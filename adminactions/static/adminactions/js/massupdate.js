@@ -1,7 +1,9 @@
 (function($) {
 $(function() {
     $('.col_field input, .col_field select').each(function() {
-        $(this).attr('disabled', 'disabled');
+        if (!$(this).parent().parent().find('.col_enabler input[type=checkbox]').is(':checked')){
+            $(this).attr('disabled', 'disabled');
+        }
     });
     $('.fastfieldvalue').click(function() {
         var check = $(this).parent().parent().find('.enabler');
