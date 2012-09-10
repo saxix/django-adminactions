@@ -1,8 +1,5 @@
-from time import sleep
-from django.core.urlresolvers import reverse
-from django.test.testcases import TestCase
 import os
-from iadmin.tests.common import BaseTestCase, FireFoxLiveTest
+from adminactions.tests.selenium_tests.common import FireFoxLiveTest
 
 __all__ = ['CSVImportTest', 'CSVImportFireFox']
 

@@ -1,25 +1,8 @@
-from django.contrib import auth
 from django.contrib.auth.models import User
-from django.core.handlers.base import BaseHandler
 from django.core.urlresolvers import reverse
-from django.contrib.admin.sites import site
-from django.test.client import RequestFactory
 from adminactions.tests.common import BaseTestCase
 
 __all__ = ['MassUpdateTest', ]
-
-
-class MiddlewareRequestFactory(RequestFactory):
-    def request(self, **request):
-        request = super(MiddlewareRequestFactory, self).request(**request)
-        handler = BaseHandler()
-        handler.load_middleware()
-        for middleware_method in handler._request_middleware:
-            if middleware_method(request):
-                raise Exception("Couldn't create request object - "
-                                "request middleware returned a response")
-
-        return request
 
 
 class MassUpdateTest(BaseTestCase):
@@ -33,7 +16,7 @@ class MassUpdateTest(BaseTestCase):
                                                'select_across': 0,
                                                '_selected_action': [2, 3, 4]})
         self.assertEqual(response.status_code, 302)
-        self.assertIn( 'auth/user/?e=1', response['Location'])
+        self.assertIn('auth/user/?e=1', response['Location'])
 
     def test_action_post(self):
         target_ids = [2, 3, 4, 7, 10]

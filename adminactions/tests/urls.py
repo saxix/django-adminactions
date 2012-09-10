@@ -4,7 +4,8 @@ import django.contrib.auth.models
 from django.contrib.admin import site
 import adminactions.actions as actions
 
-site.register(django.contrib.auth.models.User)
+if not django.contrib.auth.models.User in site._registry:
+    site.register(django.contrib.auth.models.User)
 
 site.add_action(actions.mass_update)
 site.add_action(actions.graph_queryset)

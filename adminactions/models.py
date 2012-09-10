@@ -1,6 +1,5 @@
-
-
 from django.contrib.auth.management import _get_permission_codename
+
 
 def create_extra_permission(sender, **kwargs):
     from django.contrib.auth.models import Permission

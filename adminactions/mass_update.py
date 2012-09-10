@@ -110,7 +110,7 @@ def mass_update(modeladmin, request, queryset):
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),
            'change': True,
-           'selected_fields':selected_fields,
+           'selected_fields': selected_fields,
            'is_popup': False,
            'save_as': False,
            'has_delete_permission': False,
