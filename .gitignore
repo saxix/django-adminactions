@@ -2,3 +2,9 @@
 *.pot
 *.pyc
 local_settings.py
+/.idea
+/dist
+/docs/build
+*.egg-info
+MANIFEST
+chromedriver.log
