@@ -12,6 +12,6 @@ install:
   - python setup.py -q install
   - pip install -r requirements.txt --use-mirrors
 
-script: django-admin.py test geo --settings=geo.test_settings
+script: django-admin.py test adminactions --settings=geo.test_settings
 before_script:
 #   - "pep8 --exclude=migrations --ignore=E501,E225 src"
