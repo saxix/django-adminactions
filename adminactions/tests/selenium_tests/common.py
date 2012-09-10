@@ -3,21 +3,22 @@ from django.test import LiveServerTestCase
 import selenium.webdriver.firefox.webdriver
 import selenium.webdriver.chrome.webdriver
 import time
+from adminactions.tests.common import SETTINGS
 
 
 class SeleniumTestCase(LiveServerTestCase):
     urls = 'adminactions.tests.urls'
-    fixtures = ['test.json', ]
+    fixtures = ['adminactions.json', ]
 
-    def _pre_setup(self):
-        LiveServerTestCase._pre_setup(self)
-        self.sett = self.settings(MIDDLEWARE_CLASSES=global_settings.MIDDLEWARE_CLASSES)
-        self.sett.enable()
-
-    def _post_teardown(self):
-        LiveServerTestCase._post_teardown(self)
-        time.sleep(1)
-        self.sett.disable()
+#    def _pre_setup(self):
+#        LiveServerTestCase._pre_setup(self)
+#        self.sett = self.settings(**SETTINGS)
+#        self.sett.enable()
+#
+#    def _post_teardown(self):
+#        LiveServerTestCase._post_teardown(self)
+#        time.sleep(1)
+#        self.sett.disable()
 
     @property
     def base_url(self):
@@ -36,6 +37,13 @@ class SeleniumTestCase(LiveServerTestCase):
 
     def setUp(self):
         super(SeleniumTestCase, self).setUp()
+        self.sett = self.settings(**SETTINGS)
+        self.sett.enable()
+
+    def tearDown(self):
+        super(SeleniumTestCase, self).tearDown()
+        time.sleep(1)
+        self.sett.disable()
 
     def go(self, url):
         self.driver.get('%s%s' % (self.live_server_url, url))
@@ -62,21 +70,22 @@ class ChromeDriverMixin(object):
 
 
 class FireFoxLiveTest(FirefoxDriverMixin, SeleniumTestCase):
-    INSTALLED_APPS = (
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.sites',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-        'iadmin',
-        'django.contrib.admin',
-        'django.contrib.admindocs',
-        'geo',
-        )
+    pass
+#    INSTALLED_APPS = (
+#        'django.contrib.auth',
+#        'django.contrib.contenttypes',
+#        'django.contrib.sessions',
+#        'django.contrib.sites',
+#        'django.contrib.messages',
+#        'django.contrib.staticfiles',
+#        'iadmin',
+#        'django.contrib.admin',
+#        'django.contrib.admindocs',
+#        'geo',
+#        )
 
-    def setUp(self):
-        self.settings(INSTALLED_APPS=FireFoxLiveTest.INSTALLED_APPS)
-        super(FireFoxLiveTest, self).setUp()
+#    def setUp(self):
+#        self.settings(SETTINGS)
+#        super(FireFoxLiveTest, self).setUp()
 
 

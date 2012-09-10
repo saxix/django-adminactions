@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import patterns, url, include, handler500
 from django.contrib import admin
 import django.contrib.auth.models
 from django.contrib.admin import site

@@ -59,6 +59,7 @@ setup(
     download_url='https://github.com/saxix/django-actions/tarball/master',
     author='sax',
     author_email='sax@os4d.org',
+    description="Collections of usefuls actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
     packages=packages,
     data_files=data_files,
