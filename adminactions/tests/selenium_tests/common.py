@@ -1,17 +1,21 @@
 import os
-from django.conf import settings, global_settings
+from django.utils.unittest.case import skip
+from django.conf import settings
 from django.test import LiveServerTestCase
 
 import time
 from adminactions.tests.common import SETTINGS
+
 
 selenium_can_start = lambda: getattr(settings, 'ENABLE_SELENIUM', True) and 'DISPLAY' in os.environ
 
 try:
     import selenium.webdriver.firefox.webdriver
     import selenium.webdriver.chrome.webdriver
+    from selenium.webdriver.support.wait import WebDriverWait
 except ImportError as e:
-    selenium_can_start = lambda : False
+    selenium_can_start = lambda: False
+
 
 class SkipSeleniumTestChecker(type):
     def __new__(mcs, name, bases, attrs):
@@ -22,46 +26,49 @@ class SkipSeleniumTestChecker(type):
                     attrs[name] = skip('Selenium disabled')(func)
         return type.__new__(mcs, name, bases, attrs)
 
+
 class SeleniumTestCase(LiveServerTestCase):
     __metaclass__ = SkipSeleniumTestChecker
 
     urls = 'adminactions.tests.urls'
     fixtures = ['adminactions.json', ]
+    driver = None
 
     def _pre_setup(self):
-        LiveServerTestCase._pre_setup(self)
+        super(SeleniumTestCase, self)._pre_setup()
         self.sett = self.settings(**SETTINGS)
         self.sett.enable()
 
     def _post_teardown(self):
-        LiveServerTestCase._post_teardown(self)
+        super(SeleniumTestCase, self)._post_teardown()
         time.sleep(1)
         self.sett.disable()
+
+#    @classmethod
+#    def setUpClass(cls):
+#        super(SeleniumTestCase, cls).setUpClass()
+#        if selenium_can_start():
+#            cls.driver = cls.driverClass()
+#        settings.LANGUAGE_CODE = 'en-US'
+#
+#    @classmethod
+#    def tearDownClass(cls):
+#        super(SeleniumTestCase, cls).tearDownClass()
+#        if cls.driver:
+#            cls.driver.quit()
 
     @property
     def base_url(self):
         return self.live_server_url
 
-    @classmethod
-    def setUpClass(cls):
-        cls.driver = cls.driverClass()
-        super(SeleniumTestCase, cls).setUpClass()
-        settings.LANGUAGE_CODE = 'en-US'
+    def setUp(self):
+        super(SeleniumTestCase, self).setUp()
+        self.driver = self.driverClass()
 
-    @classmethod
-    def tearDownClass(cls):
-        super(SeleniumTestCase, cls).tearDownClass()
-        cls.driver.quit()
-
-#    def setUp(self):
-#        super(SeleniumTestCase, self).setUp()
-#        self.sett = self.settings(**SETTINGS)
-#        self.sett.enable()
-#
-#    def tearDown(self):
-#        super(SeleniumTestCase, self).tearDown()
-#        time.sleep(1)
-#        self.sett.disable()
+    def tearDown(self):
+        super(SeleniumTestCase, self).tearDown()
+        if self.driver:
+            self.driver.quit()
 
     def go(self, url):
         self.driver.get('%s%s' % (self.live_server_url, url))
@@ -75,7 +82,7 @@ class SeleniumTestCase(LiveServerTestCase):
         password_input = self.driver.find_element_by_name("password")
         password_input.send_keys('123')
         self.driver.find_element_by_xpath('//input[@type="submit"]').click()
-        time.sleep(1)
+        WebDriverWait(self.driver, 5).until(lambda driver: driver.find_element_by_id('site-name'))
         self.assertTrue("Welcome, sax" in self.driver.find_element_by_id('user-tools').text)
 
 
