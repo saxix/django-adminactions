@@ -2,8 +2,8 @@
 django-adminactions
 ===================
 
-.. image:: https://secure.travis-ci.org/saxix/django-actions.png?branch=master
-   :target: http://travis-ci.org/saxix/django-actions/
+.. image:: https://secure.travis-ci.org/saxix/django-adminactions.png?branch=master
+   :target: http://travis-ci.org/saxix/django-adminactions/
 
 Originally included in django-iadmin, django-adminactions are a collections of
 usefuls actions to use with django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
@@ -21,5 +21,5 @@ Project links
 -------------
 
 * Project home page: https://github.com/saxix/django-adminactions
-* Documentation: http://django-actions.readthedocs.org/en/latest/
+* Documentation: http://django-adminactions.readthedocs.org/en/latest/
 * Download: http://pypi.python.org/pypi/django-adminactions/
