@@ -44,18 +44,15 @@ class SeleniumTestCase(LiveServerTestCase):
         time.sleep(1)
         self.sett.disable()
 
-#    @classmethod
-#    def setUpClass(cls):
-#        super(SeleniumTestCase, cls).setUpClass()
-#        if selenium_can_start():
-#            cls.driver = cls.driverClass()
-#        settings.LANGUAGE_CODE = 'en-US'
-#
-#    @classmethod
-#    def tearDownClass(cls):
-#        super(SeleniumTestCase, cls).tearDownClass()
-#        if cls.driver:
-#            cls.driver.quit()
+    @classmethod
+    def setUpClass(cls):
+        if selenium_can_start():
+            super(SeleniumTestCase, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        if selenium_can_start():
+            super(SeleniumTestCase, cls).tearDownClass()
 
     @property
     def base_url(self):
@@ -63,7 +60,8 @@ class SeleniumTestCase(LiveServerTestCase):
 
     def setUp(self):
         super(SeleniumTestCase, self).setUp()
-        self.driver = self.driverClass()
+        if selenium_can_start():
+            self.driver = self.driverClass()
 
     def tearDown(self):
         super(SeleniumTestCase, self).tearDown()
