@@ -1,12 +1,30 @@
+import os
 from django.conf import settings, global_settings
 from django.test import LiveServerTestCase
-import selenium.webdriver.firefox.webdriver
-import selenium.webdriver.chrome.webdriver
+
 import time
 from adminactions.tests.common import SETTINGS
 
+selenium_can_start = lambda: getattr(settings, 'ENABLE_SELENIUM', True) and 'DISPLAY' in os.environ
+
+try:
+    import selenium.webdriver.firefox.webdriver
+    import selenium.webdriver.chrome.webdriver
+except ImportError as e:
+    selenium_can_start = lambda : False
+
+class SkipSeleniumTestChecker(type):
+    def __new__(mcs, name, bases, attrs):
+        super_new = super(SkipSeleniumTestChecker, mcs).__new__
+        if not selenium_can_start():
+            for name, func in attrs.items():
+                if callable(func) and name.startswith('test'):
+                    attrs[name] = skip('Selenium disabled')(func)
+        return type.__new__(mcs, name, bases, attrs)
 
 class SeleniumTestCase(LiveServerTestCase):
+    __metaclass__ = SkipSeleniumTestChecker
+
     urls = 'adminactions.tests.urls'
     fixtures = ['adminactions.json', ]
 
