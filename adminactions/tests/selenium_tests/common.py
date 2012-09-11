@@ -10,15 +10,15 @@ class SeleniumTestCase(LiveServerTestCase):
     urls = 'adminactions.tests.urls'
     fixtures = ['adminactions.json', ]
 
-#    def _pre_setup(self):
-#        LiveServerTestCase._pre_setup(self)
-#        self.sett = self.settings(**SETTINGS)
-#        self.sett.enable()
-#
-#    def _post_teardown(self):
-#        LiveServerTestCase._post_teardown(self)
-#        time.sleep(1)
-#        self.sett.disable()
+    def _pre_setup(self):
+        LiveServerTestCase._pre_setup(self)
+        self.sett = self.settings(**SETTINGS)
+        self.sett.enable()
+
+    def _post_teardown(self):
+        LiveServerTestCase._post_teardown(self)
+        time.sleep(1)
+        self.sett.disable()
 
     @property
     def base_url(self):
@@ -35,15 +35,15 @@ class SeleniumTestCase(LiveServerTestCase):
         super(SeleniumTestCase, cls).tearDownClass()
         cls.driver.quit()
 
-    def setUp(self):
-        super(SeleniumTestCase, self).setUp()
-        self.sett = self.settings(**SETTINGS)
-        self.sett.enable()
-
-    def tearDown(self):
-        super(SeleniumTestCase, self).tearDown()
-        time.sleep(1)
-        self.sett.disable()
+#    def setUp(self):
+#        super(SeleniumTestCase, self).setUp()
+#        self.sett = self.settings(**SETTINGS)
+#        self.sett.enable()
+#
+#    def tearDown(self):
+#        super(SeleniumTestCase, self).tearDown()
+#        time.sleep(1)
+#        self.sett.disable()
 
     def go(self, url):
         self.driver.get('%s%s' % (self.live_server_url, url))

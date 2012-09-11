@@ -1,17 +1,10 @@
+import os
 from django.conf import global_settings
 from django.test.testcases import TestCase
 
+TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), os.pardir, 'tests', 'templates')
 SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
-            'INSTALLED_APPS': (
-                'django.contrib.auth',
-                'django.contrib.contenttypes',
-                'django.contrib.sessions',
-                'django.contrib.sites',
-                'django.contrib.messages',
-                'django.contrib.staticfiles',
-                'django.contrib.admin',
-                'adminactions',
-                ),
+            'TEMPLATE_DIRS': [TEST_TEMPLATES_DIR],
             'AUTHENTICATION_BACKENDS': ('django.contrib.auth.backends.ModelBackend',),
             'TEMPLATE_LOADERS': ('django.template.loaders.filesystem.Loader',
                                  'django.template.loaders.app_directories.Loader'),
@@ -22,9 +15,8 @@ SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
                                             "django.core.context_processors.static",
                                             "django.core.context_processors.request",
                                             "django.core.context_processors.tz",
-                                            "django.contrib.messages.context_processors.messages"
-                )
-}
+                                            "django.contrib.messages.context_processors.messages")}
+
 
 class BaseTestCase(TestCase):
     urls = 'adminactions.tests.urls'
