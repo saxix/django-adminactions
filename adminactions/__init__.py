@@ -1,5 +1,5 @@
 NAME = 'django-adminactions'
-VERSION = __version__ = (0, 0, 1, 'rc', 8)
+VERSION = __version__ = (0, 0, 2, 'alpha', 0)
 __author__ = 'sax'
 
 import subprocess

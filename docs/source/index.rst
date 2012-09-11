@@ -1,11 +1,11 @@
 .. include globals.rst
 .. _index:
-================
-django-actions
-================
+===================
+django-adminactions
+===================
 
-.. image:: https://secure.travis-ci.org/saxix/django-actions.png?branch=master
-   :target: http://travis-ci.org/saxix/django-actions/
+.. image:: https://secure.travis-ci.org/saxix/django-adminactions.png?branch=master
+   :target: http://travis-ci.org/saxix/django-adminactions/
 
 Originally included in django-iadmin, django-actions are a collections of
 usefuls actions to use with django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
@@ -30,10 +30,10 @@ Table Of Contents
 Links
 ~~~~~
 
-   * Project home page: https://github.com/saxix/django-actions
-   * Issue tracker: https://github.com/saxix/django-actions/issues?sort
-   * Download: http://pypi.python.org/pypi/django-actions/
-   * Docs: http://readthedocs.org/docs/django-actions/en/latest/
+   * Project home page: https://github.com/saxix/django-adminactions
+   * Issue tracker: https://github.com/saxix/django-adminactions/issues?sort
+   * Download: http://pypi.python.org/pypi/django-adminactions/
+   * Docs: http://readthedocs.org/docs/django-adminactions/en/latest/
 
 Indices and tables
 ==================
