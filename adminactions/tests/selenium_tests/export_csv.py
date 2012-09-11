@@ -21,7 +21,7 @@ class ExportCSVFireFox(FireFoxLiveTest):
         self.assertTrue("Select user to change" in  driver.title)
         driver.find_element_by_xpath("//input[@id='action-toggle']").click() # select all
         driver.find_element_by_xpath("//input[@name='_selected_action' and @value='1']").click() # unselect sax
-        Select(driver.find_element_by_name("action")).select_by_visible_text("Export to csv")
+        Select(driver.find_element_by_name("action")).select_by_visible_text("Export as csv")
         driver.find_element_by_name("index").click() # execute
         self.assertTrue("Export to CSV" in driver.title)
 
