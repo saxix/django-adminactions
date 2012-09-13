@@ -26,7 +26,7 @@ class MassUpdateTest(BaseTestCase):
                                                 '_selected_action': target_ids},
             follow=False)
         self.assertEquals(response.status_code, 302)
-        self.assertEquals(target_ids, [u.pk for u in User.objects.filter(is_active=False)])
+        self.assertEquals(target_ids, [u.pk for u in User.objects.filter(is_active=False).order_by('id')])
 
     def test_many_to_many(self):
         target_ids = [2, 4, 10]
