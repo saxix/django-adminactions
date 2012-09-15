@@ -5,7 +5,7 @@ from selenium.webdriver.support.select import Select
 from adminactions.tests.selenium_tests.common import FireFoxLiveTest, ChromeDriverMixin
 
 
-__all__=['ExportCSVFireFox', ]
+__all__ = ['ExportCSVFireFox', ]
 
 
 class ExportCSVFireFox(FireFoxLiveTest):
@@ -18,7 +18,7 @@ class ExportCSVFireFox(FireFoxLiveTest):
         self.login()
         driver = self.driver
         self.go(self._url)
-        self.assertTrue("Select user to change" in  driver.title)
+        self.assertTrue("Select user to change" in driver.title)
         driver.find_element_by_xpath("//input[@id='action-toggle']").click() # select all
         driver.find_element_by_xpath("//input[@name='_selected_action' and @value='1']").click() # unselect sax
         Select(driver.find_element_by_name("action")).select_by_visible_text("Export as csv")
@@ -45,7 +45,6 @@ class ExportCSVFireFox(FireFoxLiveTest):
 
     def test_time_format_ajax(self):
         self._test("id_time_format", 'H:i', 2)
-
 
 
 class ExportCSVChrome(ChromeDriverMixin, ExportCSVFireFox):

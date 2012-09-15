@@ -1,6 +1,7 @@
 from django import forms
 from django.forms.models import ModelForm
 
+
 class GenericActionForm(ModelForm):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
 

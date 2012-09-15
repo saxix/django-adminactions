@@ -7,10 +7,11 @@ from selenium.webdriver.support.ui import Select
 
 __all__ = ['MassUpdateFireFox']
 
+
 class MassUpdateFireFox(FireFoxLiveTest):
     def setUp(self):
         super(MassUpdateFireFox, self).setUp()
-#        self.factory = RequestFactory()
+        #        self.factory = RequestFactory()
         self._url = reverse('admin:auth_user_changelist')
 
     def test_mass_update_1(self):

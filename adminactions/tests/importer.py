@@ -6,6 +6,7 @@ __all__ = ['CSVImportTest', ]
 
 DATADIR = os.path.join(os.path.dirname(__file__), 'data')
 
+
 class CSVImportTest(BaseTestCase):
     def dis_test_step_1(self):
         response = self.client.get('/admin/')

@@ -12,8 +12,6 @@ site.add_action(actions.graph_queryset)
 site.add_action(actions.export_as_csv)
 site.add_action(actions.export_as_json)
 
-
-
 urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
 )

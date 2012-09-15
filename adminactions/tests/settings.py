@@ -1,5 +1,6 @@
 # Django settings for demoproject project.
 import sys, os
+
 here = os.path.dirname(__file__)
 sys.path.append(os.path.abspath(os.path.join(here, '..', '..')))
 DEBUG = True
@@ -24,21 +25,19 @@ STATIC_ROOT = ''
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    )
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder')
+
 SECRET_KEY = 'c73*n!y=)tziu^2)y*@5i2^)$8z$tx#b9*_r3i6o1ohxo%*2^a'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    )
+    'django.template.loaders.app_directories.Loader')
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    )
+    'django.contrib.messages.middleware.MessageMiddleware')
 
 ROOT_URLCONF = 'adminacgions.tests.urls'
 
@@ -50,5 +49,4 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'adminactions',
-    )
+    'adminactions')

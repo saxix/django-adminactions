@@ -4,7 +4,7 @@ import csv
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.db.models.fields.related import ForeignKey
-from django.forms.fields import  CharField, BooleanField
+from django.forms.fields import CharField, BooleanField
 from django.db.models.loading import get_models, get_apps, get_app, get_model
 from django.forms.fields import ChoiceField, FileField
 from django.forms.forms import Form, DeclarativeFieldsMetaclass, BoundField
@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 import re
 
 __author__ = 'sax'
+
 
 class CsvFileField(FileField):
     def clean(self, data, initial=None):
@@ -136,7 +137,7 @@ class ImportForm(Form):
             app, model = self.data['model'].split(':')
 
         if model:
-            m = "%s:%s" % ( app, model)
+            m = "%s:%s" % (app, model)
             self.fields['model'].choices = [(m, m)]
             self.fields['model'].widget = Input({'readonly': 'readonly'})
             self.initial['model'] = m
@@ -225,7 +226,7 @@ class CSVPRocessorForm(Form):
             lookup_name = self.cleaned_data[lkf]
             if column >= 0 or field_name:
                 found = True
-                if not ( column >= 0 and field_name):
+                if not (column >= 0 and field_name):
                     self._errors[fld] = self.error_class([_("Please set both 'column' and 'field'")])
                     raise ValidationError("Please fix errors below")
                 Field, _u, _u, _u = self._model._meta.get_field_by_name(field_name)
@@ -271,8 +272,7 @@ class CSVPRocessorForm(Form):
                 error_line.append(force_unicode(bf_errors), )
                 line.append('<td class=%(class)s>%(field)s</td>' %
                             {'field': unicode(bf),
-                             'class': n[:3]}
-                )
+                             'class': n[:3]})
             output.append('<tr><td colspan="5">%s</td></tr>' % ''.join(error_line))
             output.append('<tr>%(line)s</tr>' % {'line': ''.join(line), 'rowid': rowid})
 
