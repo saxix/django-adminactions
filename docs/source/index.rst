@@ -33,7 +33,7 @@ Links
    * Project home page: https://github.com/saxix/django-adminactions
    * Issue tracker: https://github.com/saxix/django-adminactions/issues?sort
    * Download: http://pypi.python.org/pypi/django-adminactions/
-   * Docs: http://readthedocs.org/docs/django-adminactions/en/latest/
+   * Documentation: http://readthedocs.org/docs/django-adminactions/en/latest/
 
 Indices and tables
 ==================

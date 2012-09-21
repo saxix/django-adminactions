@@ -1,10 +1,11 @@
 *.log
 *.pot
 *.pyc
-local_settings.py
+*.egg-info
 /.idea
 /dist
 /docs/build
-*.egg-info
 MANIFEST
-chromedriver.log
+local_settings.py
+
+*.sqlite
