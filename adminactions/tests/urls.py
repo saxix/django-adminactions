@@ -10,7 +10,7 @@ if not django.contrib.auth.models.User in site._registry:
 site.add_action(actions.mass_update)
 site.add_action(actions.graph_queryset)
 site.add_action(actions.export_as_csv)
-site.add_action(actions.export_as_json)
+site.add_action(actions.export_as_fixture)
 
 urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
