@@ -68,8 +68,9 @@ def mass_update(modeladmin, request, queryset):
                 for record in queryset:
                     for k, v in form.cleaned_data.items():
                         setattr(record, k, v)
-                        record.save()
-                        done += 1
+                    record.clean()
+                    record.save()
+                    done += 1
                 messages.info(request, "Updated %s records" % done)
             else:
                 values = {}

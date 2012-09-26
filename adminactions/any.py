@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
-from adminactions.models import GenericActionForm
+from adminactions.forms import GenericActionForm
 
 
 class AnyForm(GenericActionForm):

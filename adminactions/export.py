@@ -1,4 +1,7 @@
 import datetime
+from itertools import chain
+from django.core.serializers import get_serializer_formats
+from django.db.models import ManyToManyField, ForeignKey
 from django.forms.widgets import SelectMultiple
 from django.utils.translation import ugettext_lazy as _
 from django import forms
@@ -12,6 +15,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.admin import helpers
 from django.utils import formats
 from django.utils import dateformat
+from adminactions.utils import flatten
 
 
 delimiters = ",;|:"
@@ -54,10 +58,10 @@ def export_as_csv(modeladmin, request, queryset):
             response['Content-Disposition'] = 'attachment;filename="%s"' % filename
             try:
                 writer = csv.writer(response,
-                    escapechar=str(form.cleaned_data['escapechar']),
-                    delimiter=str(form.cleaned_data['delimiter']),
-                    quotechar=str(form.cleaned_data['quotechar']),
-                    quoting=int(form.cleaned_data['quoting']))
+                                    escapechar=str(form.cleaned_data['escapechar']),
+                                    delimiter=str(form.cleaned_data['delimiter']),
+                                    quotechar=str(form.cleaned_data['quotechar']),
+                                    quoting=int(form.cleaned_data['quoting']))
                 if form.cleaned_data.get('header', False):
                     writer.writerow([f for f in form.cleaned_data['columns']])
 
@@ -106,18 +110,93 @@ def export_as_csv(modeladmin, request, queryset):
 export_as_csv.short_description = "Export as CSV"
 
 
-def export_as_json(modeladmin, request, queryset):
-    records = []
-    for obj in queryset:
-        records.append(obj)
-    import django.core.serializers as ser
 
-    json = ser.get_serializer('json')()
-    ret = json.serialize(records, use_natural_keys=True, indent=2)
-    response = HttpResponse(mimetype='text/plain')
-    filename = "%s.json" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-    response['Content-Disposition'] = 'attachment;filename="%s"' % filename
-    response.content = ret
-    return response
+class Collector2(object):
+    def __init__(self):
+        self._visited = []
+        super(Collector2, self).__init__()
 
-export_as_json.short_description = "Export as fixture"
+    def _collect(self, objs):
+        objects = []
+        for obj in objs:
+            if obj and obj not in self._visited:
+                concrete_model = obj._meta.concrete_model
+                obj = concrete_model.objects.get(pk=obj.pk)
+                opts = obj._meta
+
+                self._visited.append(obj)
+                objects.append(obj)
+                for field in chain(opts.fields, opts.local_many_to_many):
+                    if isinstance(field, ManyToManyField):
+                        target = getattr(obj, field.name).all()
+                        objects.extend(self._collect(target))
+                    elif isinstance(field, ForeignKey):
+                        target = getattr(obj, field.name)
+                        objects.extend(self._collect([target]))
+        return objects
+
+    def collect(self, objs):
+        self._visited = []
+        self.data = self._collect(objs)
+        self.models = set([o.__class__ for o in self.data])
+
+    def __str__(self):
+        return mark_safe(self.data)
+
+
+class FixtureOptions(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    use_natural_key = forms.BooleanField(required=False)
+    on_screen = forms.BooleanField(label='Dump on screen', required=False)
+
+    indent = forms.IntegerField(required=True, max_value=10, min_value=0)
+    serializer = forms.ChoiceField(choices=zip(get_serializer_formats(), get_serializer_formats()))
+
+
+def export_as_fixture(modeladmin, request, queryset):
+    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
+
+    from django.db.models.deletion import Collector
+
+
+    c = Collector2()
+    c.collect(queryset)
+
+    if 'apply' in request.POST:
+        form = FixtureOptions(request.POST)
+        if form.is_valid():
+            import django.core.serializers as ser
+            fmt = form.cleaned_data.get('serializer')
+            json = ser.get_serializer(fmt)()
+            ret = json.serialize(c.data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
+                                 indent=form.cleaned_data.get('indent'))
+
+            response = HttpResponse(mimetype='text/plain')
+            if not form.cleaned_data.get('on_screen', False):
+                filename = "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
+                response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+            response.content = ret
+            return response
+
+    else:
+        form = FixtureOptions(initial=initial)
+
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
+    media = modeladmin.media + adminForm.media
+    tpl = 'adminactions/export_fixture.html'
+    ctx = {'adminform': adminForm,
+           'change': True,
+           'title': _('Export as Fixture'),
+           'is_popup': False,
+           'save_as': False,
+           'has_delete_permission': False,
+           'has_add_permission': False,
+           'has_change_permission': True,
+           'queryset': queryset,
+           'opts': queryset.model._meta,
+           'app_label': queryset.model._meta.app_label,
+           'action': 'export_as_fixture',
+           'media': mark_safe(media)}
+    return render_to_response(tpl, RequestContext(request, ctx))
+
+export_as_fixture.short_description = "Export as fixture"

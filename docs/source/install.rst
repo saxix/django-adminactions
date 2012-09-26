@@ -24,7 +24,7 @@ your project or ``PYTHONPATH``.
 Configuration
 =============
 
-Add :mod:`adminactions` to your :setting:`INSTALLED_APPS`::
+Add :mod:`adminactions` to your `INSTALLED_APPS`::
 
     INSTALLED_APPS = (
         'adminactions',

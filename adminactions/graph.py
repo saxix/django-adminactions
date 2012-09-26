@@ -86,6 +86,6 @@ def graph_queryset(modeladmin, request, queryset):
            'as_json': json.dumps(table),
            'graph_type': graph_type,
            }
-    return render_to_response('iadmin/charts/model.html', RequestContext(request, ctx))
+    return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
 
 graph_queryset.short_description = "Graph selected records"

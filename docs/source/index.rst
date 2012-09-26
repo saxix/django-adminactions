@@ -1,5 +1,6 @@
-.. include globals.rst
+.. include:: globals.rst
 .. _index:
+
 ===================
 django-adminactions
 ===================
@@ -13,7 +14,7 @@ usefuls actions to use with django.contrib.admin.ModelAdmin and/or django.contri
 Actions
 ================
 
-* Export as CSV
+* :ref:`export_csv`
 * Export as fixture
 * Mass update records
 * Graph queryset
@@ -26,6 +27,12 @@ Table Of Contents
 
     install
     screenshots
+    actions
+
+.. toctree::
+    :hidden:
+
+    globals
 
 Links
 ~~~~~

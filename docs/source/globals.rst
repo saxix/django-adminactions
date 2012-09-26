@@ -10,4 +10,4 @@
 .. |standard_admin| replace:: :py:mod:`csv`
 
 .. _GitHub: http://github.com/saxix/django-actions
-.. _PyPI: http://pypi.python.org/pypi/django-actions/
+

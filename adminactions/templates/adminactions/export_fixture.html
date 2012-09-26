@@ -1,0 +1,33 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify admin_urls %}{% load url from future %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+    <div class="breadcrumbs">
+        <a href="../../">{% trans "Home" %}</a> &rsaquo;
+        <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+        <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+        Fixture Export Options
+    </div>
+{% endif %}{% endblock %}
+
+{% block content %}
+    {% if form.subject.errors %}
+        <ol>
+            {% for error in form.subject.errors %}
+                <li><strong>{{ error|escape }}</strong></li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+    {{ data }}
+    <div id='form'>
+        <form action="." method="post">
+            {% csrf_token %}
+            <table>
+                {{ adminform.form }}
+            </table>
+            <input type="hidden" name="action" value="{{ action }}"/>
+            <input type="submit" name="apply" value="Export"/>
+        </form>
+    </div>
+    </div>
+{% endblock %}

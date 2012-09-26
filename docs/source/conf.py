@@ -20,6 +20,8 @@ from django.conf import settings
 settings.configure()
 settings.SITE_ID = 1
 
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -32,8 +34,19 @@ settings.SITE_ID = 1
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo']
+
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.intersphinx']
 todo_include_todos = True
+intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
+                       'sphinx': ('http://sphinx.pocoo.org/', None),
+                       'django': ('http://docs.djangoproject.com/en/dev/', 'http://docs.djangoproject.com/en/dev/_objects/'),
+                       }
+intersphinx_mapping = {
+    'python': ('http://python.readthedocs.org/en/latest/', None),
+    'django': ('http://django.readthedocs.org/en/latest/', None),
+    'sphinx': ('http://sphinx.readthedocs.org/en/latest/', None),
+    }
+intersphinx_cache_limit = 90 # days
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
