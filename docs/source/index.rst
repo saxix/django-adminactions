@@ -11,22 +11,13 @@ django-adminactions
 Originally included in django-iadmin, django-actions are a collections of
 usefuls actions to use with django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
 
-Actions
-================
-
-* :ref:`export_csv`
-* Export as fixture
-* Mass update records
-* Graph queryset
-
 Table Of Contents
------------------
+=================
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     install
-    screenshots
     actions
 
 .. toctree::
