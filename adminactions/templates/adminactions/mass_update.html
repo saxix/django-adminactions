@@ -22,9 +22,9 @@
 
 {% block breadcrumbs %}{% if not is_popup %}
     <div class="breadcrumbs">
-        <a href="../../../">{% trans "Home" %}</a> &rsaquo;
-        <a href="../../">{{ app_label|capfirst|escape }}</a> &rsaquo;
-        <a href="../">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+        <a href="../../">{% trans "Home" %}</a> &rsaquo;
+        <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+        <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
         Mass Update
     </div>
 {% endif %}{% endblock %}
@@ -46,7 +46,7 @@
                     <tr>
                         <td>{% if field.field.required %}
                             <b>{% endif %} {{ field.label_tag }}{% if field.field.required %}</b>{% endif %}  </td>
-                        <td colspan="3">
+                        <td colspan="4">
                             {{ field.errors }}
                             {{ field }}&nbsp;<span class="help">{{ field.help_text }}</span>
                         </td>
@@ -61,6 +61,7 @@
                         <td class='col_enabler'>{% checkbox_enabler field %}</td>
                         <td class='col_field field-{{ field.name }}-value'>{{ field.errors }}
                             {{ field }}&nbsp;</td>
+                        <td class='col_field field-{{ field.name }}-op'>{{ field.op }}&nbsp;</td>
 
                         <td class='field-{{ field.name }}-commonvalues'>{% link_fields_values grouped field.name %}
 
