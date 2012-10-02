@@ -35,7 +35,7 @@ settings.SITE_ID = 1
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.intersphinx', 'sphinx.ext.doctest', 'sphinx.ext.extlinks']
 todo_include_todos = True
 intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
                        'sphinx': ('http://sphinx.pocoo.org/', None),
@@ -206,7 +206,7 @@ htmlhelp_basename = 'djangoadminactionsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'DjangoSiteMaintenance.tex', u"Django Admin Actions Documentation",
+    ('index', 'DjangoAdminActions.tex', u"Django Admin Actions Documentation",
      u'Stefano Apostolico', 'manual'),
 ]
 

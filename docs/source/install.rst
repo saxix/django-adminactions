@@ -1,6 +1,7 @@
+.. include:: globals.rst
+
 .. _install:
 
-.. include globals.rst
 
 Installation
 ============

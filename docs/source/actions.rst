@@ -1,16 +1,23 @@
 .. include:: globals.rst
+
+:tocdepth: 2
+
 .. _actions:
 
+=======
 Actions
 =======
 
 .. contents::
     :local:
 
+
+
 .. _massupdate:
 
 ``Mass Update``
----------------
+===============
+
 Update one or more fields of the selected queryset to a common value.
 
 ===================   ===========================================================================================
@@ -24,10 +31,12 @@ Update one or more fields of the selected queryset to a common value.
 .. figure:: _static/mass_update.png
 
 
+
+
 .. _export_csv:
 
 ``Export as CSV``
------------------
+=================
 
 Export selected queryset as csv file. (see :ref:`csv <python:csv-contents>`)
 
@@ -63,10 +72,12 @@ Available options: (see :ref:`python:csv-fmt-params`)
 .. figure:: _static/export_as_csv.png
 
 
+
+
 .. _export_fixture:
 
 ``Export as Fixture``
----------------------
+=====================
 
 Export selected queryset as fixtures using any registered :ref:`Serializer <django:serialization>`.
 
@@ -89,10 +100,46 @@ Export selected queryset as fixtures using any registered :ref:`Serializer <djan
 .. figure:: _static/export_as_fixture.png
 
 
+
+.. _export_delete_tree:
+
+
+``Export Delete Tree``
+======================
+
+.. versionadded:: 0.0.5
+
+
+Export all the records that belong selected queryset using any registered :ref:`Serializer <django:serialization>`.
+
+This action is the counterpart of `export_fixture`_, where it dumps the queryset and it's ForeignKeys,
+`export_delete_tree`_ dumps all the records that belongs the selected queryset.
+
+
+===================   =============================================================
+**use natural key**   If true use natural keys.
+                      (see :ref:`Natural Keys <django:deserialization-of-natural-keys>`)
+
+**dump on screen**    Dump on screen instead to show ``Save as`` popup
+
+**indent**            Indentation value
+
+**serializer**        Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
+
+===================   =============================================================
+
+**Screenshot**
+
+.. figure:: _static/export_as_fixture.png
+
+
+
+
+
 .. _graph:
 
 ``Graph Queryset``
----------------------
+==================
 
 Graph selected queryset.
 
@@ -107,6 +154,7 @@ Graph selected queryset.
 **Screenshot**
 
 .. figure:: _static/graph_pie.png
+
 
 **Screenshot**
 

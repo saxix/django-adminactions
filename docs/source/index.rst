@@ -19,6 +19,8 @@ Table Of Contents
 
     install
     actions
+    changes
+
 
 .. toctree::
     :hidden:

@@ -1,0 +1,25 @@
+Release 0.0.4 (in development)
+==============================
+
+* Added :ref:`export_delete_tree`
+* renamed export_as_json as export_as_fixtures
+    - added foreign_keys dumps
+    - multiple serializer
+
+
+Release 0.0.3
+=============
+
+* added demo project
+
+
+Release 0.0.2
+=============
+
+* name changed from django-actions to django-adminactions
+
+
+Release 0.0.1
+=============
+
+* first relase
