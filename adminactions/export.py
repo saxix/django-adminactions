@@ -1,7 +1,9 @@
 import datetime
 from itertools import chain
 from django.core.serializers import get_serializer_formats
+from django.db import router
 from django.db.models import ManyToManyField, ForeignKey
+from django.db.models.deletion import Collector
 from django.forms.widgets import SelectMultiple
 from django.utils.translation import ugettext_lazy as _
 from django import forms
@@ -15,7 +17,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.admin import helpers
 from django.utils import formats
 from django.utils import dateformat
-from adminactions.utils import flatten
+import django.core.serializers as ser
 
 
 delimiters = ",;|:"
@@ -110,7 +112,6 @@ def export_as_csv(modeladmin, request, queryset):
 export_as_csv.short_description = "Export as CSV"
 
 
-
 class Collector2(object):
     def __init__(self):
         self._visited = []
@@ -153,11 +154,22 @@ class FixtureOptions(forms.Form):
     serializer = forms.ChoiceField(choices=zip(get_serializer_formats(), get_serializer_formats()))
 
 
+def _dump_qs(form, queryset, collector):
+    fmt = form.cleaned_data.get('serializer')
+    json = ser.get_serializer(fmt)()
+    ret = json.serialize(collector.data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
+                         indent=form.cleaned_data.get('indent'))
+
+    response = HttpResponse(mimetype='text/plain')
+    if not form.cleaned_data.get('on_screen', False):
+        filename = "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+    response.content = ret
+    return response
+
+
 def export_as_fixture(modeladmin, request, queryset):
     initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
-
-    from django.db.models.deletion import Collector
-
 
     c = Collector2()
     c.collect(queryset)
@@ -165,18 +177,7 @@ def export_as_fixture(modeladmin, request, queryset):
     if 'apply' in request.POST:
         form = FixtureOptions(request.POST)
         if form.is_valid():
-            import django.core.serializers as ser
-            fmt = form.cleaned_data.get('serializer')
-            json = ser.get_serializer(fmt)()
-            ret = json.serialize(c.data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
-                                 indent=form.cleaned_data.get('indent'))
-
-            response = HttpResponse(mimetype='text/plain')
-            if not form.cleaned_data.get('on_screen', False):
-                filename = "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
-                response['Content-Disposition'] = 'attachment;filename="%s"' % filename
-            response.content = ret
-            return response
+            _dump_qs(form, queryset, c)
 
     else:
         form = FixtureOptions(initial=initial)
@@ -200,3 +201,43 @@ def export_as_fixture(modeladmin, request, queryset):
     return render_to_response(tpl, RequestContext(request, ctx))
 
 export_as_fixture.short_description = "Export as fixture"
+
+
+def export_delete_tree(modeladmin, request, queryset):
+    """
+    Export as fixture selected queryset and all the records that belong to.
+    That mean that dump what will be deleted if the queryset was deleted
+    """
+    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
+    using = router.db_for_write(modeladmin.model)
+    c = Collector(using)
+    c.collect(queryset)
+
+    if 'apply' in request.POST:
+        form = FixtureOptions(request.POST)
+        if form.is_valid():
+            _dump_qs(form, queryset, c)
+
+    else:
+        form = FixtureOptions(initial=initial)
+
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
+    media = modeladmin.media + adminForm.media
+    tpl = 'adminactions/export_fixture.html'
+    ctx = {'adminform': adminForm,
+           'change': True,
+           'title': _('Export as Fixture'),
+           'is_popup': False,
+           'save_as': False,
+           'has_delete_permission': False,
+           'has_add_permission': False,
+           'has_change_permission': True,
+           'queryset': queryset,
+           'opts': queryset.model._meta,
+           'app_label': queryset.model._meta.app_label,
+           'action': 'export_as_fixture',
+           'media': mark_safe(media)}
+    return render_to_response(tpl, RequestContext(request, ctx))
+
+export_as_fixture.short_description = "Export delete tree"
+

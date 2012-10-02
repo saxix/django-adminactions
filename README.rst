@@ -13,6 +13,7 @@ Actions
 
 * Export as CSV
 * Export as fixture
+* Export dele tree
 * Mass update records
 * Graph queryset
 
