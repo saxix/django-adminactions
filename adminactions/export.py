@@ -1,10 +1,10 @@
 import datetime
 from itertools import chain
 from django.core.serializers import get_serializer_formats
-from django.db import router
 from django.db.models import ManyToManyField, ForeignKey
 from django.db.models.deletion import Collector
 from django.forms.widgets import SelectMultiple
+from django.utils.functional import curry
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
@@ -112,10 +112,10 @@ def export_as_csv(modeladmin, request, queryset):
 export_as_csv.short_description = "Export as CSV"
 
 
-class Collector2(object):
+class ForeignKeysCollector(object):
     def __init__(self):
         self._visited = []
-        super(Collector2, self).__init__()
+        super(ForeignKeysCollector, self).__init__()
 
     def _collect(self, objs):
         objects = []
@@ -168,10 +168,10 @@ def _dump_qs(form, queryset, collector):
     return response
 
 
-def export_as_fixture(modeladmin, request, queryset):
+def _export_collector(modeladmin, request, queryset, collector=None):
     initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
 
-    c = Collector2()
+    c = collector()
     c.collect(queryset)
 
     if 'apply' in request.POST:
@@ -200,44 +200,77 @@ def export_as_fixture(modeladmin, request, queryset):
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
 
+#def export_as_fixture(modeladmin, request, queryset):
+#    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
+#
+#    c = Collector2()
+#    c.collect(queryset)
+#
+#    if 'apply' in request.POST:
+#        form = FixtureOptions(request.POST)
+#        if form.is_valid():
+#            _dump_qs(form, queryset, c)
+#
+#    else:
+#        form = FixtureOptions(initial=initial)
+#
+#    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
+#    media = modeladmin.media + adminForm.media
+#    tpl = 'adminactions/export_fixture.html'
+#    ctx = {'adminform': adminForm,
+#           'change': True,
+#           'title': _('Export as Fixture'),
+#           'is_popup': False,
+#           'save_as': False,
+#           'has_delete_permission': False,
+#           'has_add_permission': False,
+#           'has_change_permission': True,
+#           'queryset': queryset,
+#           'opts': queryset.model._meta,
+#           'app_label': queryset.model._meta.app_label,
+#           'action': 'export_as_fixture',
+#           'media': mark_safe(media)}
+#    return render_to_response(tpl, RequestContext(request, ctx))
+export_as_fixture = curry(_export_collector, collector=ForeignKeysCollector)
 export_as_fixture.short_description = "Export as fixture"
 
 
-def export_delete_tree(modeladmin, request, queryset):
-    """
-    Export as fixture selected queryset and all the records that belong to.
-    That mean that dump what will be deleted if the queryset was deleted
-    """
-    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
-    using = router.db_for_write(modeladmin.model)
-    c = Collector(using)
-    c.collect(queryset)
+#def export_delete_tree(modeladmin, request, queryset):
+#    """
+#    Export as fixture selected queryset and all the records that belong to.
+#    That mean that dump what will be deleted if the queryset was deleted
+#    """
+#    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
+#    using = router.db_for_write(modeladmin.model)
+#    c = Collector(using)
+#    c.collect(queryset)
+#
+#    if 'apply' in request.POST:
+#        form = FixtureOptions(request.POST)
+#        if form.is_valid():
+#            _dump_qs(form, queryset, c)
+#
+#    else:
+#        form = FixtureOptions(initial=initial)
+#
+#    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
+#    media = modeladmin.media + adminForm.media
+#    tpl = 'adminactions/export_fixture.html'
+#    ctx = {'adminform': adminForm,
+#           'change': True,
+#           'title': _('Export as Fixture'),
+#           'is_popup': False,
+#           'save_as': False,
+#           'has_delete_permission': False,
+#           'has_add_permission': False,
+#           'has_change_permission': True,
+#           'queryset': queryset,
+#           'opts': queryset.model._meta,
+#           'app_label': queryset.model._meta.app_label,
+#           'action': 'export_as_fixture',
+#           'media': mark_safe(media)}
+#    return render_to_response(tpl, RequestContext(request, ctx))
 
-    if 'apply' in request.POST:
-        form = FixtureOptions(request.POST)
-        if form.is_valid():
-            _dump_qs(form, queryset, c)
-
-    else:
-        form = FixtureOptions(initial=initial)
-
-    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
-    media = modeladmin.media + adminForm.media
-    tpl = 'adminactions/export_fixture.html'
-    ctx = {'adminform': adminForm,
-           'change': True,
-           'title': _('Export as Fixture'),
-           'is_popup': False,
-           'save_as': False,
-           'has_delete_permission': False,
-           'has_add_permission': False,
-           'has_change_permission': True,
-           'queryset': queryset,
-           'opts': queryset.model._meta,
-           'app_label': queryset.model._meta.app_label,
-           'action': 'export_as_fixture',
-           'media': mark_safe(media)}
-    return render_to_response(tpl, RequestContext(request, ctx))
-
-export_as_fixture.short_description = "Export delete tree"
+export_delete_tree = curry(_export_collector, collector=Collector)
+export_delete_tree.short_description = "Export delete tree"
 
