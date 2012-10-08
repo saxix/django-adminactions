@@ -18,4 +18,3 @@ class AnyUserBackend(ModelBackend):
     def has_module_perms(self, user_obj, app_label):
         return True
 
-

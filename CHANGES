@@ -1,11 +1,11 @@
 Release 0.0.4 (in development)
 ==============================
 
-* Added :ref:`export_delete_tree`
+* NEW :ref:`export_delete_tree`
 * renamed export_as_json as export_as_fixtures
     - added foreign_keys dumps
     - multiple serializer
-
+* NEW: :ref:`transform_operations`
 
 Release 0.0.3
 =============

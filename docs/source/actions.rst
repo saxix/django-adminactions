@@ -10,7 +10,7 @@ Actions
 
 .. contents::
     :local:
-
+    :depth: 2
 
 
 .. _massupdate:
@@ -18,12 +18,15 @@ Actions
 ``Mass Update``
 ===============
 
-Update one or more fields of the selected queryset to a common value.
+Update one or more fields of the selected queryset to a common value and/or apply a
+`transform_operation`_ to selected field.
 
-===================   ===========================================================================================
-**validate**          use obj.save() instead of obj._default_manager.update.
-                      Slower but usefule if you need to run some business logic in save() and clean()
-===================   ===========================================================================================
+======================= ===========================================================================================
+**validate**            use obj.save() instead of obj._default_manager.update.
+                        Slower but required in some cases (To run some business logic in save() and clean()
+                        Manadatory if use :ref:`transform_operations`
+**unique_transaction**  .. versionadded:: 0.0.4
+======================= ===========================================================================================
 
 
 **Screenshot**
@@ -32,8 +35,78 @@ Update one or more fields of the selected queryset to a common value.
 
 
 
+.. _transform_operations:
 
-.. _export_csv:
+
+``Transform Operations``
+------------------------
+.. versionadded:: 0.0.4
+
+Startting from version 004 is possible to update fields applying function.
+
+|app| comes with a predefined set of functions. You can anyway :ref:`register your own funcrions <register_transform_function>`
+
+**common to all models**
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+    =============       ======================================================================
+    set                 set the value
+    set null            set the value to null (only available if the field has null=True
+    =============       ======================================================================
+
+
+:class:`django:django.db.models.CharField`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ==========  ======================================
+    upper       convert to uppercase
+    lower       convert to lowercase
+    capitalize  capitalize first character
+    capwords    capitalize each word
+    swapcase    swap the case
+    trim        remove leading and trailing whitespace
+    ==========  ======================================
+
+
+:class:`django:django.db.models.IntegerField`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ===========  ===================================================================
+    add          add the value passed as arg to the current value of the field
+    sub          subtract the value passed as arg to the current value of the field
+    add_percent  add the `X` percent to the current value
+    sub_percent  subtract the `X` percent from the current value
+    ===========  ===================================================================
+
+:class:`django:django.db.models.BooleanField`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ==========  =================================
+    swap        invert (negate) the current value
+    ==========  =================================
+
+:class:`django:django.db.models.NullBooleanField`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ==========  =================================
+    swap        invert (negate) the current value
+    ==========  =================================
+
+:class:`django:django.db.models.EmailField`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    =============  ======================================
+    change domain  set the domain (@?????) to common value
+    =============  ======================================
+
+:class:`django:django.db.models.URLField`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    =============  ==========================================
+    change domain  set the protocol (????://) to common value
+    =============  ==========================================
+
+.. _export_as_csv:
 
 ``Export as CSV``
 =================
@@ -74,18 +147,17 @@ Available options: (see :ref:`python:csv-fmt-params`)
 
 
 
-.. _export_fixture:
+.. _export_as_fixture:
 
 ``Export as Fixture``
 =====================
 
-Export selected queryset as fixtures using any registered :ref:`Serializer <django:serialization>`.
+Export selected queryset as fixtures using any registered Serializer.
 
-.. note:: this is not equal to django command ``dumpdata`` because dumps also the Foreignkeys
+.. note:: this is not equal to django command ``dumpdata`` because dumps also the Foreignkeys.
 
 ===================   =============================================================
 **use natural key**   If true use natural keys.
-                      (see :ref:`Natural Keys <django:deserialization-of-natural-keys>`)
 
 **dump on screen**    Dump on screen instead to show ``Save as`` popup
 
@@ -107,18 +179,19 @@ Export selected queryset as fixtures using any registered :ref:`Serializer <djan
 ``Export Delete Tree``
 ======================
 
-.. versionadded:: 0.0.5
+.. versionadded:: 0.0.4
 
 
-Export all the records that belong selected queryset using any registered :ref:`Serializer <django:serialization>`.
+Export all the records that belong selected queryset using any registered Serializer.
 
-This action is the counterpart of `export_fixture`_, where it dumps the queryset and it's ForeignKeys,
-`export_delete_tree`_ dumps all the records that belongs the selected queryset.
+This action is the counterpart of `export_as_fixture`_, where it dumps the queryset and it's ForeignKeys,
+`export_delete_tree`_ all the records that belong to the entries of the  selected queryset.
+see :ref:`fixture_vs_tree` for details
 
 
 ===================   =============================================================
 **use natural key**   If true use natural keys.
-                      (see :ref:`Natural Keys <django:deserialization-of-natural-keys>`)
+                      (see :ref:`Natural Keys <deserialization-of-natural-keys>`)
 
 **dump on screen**    Dump on screen instead to show ``Save as`` popup
 
@@ -136,7 +209,7 @@ This action is the counterpart of `export_fixture`_, where it dumps the queryset
 
 
 
-.. _graph:
+.. _graph_queryset:
 
 ``Graph Queryset``
 ==================

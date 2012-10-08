@@ -1,38 +1,145 @@
 import datetime
 import json
+from django.db import IntegrityError, transaction
+from django.utils.datastructures import SortedDict
+import re
+import string
 from django.db.models.fields import BooleanField
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.forms import FileField
+from django.forms import fields as ff
+from django.db.models import fields as df
 from django.forms.models import modelform_factory, ModelMultipleChoiceField
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import force_unicode
+from django.utils.functional import curry
 from django.utils.safestring import mark_safe
 from django.contrib.admin import helpers
 
 from adminactions.forms import GenericActionForm
 
+
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
+
+
+add = lambda arg, value: value + arg
+sub = lambda arg, value: value - arg
+add_percent = lambda arg, value: value + (value * arg / 100)
+sub_percent = lambda arg, value: value - (value * arg / 100)
+negate = lambda value: not value
+trim = lambda arg, value: value.strip(arg)
+
+change_domain = lambda arg, value: re.sub('@.*', arg, value)
+change_protocol = lambda arg, value: re.sub('^[a-z]*://', "%s://" % arg, value)
+
+disable_if_not_nullable = lambda field: field.null
+disable_if_unique = lambda field: not field.unique
+
+
+class OperationManager(object):
+    """
+    Operate like a dictionary where the key are django.form.Field classes
+    and value are tuple of function, param_allowed, enabler, description
+
+    function: callable that can accept one or two arguments
+                :param arg is the value set in the MassUpdateForm
+                :param value is the existing field's value of the record
+                :return new value to store
+    param_allowed: boolean that enable the MassUpdateForm argument:
+    enabler: boolean or callable that receive the specific Model field as argument
+            and should returns True/False to indicate the `function` can be used with this
+            specific field. i.e. disable 'set null` if the field cannot be null, or disable `set` if
+            the field is unique
+    description: string description of the operator
+    """
+
+    COMMON = [('set', (lambda arg, old_value: arg, True, disable_if_unique, "")),
+              ('set null', (lambda old_value: None, False, disable_if_not_nullable, ""))]
+
+    def __init__(self, _dict):
+        self._dict = dict()
+        for field_class, args in _dict.items():
+            self._dict[field_class] = OrderedDict(self.COMMON + args)
+
+    def get(self, field_class, d=None):
+        return self._dict.get(field_class, OrderedDict(self.COMMON))
+
+    def get_for_field(self, field):
+        """ returns valid functions for passed field
+            :param field Field django Model Field
+            :return list of (label, (__, param, enabler, help))
+        """
+        valid = SortedDict()
+        operators = self.get(field.__class__)
+        for label, (func, param, enabler, help) in operators.items():
+            if (callable(enabler) and enabler(field)) or enabler is True:
+                valid[label] = (func, param, enabler, help)
+        return valid
+
+    def __getitem__(self, field_class):
+        return self.get(field_class)
+
+
+OPERATIONS = OperationManager({
+    df.CharField: [('upper', (string.upper, False, True, "convert to uppercase")),
+                   ('lower', (string.lower, False, True, "convert to lowercase")),
+                   ('capitalize', (string.capitalize, False, True, "capitalize first character")),
+                   ('capwords', (string.capwords, False, True, "capitalize each word")),
+                   ('swapcase', (string.swapcase, False, True, "")),
+                   ('trim', (string.strip, False, True, "leading and trailing whitespace"))],
+    df.IntegerField: [('add percent', (add_percent, True, True, "add <arg> percent to existing value")),
+                      ('sub percent', (sub_percent, True, True, "")),
+                      ('sub', (sub_percent, True, True, "")),
+                      ('add', (add, True, True, ""))],
+    df.BooleanField: [('swap', (negate, False, True, ""))],
+    df.NullBooleanField: [('swap', (negate, False, True, ""))],
+    df.EmailField: [('change domain', (change_domain, True, True, ""))],
+    df.URLField: [('change protocol', (change_protocol, True, True, ""))]
+})
 
 
 class MassUpdateForm(GenericActionForm):
     _validate = forms.BooleanField(label='Validate', help_text="if checked use obj.save() instead of manager.update()")
+    _unique_transaction = forms.BooleanField(label='Unique transaction', help_text="if checked create one transaction for the whole update. If some record canno be updated everything will be rolled-back")
+
+    def _get_validation_exclusions(self):
+        exclude = super(MassUpdateForm, self)._get_validation_exclusions()
+        for name, field in self.fields.items():
+            function = self.data.get('func_id_%s' % name, False)
+            if function:
+                exclude.append(name)
+        return exclude
+
+    def _clean_form(self):
+        super(MassUpdateForm, self)._clean_form()
+
+    def _post_clean(self):
+        super(MassUpdateForm, self)._post_clean()
 
     def _clean_fields(self):
         for name, field in self.fields.items():
             value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             try:
-                if isinstance(field, FileField):
+                if isinstance(field, ff.FileField):
                     initial = self.initial.get(name, field.initial)
                     field.clean(value, initial)
                 else:
                     enabler = 'chk_id_%s' % name
+                    function = self.data.get('func_id_%s' % name, False)
                     if self.data.get(enabler, False):
+                        field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
                         value = field.clean(value)
+                        if function:
+                            func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
+                            if hasparm:
+                                value = curry(func, value)
+                            else:
+                                value = func
+
                         self.cleaned_data[name] = value
                     if hasattr(self, 'clean_%s' % name):
                         value = getattr(self, 'clean_%s' % name)()
@@ -45,14 +152,16 @@ class MassUpdateForm(GenericActionForm):
     def clean__validate(self):
         return self.data.get('_validate', '') == 'on'
 
+    def clean(self):
+        return super(MassUpdateForm, self).clean()
+
 
 def mass_update(modeladmin, request, queryset):
     """
         mass update queryset
     """
-
     def not_required(field, **kwargs):
-        """ force all fields as not required, required by mass update"""
+        """ force all fields as not required"""
         kwargs['required'] = False
         return field.formfield(**kwargs)
 
@@ -61,29 +170,56 @@ def mass_update(modeladmin, request, queryset):
 
     if 'apply' in request.POST:
         form = MForm(request.POST)
-        selected_fields = [x for x, y in request.POST.items() if x.startswith('chk_id_')]
         if form.is_valid():
+#            selected_fields = [x for x, y in request.POST.items() if x.startswith('chk_id_')]
+            need_transaction = form.cleaned_data.get('_unique_transaction', False)
+            validate = form.cleaned_data.get('_validate', False)
+
             done = 0
-            if form.cleaned_data.get('_validate', False):
+            errors = 0
+            if validate:
+                if need_transaction:
+                    transaction.enter_transaction_management()
                 for record in queryset:
-                    for k, v in form.cleaned_data.items():
-                        setattr(record, k, v)
-                    record.clean()
-                    record.save()
-                    done += 1
-                messages.info(request, "Updated %s records" % done)
+                    for field_name, value_or_func in form.cleaned_data.items():
+                        if callable(value_or_func):
+                            old_value = getattr(record, field_name)
+                            setattr(record, field_name, value_or_func(old_value))
+                        else:
+                            setattr(record, field_name, value_or_func)
+                    try:
+                        record.clean()
+                        record.save()
+                    except IntegrityError as e:
+                        errors += 1
+                        if need_transaction:
+                            transaction.rollback()
+                            done = 0
+                            break
+                    else:
+                        done += 1
+                if done:
+                    messages.info(request, "Updated %s records" % done)
+                if errors:
+                    messages.error(request, "%s records not updated due errors" % errors)
+                if need_transaction:
+                    transaction.commit()
             else:
                 values = {}
                 for field_name, value in form.cleaned_data.items():
                     if isinstance(form.fields[field_name], ModelMultipleChoiceField):
                         messages.error(request, "Unable no mass update ManyToManyField without 'validate'")
                         return HttpResponseRedirect(request.get_full_path())
+                    elif callable(value):
+                        messages.error(request, "Unable no mass update using operators without 'validate'")
+                        return HttpResponseRedirect(request.get_full_path())
                     elif field_name not in ['_selected_action', '_validate']:
                         values[field_name] = value
                 queryset.update(**values)
             return HttpResponseRedirect(request.get_full_path())
     else:
-        initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)}
+        initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+                   '_validate': True}
         selected_fields = []
         form = MForm(initial=initial)
 

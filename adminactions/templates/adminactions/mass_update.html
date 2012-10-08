@@ -11,6 +11,7 @@
             float: right;
             width: 30%;
         }
+
         #col2 select {
             width: 100%;
         }
@@ -41,30 +42,42 @@
     <div id='col1'>
         <form action="." method="post">
             {% csrf_token %}
-            <table>
+            <table border="1">
                 {% for field in adminform.form.configured_fields %}
                     <tr>
-                        <td>{% if field.field.required %}
-                            <b>{% endif %} {{ field.label_tag }}{% if field.field.required %}</b>{% endif %}  </td>
+                        <td>{{ field.label_tag }}</td>
                         <td colspan="4">
                             {{ field.errors }}
                             {{ field }}&nbsp;<span class="help">{{ field.help_text }}</span>
                         </td>
                     </tr>
                 {% endfor %}
-                <tr><td colspan="4"><hr/></td></tr>
-                <tr><th>field name</th><th>update</th><th>new value</th><th>existing values <small><i>(some of the most used)</i></small></th></tr>
+                <tr>
+                    <td colspan="5">
+{#                        <hr/>#}
+                    </td>
+                </tr>
+                <tr>
+                    <th>field name</th>
+                    <th>update</th>
+                    <th>function</th>
+                    <th>new value</th>
+                    <th>existing values
+                        <small><i>(sample)</i></small>
+                    </th>
+                </tr>
                 {% for field in adminform.form.model_fields %}
                     <tr class="{{ field.name }}-row">
                         <td>{% if field.field.required %}
                             <b>{% endif %} {{ field.label_tag }}{% if field.field.required %}</b>{% endif %}  </td>
                         <td class='col_enabler'>{% checkbox_enabler field %}</td>
+                        <td class='col_func field-{{ field.name }}-op'>
+                            {% field_function adminform.model_admin.model field %}&nbsp;</td>
                         <td class='col_field field-{{ field.name }}-value'>{{ field.errors }}
-                            {{ field }}&nbsp;</td>
-                        <td class='col_field field-{{ field.name }}-op'>{{ field.op }}&nbsp;</td>
+                        {{ field }}&nbsp;</td>
 
-                        <td class='field-{{ field.name }}-commonvalues'>{% link_fields_values grouped field.name %}
-
+                        <td class='field-{{ field.name }}-commonvalues'>
+                            {% link_fields_values grouped field.name %}
                         </td>
 
                     </tr>
@@ -77,14 +90,14 @@
             <input type="submit" name="apply" value="Update records"/>
         </form>
     </div>
-    <div id='col2'>
-    Selected records:
-        <select size="30">
-            {% for el in selection %}
-            <option>{{ el }}</option>
-            {% endfor %}
-        </select>
-
-
-    </div>
+{#    <div id='col2'>#}
+{#        Selected records:#}
+{#        <select size="30">#}
+{#            {% for el in selection %}#}
+{#                <option>{{ el }}</option>#}
+{#            {% endfor %}#}
+{#        </select>#}
+{##}
+{##}
+{#    </div>#}
 {% endblock %}

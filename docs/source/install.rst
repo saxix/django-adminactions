@@ -18,10 +18,6 @@ your project or ``PYTHONPATH``.
 
 
 
-.. _GitHub: http://github.com/saxix/django-actions
-.. _PyPI: http://pypi.python.org/pypi/django-actions/
-
-
 Configuration
 =============
 

@@ -6,6 +6,8 @@ __all__ = ['MassUpdateTest', ]
 
 
 class MassUpdateTest(BaseTestCase):
+    urls = "adminactions.tests.urls"
+
     def setUp(self):
         super(MassUpdateTest, self).setUp()
         self._url = reverse('admin:auth_user_changelist')
