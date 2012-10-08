@@ -39,7 +39,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware')
 
-ROOT_URLCONF = 'adminacgions.tests.urls'
+ROOT_URLCONF = 'adminactions.tests.urls'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
