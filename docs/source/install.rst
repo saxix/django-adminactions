@@ -41,4 +41,12 @@ Add the actions to your site::
     site.add_action(actions.export_as_csv)
     site.add_action(actions.export_as_json)
 
+Add service url to your urls.py ::
+
+    urlpatterns = patterns('',
+        ...
+        (r'^adminactions/', include(include(adminactions.urls))),
+    )
+
+
 

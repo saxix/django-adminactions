@@ -6,6 +6,8 @@ Release 0.0.4 (in development)
     - added foreign_keys dumps
     - multiple serializer
 * NEW: :ref:`transform_operations`
+* NEW: url to preview date format in `export_as_csv`
+
 
 Release 0.0.3
 =============

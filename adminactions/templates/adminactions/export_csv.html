@@ -12,12 +12,12 @@
             width: 60%;
         }
     </style>
-    {% url 'admin:format_date' as url_format_date %}
+    {% url 'adminactions.format_date' as url_format_date %}
     {% if url_format_date %}
     <script type="text/javascript">
         (function ($) {
             $(document).ready(function ($) {
-                $('#id_datetime_format, #id_date_format, #id_time_format,').after('&nbsp;&nbsp;<span class="sample"></span>');
+{#                $('#id_datetime_format, #id_date_format, #id_time_format,').after('&nbsp;&nbsp;<span class="sample"></span>');#}
                 var _url = "{{ url_format_date }}";
                 var get_format = function (sender) {
                     $.get(_url, {'fmt':$(sender).val()},
@@ -26,15 +26,14 @@
                             }
                     );
                 };
-                $('#id_datetime_format, #id_date_format, #id_time_format,').keyup(function () {
+                $('#id_datetime_format, #id_date_format, #id_time_format,').after('&nbsp;&nbsp;<span class="sample"></span>').keyup(function () {
                     clearTimeout($(this).data('timer'));
                     var target = $(this);
                     var wait = setTimeout(function () {
                         get_format(target)
                     }, 500);
                     $(this).data('timer', wait);
-                });
-                $('#id_datetime_format, #id_date_format, #id_time_format,').trigger('keyup');
+                }).trigger('keyup');
             });
         })(django.jQuery);
 
@@ -70,8 +69,10 @@
             <input type="submit" name="apply" value="Export"/>
         </form>
     </div>
-    <div id='legend-date' style='display:none'>
-    <table xmlns="http://www.w3.org/1999/xhtml" class="doctable table">
+    {% url 'adminactions.format_date' as url_format_date %}
+    {% if url_format_date %}
+    <div id='legend-date'>
+    <table xmlns="http://www.w3.org/1999/xhtml" lass="doctable table">
     <caption><b>The following characters are recognized in the
         <i><tt class="parameter">format</tt></i> parameter string</b></caption>
 
@@ -120,6 +121,7 @@
 
         <td align="left"><i>Sunday</i> through <i>Saturday</i></td>
     </tr>
+    <tr>
     <td align="left"><i>1</i> (for Monday) through <i>7</i> (for Sunday)</td>
     </tr>
 
@@ -395,4 +397,5 @@
     </table>
 
     </div>
+    {% endif  %}
 {% endblock %}

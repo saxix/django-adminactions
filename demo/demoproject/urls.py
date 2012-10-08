@@ -1,3 +1,4 @@
+import adminactions.urls
 import django.contrib.admin
 import django.contrib.admin.sites
 from django.contrib.auth.models import User
@@ -23,6 +24,7 @@ public_site.add_action(actions.export_as_csv)
 public_site.add_action(actions.export_as_fixture)
 
 urlpatterns = patterns('',
+    (r'^adm/', include(include(adminactions.urls))),
     (r'', include(include(public_site.urls))),
     (r'^admin/', include(include(public_site.urls))),
 )
