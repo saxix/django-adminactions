@@ -1,24 +1,23 @@
-import datetime
-import json
-from django.db import IntegrityError, transaction
-from django.utils.datastructures import SortedDict
 import re
+import json
+import datetime
 import string
-from django.db.models.fields import BooleanField
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from django import forms
-from django.contrib import messages
-from django.core.exceptions import ValidationError
-from django.forms import fields as ff
+from django.db import IntegrityError, transaction
 from django.db.models import fields as df
+from django.forms import fields as ff
 from django.forms.models import modelform_factory, ModelMultipleChoiceField
+from django.contrib import messages
+from django.contrib.admin import helpers
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import force_unicode
 from django.utils.functional import curry
+from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
-from django.contrib.admin import helpers
 
 from adminactions.forms import GenericActionForm
 
@@ -63,10 +62,10 @@ class OperationManager(object):
     def __init__(self, _dict):
         self._dict = dict()
         for field_class, args in _dict.items():
-            self._dict[field_class] = OrderedDict(self.COMMON + args)
+            self._dict[field_class] = SortedDict(self.COMMON + args)
 
     def get(self, field_class, d=None):
-        return self._dict.get(field_class, OrderedDict(self.COMMON))
+        return self._dict.get(field_class, SortedDict(self.COMMON))
 
     def get_for_field(self, field):
         """ returns valid functions for passed field
@@ -229,7 +228,7 @@ def mass_update(modeladmin, request, queryset):
                     grouped[f.name] = dict(getattr(f, 'flatchoices')).values()
                 elif hasattr(f, 'choices') and f.choices:
                     grouped[f.name] = dict(getattr(f, 'choices')).values()
-                elif isinstance(f, BooleanField):
+                elif isinstance(f, df.BooleanField):
                     grouped[f.name] = [True, False]
                 else:
                     value = getattr(el, f.name)

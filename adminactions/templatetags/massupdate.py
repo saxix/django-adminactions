@@ -1,4 +1,3 @@
-from itertools import chain
 from django.forms import widgets
 from django.forms.util import flatatt
 from django.template import Library
