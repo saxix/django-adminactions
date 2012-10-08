@@ -8,7 +8,7 @@ env:
 install:
 #  - pip install pep8 --use-mirrors
   - pip install -q Django==$DJANGO_VERSION
-  - python setup.py -q install
+  - python setup.py install
   - pip install -r requirements.txt --use-mirrors
 
 script: django-admin.py test adminactions --settings=adminactions.tests.settings
