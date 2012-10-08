@@ -1,7 +1,9 @@
 include README.rst
 include MANIFEST.in
 include AUTHORS
+include CHANGES
 include LICENSE
+include requirements.txt
 include setup.py
 recursive-include adminactions *.*
 recursive-exclude adminactions *.pyc
