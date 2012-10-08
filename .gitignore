@@ -1,11 +1,11 @@
+/.idea
+/dist
+/build
+/docs/build
 *.log
 *.pot
 *.pyc
 *.egg-info
-/.idea
-/dist
-/docs/build
-MANIFEST
-local_settings.py
-
+/MANIFEST
 *.sqlite
+
