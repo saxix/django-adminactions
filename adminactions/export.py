@@ -1,12 +1,10 @@
 import datetime
-from functools import wraps
 from itertools import chain
 from django.core.serializers import get_serializer_formats
 from django.db import router
 from django.db.models import ManyToManyField, ForeignKey
 from django.db.models.deletion import Collector
 from django.forms.widgets import SelectMultiple
-from django.utils.functional import curry
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
@@ -170,40 +168,6 @@ def _dump_qs(form, queryset, collector):
     return response
 
 
-def _export_collector(modeladmin, request, queryset, collector=None, action_name=""):
-    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
-
-    using = router.db_for_write(modeladmin.model)
-    c = collector(using)
-    c.collect(queryset)
-
-    if 'apply' in request.POST:
-        raise
-        form = FixtureOptions(request.POST)
-        if form.is_valid():
-            return _dump_qs(form, queryset, c)
-
-    else:
-        form = FixtureOptions(initial=initial)
-
-    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
-    media = modeladmin.media + adminForm.media
-    tpl = 'adminactions/export_fixture.html'
-    ctx = {'adminform': adminForm,
-           'change': True,
-           'title': _('Export as Fixture'),
-           'is_popup': False,
-           'save_as': False,
-           'has_delete_permission': False,
-           'has_add_permission': False,
-           'has_change_permission': True,
-           'queryset': queryset,
-           'opts': queryset.model._meta,
-           'app_label': queryset.model._meta.app_label,
-           'action': action_name,
-           'media': mark_safe(media)}
-    return render_to_response(tpl, RequestContext(request, ctx))
-
 def export_as_fixture(modeladmin, request, queryset):
     initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
 
@@ -238,7 +202,7 @@ def export_as_fixture(modeladmin, request, queryset):
            'action': 'export_as_fixture',
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
-#export_as_fixture = curry(_export_collector, collector=ForeignKeysCollector, action_name='export_as_fixture')
+
 export_as_fixture.short_description = "Export as fixture"
 
 
@@ -270,7 +234,7 @@ def export_delete_tree(modeladmin, request, queryset):
     tpl = 'adminactions/export_fixture.html'
     ctx = {'adminform': adminForm,
            'change': True,
-           'title': _('Export as Fixture'),
+           'title': _('Export Delete Tree'),
            'is_popup': False,
            'save_as': False,
            'has_delete_permission': False,
@@ -279,9 +243,10 @@ def export_delete_tree(modeladmin, request, queryset):
            'queryset': queryset,
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
-           'action': 'export_as_fixture',
+           'action': 'export_delete_tree',
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
+
 
 export_delete_tree.short_description = "Export delete tree"
 
