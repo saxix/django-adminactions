@@ -102,8 +102,18 @@ OPERATIONS = OperationManager({
 
 
 class MassUpdateForm(GenericActionForm):
-    _validate = forms.BooleanField(label='Validate', help_text="if checked use obj.save() instead of manager.update()")
-    _unique_transaction = forms.BooleanField(label='Unique transaction', help_text="if checked create one transaction for the whole update. If some record canno be updated everything will be rolled-back")
+    _validate = forms.BooleanField(label='Validate',
+                                   help_text="if checked use obj.save() instead of manager.update()")
+    _unique_transaction = forms.BooleanField(label='Unique transaction',
+                                             help_text="if checked create one transaction for the whole update. "
+                                                       "If some record canno be updated everything will be rolled-back")
+    select_across = forms.BooleanField(label='', required=False, initial=0,
+                                       widget=forms.HiddenInput({'class': 'select-across'}))
+    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(MassUpdateForm, self).__init__(*args, **kwargs)
+        self._errors = None
 
     def _get_validation_exclusions(self):
         exclude = super(MassUpdateForm, self)._get_validation_exclusions()
@@ -112,12 +122,6 @@ class MassUpdateForm(GenericActionForm):
             if function:
                 exclude.append(name)
         return exclude
-
-    def _clean_form(self):
-        super(MassUpdateForm, self)._clean_form()
-
-    def _post_clean(self):
-        super(MassUpdateForm, self)._post_clean()
 
     def _clean_fields(self):
         for name, field in self.fields.items():
@@ -149,10 +153,10 @@ class MassUpdateForm(GenericActionForm):
                     del self.cleaned_data[name]
 
     def clean__validate(self):
-        return self.data.get('_validate', '') == 'on'
+        return bool(self.data.get('_validate', 0))
 
-    def clean(self):
-        return super(MassUpdateForm, self).clean()
+#    def clean(self):
+#        return super(MassUpdateForm, self).clean()
 
 
 def mass_update(modeladmin, request, queryset):
@@ -166,11 +170,12 @@ def mass_update(modeladmin, request, queryset):
 
     MForm = modelform_factory(modeladmin.model, form=MassUpdateForm, formfield_callback=not_required)
     grouped = defaultdict(lambda: [])
+    selected_fields = []
 
     if 'apply' in request.POST:
         form = MForm(request.POST)
         if form.is_valid():
-#            selected_fields = [x for x, y in request.POST.items() if x.startswith('chk_id_')]
+
             need_transaction = form.cleaned_data.get('_unique_transaction', False)
             validate = form.cleaned_data.get('_validate', False)
 
@@ -212,14 +217,16 @@ def mass_update(modeladmin, request, queryset):
                     elif callable(value):
                         messages.error(request, "Unable no mass update using operators without 'validate'")
                         return HttpResponseRedirect(request.get_full_path())
-                    elif field_name not in ['_selected_action', '_validate']:
+                    elif field_name not in ['_selected_action', '_validate', 'select_across', 'action']:
                         values[field_name] = value
                 queryset.update(**values)
             return HttpResponseRedirect(request.get_full_path())
     else:
-        initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
-                   '_validate': True}
-        selected_fields = []
+
+        initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+                   'select_across': request.POST.get('select_across') == '1',
+                   'action': 'mass_update',
+                   '_validate': 1}
         form = MForm(initial=initial)
 
         for el in queryset.all()[:10]:
@@ -254,7 +261,8 @@ def mass_update(modeladmin, request, queryset):
            'has_change_permission': True,
            'opts': modeladmin.model._meta,
            'app_label': modeladmin.model._meta.app_label,
-           'action': 'mass_update',
+#           'action': 'mass_update',
+#           'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
 

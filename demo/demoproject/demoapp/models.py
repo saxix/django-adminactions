@@ -11,7 +11,7 @@ class DemoModel(models.Model):
     time = models.TimeField()
     decimal = models.DecimalField(max_digits=10, decimal_places=3)
     email = models.EmailField()
-#    filepath = models.FilePathField(path=__file__)
+    #    filepath = models.FilePathField(path=__file__)
     float = models.FloatField()
     bigint = models.BigIntegerField()
     ip = models.IPAddressField()
@@ -20,10 +20,10 @@ class DemoModel(models.Model):
     text = models.TextField()
 
     unique = models.CharField(max_length=255, unique=True)
-    nullable= models.CharField(max_length=255, null=True)
+    nullable = models.CharField(max_length=255, null=True)
     blank = models.CharField(max_length=255, blank=True, null=True)
     not_editable = models.CharField(max_length=255, editable=False, blank=True, null=True)
-    choices = models.IntegerField(choices=((1,1),(2,2),(3,3)))
+    choices = models.IntegerField(choices=((1, 1), (2, 2), (3, 3)))
 
     class Meta:
         app_label = 'demoapp'

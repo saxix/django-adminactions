@@ -9,7 +9,10 @@ from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-import csv
+try:
+    import unicodecsv as csv
+except ImportError:
+    import csv
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import smart_str
@@ -27,6 +30,10 @@ escapechars = " \\"
 
 class CSVOptions(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    select_across = forms.BooleanField(label='', required=False, initial=0,
+                                       widget=forms.HiddenInput({'class': 'select-across'}))
+    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
+
     header = forms.BooleanField(required=False)
     delimiter = forms.ChoiceField(choices=zip(delimiters, delimiters))
     quotechar = forms.ChoiceField(choices=zip(quotes, quotes))
@@ -48,8 +55,17 @@ def export_as_csv(modeladmin, request, queryset):
         export a queryset to csv file
     """
     cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields]
-    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'quotechar': '"',
-               'columns': [x for x, v in cols], 'quoting': csv.QUOTE_ALL, 'delimiter': ';', 'escapechar': '\\', }
+    initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+               'select_across': request.POST.get('select_across') == '1',
+               'action': request.POST.get('action'),
+               'date_format': 'd/m/Y',
+               'datetime_format': 'N j, Y, P',
+               'time_format': 'P',
+               'quotechar': '"',
+               'columns': [x for x, v in cols],
+               'quoting': csv.QUOTE_ALL,
+               'delimiter': ';',
+               'escapechar': '\\', }
 
     if 'apply' in request.POST:
         form = CSVOptions(request.POST)
@@ -66,7 +82,6 @@ def export_as_csv(modeladmin, request, queryset):
                                     quoting=int(form.cleaned_data['quoting']))
                 if form.cleaned_data.get('header', False):
                     writer.writerow([f for f in form.cleaned_data['columns']])
-
                 for obj in queryset:
                     row = []
                     for fieldname in form.cleaned_data['columns']:
@@ -105,7 +120,6 @@ def export_as_csv(modeladmin, request, queryset):
            'queryset': queryset,
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
-           'action': 'export_as_csv',
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
 
@@ -147,6 +161,8 @@ class ForeignKeysCollector(object):
 
 class FixtureOptions(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    select_across = forms.BooleanField(label='', required=False, initial=0,
+                                       widget=forms.HiddenInput({'class': 'select-across'}))
     use_natural_key = forms.BooleanField(required=False)
     on_screen = forms.BooleanField(label='Dump on screen', required=False)
 
@@ -169,7 +185,11 @@ def _dump_qs(form, queryset, collector):
 
 
 def export_as_fixture(modeladmin, request, queryset):
-    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
+    initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+               'select_across': request.POST.get('select_across') == '1',
+               'action': request.POST.get('action'),
+               'serializer': 'json',
+               'indent': 4}
 
     c = ForeignKeysCollector(None)
     c.collect(queryset)
@@ -199,7 +219,6 @@ def export_as_fixture(modeladmin, request, queryset):
            'queryset': queryset,
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
-           'action': 'export_as_fixture',
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
 
@@ -211,7 +230,12 @@ def export_delete_tree(modeladmin, request, queryset):
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted
     """
-    initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME), 'serializer': 'json', 'indent': 4}
+    initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+               'select_across': request.POST.get('select_across') == '1',
+               'action': request.POST.get('action'),
+               'serializer': 'json',
+               'indent': 4}
+
     using = router.db_for_write(modeladmin.model)
     c = Collector(using)
     c.collect(queryset)
@@ -224,8 +248,6 @@ def export_delete_tree(modeladmin, request, queryset):
             except AttributeError as e:
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.path)
-
-
     else:
         form = FixtureOptions(initial=initial)
 
@@ -243,7 +265,6 @@ def export_delete_tree(modeladmin, request, queryset):
            'queryset': queryset,
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
-           'action': 'export_delete_tree',
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
 

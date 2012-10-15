@@ -1,5 +1,5 @@
 NAME = 'django-adminactions'
-VERSION = __version__ = (0, 0, 4, 'alpha', 0)
+VERSION = __version__ = (0, 0, 4, 'beta', 0)
 __author__ = 'sax'
 
 import subprocess
@@ -21,7 +21,7 @@ def get_version(version=None):
     if version[3] == 'alpha' and version[4] == 0:
         git_changeset = get_git_changeset()
         if git_changeset:
-            sub = '.dev%s' % git_changeset
+            sub = '.a%s' % git_changeset
 
     elif version[3] != 'final':
         mapping = {'alpha': 'a', 'beta': 'b', 'rc': 'c'}
