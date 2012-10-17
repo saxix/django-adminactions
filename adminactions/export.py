@@ -163,6 +163,8 @@ class FixtureOptions(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     select_across = forms.BooleanField(label='', required=False, initial=0,
                                        widget=forms.HiddenInput({'class': 'select-across'}))
+    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
+
     use_natural_key = forms.BooleanField(required=False)
     on_screen = forms.BooleanField(label='Dump on screen', required=False)
 
