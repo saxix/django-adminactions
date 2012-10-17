@@ -56,7 +56,7 @@ class OperationManager(object):
     description: string description of the operator
     """
 
-    COMMON = [('set', (lambda arg, old_value: arg, True, disable_if_unique, "")),
+    COMMON = [('set', (None, True, disable_if_unique, "")),
               ('set null', (lambda old_value: None, False, disable_if_not_nullable, ""))]
 
     def __init__(self, _dict):
@@ -125,7 +125,7 @@ class MassUpdateForm(GenericActionForm):
 
     def _clean_fields(self):
         for name, field in self.fields.items():
-            value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
+            raw_value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             try:
                 if isinstance(field, ff.FileField):
                     initial = self.initial.get(name, field.initial)
@@ -135,10 +135,12 @@ class MassUpdateForm(GenericActionForm):
                     function = self.data.get('func_id_%s' % name, False)
                     if self.data.get(enabler, False):
                         field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
-                        value = field.clean(value)
+                        value = field.clean(raw_value)
                         if function:
                             func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
-                            if hasparm:
+                            if func is None:
+                                pass
+                            elif hasparm:
                                 value = curry(func, value)
                             else:
                                 value = func
