@@ -16,6 +16,7 @@ your project or ``PYTHONPATH``.
 
 3. Either symlink the ``adminactions`` directory into your project or copy the directory in. What ever works best for you.
 
+4. Optionally install unicodecsv with ``pip install unicodecsv``
 
 
 Configuration
