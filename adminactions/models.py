@@ -1,5 +1,5 @@
 from django.contrib.auth.management import _get_permission_codename
-
+from django.db.models import signals
 
 def create_extra_permission(sender, **kwargs):
     from django.contrib.auth.models import Permission
@@ -7,7 +7,7 @@ def create_extra_permission(sender, **kwargs):
     from django.contrib.contenttypes.models import ContentType
 
     for model in get_models(sender):
-        for action in ('export', 'massupdate', 'import'):
+        for action in ('export', 'massupdate'):
             opts = model._meta
             codename = _get_permission_codename(action, opts)
             label = u'Can %s %s' % (action, opts.verbose_name_raw)
@@ -15,3 +15,4 @@ def create_extra_permission(sender, **kwargs):
             Permission.objects.get_or_create(codename=codename, content_type=ct, defaults={'name': label})
 
 
+signals.post_syncdb.connect(create_extra_permission)
