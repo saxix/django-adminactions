@@ -1,6 +1,7 @@
 Release 0.0.4 (in development)
 ==============================
 
+* NEW added ``add_foreign_keys`` parameter to :ref:`export_as_fixtures` and :ref:`export_delete_tree`
 * NEW :ref:`export_delete_tree`
 * renamed export_as_json as export_as_fixtures
     - added foreign_keys dumps

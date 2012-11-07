@@ -154,7 +154,7 @@ Available options: (see :ref:`python:csv-fmt-params`)
 
 Export selected queryset as fixtures using any registered Serializer.
 
-.. note:: this is not equal to django command ``dumpdata`` because dumps also the Foreignkeys.
+.. note:: this is not the same as django's command ``dumpdata`` because it can dump also the Foreign Keys.
 
 ===================   =============================================================
 **use natural key**   If true use natural keys.
@@ -164,6 +164,8 @@ Export selected queryset as fixtures using any registered Serializer.
 **indent**            Indentation value
 
 **serializer**        Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
+
+**add_foreign_keys**  If checked export foreign keys too, otherwise act as standard dumpdata
 
 ===================   =============================================================
 
@@ -186,7 +188,7 @@ Export all the records that belong selected queryset using any registered Serial
 
 This action is the counterpart of `export_as_fixture`_, where it dumps the queryset and it's ForeignKeys,
 `export_delete_tree`_ all the records that belong to the entries of the  selected queryset.
-see :ref:`fixture_vs_tree` for details
+see `export_as_fixture`_ for details
 
 
 ===================   =============================================================
@@ -198,6 +200,8 @@ see :ref:`fixture_vs_tree` for details
 **indent**            Indentation value
 
 **serializer**        Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
+
+**add_foreign_keys**  If checked export dependent objects too.
 
 ===================   =============================================================
 

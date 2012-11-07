@@ -1,5 +1,6 @@
 import datetime
 from itertools import chain
+from operator import attrgetter
 from django.core.serializers import get_serializer_formats
 from django.db import router
 from django.db.models import ManyToManyField, ForeignKey
@@ -125,6 +126,14 @@ def export_as_csv(modeladmin, request, queryset):
 
 export_as_csv.short_description = "Export as CSV"
 
+class FlatCollector(object):
+    def __init__(self, using):
+        self._visited = []
+        super(FlatCollector, self).__init__()
+
+    def collect(self, objs):
+        self.data = objs
+        self.models = set([o.__class__ for o in self.data])
 
 class ForeignKeysCollector(object):
     def __init__(self, using):
@@ -158,6 +167,17 @@ class ForeignKeysCollector(object):
     def __str__(self):
         return mark_safe(self.data)
 
+class DependenciesCollector(Collector):
+    def collect(self, objs, source=None, nullable=False, collect_related=True, source_attr=None, reverse_dependency=False):
+        super(DependenciesCollector, self).collect(objs, source, nullable, collect_related, source_attr, reverse_dependency)
+        alls = []
+        for model, instances in self.data.items():
+            alls.extend( sorted(instances, key=attrgetter("pk")) )
+        self.data = alls
+
+    def delete(self):
+        pass
+
 
 class FixtureOptions(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
@@ -167,15 +187,17 @@ class FixtureOptions(forms.Form):
 
     use_natural_key = forms.BooleanField(required=False)
     on_screen = forms.BooleanField(label='Dump on screen', required=False)
+    add_foreign_keys = forms.BooleanField(required=False)
 
     indent = forms.IntegerField(required=True, max_value=10, min_value=0)
     serializer = forms.ChoiceField(choices=zip(get_serializer_formats(), get_serializer_formats()))
 
 
-def _dump_qs(form, queryset, collector):
+def _dump_qs(form, queryset, data):
     fmt = form.cleaned_data.get('serializer')
+
     json = ser.get_serializer(fmt)()
-    ret = json.serialize(collector.data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
+    ret = json.serialize(data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
                          indent=form.cleaned_data.get('indent'))
 
     response = HttpResponse(mimetype='text/plain')
@@ -193,14 +215,15 @@ def export_as_fixture(modeladmin, request, queryset):
                'serializer': 'json',
                'indent': 4}
 
-    c = ForeignKeysCollector(None)
-    c.collect(queryset)
-
     if 'apply' in request.POST:
         form = FixtureOptions(request.POST)
         if form.is_valid():
             try:
-                return _dump_qs(form, queryset, c)
+                _collector = ForeignKeysCollector if form.cleaned_data.get('add_foreign_keys') else FlatCollector
+                c = _collector(None)
+                c.collect(queryset)
+
+                return _dump_qs(form, queryset, c.data)
             except AttributeError as e:
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.path)
@@ -238,15 +261,20 @@ def export_delete_tree(modeladmin, request, queryset):
                'serializer': 'json',
                'indent': 4}
 
-    using = router.db_for_write(modeladmin.model)
-    c = Collector(using)
-    c.collect(queryset)
-
     if 'apply' in request.POST:
         form = FixtureOptions(request.POST)
         if form.is_valid():
             try:
-                return _dump_qs(form, queryset, c)
+                collect_related = form.cleaned_data.get('add_foreign_keys')
+                using = router.db_for_write(modeladmin.model)
+
+                c = Collector(using)
+                c.collect(queryset, collect_related=collect_related)
+                data = []
+                for model, instances in c.data.items():
+                    data.extend(instances)
+
+                return _dump_qs(form, queryset, data)
             except AttributeError as e:
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.path)
