@@ -170,7 +170,10 @@ def mass_update(modeladmin, request, queryset):
         kwargs['required'] = False
         return field.formfield(**kwargs)
 
-    MForm = modelform_factory(modeladmin.model, form=MassUpdateForm, formfield_callback=not_required)
+    # Allows to specified a custom mass update Form in the ModelAdmin
+    mass_update_form = getattr(modeladmin, 'mass_update_form', MassUpdateForm)
+
+    MForm = modelform_factory(modeladmin.model, form=mass_update_form, formfield_callback=not_required)
     grouped = defaultdict(lambda: [])
     selected_fields = []
 
