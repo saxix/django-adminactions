@@ -77,7 +77,6 @@ def field_function(model, form_field):
     choices = []
     classes = {True: 'param', False: 'noparam'}
     for label, (__, param, enabler, __) in OPERATIONS.get_for_field(model_object).items():
-        options_attrs[label] = {'class': classes[param], 'label': help}
+        options_attrs[label] = {'class': classes[param], 'label': label}
         choices.append((label, label))
     return SelectOptionsAttribute(attrs, choices, options_attrs).render("func_id_%s" % form_field.name, "")
-
