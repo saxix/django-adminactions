@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User, Permission
 
@@ -7,14 +8,21 @@ class AnyUserBackend(ModelBackend):
     supports_anonymous_user = True
 
     def get_all_permissions(self, user_obj, obj=None):
-        perms = Permission.objects.all().values_list('content_type__app_label', 'codename').order_by()
-        return perms
+        if settings.DEBUG:
+            return Permission.objects.all().values_list('content_type__app_label', 'codename').order_by()
+        return super(AnyUserBackend, self).get_all_permissions(user_obj, obj)
 
-    get_group_permissions = get_all_permissions
+    def get_group_permissions(self, user_obj, obj=None):
+        if settings.DEBUG:
+            return Permission.objects.all().values_list('content_type__app_label', 'codename').order_by()
+        return super(AnyUserBackend, self).get_group_permissions(user_obj, obj)
 
     def has_perm(self, user_obj, perm, obj=None):
-        return True
+        if settings.DEBUG:
+            return True
+        return super(AnyUserBackend, self).has_perm(user_obj, perm, obj)
 
     def has_module_perms(self, user_obj, app_label):
-        return True
-
+        if settings.DEBUG:
+            return True
+        return super(AnyUserBackend, self).has_module_perms(user_obj, app_label)
