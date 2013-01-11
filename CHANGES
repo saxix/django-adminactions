@@ -1,4 +1,8 @@
-Release 0.0.4 (in development)
+Release 0.0.5 (in development)
+==============================
+* NEW :ref:`merge`
+
+Release 0.0.4
 ==============================
 
 * NEW added ``add_foreign_keys`` parameter to :ref:`export_as_fixtures` and :ref:`export_delete_tree`
