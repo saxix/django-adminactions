@@ -194,7 +194,8 @@ def mass_update(modeladmin, request, queryset):
         form = MForm(request.POST)
         if form.is_valid():
             try:
-                adminaction_start.send(sender=modeladmin.model, action='mass_update', request=request, queryset=queryset)
+                adminaction_start.send(sender=modeladmin.model, action='mass_update',
+                                       request=request, queryset=queryset, form=form)
             except ActionInterrupted as e:
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.get_full_path())
