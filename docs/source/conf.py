@@ -28,18 +28,28 @@ settings.SITE_ID = 1
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
+needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext")))
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
               'sphinx.ext.graphviz', 'sphinx.ext.intersphinx',
-              'sphinx.ext.doctest', 'sphinx.ext.extlinks']
+              'sphinx.ext.doctest', 'sphinx.ext.extlinks',
+#              'sphinxcontrib.issuetracker',
+              'github',
+]
+
+
+issuetracker = 'github'
+issuetracker_project = 'saxix/django-adminactions'
+issuetracker_plaintext_issues = True
+github_project_url = 'https://github.com/saxix/django-adminactions/'
 
 todo_include_todos = True
 intersphinx_mapping = {
     'python': ('http://python.readthedocs.org/en/latest/', None),
-    'django': ('http://django.readthedocs.org/en/1.4/', 'http://docs.djangoproject.com/en/dev/_objects/'),
+    'django': ('http://django.readthedocs.org/en/1.4.3/', 'http://docs.djangoproject.com/en/dev/_objects/'),
     'sphinx': ('http://sphinx.readthedocs.org/en/latest/', None)}
 intersphinx_cache_limit = 90 # days
 

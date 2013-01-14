@@ -15,11 +15,13 @@ Table Of Contents
 =================
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     install
     actions
     changes
+    howto
+    faq
     api
 
 

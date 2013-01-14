@@ -10,7 +10,7 @@ Actions
 
 .. contents::
     :local:
-    :depth: 2
+    :depth: 1
 
 
 .. _massupdate:
@@ -19,7 +19,7 @@ Actions
 ===============
 
 Update one or more fields of the selected queryset to a common value and/or apply a
-`transform_operation`_ to selected field.
+`transform_operations`_ to selected field.
 
 ======================= ===========================================================================================
 **validate**            use obj.save() instead of obj._default_manager.update.
@@ -38,13 +38,13 @@ Update one or more fields of the selected queryset to a common value and/or appl
 .. _transform_operations:
 
 
-``Transform Operations``
+``Transform Operation``
 ------------------------
 .. versionadded:: 0.0.4
 
-Startting from version 004 is possible to update fields applying function.
+Is possible to update fields applying function. |app| comes with a predefined set of functions.
+You can anyway :ref:`register your own funcrions <register_transform_function>`
 
-|app| comes with a predefined set of functions. You can anyway :ref:`register your own funcrions <register_transform_function>`
 
 **common to all models**
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,18 +156,18 @@ Export selected queryset as fixtures using any registered Serializer.
 
 .. note:: this is not the same as django's command ``dumpdata`` because it can dump also the Foreign Keys.
 
-===================   =============================================================
-**use natural key**   If true use natural keys.
+====================   ========================================================================================
+**use natural key**    If true use natural keys.
 
-**dump on screen**    Dump on screen instead to show ``Save as`` popup
+**dump on screen**     Dump on screen instead to show ``Save as`` popup
 
-**indent**            Indentation value
+**indent**             Indentation value
 
-**serializer**        Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
+**serializer**         Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
 
-**add_foreign_keys**  If checked export foreign keys too, otherwise act as standard dumpdata
+**add_foreign_keys**   If checked export foreign keys too, otherwise act as standard dumpdata
 
-===================   =============================================================
+====================   ========================================================================================
 
 **Screenshot**
 
@@ -191,19 +191,19 @@ This action is the counterpart of `export_as_fixture`_, where it dumps the query
 see `export_as_fixture`_ for details
 
 
-===================   =============================================================
-**use natural key**   If true use natural keys.
-                      (see :ref:`Natural Keys <deserialization-of-natural-keys>`)
+====================   =====================================================================================
+**use natural key**    If true use natural keys.
+                       (see :ref:`Natural Keys <deserialization-of-natural-keys>`)
 
-**dump on screen**    Dump on screen instead to show ``Save as`` popup
+**dump on screen**     Dump on screen instead to show ``Save as`` popup
 
-**indent**            Indentation value
+**indent**             Indentation value
 
-**serializer**        Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
+**serializer**         Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
 
-**add_foreign_keys**  If checked export dependent objects too.
+**add_foreign_keys**   If checked export dependent objects too.
 
-===================   =============================================================
+====================   =====================================================================================
 
 **Screenshot**
 

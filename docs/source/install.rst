@@ -37,10 +37,8 @@ Add the actions to your site::
     from django.contrib.admin import site
     import adminactions.actions as actions
 
-    site.add_action(actions.mass_update)
-    site.add_action(actions.graph_queryset)
-    site.add_action(actions.export_as_csv)
-    site.add_action(actions.export_as_json)
+    # register all adminactions
+    actions.add_to_site(site)
 
 Add service url to your urls.py ::
 
