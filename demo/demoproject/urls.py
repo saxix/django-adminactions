@@ -17,11 +17,9 @@ class PublicAdminSite(django.contrib.admin.sites.AdminSite):
 public_site = PublicAdminSite()
 django.contrib.admin.autodiscover()
 public_site.register(DemoModel, DemoModelAdmin)
+public_site.register(User)
 
-public_site.add_action(actions.mass_update)
-public_site.add_action(actions.graph_queryset)
-public_site.add_action(actions.export_as_csv)
-public_site.add_action(actions.export_as_fixture)
+actions.add_to_site(public_site)
 
 urlpatterns = patterns('',
     (r'^adm/', include(include(adminactions.urls))),
