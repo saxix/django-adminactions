@@ -1,0 +1,57 @@
+{% extends "admin/change_form.html" %}
+{% load i18n merge static %}
+{% block breadcrumbs %}{% if not is_popup %}
+    <div class="breadcrumbs">
+        <a href="../../">{% trans "Home" %}</a> &rsaquo;
+        <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+        <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+        Merge records
+    </div>
+{% endif %}{% endblock %}
+{% block content %}
+    {% if adminform.form.errors %}
+        <ol>
+            {% for error in form.errors %}
+                <li><strong>{{ error|escape }}</strong></li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+    {{ adminform.form.non_field_errors }}
+    <form method="post">{% csrf_token %}
+        {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
+        <table>
+            <tr>
+                <td>{{ adminform.form.dependencies.label }}</td>
+                <td>{{ adminform.form.dependencies }}</td>
+            </tr>
+            <tr>
+                <td>{{ adminform.form.generic.label }}</td>
+                <td>{{ adminform.form.generic }}</td>
+            </tr>
+        </table>
+        <table class="mergetable">
+            <tr class="header">
+                <th>Field</th>
+                <th>First</th>
+                <th></th>
+                <th>Result</th>
+                <th></th>
+                <th>Second</th>
+            </tr>
+            {% for field in fields %}
+                <tr class="{% cycle "row1" "row2" %}">
+                    <td class="column label">{{ master|verbose_name:field.name }}</td>
+                    <td class="column first selected">{{ master|get_field_value:field }}</td>
+                    <td><a class="from-first" href="#"> &gt;&gt; </a></td>
+                    <td class="column result">
+                        <input type="hidden" value="1" name="map-{{ field.name }}">
+                        <span class="selection">{{ master|get_field_value:field }}</span>
+                    </td>
+                    <td><a class="from-second" href="#"> &lt;&lt; </a></td>
+                    <td class="column second">{{ other|get_field_value:field }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit" value="apply" name="apply">
+    </form>
+{% endblock %}
