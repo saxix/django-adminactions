@@ -18,12 +18,14 @@ from django.utils.encoding import force_unicode
 from django.utils.functional import curry
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _
 
+from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import GenericActionForm
+from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
-
 
 add = lambda arg, value: value + arg
 sub = lambda arg, value: value - arg
@@ -106,7 +108,7 @@ class MassUpdateForm(GenericActionForm):
                                    help_text="if checked use obj.save() instead of manager.update()")
     _unique_transaction = forms.BooleanField(label='Unique transaction',
                                              help_text="if checked create one transaction for the whole update. "
-                                                       "If some record canno be updated everything will be rolled-back")
+                                                       "If some record cannot be updated everything will be rolled-back")
     select_across = forms.BooleanField(label='', required=False, initial=0,
                                        widget=forms.HiddenInput({'class': 'select-across'}))
     action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
@@ -165,10 +167,21 @@ def mass_update(modeladmin, request, queryset):
     """
         mass update queryset
     """
+
     def not_required(field, **kwargs):
         """ force all fields as not required"""
         kwargs['required'] = False
         return field.formfield(**kwargs)
+
+    if not request.user.has_perm('adminactions.massupdate'):
+        messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
+
+    try:
+        adminaction_requested.send(sender=modeladmin.model, action='mass_update', request=request, queryset=queryset)
+    except ActionInterrupted as e:
+        messages.error(request, str(e))
+        return
 
     # Allows to specified a custom mass update Form in the ModelAdmin
     mass_update_form = getattr(modeladmin, 'mass_update_form', MassUpdateForm)
@@ -180,11 +193,16 @@ def mass_update(modeladmin, request, queryset):
     if 'apply' in request.POST:
         form = MForm(request.POST)
         if form.is_valid():
+            try:
+                adminaction_start.send(sender=modeladmin.model, action='mass_update', request=request, queryset=queryset)
+            except ActionInterrupted as e:
+                messages.error(request, str(e))
+                return HttpResponseRedirect(request.get_full_path())
 
             need_transaction = form.cleaned_data.get('_unique_transaction', False)
             validate = form.cleaned_data.get('_validate', False)
 
-            done = 0
+            updated = 0
             errors = 0
             if validate:
                 if need_transaction:
@@ -203,16 +221,27 @@ def mass_update(modeladmin, request, queryset):
                         errors += 1
                         if need_transaction:
                             transaction.rollback()
-                            done = 0
+                            updated = 0
                             break
                     else:
-                        done += 1
-                if done:
-                    messages.info(request, "Updated %s records" % done)
+                        updated += 1
+                if updated:
+                    messages.info(request, _("Updated %s records") % updated)
                 if errors:
                     messages.error(request, "%s records not updated due errors" % errors)
-                if need_transaction:
-                    transaction.commit()
+                try:
+                    adminaction_end.send(sender=modeladmin.model,
+                                         action='mass_update',
+                                         request=request,
+                                         queryset=queryset,
+                                         errors=errors,
+                                         updated=updated)
+                    if need_transaction:
+                        transaction.commit()
+                except ActionInterrupted:
+                    if need_transaction:
+                        transaction.rollback()
+
             else:
                 values = {}
                 for field_name, value in form.cleaned_data.items():
@@ -225,9 +254,9 @@ def mass_update(modeladmin, request, queryset):
                     elif field_name not in ['_selected_action', '_validate', 'select_across', 'action']:
                         values[field_name] = value
                 queryset.update(**values)
+
             return HttpResponseRedirect(request.get_full_path())
     else:
-
         initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                    'select_across': request.POST.get('select_across') == '1',
                    'action': 'mass_update',
@@ -266,11 +295,12 @@ def mass_update(modeladmin, request, queryset):
            'has_change_permission': True,
            'opts': modeladmin.model._meta,
            'app_label': modeladmin.model._meta.app_label,
-#           'action': 'mass_update',
-#           'select_across': request.POST.get('select_across')=='1',
+           #           'action': 'mass_update',
+           #           'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
 
     return render_to_response(tpl, RequestContext(request, ctx))
+
 
 mass_update.short_description = "Mass update"

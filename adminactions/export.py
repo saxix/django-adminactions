@@ -10,6 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
+from adminactions.exceptions import ActionInterrupted
+from adminactions.signals import adminaction_requested, adminaction_start
 from adminactions.templatetags.actions import get_field_value
 
 
@@ -62,6 +64,15 @@ def export_as_csv(modeladmin, request, queryset):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
 
+    try:
+        adminaction_requested.send(sender=modeladmin.model,
+                                   action='export_as_csv',
+                                   request=request,
+                                   queryset=queryset)
+    except ActionInterrupted as e:
+        messages.error(request, str(e))
+        return
+
     cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields]
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
@@ -79,6 +90,16 @@ def export_as_csv(modeladmin, request, queryset):
         form = CSVOptions(request.POST)
         form.fields['columns'].choices = cols
         if form.is_valid():
+            try:
+                adminaction_start.send(sender=modeladmin.model,
+                                       action='export_as_csv',
+                                       request=request,
+                                       queryset=queryset,
+                                       form=form)
+            except ActionInterrupted as e:
+                messages.error(request, str(e))
+                return
+
             filename = "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
             response = HttpResponse(mimetype='text/csv')
             response['Content-Disposition'] = 'attachment;filename="%s"' % filename
@@ -105,6 +126,11 @@ def export_as_csv(modeladmin, request, queryset):
             except Exception as e:
                 messages.error(request, "Error: (%s)" % str(e))
             else:
+                try:
+                    adminaction_start.send(sender=modeladmin.model, action='export_as_csv', request=request, queryset=queryset)
+                except ActionInterrupted as e:
+                    messages.error(request, str(e))
+                    return HttpResponseRedirect(request.get_full_path())
                 return response
     else:
         form = CSVOptions(initial=initial)
@@ -128,7 +154,9 @@ def export_as_csv(modeladmin, request, queryset):
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
 
+
 export_as_csv.short_description = "Export as CSV"
+
 
 class FlatCollector(object):
     def __init__(self, using):
@@ -138,6 +166,7 @@ class FlatCollector(object):
     def collect(self, objs):
         self.data = objs
         self.models = set([o.__class__ for o in self.data])
+
 
 class ForeignKeysCollector(object):
     def __init__(self, using):
@@ -171,12 +200,13 @@ class ForeignKeysCollector(object):
     def __str__(self):
         return mark_safe(self.data)
 
+
 class DependenciesCollector(Collector):
     def collect(self, objs, source=None, nullable=False, collect_related=True, source_attr=None, reverse_dependency=False):
         super(DependenciesCollector, self).collect(objs, source, nullable, collect_related, source_attr, reverse_dependency)
         alls = []
         for model, instances in self.data.items():
-            alls.extend( sorted(instances, key=attrgetter("pk")) )
+            alls.extend(sorted(instances, key=attrgetter("pk")))
         self.data = alls
 
     def delete(self):
@@ -253,6 +283,7 @@ def export_as_fixture(modeladmin, request, queryset):
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
     return render_to_response(tpl, RequestContext(request, ctx))
+
 
 export_as_fixture.short_description = "Export as fixture"
 

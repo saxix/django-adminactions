@@ -1,7 +1,9 @@
 Release 0.1
 ===========
 * Fixed :ghissue:`9`
-* Added permission checking before :ref:`mass_update` and :ref:`export_as_csv`
+* Added permission checking on :ref:`massupdate` and :ref:`export_as_csv`
+* New signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
+
 
 Release 0.0.4
 =============

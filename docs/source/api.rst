@@ -18,5 +18,5 @@ API
 .. automodule:: adminactions.templatetags.massupdate
     :members:
 
-.. automodule:: adminactions.templatetags.adminactions
+.. automodule:: adminactions.templatetags.actions
     :members:

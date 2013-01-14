@@ -1,13 +1,13 @@
 from django.db import models
 
 
-def get_field_from_path(Model, field_path):
+def get_field_by_path(Model, field_path):
     """
     get a Model and a path to a attribute, return the field
 
 
-    >>> a = get_field_from_path(Payslip, 'contract.employee.health_ins_type')
-    >>> print a
+    >> a = get_field_from_path(Payslip, 'contract.employee.health_ins_type')
+    >> print a
     Health Insurance Type
     """
     parts = field_path.split('.')
@@ -16,13 +16,12 @@ def get_field_from_path(Model, field_path):
         field_object, model, direct, m2m = Model._meta.get_field_by_name(target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
-                return get_field_from_path(field_object.rel.to, '.'.join(parts[1:]))
+                return get_field_by_path(field_object.rel.to, '.'.join(parts[1:]))
             else:
                 return field_object
         else:
             return field_object
     return None
-
 
 
 def flatten(x):
