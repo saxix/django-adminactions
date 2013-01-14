@@ -1,11 +1,12 @@
-Release 0.0.5 (in development)
-==============================
-* NEW :ref:`merge`
+Release 0.1
+===========
+* Fixed :ghissue:`9`
+* Added permission checking before :ref:`mass_update` and :ref:`export_as_csv`
 
 Release 0.0.4
-==============================
+=============
 
-* NEW added ``add_foreign_keys`` parameter to :ref:`export_as_fixtures` and :ref:`export_delete_tree`
+* NEW added ``add_foreign_keys`` parameter to :ref:`export_as_fixture` and :ref:`export_delete_tree`
 * NEW :ref:`export_delete_tree`
 * renamed export_as_json as export_as_fixtures
     - added foreign_keys dumps
