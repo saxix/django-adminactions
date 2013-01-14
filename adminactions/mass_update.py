@@ -18,12 +18,12 @@ from django.utils.encoding import force_unicode
 from django.utils.functional import curry
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
 
 from adminactions.forms import GenericActionForm
 
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
+
 
 add = lambda arg, value: value + arg
 sub = lambda arg, value: value - arg
@@ -44,16 +44,16 @@ class OperationManager(object):
     Operate like a dictionary where the key are django.form.Field classes
     and value are tuple of function, param_allowed, enabler, description
 
-    function: callable that can accept one or two arguments ( see. :ref:`transform_operations`)
-
+    function: callable that can accept one or two arguments
+                :param arg is the value set in the MassUpdateForm
+                :param value is the existing field's value of the record
+                :return new value to store
     param_allowed: boolean that enable the MassUpdateForm argument:
-
     enabler: boolean or callable that receive the specific Model field as argument
             and should returns True/False to indicate the `function` can be used with this
             specific field. i.e. disable 'set null` if the field cannot be null, or disable `set` if
             the field is unique
     description: string description of the operator
-
     """
 
     COMMON = [('set', (None, True, disable_if_unique, "")),
@@ -129,7 +129,7 @@ class MassUpdateForm(GenericActionForm):
             try:
                 if isinstance(field, ff.FileField):
                     initial = self.initial.get(name, field.initial)
-                    field.clean(value, initial)
+                    value = field.clean(raw_value, initial)
                 else:
                     enabler = 'chk_id_%s' % name
                     function = self.data.get('func_id_%s' % name, False)
@@ -165,15 +165,11 @@ def mass_update(modeladmin, request, queryset):
     """
         mass update queryset
     """
-
     def not_required(field, **kwargs):
         """ force all fields as not required"""
         kwargs['required'] = False
         return field.formfield(**kwargs)
 
-    if not request.user.has_perm('adminactions.massupdate'):
-        messages.error(request, _('Sorry you do not have rights to execute this action'))
-        return
     # Allows to specified a custom mass update Form in the ModelAdmin
     mass_update_form = getattr(modeladmin, 'mass_update_form', MassUpdateForm)
 
@@ -184,6 +180,7 @@ def mass_update(modeladmin, request, queryset):
     if 'apply' in request.POST:
         form = MForm(request.POST)
         if form.is_valid():
+
             need_transaction = form.cleaned_data.get('_unique_transaction', False)
             validate = form.cleaned_data.get('_validate', False)
 
@@ -230,6 +227,7 @@ def mass_update(modeladmin, request, queryset):
                 queryset.update(**values)
             return HttpResponseRedirect(request.get_full_path())
     else:
+
         initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                    'select_across': request.POST.get('select_across') == '1',
                    'action': 'mass_update',
@@ -268,12 +266,11 @@ def mass_update(modeladmin, request, queryset):
            'has_change_permission': True,
            'opts': modeladmin.model._meta,
            'app_label': modeladmin.model._meta.app_label,
-           #           'action': 'mass_update',
-           #           'select_across': request.POST.get('select_across')=='1',
+#           'action': 'mass_update',
+#           'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
 
     return render_to_response(tpl, RequestContext(request, ctx))
-
 
 mass_update.short_description = "Mass update"

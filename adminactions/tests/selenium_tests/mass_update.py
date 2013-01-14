@@ -1,6 +1,4 @@
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test.client import RequestFactory
 from .common import FireFoxLiveTest, ChromeDriverMixin
 from selenium.webdriver.support.ui import Select
 #from reg import site1 as site

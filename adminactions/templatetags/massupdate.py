@@ -10,11 +10,12 @@ from adminactions.mass_update import OPERATIONS
 register = Library()
 
 
+
 @register.simple_tag
 def fields_values(d, k):
     """
     >>> data = {'name1': ['value1.1', 'value1.2'], 'name2': ['value2.1', 'value2.2'], }
-    >>> field_values(data, 'name1')
+    >>> fields_values(data, 'name1')
     value1.1, value1.2
     """
     values = d.get(k, [])
@@ -80,3 +81,6 @@ def field_function(model, form_field):
         options_attrs[label] = {'class': classes[param], 'label': label}
         choices.append((label, label))
     return SelectOptionsAttribute(attrs, choices, options_attrs).render("func_id_%s" % form_field.name, "")
+
+
+

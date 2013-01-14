@@ -82,10 +82,11 @@ def graph_queryset(modeladmin, request, queryset):
            'action': 'graph_queryset',
            'opts': modeladmin.model._meta,
            'app_label': queryset.model._meta.app_label,
-
+           'media': media,
            'as_json': json.dumps(table),
            'graph_type': graph_type,
-           }
+    }
     return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
+
 
 graph_queryset.short_description = "Graph selected records"

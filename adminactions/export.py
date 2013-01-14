@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
+from adminactions.templatetags.actions import get_field_value
 
 
 try:
