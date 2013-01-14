@@ -10,6 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
+
+
 try:
     import unicodecsv as csv
 except ImportError:
@@ -55,6 +57,10 @@ def export_as_csv(modeladmin, request, queryset):
     """
         export a queryset to csv file
     """
+    if not request.user.has_perm('adminactions.export'):
+        messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
+
     cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields]
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
@@ -86,10 +92,7 @@ def export_as_csv(modeladmin, request, queryset):
                 for obj in queryset:
                     row = []
                     for fieldname in form.cleaned_data['columns']:
-                        if hasattr(obj, 'get_%s_display' % fieldname):
-                            value = getattr(obj, 'get_%s_display' % fieldname)()
-                        else:
-                            value = getattr(obj, fieldname)
+                        value = get_field_value(obj, fieldname)
                         if isinstance(value, datetime.datetime):
                             value = dateformat.format(value, form.cleaned_data['datetime_format'])
                         elif isinstance(value, datetime.date):
@@ -214,6 +217,9 @@ def export_as_fixture(modeladmin, request, queryset):
                'action': request.POST.get('action'),
                'serializer': 'json',
                'indent': 4}
+    if not request.user.has_perm('adminactions.export'):
+        messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
 
     if 'apply' in request.POST:
         form = FixtureOptions(request.POST)
@@ -255,6 +261,10 @@ def export_delete_tree(modeladmin, request, queryset):
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted
     """
+    if not request.user.has_perm('adminactions.export'):
+        messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
+
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
                'action': request.POST.get('action'),

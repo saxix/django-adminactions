@@ -9,10 +9,7 @@ if not django.contrib.auth.models.User in admin.site._registry:
 if not django.contrib.auth.models.Permission in admin.site._registry:
     admin.site.register(django.contrib.auth.models.Permission)
 
-admin.site.add_action(actions.mass_update)
-admin.site.add_action(actions.graph_queryset)
-admin.site.add_action(actions.export_as_csv)
-admin.site.add_action(actions.export_as_fixture)
+actions.add_to_site(admin.site)
 
 urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),

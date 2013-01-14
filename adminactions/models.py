@@ -7,7 +7,7 @@ def create_extra_permission(sender, **kwargs):
     from django.contrib.contenttypes.models import ContentType
 
     for model in get_models(sender):
-        for action in ('export', 'massupdate'):
+        for action in ('adminactions.export', 'adminactions.massupdate'):
             opts = model._meta
             codename = _get_permission_codename(action, opts)
             label = u'Can %s %s' % (action, opts.verbose_name_raw)
