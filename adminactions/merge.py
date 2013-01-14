@@ -72,7 +72,7 @@ def merge(modeladmin, request, queryset):
             for f in queryset.model._meta.fields:
                 mapping[f.name] = request.POST.get("map-%s" % f.name)
             raise Exception(mapping)
-            merge_record(master, other, mapping)
+#            merge_record(master, other, mapping)
 
             return HttpResponse(request.POST)
     else:

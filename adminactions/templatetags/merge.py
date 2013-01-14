@@ -1,39 +1,11 @@
 from django.db import models
-from django.db.models import Manager, Model, Field
+from django.db.models import Manager, Model
 from django.db.models.query import QuerySet
-from django.forms import widgets
-from django.forms.util import flatatt
 from django.template import Library
-from django.utils.encoding import force_unicode
-from django.utils.html import escape, conditional_escape
-from django.utils.safestring import mark_safe
-from adminactions.mass_update import OPERATIONS
+from adminactions.utils import get_field_by_path
 
 
 register = Library()
-
-
-def get_field_by_path(Model, field_path):
-    """
-    get a Model and a path to a attribute, return the field
-
-
-    >>> a = _get_field(Payslip, 'contract.employee.health_ins_type')
-    >>> print a
-    Health Insurance Type
-    """
-    parts = field_path.split('.')
-    target = parts[0]
-    if target in Model._meta.get_all_field_names():
-        field_object, model, direct, m2m = Model._meta.get_field_by_name(target)
-        if isinstance(field_object, models.fields.related.ForeignKey):
-            if parts[1:]:
-                return get_field_by_path(field_object.rel.to, '.'.join(parts[1:]))
-            else:
-                return field_object
-        else:
-            return field_object
-    return None
 
 
 @register.filter()
@@ -45,6 +17,8 @@ def get_field_value(obj, field, usedisplay=True):
         fieldname = field
     elif isinstance(field, models.Field):
         fieldname = field.name
+    else:
+        raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance ')
 
     if hasattr(obj, 'get_%s_display' % fieldname) and usedisplay:
         value = getattr(obj, 'get_%s_display' % fieldname)()
