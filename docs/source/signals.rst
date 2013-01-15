@@ -5,7 +5,7 @@
 Signals
 =======
 
-|app| provide the following signals:
+|app| provides the following signals:
 
     * :ref:`adminaction_requested`
     * :ref:`adminaction_start`
@@ -41,8 +41,8 @@ Example::
 ``adminaction_start``
 =====================
 
-Sent when the action's form is validated ( POST request), **just before** the execution of the action
-The handler can raise a :ref:`actioninterrupted` to avoid the action's execution. The handler can rely on the following parameter:
+Sent after the form has been validated (POST request), **just before** the execution of the action
+The handler can raise a :ref:`actioninterrupted` to avoid the stop execution. The handler can rely on the following parameter:
 
     * sender: :class:`django:django.db.models.Model`
     * action: string. name of the action

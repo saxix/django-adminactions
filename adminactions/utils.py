@@ -1,19 +1,32 @@
 from django.db import models
 
 
-def get_field_by_path(Model, field_path):
+def get_field_by_path(model, field_path):
     """
-    get a Model and a path to a attribute, return the field
+    get a Model class or instance and a path to a attribute, returns the field object
+
+    :param model: :class:`django.db.models.Model`
+    :param field_path: string path to the field
+    :return: :class:`django.db.models.Field`
 
 
-    >> a = get_field_from_path(Payslip, 'contract.employee.health_ins_type')
-    >> print a
-    Health Insurance Type
+    >>> from django.contrib.auth.models import User, Permission
+
+    >>> p = Permission(name='perm')
+    >>> f = get_field_by_path(Permission, 'content_type')
+    >>> print f
+    <django.db.models.fields.related.ForeignKey: content_type>
+
+    >>> p = Permission(name='perm')
+    >>> f = get_field_by_path(p, 'content_type.app_label')
+    >>> print f
+    <django.db.models.fields.CharField: app_label>
+
     """
     parts = field_path.split('.')
     target = parts[0]
-    if target in Model._meta.get_all_field_names():
-        field_object, model, direct, m2m = Model._meta.get_field_by_name(target)
+    if target in model._meta.get_all_field_names():
+        field_object, model, direct, m2m = model._meta.get_field_by_name(target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
                 return get_field_by_path(field_object.rel.to, '.'.join(parts[1:]))
@@ -24,12 +37,16 @@ def get_field_by_path(Model, field_path):
     return None
 
 
-def flatten(x):
-    """flatten(sequence) -> list
+def flatten(iterable):
+    """
+    flatten(sequence) -> list
 
     Returns a single, flat list which contains all elements retrieved
     from the sequence and all recursively contained sub-sequences
     (iterables).
+
+    :param sequence: any object that implements iterable protocol (see: :ref:`typeiter`)
+    :return: list
 
     Examples:
 
@@ -40,9 +57,8 @@ def flatten(x):
     >>> flatten([[[1,2,3], (42,None)], [4,5], [6], 7, (8,9,10)])
     [1, 2, 3, 42, None, 4, 5, 6, 7, 8, 9, 10]"""
 
-    result = []
-    for el in x:
-        #if isinstance(el, (list, tuple)):
+    result = list()
+    for el in iterable:
         if hasattr(el, "__iter__") and not isinstance(el, basestring):
             result.extend(flatten(el))
         else:

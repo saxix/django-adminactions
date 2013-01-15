@@ -5,6 +5,8 @@ import os
 import re
 
 from docutils import nodes, transforms
+
+
 try:
     import json
 except ImportError:
@@ -26,38 +28,39 @@ from sphinx.util.compat import Directive
 simple_option_desc_re = re.compile(
     r'([-_a-zA-Z0-9]+)(\s*.*?)(?=,\s+(?:/|-|--)|$)')
 
+
 def setup(app):
     app.add_crossref_type(
-        directivename = "setting",
-        rolename      = "setting",
-        indextemplate = "pair: %s; setting",
+        directivename="setting",
+        rolename="setting",
+        indextemplate="pair: %s; setting",
     )
     app.add_crossref_type(
-        directivename = "templatetag",
-        rolename      = "ttag",
-        indextemplate = "pair: %s; template tag"
+        directivename="templatetag",
+        rolename="ttag",
+        indextemplate="pair: %s; template tag"
     )
     app.add_crossref_type(
-        directivename = "templatefilter",
-        rolename      = "tfilter",
-        indextemplate = "pair: %s; template filter"
+        directivename="templatefilter",
+        rolename="tfilter",
+        indextemplate="pair: %s; template filter"
     )
     app.add_crossref_type(
-        directivename = "fieldlookup",
-        rolename      = "lookup",
-        indextemplate = "pair: %s; field lookup type",
+        directivename="fieldlookup",
+        rolename="lookup",
+        indextemplate="pair: %s; field lookup type",
     )
     app.add_description_unit(
-        directivename = "django-admin",
-        rolename      = "djadmin",
-        indextemplate = "pair: %s; django-admin command",
-        parse_node    = parse_django_admin_node,
+        directivename="django-admin",
+        rolename="djadmin",
+        indextemplate="pair: %s; django-admin command",
+        parse_node=parse_django_admin_node,
     )
     app.add_description_unit(
-        directivename = "django-admin-option",
-        rolename      = "djadminopt",
-        indextemplate = "pair: %s; django-admin command-line option",
-        parse_node    = parse_django_adminopt_node,
+        directivename="django-admin-option",
+        rolename="djadminopt",
+        indextemplate="pair: %s; django-admin command-line option",
+        parse_node=parse_django_adminopt_node,
     )
     app.add_config_value('django_next_version', '0.0', True)
     app.add_directive('versionadded', VersionDirective)
@@ -90,7 +93,7 @@ class VersionDirective(Directive):
             node['version'] = "Development version"
         node['type'] = self.name
         if len(self.arguments) == 2:
-            inodes, messages = self.state.inline_text(self.arguments[1], self.lineno+1)
+            inodes, messages = self.state.inline_text(self.arguments[1], self.lineno + 1)
             node.extend(inodes)
             if self.content:
                 self.state.nested_parse(self.content, self.content_offset, node)
@@ -119,6 +122,7 @@ class SuppressBlockquotes(transforms.Transform):
         for node in self.document.traverse(nodes.block_quote):
             if len(node.children) == 1 and isinstance(node.children[0], self.suppress_blockquote_child_nodes):
                 node.replace_self(node.children[0])
+
 
 class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
     """
@@ -158,9 +162,9 @@ class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
     # that work.
     #
     version_text = {
-        'deprecated':       'Deprecated in Django %s',
-        'versionchanged':   'Changed in Django %s',
-        'versionadded':     'New in Django %s',
+        'deprecated': 'Deprecated in Django %s',
+        'versionchanged': 'Changed in Django %s',
+        'versionadded': 'New in Django %s',
     }
 
     def visit_versionmodified(self, node):
@@ -184,6 +188,7 @@ class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
         SmartyPantsHTMLTranslator.visit_section(self, node)
         node['ids'] = old_ids
 
+
 def parse_django_admin_node(env, sig, signode):
     command = sig.split(' ')[0]
     env._django_curr_admin_command = command
@@ -191,9 +196,11 @@ def parse_django_admin_node(env, sig, signode):
     signode += addnodes.desc_name(title, title)
     return sig
 
+
 def parse_django_adminopt_node(env, sig, signode):
     """A copy of sphinx.directives.CmdoptionDesc.parse_signature()"""
     from sphinx.domains.std import option_desc_re
+
     count = 0
     firstname = ''
     for m in option_desc_re.finditer(sig):
@@ -236,13 +243,13 @@ class DjangoStandaloneHTMLBuilder(StandaloneHTMLBuilder):
         xrefs = self.env.domaindata["std"]["objects"]
         templatebuiltins = {
             "ttags": [n for ((t, n), (l, a)) in xrefs.items()
-                        if t == "templatetag" and l == "ref/templates/builtins"],
+                      if t == "templatetag" and l == "ref/templates/builtins"],
             "tfilters": [n for ((t, n), (l, a)) in xrefs.items()
-                        if t == "templatefilter" and l == "ref/templates/builtins"],
+                         if t == "templatefilter" and l == "ref/templates/builtins"],
         }
         outfilename = os.path.join(self.outdir, "templatebuiltins.js")
         f = open(outfilename, 'wb')
         f.write('var django_template_builtins = ')
         json.dump(templatebuiltins, f)
         f.write(';\n')
-        f.close();
+        f.close()

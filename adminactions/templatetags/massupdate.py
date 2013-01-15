@@ -10,7 +10,6 @@ from adminactions.mass_update import OPERATIONS
 register = Library()
 
 
-
 @register.simple_tag
 def fields_values(d, k):
     """

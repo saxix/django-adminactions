@@ -193,7 +193,6 @@ see `export_as_fixture`_ for details
 
 ====================   =====================================================================================
 **use natural key**    If true use natural keys.
-                       (see :ref:`Natural Keys <deserialization-of-natural-keys>`)
 
 **dump on screen**     Dump on screen instead to show ``Save as`` popup
 

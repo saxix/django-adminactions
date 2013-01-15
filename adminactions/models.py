@@ -1,6 +1,7 @@
 from django.contrib.auth.management import _get_permission_codename
 from django.db.models import signals
 
+
 def create_extra_permission(sender, **kwargs):
     from django.contrib.auth.models import Permission
     from django.db.models.loading import get_models
