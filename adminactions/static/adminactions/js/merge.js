@@ -1,6 +1,6 @@
 (function ($) {
     $(function () {
-        var select = function (from, to, val) {
+        var select = function (from, to, $val) {
             return function () {
                 var $row = $(this).parent().parent();
                 var $sel = $row.find(from);
@@ -9,31 +9,52 @@
                 $sel.addClass("selected");
                 $other.removeClass("selected");
 
-                $row.find("input").val(val);
+
+                $row.find("input").val($val.val());
+
                 $row.find(".selection").text(value);
             }
         }
-        $('.from-first').click(select("td.first", "td.second", 1));
-        $('.from-second').click(select("td.second", "td.first", 2));
+        $('.origin').click(select("td.origin", "td.other", $('input[name="master-pk"]')));
+        $('.other').click(select("td.other", "td.origin", $('input[name="other-pk"]')));
 
-//        $('.from-first').click(function () {
-//                var $row = $(this).parent().parent();
-//                var $sel = $row.find("td.first");
-//                var $other = $row.find("td.second");
-//                var value = $sel.text();
-//                $sel.addClass("selected");
-//                $other.removeClass("selected");
-//
-//                $row.find("input").val(1);
-//                $row.find(".selection").text(value);
-//        });
+        $('a.swap').click(function(){
+            var left = new Array();
+            var right = new Array();
 
-//        $('.from-second').click(function () {
-//            var $row = $(this).parent().parent();
-//            var value = $row.find("td.second").text();
-//            $row.find("input").val(2);
-//            $row.find(".selection").text(value);
-//        });
+            $('.column.origin').each(function(){
+                $(this).removeClass("selected");
+                left.push($(this).text());
+            });
 
+            $('.column.other').each(function(){
+                $(this).removeClass("selected");
+                right.push($(this).text());
+            });
+
+            left.push($('input[name="master-pk"]').val());
+            right.push($('input[name="other-pk"]').val());
+            $('input[name="master-pk"]').val(right.pop());
+            $('input[name="other-pk"]').val(left.pop());
+
+            $($('.column.origin').get().reverse()).each(function(){
+                $(this).text(right.pop());
+            });
+            $($('.column.other').get().reverse()).each(function(){
+                $(this).text(left.pop());
+            });
+
+            $('.mergetable tr').each(function(){
+                var value = $(this).find('input.result').val();
+                if (value ==  $('input[name="master-pk"]').val()){
+                    $(this).find('td.origin').addClass("selected");
+                }
+                if (value ==  $('input[name="other-pk"]').val()){
+                    $(this).find('td.other').addClass("selected");
+                }
+
+            });
+
+        });
     });
 })(django.jQuery);

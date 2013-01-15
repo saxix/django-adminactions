@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import json
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django import forms
-from django.forms.models import modelform_factory
+from django.forms.models import modelform_factory, model_to_dict
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.safestring import mark_safe
@@ -92,7 +93,7 @@ def merge(modeladmin, request, queryset):
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media),
            'opts': queryset.model._meta,
-           'fields': queryset.model._meta.fields,
+           'fields': [ f for f in queryset.model._meta.fields if not f.primary_key],
            'master': master,
            'other': other}
     return render_to_response(tpl, RequestContext(request, ctx))

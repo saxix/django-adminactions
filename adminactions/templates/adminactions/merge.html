@@ -1,5 +1,5 @@
 {% extends "admin/change_form.html" %}
-{% load i18n merge static %}
+{% load i18n actions static %}
 {% block breadcrumbs %}{% if not is_popup %}
     <div class="breadcrumbs">
         <a href="../../">{% trans "Home" %}</a> &rsaquo;
@@ -32,23 +32,26 @@
         <table class="mergetable">
             <tr class="header">
                 <th>Field</th>
-                <th>First</th>
-                <th></th>
+                <th>Master (This will be preserved)
+                    <input type="text" value="{{ master.pk }}" name="master-pk">
+                </th>
+                <th><a class="swap" href="#">swap</a></th>
                 <th>Result</th>
                 <th></th>
-                <th>Second</th>
+                <th>Other (This will be removed)
+                    <input type="text" value="{{ other.pk }}" name="other-pk"></th>
             </tr>
             {% for field in fields %}
                 <tr class="{% cycle "row1" "row2" %}">
                     <td class="column label">{{ master|verbose_name:field.name }}</td>
-                    <td class="column first selected">{{ master|get_field_value:field }}</td>
-                    <td><a class="from-first" href="#"> &gt;&gt; </a></td>
+                    <td class="column origin selected">{{ master|get_field_value:field }}</td>
+                    <td><a class="origin" href="#"> &gt;&gt; </a></td>
                     <td class="column result">
-                        <input type="hidden" value="1" name="map-{{ field.name }}">
+                        <input class="result" type="text" value="{{ master.pk }}" name="map-{{ field.name }}">
                         <span class="selection">{{ master|get_field_value:field }}</span>
                     </td>
-                    <td><a class="from-second" href="#"> &lt;&lt; </a></td>
-                    <td class="column second">{{ other|get_field_value:field }}</td>
+                    <td><a class="other" href="#"> &lt;&lt; </a></td>
+                    <td class="column other">{{ other|get_field_value:field }}</td>
                 </tr>
             {% endfor %}
         </table>
