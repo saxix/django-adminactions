@@ -16,7 +16,7 @@ Signals
 ``adminaction_requested``
 =========================
 
-Sent when the action is requestest (ie GET request).
+Sent when the action is requestest (ie click 'Go' in the admin changelist view).
 The handler can raise a :ref:`actioninterrupted` to interrupt
 the action's execution. The hadler can rely on the following parameter:
 
@@ -33,7 +33,7 @@ Example::
         if action == 'mass_update' and queryset.filter(locked==True).exists():
             raise ActionInterrupted('Queryset cannot contains locked records')
 
-    adminaction_requested.connect(sender=MyModel, action='mass_update`)
+    adminaction_requested.connect(myhandler, sender=MyModel, action='mass_update`)
 
 
 .. _adminaction_start:
@@ -41,7 +41,7 @@ Example::
 ``adminaction_start``
 =====================
 
-Sent after the form has been validated (POST request), **just before** the execution of the action
+Sent after the form has been validated (ie click 'Apply' in the action Form), **just before** the execution of the action
 The handler can raise a :ref:`actioninterrupted` to avoid the stop execution. The handler can rely on the following parameter:
 
     * sender: :class:`django:django.db.models.Model`
@@ -59,7 +59,7 @@ Example::
             if not request.user.is_administrator:
                 raise ActionInterrupted('Only administrors can export `money` field')
 
-    adminaction_start.connect(sender=MyModel, action='export`)
+    adminaction_start.connect(myhandler, sender=MyModel, action='export`)
 
 
 .. _adminaction_end:
@@ -68,14 +68,9 @@ Example::
 ===================
 
 Sent **after** the successfully execution of the action.
-The handler can raise a :ref:`actioninterrupted` to block the response (:ref:`export_as_csv`)
-or rollback the transaction (:ref:`massupdate`).
 The handler can rely on the following parameter:
-
 
     * sender: :class:`django:django.db.models.Model`
     * action: string. name of the action
     * request: :class:`django:django.core.httpd.Httprequest`
     * queryset: :class:`django:django.db.models.query.Queryset`
-    * errors:
-    * updated:

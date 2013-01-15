@@ -11,7 +11,7 @@ from django import forms
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from adminactions.exceptions import ActionInterrupted
-from adminactions.signals import adminaction_requested, adminaction_start
+from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 from adminactions.templatetags.actions import get_field_value
 
 
@@ -126,11 +126,7 @@ def export_as_csv(modeladmin, request, queryset):
             except Exception as e:
                 messages.error(request, "Error: (%s)" % str(e))
             else:
-                try:
-                    adminaction_start.send(sender=modeladmin.model, action='export_as_csv', request=request, queryset=queryset)
-                except ActionInterrupted as e:
-                    messages.error(request, str(e))
-                    return HttpResponseRedirect(request.get_full_path())
+                adminaction_end.send(sender=modeladmin.model, action='export_as_csv', request=request, queryset=queryset)
                 return response
     else:
         form = CSVOptions(initial=initial)
@@ -140,7 +136,6 @@ def export_as_csv(modeladmin, request, queryset):
     media = modeladmin.media + adminForm.media
     tpl = 'adminactions/export_csv.html'
     ctx = {'adminform': adminForm,
-           'form': form,
            'change': True,
            'title': _('Export to CSV'),
            'is_popup': False,
@@ -248,17 +243,36 @@ def export_as_fixture(modeladmin, request, queryset):
                'action': request.POST.get('action'),
                'serializer': 'json',
                'indent': 4}
-    if not request.user.has_perm('adminactions.export'):
+    if not request.user.has_perm('adminactions_export'):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
+    try:
+        adminaction_requested.send(sender=modeladmin.model,
+                                   action='export_as_fixture',
+                                   request=request,
+                                   queryset=queryset)
+    except ActionInterrupted as e:
+        messages.error(request, str(e))
         return
 
     if 'apply' in request.POST:
         form = FixtureOptions(request.POST)
         if form.is_valid():
             try:
+                adminaction_start.send(sender=modeladmin.model,
+                                       action='export_as_fixture',
+                                       request=request,
+                                       queryset=queryset,
+                                       form=form)
+            except ActionInterrupted as e:
+                messages.error(request, str(e))
+                return
+            try:
                 _collector = ForeignKeysCollector if form.cleaned_data.get('add_foreign_keys') else FlatCollector
                 c = _collector(None)
                 c.collect(queryset)
+                adminaction_end.send(sender=modeladmin.model, action='export_as_fixture', request=request,
+                                     queryset=queryset)
 
                 return _dump_qs(form, queryset, c.data)
             except AttributeError as e:
@@ -293,8 +307,16 @@ def export_delete_tree(modeladmin, request, queryset):
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted
     """
-    if not request.user.has_perm('adminactions.export'):
+    if not request.user.has_perm('adminactions_export'):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
+    try:
+        adminaction_requested.send(sender=modeladmin.model,
+                                   action='export_delete_tree',
+                                   request=request,
+                                   queryset=queryset)
+    except ActionInterrupted as e:
+        messages.error(request, str(e))
         return
 
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
@@ -307,6 +329,15 @@ def export_delete_tree(modeladmin, request, queryset):
         form = FixtureOptions(request.POST)
         if form.is_valid():
             try:
+                adminaction_start.send(sender=modeladmin.model,
+                                       action='export_delete_tree',
+                                       request=request,
+                                       queryset=queryset,
+                                       form=form)
+            except ActionInterrupted as e:
+                messages.error(request, str(e))
+                return
+            try:
                 collect_related = form.cleaned_data.get('add_foreign_keys')
                 using = router.db_for_write(modeladmin.model)
 
@@ -315,7 +346,8 @@ def export_delete_tree(modeladmin, request, queryset):
                 data = []
                 for model, instances in c.data.items():
                     data.extend(instances)
-
+                adminaction_end.send(sender=modeladmin.model, action='export_delete_tree', request=request,
+                                     queryset=queryset)
                 return _dump_qs(form, queryset, data)
             except AttributeError as e:
                 messages.error(request, str(e))

@@ -1,6 +1,6 @@
 from django.conf import settings
 from .mass_update import *
-from .exports import ExportAsCsvTest
+from .exports import ExportAsCsvTest, ExportAsFixtureTest, ExportDeleteTreeTest
 from .merge import MergeTest
 
 if getattr(settings, 'ENABLE_SELENIUM', True):

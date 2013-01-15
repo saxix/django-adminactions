@@ -2,30 +2,135 @@ import StringIO
 import csv
 from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
+from django.forms import Form
 from adminactions.tests.common import BaseTestCase
+from adminactions.exceptions import ActionInterrupted
+from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 
 
-__all__ = ['MassUpdateTest', ]
+__all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest']
 
 
-class ExportAsCsvTest(BaseTestCase):
+class CheckSignalsMixin(object):
+    def test_signal_requested(self):
+        # test if adminaction_requested Signal can stop the action
+
+        MESSAGE = 'Action Interrupted Test'
+
+        def myhandler(sender, action, request, queryset, **kwargs):
+            myhandler.invoked = True
+            self.assertEqual(action, self.action_name)
+            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
+            raise ActionInterrupted(MESSAGE)
+
+        try:
+            adminaction_requested.connect(myhandler, sender=Permission)
+            response = self._run_action(code2=302)
+            self.assertTrue(myhandler.invoked)
+            self.assertIn(MESSAGE, response.cookies['messages'].value)
+        finally:
+            adminaction_requested.disconnect(myhandler, sender=Permission)
+
+    def test_signal_start(self):
+        # test if adminaction_start Signal can stop the action
+
+        MESSAGE = 'Action Interrupted Test'
+        SELECTION = [2, 3, 4]
+
+        def myhandler(sender, action, request, queryset, form, **kwargs):
+            myhandler.invoked = True
+            self.assertEqual(action, self.action_name)
+            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), SELECTION)
+            self.assertTrue(isinstance(form, Form))
+            raise ActionInterrupted(MESSAGE)
+
+        try:
+            adminaction_start.connect(myhandler, sender=Permission)
+            response = self._run_action(code3=302)
+            self.assertTrue(myhandler.invoked)
+            self.assertIn(MESSAGE, response.cookies['messages'].value)
+        finally:
+            adminaction_start.disconnect(myhandler, sender=Permission)
+
+    def test_signal_end(self):
+        # test if adminaction_start Signal can stop the action
+
+        SELECTION = [2, 3, 4]
+
+        def myhandler(sender, action, request, queryset, **kwargs):
+            myhandler.invoked = True
+            self.assertEqual(action, self.action_name)
+            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), SELECTION)
+
+        try:
+            adminaction_end.connect(myhandler, sender=Permission)
+            response = self._run_action(code3=200)
+            self.assertTrue(myhandler.invoked)
+        finally:
+            adminaction_end.disconnect(myhandler, sender=Permission)
+
+
+class ExecuteActionMixin(object):
+    def _run_action(self, code1=200, code2=200, code3=200, **kwargs):
+        kwargs.setdefault('select_across', 0)
+        kwargs.setdefault('_selected_action', self.selected_rows)
+        kwargs.setdefault('index', 0)
+        kwargs.setdefault('action', self.action_name)
+
+        url = kwargs.pop('url', self._url)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, code1)
+        response = self.client.post(url, kwargs)
+        self.assertEqual(response.status_code, code2)
+        #post the form
+        if code2 == 200:
+            data = response.context['adminform'].form.initial
+            data.update({'apply': 'Export'})
+            response = self.client.post(url, data)
+            self.assertEqual(response.status_code, code3)
+        return response
+
+    def test_happy_path(self):
+        url = reverse('admin:auth_user_changelist')
+
+        def myhandler(sender, action, request, queryset, **kwargs):
+            self.assertEqual(action, self.action_name)
+            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
+
+        try:
+            adminaction_start.connect(myhandler, sender=User)
+            adminaction_end.connect(myhandler, sender=User)
+            adminaction_requested.connect(myhandler, sender=User)
+            response = self._run_action(url=url, header=1)
+            self.assertIn('Content-Disposition', response)
+            self.assertIn('attachment;filename=', response['Content-Disposition'])
+        finally:
+            adminaction_start.disconnect(myhandler, sender=User)
+            adminaction_end.disconnect(myhandler, sender=User)
+            adminaction_requested.disconnect(myhandler, sender=User)
+
+
+class ExportAsCsvTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
     urls = "adminactions.tests.urls"
+    action_name = 'export_as_csv'
+    selected_rows = [2, 3, 4]
 
     def setUp(self):
         super(ExportAsCsvTest, self).setUp()
         self._url = reverse('admin:auth_permission_changelist')
 
+    def test_permission(self):
+        # test if right permission is checked
+        self.login('user_0', '123') # normal user
+        self.add_permission('auth.change_permission')
+        response = self._run_action(code2=302)
+        self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
+
     def test_export_across(self):
-        response = self.client.get(self._url)
+        response = self._run_action(select_across=1)
+        self.assertEqual(response['Content-Disposition'], 'attachment;filename="permissions.csv"')
         self.assertEqual(response.status_code, 200)
-        response = self.client.post(self._url, {'action': 'export_as_csv',
-                                                'index': 0,
-                                                'select_across': 1,
-                                                '_selected_action': [2, 3, 4]})
-        self.assertEqual(response.status_code, 200)
-        data = response.context['form'].initial
-        data.update({'apply': 'Export'})
-        response = self.client.post(self._url, data)
 
         io = StringIO.StringIO(response.content)
         csv_reader = csv.reader(io)
@@ -36,14 +141,7 @@ class ExportAsCsvTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_selected_row(self):
-        response = self.client.post(self._url, {'action': 'export_as_csv',
-                                                'index': 0,
-                                                'select_across': 0,
-                                                '_selected_action': [2, 3, 4]})
-        data = response.context['form'].initial
-        data.update({'apply': 'Export'})
-        response = self.client.post(self._url, data)
-
+        response = self._run_action()
         io = StringIO.StringIO(response.content)
         csv_reader = csv.reader(io)
         rows = 0
@@ -51,4 +149,39 @@ class ExportAsCsvTest(BaseTestCase):
             rows += 1
         self.assertEqual(rows, 3)
         self.assertEqual(response.status_code, 200)
+
+
+class ExportAsFixtureTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
+    urls = "adminactions.tests.urls"
+    action_name = 'export_as_fixture'
+    selected_rows = [2, 3, 4]
+
+    def setUp(self):
+        super(ExportAsFixtureTest, self).setUp()
+        self._url = reverse('admin:auth_permission_changelist')
+
+    def test_permission(self):
+        # test if right permission is checked
+        self.login('user_0', '123') # normal user
+        self.add_permission('auth.change_permission')
+        response = self._run_action(code2=302)
+        self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
+
+
+class ExportDeleteTreeTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
+    urls = "adminactions.tests.urls"
+    action_name = 'export_delete_tree'
+    selected_rows = [2, 3, 4]
+
+    def setUp(self):
+        super(ExportDeleteTreeTest, self).setUp()
+        self._url = reverse('admin:auth_permission_changelist')
+
+    def test_permission(self):
+        # test if right permission is checked
+        self.login('user_0', '123') # normal user
+        self.add_permission('auth.change_permission')
+        response = self._run_action(code2=302)
+        self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
+
 

@@ -52,9 +52,9 @@
 {% endif %}{% endblock %}
 
 {% block content %}
-    {% if form.subject.errors %}
+    {% if adminform.form.subject.errors %}
         <ol>
-            {% for error in form.subject.errors %}
+            {% for error in adminform.form.subject.errors %}
                 <li><strong>{{ error|escape }}</strong></li>
             {% endfor %}
         </ol>
