@@ -38,7 +38,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
               'sphinx.ext.doctest', 'sphinx.ext.extlinks',
 #              'sphinxcontrib.issuetracker',
               'github',
-              'djangodocs']
+#              'djangodocs'
+]
 
 
 issuetracker = 'github'

@@ -17,6 +17,7 @@ Actions
 * Export delete tree
 * Mass update records
 * Graph queryset
+* Merge records
 
 
 Project links

@@ -1,41 +1,42 @@
 # -*- coding: utf-8 -*-
+import datetime
+from django import forms
+from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.template import Library
+from django.utils.formats import get_format
 from adminactions.templatetags.merge import get_field_by_path
+from adminactions.utils import get_field_value
+
 
 register = Library()
 
+@register.filter()
+def raw_value(obj, field):
+    value = get_field_value(obj, field, False)
+#    return value
+    return str(field.formfield().to_python(value))
+#    if settings.USE_L10N:
+#        if isinstance(value, datetime.datetime):
+#            fmt = get_format('DATETIME_INPUT_FORMATS')[0]
+#            return value.strftime(fmt)
+#        elif isinstance(value, datetime.date):
+#            fmt = get_format('DATE_INPUT_FORMATS')[0]
+#            return value.strftime(fmt)
+#    return value
+#    return str(get_field_value(obj, field, False))
+
+#@register.filter()
+#def raw_value(obj, field):
+#    return field.formfield(form_class=forms.CharField).widget.render("", get_field_value(obj, field, False))
+#    .render("", get_field_value(obj, field, False))
+
+
 
 @register.filter()
-def get_field_value(obj, field, usedisplay=True):
-    """
-    returns the field value or field representation if get_FIELD_display exists
-
-    :param obj: :class:`django.db.models.Model` instance
-    :param field: :class:`django.db.models.Field` instance or ``basestring`` fieldname
-    :param usedisplay: boolean if True return the get_FIELD_display() result
-    :return: field value
-
-    >>> from django.contrib.auth.models import User, Permission
-    >>> p = Permission(name='perm')
-    >>> print get_field_value(p, 'name')
-    perm
-
-    """
-    if isinstance(field, basestring):
-        fieldname = field
-    elif isinstance(field, models.Field):
-        fieldname = field.name
-    else:
-        raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance ')
-
-    if hasattr(obj, 'get_%s_display' % fieldname) and usedisplay:
-        value = getattr(obj, 'get_%s_display' % fieldname)()
-    else:
-        value = getattr(obj, fieldname)
-
-    return value
+def field_display(obj, field):
+    return get_field_value(obj, field)
 
 
 @register.filter(name="verbose_name")

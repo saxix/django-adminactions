@@ -235,3 +235,30 @@ Graph selected queryset.
 **Screenshot**
 
 .. figure:: _static/graph_bar.png
+
+
+.. _merge:
+
+
+``Merge Records``
+==================
+
+.. versionadded:: 0.1
+
+Sometimes you need to *"merge"* two records maybe because they represent the same business object
+but were create double by mistake.
+This action allow you to selectively merge two records and move dependencies
+from one record to the other one.
+
+**Screenshots**
+
+Step 1
+------
+
+.. figure:: _static/merge_1.png
+
+Step 2
+------
+
+.. figure:: _static/merge_2.png
+

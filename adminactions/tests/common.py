@@ -20,12 +20,12 @@ SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
                                             "django.contrib.messages.context_processors.messages")}
 
 
-class BaseTestCase(TestCase):
+class BaseTestCaseMixin(object):
     urls = 'adminactions.tests.urls'
     fixtures = ['adminactions.json', ]
 
     def setUp(self):
-        super(BaseTestCase, self).setUp()
+        super(BaseTestCaseMixin, self).setUp()
         self.sett = self.settings(**SETTINGS)
         self.login()
         self.sett.enable()
@@ -52,3 +52,6 @@ class BaseTestCase(TestCase):
             target.user_permissions.add(*perms)
 
         target.save()
+
+class BaseTestCase(BaseTestCaseMixin, TestCase):
+    pass

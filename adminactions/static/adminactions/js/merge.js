@@ -1,60 +1,72 @@
 (function ($) {
     $(function () {
-        var select = function (from, to, $val) {
+        var select = function (from) {
             return function () {
                 var $row = $(this).parent().parent();
                 var $sel = $row.find(from);
-                var $other = $row.find(to);
-                var value = $sel.text();
-                $sel.addClass("selected");
-                $other.removeClass("selected");
+                $('.result input', $row).val($('input.raw-value', $sel).val());
+                highlight();
+            };
+        };
+        var highlight = function () {
+            $('.mergetable tr').each(function () {
 
+                var $result = $(this).find('td.result');
+                var $left = $(this).find('td.origin');
+                var $right = $(this).find('td.other');
+                $('td', this).removeClass("selected");
 
-                $row.find("input").val($val.val());
-
-                $row.find(".selection").text(value);
-            }
-        }
-        $('.origin').click(select("td.origin", "td.other", $('input[name="master-pk"]')));
-        $('.other').click(select("td.other", "td.origin", $('input[name="other-pk"]')));
-
-        $('a.swap').click(function(){
-            var left = new Array();
-            var right = new Array();
-
-            $('.column.origin').each(function(){
-                $(this).removeClass("selected");
-                left.push($(this).text());
-            });
-
-            $('.column.other').each(function(){
-                $(this).removeClass("selected");
-                right.push($(this).text());
-            });
-
-            left.push($('input[name="master-pk"]').val());
-            right.push($('input[name="other-pk"]').val());
-            $('input[name="master-pk"]').val(right.pop());
-            $('input[name="other-pk"]').val(left.pop());
-
-            $($('.column.origin').get().reverse()).each(function(){
-                $(this).text(right.pop());
-            });
-            $($('.column.other').get().reverse()).each(function(){
-                $(this).text(left.pop());
-            });
-
-            $('.mergetable tr').each(function(){
-                var value = $(this).find('input.result').val();
-                if (value ==  $('input[name="master-pk"]').val()){
+                if ($('input.raw-value', $result).val() == $('input.raw-value', $left).val()) {
                     $(this).find('td.origin').addClass("selected");
-                }
-                if (value ==  $('input[name="other-pk"]').val()){
+                    $('span.display', $result).text($('span.display', $left).text());
+                } else if ($('input.raw-value', $result).val() == $('input.raw-value', $right).val()) {
                     $(this).find('td.other').addClass("selected");
+                    $('span.display', $result).text($('span.display', $right).text());
+                }else if ($('.original .display', this).text() !== $('.result .display', this).text()){
+                    $(this).addClass("changed");
                 }
+            });
+        };
+        $('a.origin').click(select("td.origin"));
+        $('a.other').click(select("td.other"));
 
+        $('a.swap').click(function () {
+            var left = [];
+            var right = [];
+            var $master = $('input[name="master_pk"]');
+            var $other = $('input[name="other_pk"]');
+
+            $('.column.origin').each(function () {
+                left.push([$('input.raw-value', this).val(), $('.display', this).text()]);
             });
 
+            $('.column.other').each(function () {
+                right.push([$('input.raw-value', this).val(), $('.display', this).text()]);
+            });
+
+            left.push($master.val());
+            right.push($other.val());
+
+            $master.val(right.pop());
+            $other.val(left.pop());
+
+            $('span[id="master_pk"]').text($master.val());
+            $('span[id="other_pk"]').text($other.val());
+
+            $($('.column.origin').get().reverse()).each(function () {
+                var entry = right.pop();
+                $('input.raw-value', this).val(entry[0]);
+                $('.display', this).text(entry[1]);
+            });
+            $($('.column.other').get().reverse()).each(function () {
+                var entry = left.pop();
+                $('input.raw-value', this).val(entry[0]);
+                $('.display', this).text(entry[1]);
+            });
+            highlight();
         });
+
+        highlight();
+
     });
 })(django.jQuery);

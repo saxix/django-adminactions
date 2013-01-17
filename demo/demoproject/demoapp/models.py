@@ -23,7 +23,7 @@ class DemoModel(models.Model):
     nullable = models.CharField(max_length=255, null=True)
     blank = models.CharField(max_length=255, blank=True, null=True)
     not_editable = models.CharField(max_length=255, editable=False, blank=True, null=True)
-    choices = models.IntegerField(choices=((1, 1), (2, 2), (3, 3)))
+    choices = models.IntegerField(choices=((1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')))
 
     class Meta:
         app_label = 'demoapp'

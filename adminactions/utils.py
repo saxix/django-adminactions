@@ -1,5 +1,38 @@
 from django.db import models
 
+def clone_model(model):
+    new_kwargs = dict([(fld.name, getattr(model, fld.name)) for fld in model._meta.fields])
+    return model.__class__(**new_kwargs)
+
+
+def get_field_value(obj, field, usedisplay=True):
+    """
+    returns the field value or field representation if get_FIELD_display exists
+
+    :param obj: :class:`django.db.models.Model` instance
+    :param field: :class:`django.db.models.Field` instance or ``basestring`` fieldname
+    :param usedisplay: boolean if True return the get_FIELD_display() result
+    :return: field value
+
+    >>> from django.contrib.auth.models import User, Permission
+    >>> p = Permission(name='perm')
+    >>> print get_field_value(p, 'name')
+    perm
+
+    """
+    if isinstance(field, basestring):
+        fieldname = field
+    elif isinstance(field, models.Field):
+        fieldname = field.name
+    else:
+        raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance ')
+
+    if hasattr(obj, 'get_%s_display' % fieldname) and usedisplay:
+        value = getattr(obj, 'get_%s_display' % fieldname)()
+    else:
+        value = getattr(obj, fieldname)
+
+    return value
 
 def get_field_by_path(model, field_path):
     """

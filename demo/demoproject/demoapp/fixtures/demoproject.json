@@ -1,0 +1,54 @@
+[
+    {
+        "pk": 1,
+        "model": "demoapp.demomodel",
+        "fields": {
+            "nullable": "aaaa",
+            "float": 10.1,
+            "generic_ip": "192.168.10.1",
+            "url": "https://github.com/saxix/django-adminactions",
+            "ip": "192.168.10.1",
+            "decimal": "10.1",
+            "time": "09:18:35",
+            "blank": "",
+            "datetime": "2012-10-06T02:18:33Z",
+            "char": "bbb",
+            "not_editable": null,
+            "bigint": 1111,
+            "text": "sddd",
+            "null_logic": true,
+            "logic": false,
+            "date": "2012-10-06",
+            "integer": 90000,
+            "unique": "unique 1",
+            "email": "s.apostolico@gmail.com",
+            "choices": 2
+        }
+    },
+    {
+        "pk": 2,
+        "model": "demoapp.demomodel",
+        "fields": {
+            "nullable": "bbbb",
+            "float": 10.1,
+            "generic_ip": "192.168.10.2",
+            "url": "https://github.com/saxix/django-adminactions",
+            "ip": "192.168.10.2",
+            "decimal": "22.2",
+            "time": "19:00:35",
+            "blank": "",
+            "datetime": "2013-01-01T02:18:33Z",
+            "char": "ccccc",
+            "not_editable": null,
+            "bigint": 333333333,
+            "text": "lorem ipsum",
+            "null_logic": true,
+            "logic": false,
+            "date": "2013-01-29",
+            "integer": 888888,
+            "unique": "unique 2",
+            "email": "s.apostolico@gmail.com",
+            "choices": 2
+        }
+    }
+]

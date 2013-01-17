@@ -1,5 +1,5 @@
 {% extends "admin/change_form.html" %}
-{% load i18n actions static %}
+{% load i18n actions static merge %}
 {% block breadcrumbs %}{% if not is_popup %}
     <div class="breadcrumbs">
         <a href="../../">{% trans "Home" %}</a> &rsaquo;
@@ -32,29 +32,41 @@
         <table class="mergetable">
             <tr class="header">
                 <th>Field</th>
-                <th>Master (This will be preserved)
-                    <input type="text" value="{{ master.pk }}" name="master-pk">
+                <th>Master #<span id='master_pk'>{{ master.pk }}</span> (This will be preserved)
+                    {#                    <input type="hidden" value="{{ master.pk }}" name="master-pk">#}
+                    {{ adminform.form.master_pk }}
                 </th>
                 <th><a class="swap" href="#">swap</a></th>
                 <th>Result</th>
                 <th></th>
-                <th>Other (This will be removed)
-                    <input type="text" value="{{ other.pk }}" name="other-pk"></th>
+                <th>Other #<span id='other_pk'>{{ other.pk }}</span> (This will be removed)
+                    {{ adminform.form.other_pk }}</th>
             </tr>
             {% for field in fields %}
                 <tr class="{% cycle "row1" "row2" %}">
                     <td class="column label">{{ master|verbose_name:field.name }}</td>
-                    <td class="column origin selected">{{ master|get_field_value:field }}</td>
-                    <td><a class="origin" href="#"> &gt;&gt; </a></td>
-                    <td class="column result">
-                        <input class="result" type="text" value="{{ master.pk }}" name="map-{{ field.name }}">
-                        <span class="selection">{{ master|get_field_value:field }}</span>
+
+                    <td class="column origin">
+                        {{ formset.0|widget:field.name }}
+                        <span class="display">{{ master|field_display:field }}</span>
                     </td>
+                    <td><a class="origin" href="#"> &gt;&gt; </a></td>
+
+                    <td class="column result">
+                        {{ adminform.form|widget:field.name }}
+                        <span class="display"></span>
+                        {{ adminform.form|errors:field.name }}
+                    </td>
+
                     <td><a class="other" href="#"> &lt;&lt; </a></td>
-                    <td class="column other">{{ other|get_field_value:field }}</td>
+
+                    <td class="column other">
+                        {{ formset.1|widget:field.name }}
+                        <span class="display">{{ other|field_display:field }}</span>
+                   </td>
                 </tr>
             {% endfor %}
         </table>
-        <input type="submit" value="apply" name="apply">
+        <input type="submit" value="{% trans "Preview" %}" name="preview">
     </form>
 {% endblock %}

@@ -4,6 +4,9 @@ from django.forms.models import ModelForm
 
 class GenericActionForm(ModelForm):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    select_across = forms.BooleanField(label='', required=False, initial=0,
+                                       widget=forms.HiddenInput({'class': 'select-across'}))
+    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
 
     def configured_fields(self):
 
