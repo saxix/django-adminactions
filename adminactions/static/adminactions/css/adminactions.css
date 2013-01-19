@@ -1,0 +1,36 @@
+.mergetable{
+    width: 100%;
+    border: 1px solid black;
+}
+.mergetable tr.header th{
+    font-weight: bold;
+    text-align: center;
+}
+.mergetable td{
+    vertical-align: middle;
+    border-right: 1px solid #000000;
+}
+
+.mergetable .column {
+    width: 33%;
+}
+
+.mergetable .label {
+    width: 10%;
+    font-weight: bold;
+}
+.mergetable .selected {
+    background-color: #81b10c;
+}
+
+.mergetable .changed {
+    background-color: #f9adaf;
+}
+
+.mergetable input.raw-value{
+    width: 200px;
+    border: 0px transparent;
+    background-color: transparent;
+    display: none;
+}
+
