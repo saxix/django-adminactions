@@ -173,7 +173,7 @@ def mass_update(modeladmin, request, queryset):
         kwargs['required'] = False
         return field.formfield(**kwargs)
 
-    if not request.user.has_perm('adminactions.massupdate'):
+    if not request.user.has_perm('adminactions_massupdate'):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
 
@@ -204,7 +204,7 @@ def mass_update(modeladmin, request, queryset):
             validate = form.cleaned_data.get('_validate', False)
 
             updated = 0
-            errors = 0
+            errors = {}
             if validate:
                 if need_transaction:
                     transaction.enter_transaction_management()
@@ -219,7 +219,7 @@ def mass_update(modeladmin, request, queryset):
                         record.clean()
                         record.save()
                     except IntegrityError as e:
-                        errors += 1
+                        errors[record.pk] = str(e)
                         if need_transaction:
                             transaction.rollback()
                             updated = 0
@@ -228,15 +228,15 @@ def mass_update(modeladmin, request, queryset):
                         updated += 1
                 if updated:
                     messages.info(request, _("Updated %s records") % updated)
-                if errors:
-                    messages.error(request, "%s records not updated due errors" % errors)
+                if len(errors):
+                    messages.error(request, "%s records not updated due errors" % len(errors))
                 try:
                     adminaction_end.send(sender=modeladmin.model,
                                          action='mass_update',
                                          request=request,
                                          queryset=queryset,
-                                         errors=errors,
-                                         updated=updated)
+                                         form=form,
+                                         errors=errors)
                     if need_transaction:
                         transaction.commit()
                 except ActionInterrupted:

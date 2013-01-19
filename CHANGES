@@ -2,7 +2,7 @@ Release 0.1
 =============
 * New action: :ref:`merge`
 * Fixed :ghissue:`9`
-* Added permission checking on :ref:`massupdate` and :ref:`export_as_csv`
+* Added :ref:`permissions`
 * New signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
 
 

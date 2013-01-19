@@ -74,3 +74,6 @@ The handler can rely on the following parameter:
     * action: string. name of the action
     * request: :class:`django:django.core.httpd.Httprequest`
     * queryset: :class:`django:django.db.models.query.Queryset`
+    * queryset: :class:`django:django.db.models.query.Queryset`
+    * form: :class:`django:django.forms.Form`
+    * errors: dict
