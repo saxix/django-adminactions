@@ -4,17 +4,31 @@ from .mass_update import mass_update
 from .export import export_as_fixture, export_as_csv, export_delete_tree
 from .graph import graph_queryset
 
+actions = [export_as_fixture, export_as_csv, export_delete_tree, merge, mass_update,
+           graph_queryset]
 
-def add_to_site(site):
+
+def add_to_site(site, exclude=None):
     """
-    Register all the adminactions's actions into passed site
+    Register all the adminactions into passed site
 
-    :param site: django.contrib.admin.AdminSite instance
+    :param site: AdminSite instance
+    :type site: django.contrib.admin.AdminSite
+
+    :param exclude: name of the actions to exclude
+    :type exclude: List
     :return: None
+
+    Examples:
+
+    >>> from django.contrib.admin import site
+    >>> add_to_site(public_site)
+
+    >>> from django.contrib.admin import site
+    >>> add_to_site(public_site, exclude=['merge'])
+
     """
-    site.add_action(mass_update)
-    site.add_action(graph_queryset)
-    site.add_action(export_as_csv)
-    site.add_action(export_as_fixture)
-    site.add_action(export_delete_tree)
-    site.add_action(merge)
+    exclude = exclude or []
+    for action in actions:
+        if action.__name__ not in exclude:
+            site.add_action(action)
