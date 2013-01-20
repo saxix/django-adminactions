@@ -33,7 +33,7 @@ Required to execute :ref:`export_as_csv`, :ref:`export_as_fixture`, :ref:`export
 Required to execute :ref:`massupdate`
 
 
-.. _adminactions_massupdate:
+.. _adminactions_merge:
 
 ``adminactions_merge``
 ----------------------

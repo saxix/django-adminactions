@@ -9,14 +9,30 @@
 API
 ===
 
-.. automodule:: adminactions.utils
-    :members:
+.. currentmodule:: adminactions
 
-.. autoclass:: adminactions.mass_update.OperationManager
-    :members:
+.. autosummary::
+    actions.add_to_site
+    utils.clone_instance
+    utils.get_field_by_path
+    utils.get_field_value
+    utils.get_verbose_name
+    templatetags.actions.verbose_name
+    templatetags.actions.field_display
+    templatetags.actions.raw_value
 
-.. automodule:: adminactions.templatetags.massupdate
-    :members:
+.. autofunction:: adminactions.actions.add_to_site
 
-.. automodule:: adminactions.templatetags.actions
-    :members:
+Utils
+-----
+
+.. autofunction:: adminactions.utils.clone_instance
+.. autofunction:: adminactions.utils.get_field_by_path
+.. autofunction:: adminactions.utils.get_field_value
+.. autofunction:: adminactions.utils.get_verbose_name
+
+Templatetags
+------------
+.. autofunction:: adminactions.templatetags.actions.verbose_name
+.. autofunction:: adminactions.templatetags.actions.field_display
+.. autofunction:: adminactions.templatetags.actions.raw_value

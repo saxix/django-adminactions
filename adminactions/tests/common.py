@@ -55,7 +55,6 @@ class BaseTestCaseMixin(object):
 
         target.save()
 
-
     def assert_post_form(self, response, context_forms=None):
         """Assert that a POST response was successful
 
@@ -85,6 +84,7 @@ class BaseTestCaseMixin(object):
 
     assertPostForm = assert_post_form
 
+
 class BaseTestCase(BaseTestCaseMixin, TestCase):
     pass
 
@@ -92,16 +92,13 @@ class BaseTestCase(BaseTestCaseMixin, TestCase):
 class CheckSignalsMixin(object):
     MESSAGE = 'Action Interrupted Test'
     SELECTION = [2, 3, 4]
-#    action_name = None
-#    sender_model = None
-#    selected_rows = []
+
     def test_signal_sent(self):
         def handler_factory(name):
             def myhandler(sender, action, request, queryset, **kwargs):
                 handler_factory.invoked[name] = True
                 self.assertEqual(action, self.action_name)
                 self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
-    #            raise ActionInterrupted(self.MESSAGE)
             return myhandler
         handler_factory.invoked = {}
 

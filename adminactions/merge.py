@@ -13,7 +13,7 @@ from django.utils.safestring import mark_safe
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.translation import gettext as _
 from adminactions.forms import GenericActionForm
-from adminactions.utils import clone_model
+from adminactions.utils import clone_instance
 
 
 class MergeForm(GenericActionForm):
@@ -50,13 +50,15 @@ def merge(modeladmin, request, queryset):
     Merge two model instances. Move all foreign keys.
 
     """
+
     def raw_widget(field, **kwargs):
         """ force all fields as not required"""
-        kwargs['widget'] = TextInput({'class':'raw-value', 'readonly':'readonly'})
-        kwargs['widget'] = TextInput({'class':'raw-value', 'size':'30'})
+        kwargs['widget'] = TextInput({'class': 'raw-value', 'readonly': 'readonly'})
+        kwargs['widget'] = TextInput({'class': 'raw-value', 'size': '30'})
         return field.formfield(**kwargs)
 
         # Allows to specified a custom Form in the ModelAdmin
+
     #    MForm = getattr(modeladmin, 'merge_form', MergeForm)
     merge_form = getattr(modeladmin, 'merge_form', MergeForm)
     MForm = modelform_factory(modeladmin.model, form=merge_form, formfield_callback=raw_widget)
@@ -74,7 +76,7 @@ def merge(modeladmin, request, queryset):
 
     if 'preview' in request.POST:
         master = queryset.get(pk=request.POST.get('master_pk'))
-        original = clone_model(master)
+        original = clone_instance(master)
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
         with transaction.commit_manually():
@@ -112,8 +114,7 @@ def merge(modeladmin, request, queryset):
                    'dependencies': MergeForm.DEP_MOVE,
                    'action': 'merge',
                    'master_pk': master.pk,
-                   'other_pk': other.pk,
-                   }
+                   'other_pk': other.pk}
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
         form = MForm(initial=initial, instance=master)
 
@@ -122,10 +123,8 @@ def merge(modeladmin, request, queryset):
     ctx.update({'adminform': adminForm,
                 'formset': formset,
                 'media': mark_safe(media),
-                'master':master,
-                'other':other})
-
-
+                'master': master,
+                'other': other})
     return render_to_response(tpl, RequestContext(request, ctx))
 
 

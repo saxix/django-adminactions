@@ -8,6 +8,7 @@ django-adminactions
 Collection of useful actions to use with
 django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
 
+**Requires Django>=1.4**
 
 Actions
 ================

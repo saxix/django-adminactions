@@ -21,10 +21,12 @@ Table Of Contents
     actions
     signals
     exceptions
+    api
+
     changes
     howto
     faq
-    api
+
 
 
 .. toctree::

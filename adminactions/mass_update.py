@@ -109,10 +109,7 @@ class MassUpdateForm(GenericActionForm):
     _unique_transaction = forms.BooleanField(label='Unique transaction',
                                              help_text="if checked create one transaction for the whole update. "
                                                        "If some record cannot be updated everything will be rolled-back")
-#    select_across = forms.BooleanField(label='', required=False, initial=0,
-#                                       widget=forms.HiddenInput({'class': 'select-across'}))
-#    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
-#
+
     def __init__(self, *args, **kwargs):
         super(MassUpdateForm, self).__init__(*args, **kwargs)
         self._errors = None

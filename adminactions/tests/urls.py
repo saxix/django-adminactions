@@ -1,5 +1,5 @@
 import django.contrib.auth.models
-from django.conf.urls import patterns, url, include, handler500
+from django.conf.urls import patterns, include
 from django.contrib import admin
 import adminactions.actions as actions
 

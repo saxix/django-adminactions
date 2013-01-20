@@ -1,5 +1,6 @@
-Release 0.1
-=============
+Release 0.1 (in development)
+============================
+* New registration shortcut `add_to_site() <api.html#adminactions.actions.add_to_site>`_
 * New action: :ref:`merge`
 * Fixed :ghissue:`9`
 * Added :ref:`permissions`

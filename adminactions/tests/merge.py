@@ -51,7 +51,6 @@ class MergeTest(BaseTestCaseMixin, TransactionTestCase):
         self.assertIn('original', response.context)
         return response
 
-
     def test_success(self):
         response, master, other, base_data, data, master_data, other_data = self._action_init()
         # merge
@@ -108,7 +107,6 @@ class MergeTest(BaseTestCaseMixin, TransactionTestCase):
 
         self.assertEqual(merged_record.first_name, other.first_name)
         self.assertEqual(merged_record.email, other.email)
-
 
     def test_signal_start(self):
         pass

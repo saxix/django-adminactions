@@ -33,19 +33,24 @@ needs_sphinx = '1.0'
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext")))
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
-              'sphinx.ext.graphviz', 'sphinx.ext.intersphinx',
-              'sphinx.ext.doctest', 'sphinx.ext.extlinks',
-#              'sphinxcontrib.issuetracker',
-              'github',
-#              'djangodocs'
-]
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.todo',
+              'sphinx.ext.graphviz',
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.doctest',
+              'sphinx.ext.extlinks',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.coverage',
+              'sphinx.ext.viewcode',
+              'github']
 
 
-issuetracker = 'github'
-issuetracker_project = 'saxix/django-adminactions'
-issuetracker_plaintext_issues = True
+#issuetracker = 'github'
+#issuetracker_project = 'saxix/django-adminactions'
+#issuetracker_plaintext_issues = True
+
 github_project_url = 'https://github.com/saxix/django-adminactions/'
+github_project_url_basesource = 'https://github.com/saxix/django-adminactions/'
 
 todo_include_todos = True
 intersphinx_mapping = {
