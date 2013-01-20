@@ -1,3 +1,5 @@
+.. release:: dev
+
 Release 0.1 (in development)
 ============================
 * New registration shortcut `add_to_site() <api.html#adminactions.actions.add_to_site>`_
@@ -6,6 +8,7 @@ Release 0.1 (in development)
 * Added :ref:`permissions`
 * New signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
 
+.. release:: 0_0_4
 
 Release 0.0.4
 =============
@@ -18,18 +21,21 @@ Release 0.0.4
 * NEW: :ref:`transform_operations`
 * NEW: url to preview date format in `export_as_csv`
 
+.. release:: 0_0_3
 
 Release 0.0.3
 =============
 
 * added demo project
 
+.. release:: 0_0_2
 
 Release 0.0.2
 =============
 
 * name changed from django-actions to django-adminactions
 
+.. release:: 0_0_2
 
 Release 0.0.1
 =============
