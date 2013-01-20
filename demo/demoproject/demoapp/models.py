@@ -15,6 +15,7 @@ class DemoModel(models.Model):
     float = models.FloatField()
     bigint = models.BigIntegerField()
     ip = models.IPAddressField()
+    generic_ip = models.GenericIPAddressField()
     url = models.URLField()
     text = models.TextField()
 
@@ -23,9 +24,6 @@ class DemoModel(models.Model):
     blank = models.CharField(max_length=255, blank=True, null=True)
     not_editable = models.CharField(max_length=255, editable=False, blank=True, null=True)
     choices = models.IntegerField(choices=((1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')))
-
-#    generic_ip = models.GenericIPAddressField()
-
 
     class Meta:
         app_label = 'demoapp'
