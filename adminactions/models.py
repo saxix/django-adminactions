@@ -13,7 +13,7 @@ def create_extra_permission(sender, **kwargs):
             codename = _get_permission_codename(action, opts)
             label = u'Can %s %s (adminactions)' % (action.replace('adminactions_', ""), opts.verbose_name_raw)
             ct = ContentType.objects.get_for_model(model)
-            Permission.objects.get_or_create(codename=codename, content_type=ct, defaults={'name': label})
+            Permission.objects.get_or_create(codename=codename, content_type=ct, defaults={'name': label[:50]})
 
 
 signals.post_syncdb.connect(create_extra_permission)
