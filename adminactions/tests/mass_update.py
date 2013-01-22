@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from adminactions.tests.common import BaseTestCase, CheckSignalsMixin
+from adminactions.tests.common import BaseTestCase
 
 
 __all__ = ['MassUpdateTest', ]
 
 
-class MassUpdateTest(BaseTestCase, CheckSignalsMixin):
+class MassUpdateTest(BaseTestCase):
     urls = "adminactions.tests.urls"
     selected_rows = [2, 3, 4, 7, 10]
     action_name = 'mass_update'

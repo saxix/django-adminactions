@@ -272,7 +272,7 @@ def export_as_fixture(modeladmin, request, queryset):
                 c = _collector(None)
                 c.collect(queryset)
                 adminaction_end.send(sender=modeladmin.model, action='export_as_fixture', request=request,
-                                     queryset=queryset)
+                                     queryset=queryset, form=form)
 
                 return _dump_qs(form, queryset, c.data)
             except AttributeError as e:
