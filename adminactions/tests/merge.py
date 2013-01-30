@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import QueryDict
 from django.test import TransactionTestCase
 
-from django.utils.translation import gettext as _
-from .common import BaseTestCase, BaseTestCaseMixin
+from .common import BaseTestCaseMixin
 
 
 class MergeTest(BaseTestCaseMixin, TransactionTestCase):

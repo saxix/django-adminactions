@@ -1,4 +1,3 @@
-import json
 from django import forms
 from django.contrib.admin import helpers
 from django.forms.models import modelform_factory

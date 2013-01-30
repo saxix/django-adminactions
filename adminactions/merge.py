@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django import forms
@@ -10,7 +9,7 @@ from django.forms.models import modelform_factory, model_to_dict
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.safestring import mark_safe
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
 from adminactions.forms import GenericActionForm
 from adminactions.utils import clone_instance

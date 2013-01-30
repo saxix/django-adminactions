@@ -3,7 +3,6 @@ from django.conf import global_settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Permission
 from django.test.testcases import TestCase
-from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested, adminaction_end, adminaction_start
 
 TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), os.pardir, 'tests', 'templates')
