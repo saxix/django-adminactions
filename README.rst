@@ -27,5 +27,5 @@ Project links
 -------------
 
 * Project home page: https://github.com/saxix/django-adminactions
-* Documentation: http://django-actions.readthedocs.org/en/latest/
+* Documentation: http://django-adminactions.readthedocs.org/en/latest/
 * Download: http://pypi.python.org/pypi/django-adminactions/
