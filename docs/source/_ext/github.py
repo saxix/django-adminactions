@@ -145,7 +145,6 @@ def ghcommit_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     return [node], []
 
 
-
 def setup(app):
     """Install the plugin.
 

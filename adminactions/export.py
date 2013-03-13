@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import datetime
 from itertools import chain
 from operator import attrgetter
@@ -100,9 +101,12 @@ def export_as_csv(modeladmin, request, queryset):
                 messages.error(request, str(e))
                 return
 
-            filename = "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+            if hasattr(modeladmin, 'get_export_as_csv_filename'):
+                filename = modeladmin.get_export_as_csv_filename(request, queryset)
+            else:
+                filename = "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
             response = HttpResponse(mimetype='text/csv')
-            response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+            response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
             try:
                 writer = csv.writer(response,
                                     escapechar=str(form.cleaned_data['escapechar']),
@@ -222,7 +226,7 @@ class FixtureOptions(forms.Form):
     serializer = forms.ChoiceField(choices=zip(get_serializer_formats(), get_serializer_formats()))
 
 
-def _dump_qs(form, queryset, data):
+def _dump_qs(form, queryset, data, filename):
     fmt = form.cleaned_data.get('serializer')
 
     json = ser.get_serializer(fmt)()
@@ -231,8 +235,8 @@ def _dump_qs(form, queryset, data):
 
     response = HttpResponse(mimetype='text/plain')
     if not form.cleaned_data.get('on_screen', False):
-        filename = "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
-        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+        filename = filename or "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
     response.content = ret
     return response
 
@@ -274,7 +278,11 @@ def export_as_fixture(modeladmin, request, queryset):
                 adminaction_end.send(sender=modeladmin.model, action='export_as_fixture', request=request,
                                      queryset=queryset, form=form)
 
-                return _dump_qs(form, queryset, c.data)
+                if hasattr(modeladmin, 'get_export_as_fixture_filename'):
+                    filename = modeladmin.get_export_as_fixture_filename(request, queryset)
+                else:
+                    filename = None
+                return _dump_qs(form, queryset, c.data, filename)
             except AttributeError as e:
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.path)
@@ -348,7 +356,11 @@ def export_delete_tree(modeladmin, request, queryset):
                     data.extend(instances)
                 adminaction_end.send(sender=modeladmin.model, action='export_delete_tree', request=request,
                                      queryset=queryset)
-                return _dump_qs(form, queryset, data)
+                if hasattr(modeladmin, 'get_export_delete_tree_filename'):
+                    filename = modeladmin.get_export_delete_tree_filename(request, queryset)
+                else:
+                    filename = None
+                return _dump_qs(form, queryset, data, filename)
             except AttributeError as e:
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.path)

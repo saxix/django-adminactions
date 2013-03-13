@@ -1,5 +1,8 @@
+# -*- encoding: utf-8 -*-
 import StringIO
 import csv
+import mock
+import django.contrib.admin
 from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.forms import Form
@@ -8,7 +11,7 @@ from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 
 
-__all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest']
+__all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportDeleteTreeTest']
 
 
 class CheckSignalsMixin(object):
@@ -88,8 +91,31 @@ class ExecuteActionMixin(object):
             data = response.context['adminform'].form.initial
             data.update({'apply': 'Export'})
             response = self.client.post(url, data)
+
             self.assertEqual(response.status_code, code3)
         return response
+
+
+class BaseExportTest(BaseTestCase, ExecuteActionMixin):
+    def setUp(self):
+        super(BaseExportTest, self).setUp()
+        self._url = reverse('admin:auth_permission_changelist')
+        self.original_verbose_name = Permission._meta.verbose_name_plural
+
+    def tearDown(self):
+        super(BaseExportTest, self).tearDown()
+        Permission._meta.verbose_name_plural = self.original_verbose_name
+
+    def test_custom_filename(self):
+        md = django.contrib.admin.site._registry[Permission]
+        with mock.patch.object(md, 'get_%s_filename' % self.action_name, lambda r, q: 'new.test', create=True):
+            response = self._run_action(select_across=1)
+            self.assertEqual(response['Content-Disposition'], u'attachment;filename="new.test"')
+
+    def test_unicode(self):
+        Permission._meta.verbose_name_plural = u'replaced_ë'
+        response = self._run_action(select_across=1)
+        self.assertAlmostEqual(response['Content-Disposition'], 'attachment;filename="replaced_?.%s"' % self.suffix)
 
     def test_happy_path(self):
         url = reverse('admin:auth_user_changelist')
@@ -111,10 +137,11 @@ class ExecuteActionMixin(object):
             adminaction_requested.disconnect(myhandler, sender=User)
 
 
-class ExportAsCsvTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
+class ExportAsCsvTest(BaseExportTest, CheckSignalsMixin):
     urls = "adminactions.tests.urls"
     action_name = 'export_as_csv'
     selected_rows = [2, 3, 4]
+    suffix = 'csv'
 
     def setUp(self):
         super(ExportAsCsvTest, self).setUp()
@@ -151,10 +178,11 @@ class ExportAsCsvTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
         self.assertEqual(response.status_code, 200)
 
 
-class ExportAsFixtureTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
+class ExportAsFixtureTest(BaseExportTest, CheckSignalsMixin):
     urls = "adminactions.tests.urls"
     action_name = 'export_as_fixture'
     selected_rows = [2, 3, 4]
+    suffix = 'json'
 
     def setUp(self):
         super(ExportAsFixtureTest, self).setUp()
@@ -168,10 +196,11 @@ class ExportAsFixtureTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
         self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
 
 
-class ExportDeleteTreeTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
+class ExportDeleteTreeTest(BaseExportTest, CheckSignalsMixin):
     urls = "adminactions.tests.urls"
     action_name = 'export_delete_tree'
     selected_rows = [2, 3, 4]
+    suffix = 'json'
 
     def setUp(self):
         super(ExportDeleteTreeTest, self).setUp()
@@ -183,5 +212,4 @@ class ExportDeleteTreeTest(BaseTestCase, ExecuteActionMixin, CheckSignalsMixin):
         self.add_permission('auth.change_permission')
         response = self._run_action(code2=302)
         self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
-
 
