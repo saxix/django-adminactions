@@ -205,6 +205,7 @@ def mass_update(modeladmin, request, queryset):
             if validate:
                 if need_transaction:
                     transaction.enter_transaction_management()
+                    transaction.managed(True)
                 for record in queryset:
                     for field_name, value_or_func in form.cleaned_data.items():
                         if callable(value_or_func):
@@ -239,6 +240,9 @@ def mass_update(modeladmin, request, queryset):
                 except ActionInterrupted:
                     if need_transaction:
                         transaction.rollback()
+                finally:
+                    if need_transaction:
+                        transaction.leave_transaction_management()
 
             else:
                 values = {}
