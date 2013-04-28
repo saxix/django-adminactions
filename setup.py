@@ -55,7 +55,7 @@ packages, data_files = scan_dir('adminactions')
 setup(
     name=NAME,
     version=RELEASE,
-    url='https://github.com/saxix/django-actions',
+    url='https://github.com/saxix/django-adminactions',
     download_url='https://github.com/saxix/django-adminactions',
     author='sax',
     author_email='sax@os4d.org',
