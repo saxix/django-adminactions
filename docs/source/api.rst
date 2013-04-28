@@ -11,6 +11,7 @@ API
 
 .. currentmodule:: adminactions
 
+
 .. autosummary::
     actions.add_to_site
     utils.clone_instance
@@ -23,6 +24,34 @@ API
 
 .. autofunction:: adminactions.actions.add_to_site
 
+
+.. _get_export_as_csv_filename:
+.. _get_export_as_fixture_filename:
+.. _get_export_delete_tree_filename:
+.. _filename_callbacks:
+
+Filename callbacks
+-------------------
+To use custom names for yours exports simply implements ``get_export_<TYPE>_filename``
+in your ``Modeladmin`` class, these must return a string that will be used as filename
+in the SaveAs dialog box of the browser
+
+example::
+    class UserAdmin(ModelAdmin):
+        def get_export_as_csv_filename(request, queryset):
+            if 'isadmin' in request.GET
+                return 'administrators.csv'
+            else:
+                return 'all_users.csv'
+
+Available callbacks:
+
+* ``get_export_as_csv_filename``
+* ``get_export_as_fixture_filename``
+* ``get_export_delete_tree_filename``
+
+
+
 Utils
 -----
 
@@ -30,6 +59,7 @@ Utils
 .. autofunction:: adminactions.utils.get_field_by_path
 .. autofunction:: adminactions.utils.get_field_value
 .. autofunction:: adminactions.utils.get_verbose_name
+
 
 Templatetags
 ------------

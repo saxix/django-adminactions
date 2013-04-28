@@ -12,8 +12,11 @@
 # serve to show the default.
 
 import sys, os
+here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+up = lambda base, level: os.path.abspath(os.path.join(base, *([os.pardir] * level)))
+print 1111, up(here, 2)
+sys.path.insert(0, up(here, 2))
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import adminactions as app
 from django.conf import settings
 
