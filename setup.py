@@ -1,18 +1,11 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup
 from distutils.command.install import INSTALL_SCHEMES
 import os
 import adminactions as app
 
 NAME = app.NAME
 RELEASE = app.get_version()
-
-VERSIONMAP = {'final': (app.VERSION, 'Development Status :: 5 - Production/Stable'),
-              'rc': (app.VERSION, 'Development Status :: 4 - Beta'),
-              'beta': (app.VERSION, 'Development Status :: 4 - Beta'),
-              'alpha': ('master', 'Development Status :: 3 - Alpha'),
-              }
-download_tag, development_status = VERSIONMAP[app.VERSION[3]]
 
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
@@ -50,7 +43,13 @@ def scan_dir(target, packages=[], data_files=[]):
             data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
     return packages, data_files
 
+
 packages, data_files = scan_dir('adminactions')
+
+
+def fread(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 setup(
     name=NAME,
@@ -63,6 +62,8 @@ setup(
     license='BSD',
     packages=packages,
     data_files=data_files,
+    install_requires=fread('adminactions/requirements.pip').split('\n'),
+    zip_safe=False,
     platforms=['any'],
     command_options={
         'build_sphinx': {
@@ -70,7 +71,6 @@ setup(
             'release': ('setup.py', app.VERSION)}
     },
     classifiers=[
-        development_status,
         'Environment :: Web Environment',
         'Framework :: Django',
         'Operating System :: OS Independent',
