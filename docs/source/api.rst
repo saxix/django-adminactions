@@ -24,6 +24,10 @@ API
 
 .. autofunction:: adminactions.actions.add_to_site
 
+.. _api_export_as_csv:
+
+.. autofunction:: adminactions.export._export_as_csv
+
 
 .. _get_export_as_csv_filename:
 .. _get_export_as_fixture_filename:

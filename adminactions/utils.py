@@ -24,7 +24,7 @@ def get_field_value(obj, field, usedisplay=True):
     :param usedisplay: boolean if True return the get_FIELD_display() result
     :return: field value
 
-    >>> from django.contrib.auth.models import User, Permission
+    >>> from django.contrib.auth.models import Permission
     >>> p = Permission(name='perm')
     >>> print get_field_value(p, 'name')
     perm
@@ -54,7 +54,7 @@ def get_field_by_path(model, field_path):
     :return: :class:`django.db.models.Field`
 
 
-    >>> from django.contrib.auth.models import User, Permission
+    >>> from django.contrib.auth.models import Permission
 
     >>> p = Permission(name='perm')
     >>> f = get_field_by_path(Permission, 'content_type')

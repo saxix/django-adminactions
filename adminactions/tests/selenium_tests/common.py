@@ -19,7 +19,7 @@ except ImportError as e:
 
 class SkipSeleniumTestChecker(type):
     def __new__(mcs, name, bases, attrs):
-        super_new = super(SkipSeleniumTestChecker, mcs).__new__
+        # super_new = super(SkipSeleniumTestChecker, mcs).__new__
         if not selenium_can_start():
             for name, func in attrs.items():
                 if callable(func) and name.startswith('test'):
@@ -110,5 +110,3 @@ class FireFoxLiveTest(FirefoxDriverMixin, SeleniumTestCase):
 #    def setUp(self):
 #        self.settings(SETTINGS)
 #        super(FireFoxLiveTest, self).setUp()
-
-

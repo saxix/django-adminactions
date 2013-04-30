@@ -1,18 +1,18 @@
 # Django settings for demoproject project.
-import sys, os
+import sys
+import os
 
 here = os.path.dirname(__file__)
 sys.path.append(os.path.abspath(os.path.join(here, '..', '..')))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'DEMODB.sqlite', # Not used with sqlite3.
-        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.
-    }
-}
+    'default': {'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+                'NAME': 'DEMODB.sqlite',  # Not used with sqlite3.
+                'HOST': '',  # Set to empty string for localhost. Not used with sqlite3.
+                'PORT': '',  # Set to empty string for default. Not used with sqlite3.
+    }}  # NOQA
+
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'
 SITE_ID = 1

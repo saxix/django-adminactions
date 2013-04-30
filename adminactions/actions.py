@@ -22,10 +22,10 @@ def add_to_site(site, exclude=None):
     Examples:
 
     >>> from django.contrib.admin import site
-    >>> add_to_site(public_site)
+    >>> add_to_site(site)
 
     >>> from django.contrib.admin import site
-    >>> add_to_site(public_site, exclude=['merge'])
+    >>> add_to_site(site, exclude=['merge'])
 
     """
     exclude = exclude or []

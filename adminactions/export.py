@@ -1,60 +1,26 @@
 # -*- encoding: utf-8 -*-
-import datetime
+
 from itertools import chain
 from operator import attrgetter
 from django.core.serializers import get_serializer_formats
 from django.db import router
 from django.db.models import ManyToManyField, ForeignKey
 from django.db.models.deletion import Collector
-from django.forms.widgets import SelectMultiple
+
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
+from adminactions.api import csv_options_default
 from adminactions.exceptions import ActionInterrupted
+from adminactions.forms import CSVOptions
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
-from adminactions.templatetags.actions import get_field_value
-
-
-try:
-    import unicodecsv as csv
-except ImportError:
-    import csv
+from adminactions.api import export_as_csv as _export_as_csv
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.contrib.admin import helpers
-from django.utils import formats
-from django.utils import dateformat
 import django.core.serializers as ser
-
-
-delimiters = ",;|:"
-quotes = "'\"`"
-escapechars = " \\"
-
-
-class CSVOptions(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    select_across = forms.BooleanField(label='', required=False, initial=0,
-                                       widget=forms.HiddenInput({'class': 'select-across'}))
-    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
-
-    header = forms.BooleanField(required=False)
-    delimiter = forms.ChoiceField(choices=zip(delimiters, delimiters))
-    quotechar = forms.ChoiceField(choices=zip(quotes, quotes))
-    quoting = forms.ChoiceField(
-        choices=((csv.QUOTE_ALL, 'All'),
-                 (csv.QUOTE_MINIMAL, 'Minimal'),
-                 (csv.QUOTE_NONE, 'None'),
-                 (csv.QUOTE_NONNUMERIC, 'Non Numeric')))
-
-    escapechar = forms.ChoiceField(choices=(('', ''), ('\\', '\\')), required=False)
-    datetime_format = forms.CharField(initial=formats.get_format('DATETIME_FORMAT'))
-    date_format = forms.CharField(initial=formats.get_format('DATE_FORMAT'))
-    time_format = forms.CharField(initial=formats.get_format('TIME_FORMAT'))
-    columns = forms.MultipleChoiceField(widget=SelectMultiple(attrs={'size': 20}))
 
 
 def export_as_csv(modeladmin, request, queryset):
@@ -78,14 +44,8 @@ def export_as_csv(modeladmin, request, queryset):
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
                'action': request.POST.get('action'),
-               'date_format': 'd/m/Y',
-               'datetime_format': 'N j, Y, P',
-               'time_format': 'P',
-               'quotechar': '"',
-               'columns': [x for x, v in cols],
-               'quoting': csv.QUOTE_ALL,
-               'delimiter': ';',
-               'escapechar': '\\', }
+               'columns': [x for x, v in cols]}
+    initial.update(csv_options_default)
 
     if 'apply' in request.POST:
         form = CSVOptions(request.POST)
@@ -104,33 +64,17 @@ def export_as_csv(modeladmin, request, queryset):
             if hasattr(modeladmin, 'get_export_as_csv_filename'):
                 filename = modeladmin.get_export_as_csv_filename(request, queryset)
             else:
-                filename = "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-            response = HttpResponse(mimetype='text/csv')
-            response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
+                filename = None
             try:
-                writer = csv.writer(response,
-                                    escapechar=str(form.cleaned_data['escapechar']),
-                                    delimiter=str(form.cleaned_data['delimiter']),
-                                    quotechar=str(form.cleaned_data['quotechar']),
-                                    quoting=int(form.cleaned_data['quoting']))
-                if form.cleaned_data.get('header', False):
-                    writer.writerow([f for f in form.cleaned_data['columns']])
-                for obj in queryset:
-                    row = []
-                    for fieldname in form.cleaned_data['columns']:
-                        value = get_field_value(obj, fieldname)
-                        if isinstance(value, datetime.datetime):
-                            value = dateformat.format(value, form.cleaned_data['datetime_format'])
-                        elif isinstance(value, datetime.date):
-                            value = dateformat.format(value, form.cleaned_data['date_format'])
-                        elif isinstance(value, datetime.time):
-                            value = dateformat.format(value, form.cleaned_data['time_format'])
-                        row.append(smart_str(value))
-                    writer.writerow(row)
+                response = _export_as_csv(queryset,
+                                          fields=form.cleaned_data['columns'],
+                                          header=form.cleaned_data.get('header', False),
+                                          filename=filename, options=form.cleaned_data)
             except Exception as e:
                 messages.error(request, "Error: (%s)" % str(e))
             else:
-                adminaction_end.send(sender=modeladmin.model, action='export_as_csv', request=request, queryset=queryset)
+                adminaction_end.send(sender=modeladmin.model, action='export_as_csv', request=request,
+                                     queryset=queryset)
                 return response
     else:
         form = CSVOptions(initial=initial)
@@ -141,7 +85,7 @@ def export_as_csv(modeladmin, request, queryset):
     tpl = 'adminactions/export_csv.html'
     ctx = {'adminform': adminForm,
            'change': True,
-           'title': _('Export to CSV'),
+           'title': _('Export as CSV'),
            'is_popup': False,
            'save_as': False,
            'has_delete_permission': False,
@@ -201,8 +145,10 @@ class ForeignKeysCollector(object):
 
 
 class DependenciesCollector(Collector):
-    def collect(self, objs, source=None, nullable=False, collect_related=True, source_attr=None, reverse_dependency=False):
-        super(DependenciesCollector, self).collect(objs, source, nullable, collect_related, source_attr, reverse_dependency)
+    def collect(self, objs, source=None, nullable=False, collect_related=True, source_attr=None,
+                reverse_dependency=False):
+        super(DependenciesCollector, self).collect(objs, source, nullable, collect_related, source_attr,
+                                                   reverse_dependency)
         alls = []
         for model, instances in self.data.items():
             alls.extend(sorted(instances, key=attrgetter("pk")))
@@ -386,4 +332,3 @@ def export_delete_tree(modeladmin, request, queryset):
 
 
 export_delete_tree.short_description = "Export delete tree"
-

@@ -86,7 +86,7 @@ def graph_queryset(modeladmin, request, queryset):
             except Exception as e:
                 messages.error(request, 'Unable to produce valid data: %s' % str(e))
     elif request.method == 'POST':
-        total = queryset.all().count()
+        # total = queryset.all().count()
         initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                    'select_across': request.POST.get('select_across', 0)}
         form = MForm(initial=initial)

@@ -1,6 +1,8 @@
 from time import sleep
+import datetime
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+from django.utils import dateformat
 from selenium.webdriver.support.select import Select
 from adminactions.tests.selenium_tests.common import FireFoxLiveTest, ChromeDriverMixin
 
@@ -19,22 +21,21 @@ class ExportCSVFireFox(FireFoxLiveTest):
         driver = self.driver
         self.go(self._url)
         self.assertTrue("Select user to change" in driver.title)
-        driver.find_element_by_xpath("//input[@id='action-toggle']").click() # select all
-        driver.find_element_by_xpath("//input[@name='_selected_action' and @value='1']").click() # unselect sax
-        Select(driver.find_element_by_name("action")).select_by_visible_text("Export as csv")
-        driver.find_element_by_name("index").click() # execute
-        self.assertTrue("Export to CSV" in driver.title)
+        driver.find_element_by_xpath("//input[@id='action-toggle']").click()  # select all
+        driver.find_element_by_xpath("//input[@name='_selected_action' and @value='1']").click()  # unselect sax
+        Select(driver.find_element_by_name("action")).select_by_visible_text("Export as CSV")
+        driver.find_element_by_name("index").click()  # execute
+        self.assertTrue("Export as CSV" in driver.title)
 
     def _test(self, target, format, sample_num):
         self._go_to_page()
         driver = self.driver
         fmt = driver.find_element_by_id(target)
-        sample = driver.find_elements_by_css_selector("span.sample")[sample_num]
-        request = self.factory.get('', {'fmt': format})
-        expected_value = reg.site1.format_date(request).content
         fmt.clear()
         fmt.send_keys(format)
         sleep(1)
+        sample = driver.find_elements_by_css_selector("span.sample")[sample_num]
+        expected_value = dateformat.format(datetime.datetime.now(), format)
         self.assertEquals(sample.text, expected_value)
 
     def test_datetime_format_ajax(self):

@@ -127,5 +127,4 @@ def merge(modeladmin, request, queryset):
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
-merge.short_description = "Merge selected records   "
-
+merge.short_description = "Merge selected records"
