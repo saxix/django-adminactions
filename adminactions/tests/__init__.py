@@ -1,7 +1,7 @@
 from django.conf import settings
 from .mass_update import *  # NOQA
 from .exports import * # NOQA
-from .merge import MergeTest # NOQA
+from .merge import MergeTest, MergeTestApi # NOQA
 
 if getattr(settings, 'ENABLE_SELENIUM', True):
     try:

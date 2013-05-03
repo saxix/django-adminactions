@@ -1,10 +1,12 @@
 # -*- encoding: utf-8 -*-
 import datetime
+from django.db import transaction
 from django.http import HttpResponse
 from adminactions.templatetags.actions import get_field_value
 import unicodecsv as csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
+from adminactions.utils import clone_instance, get_field_by_path
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -17,6 +19,34 @@ csv_options_default = {'date_format': 'd/m/Y',
 delimiters = ",;|:"
 quotes = "'\"`"
 escapechars = " \\"
+
+def merge(master, other, fields=None, commit=False):
+    """
+        Merge 'other' into master.
+
+        `fields` is a list of fieldnames that must be readed from ``other`` to put into master.
+        If ``fields`` is None ``master`` will get all the ``other`` values except primary_key.
+        Finally ``other`` will be deleted and master will be preserved
+
+    @param master:  Model instance
+    @param other: Model instance
+    @param fields: list of fieldnames to  merge
+    @return:
+    """
+    fields = fields or [f.name for f in master._meta.fields]
+    with transaction.commit_manually():
+        try:
+            target = clone_instance(other)
+            result = clone_instance(master)
+            for fieldname in fields:
+                f = get_field_by_path(master, fieldname)
+                if not f.primary_key:
+                    setattr(result, fieldname, getattr(target, fieldname))
+        except:
+            transaction.rollback()
+        else:
+            transaction.commit()
+    return result
 
 
 def export_as_csv(queryset, fields=None, header=False, filename=None, options=None):

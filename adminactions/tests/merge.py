@@ -2,8 +2,40 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
+from adminactions.api import merge
 
 from .common import BaseTestCaseMixin
+
+class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
+    urls = "adminactions.tests.urls"
+    def test_merge_success_no_commit(self):
+        master = User.objects.get(pk=2)
+        other = User.objects.get(pk=3)
+        result = merge(master, other)
+
+        self.assertTrue(User.objects.filter(pk=master.pk).exists())
+        self.assertTrue(User.objects.filter(pk=other.pk).exists())
+
+        self.assertEqual(result.pk, master.pk)
+        self.assertEqual(result.first_name, other.first_name)
+        self.assertEqual(result.last_name, other.last_name)
+        self.assertEqual(result.password, other.password)
+
+    def test_merge_success_fields(self):
+        master = User.objects.get(pk=2)
+        other = User.objects.get(pk=3)
+        result = merge(master, other, ['password', 'last_login'])
+
+        master = User.objects.get(pk=master.pk)
+
+        self.assertTrue(User.objects.filter(pk=master.pk).exists())
+        self.assertTrue(User.objects.filter(pk=other.pk).exists())
+
+        self.assertNotEqual(result.last_login, master.last_login)
+        self.assertEqual(result.last_login, other.last_login)
+        self.assertEqual(result.password, other.password)
+
+        self.assertNotEqual(result.last_name, other.last_name)
 
 
 class MergeTest(BaseTestCaseMixin, TransactionTestCase):
