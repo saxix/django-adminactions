@@ -14,10 +14,10 @@ FAQ
 
 .. _selenium_test:
 
-It's possible to disable seleium tests?
+It's possible to disable selenium tests?
 =======================================
 
-Simply add ``ENABLE_SELENIUM==False`` to your ``settings`` file
+Simply add ``ENABLE_SELENIUM=False`` to your ``settings`` file
 
 
 .. _fixture_vs_tree:
