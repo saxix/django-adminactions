@@ -12,6 +12,14 @@ FAQ
 .. contents::
     :local:
 
+.. _selenium_test:
+
+It's possible to disable seleium tests?
+=======================================
+
+Simply add ``ENABLE_SELENIUM==False`` to your ``settings`` file
+
+
 .. _fixture_vs_tree:
 
 Difference between :ref:`export_delete_tree` and :ref:`export_as_fixture`
