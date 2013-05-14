@@ -5,6 +5,7 @@
 *.sqlite
 .idea
 .tox
+.cache
 /dist
 /build
 /docs/build
