@@ -6,8 +6,7 @@ from django.test import LiveServerTestCase
 import time
 from adminactions.tests.common import SETTINGS
 
-
-selenium_can_start = lambda: getattr(settings, 'ENABLE_SELENIUM', True) and 'DISPLAY' in os.environ
+selenium_can_start = lambda: getattr(settings, 'ENABLE_SELENIUM', not os.environ.get('DISABLE_SELENIUM', 0)) and 'DISPLAY' in os.environ
 
 try:
     import selenium.webdriver.firefox.webdriver
