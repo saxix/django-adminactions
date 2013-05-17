@@ -4,7 +4,10 @@ from django.db import transaction
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.http import HttpResponse
 from adminactions.templatetags.actions import get_field_value
-import unicodecsv as csv
+try:
+    import unicodecsv as csv
+except ImportError:
+    import csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
 from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance
