@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import User, Group, Permission
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
@@ -88,6 +89,19 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         result = merge(master, other, commit=True, related=ALL_FIELDS)
         master = User.objects.get(pk=result.pk) # reload
         self.assertSequenceEqual(master.logentry_set.all(), [entry])
+        self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_merge_ignore_related(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+        result = merge(master, other, commit=True, related=None)
+
+        master = User.objects.get(pk=result.pk) # reload
+        self.assertSequenceEqual(master.logentry_set.all(), [])
+        self.assertFalse(User.objects.filter(pk=other.pk).exists())
+        self.assertFalse(LogEntry.objects.filter(pk=entry.pk).exists())
+
 
 class MergeTest(BaseTestCaseMixin, TransactionTestCase):
     urls = "adminactions.tests.urls"
