@@ -25,17 +25,17 @@ class MergeForm(GenericActionForm):
     dependencies = forms.ChoiceField(label=_('Dependencies'),
                                      choices=((DEP_MOVE, _("Move")), (DEP_DELETE, _("Delete"))))
 
-    generic = forms.ChoiceField(label=_('Search GenericForeignKeys'),
-                                help_text=_("Search for generic relation"),
-                                choices=((GEN_IGNORE, _("No")),
-                                         (GEN_RELATED, _("Only Related (look for Managers)")),
-                                         (GEN_DEEP, _("Analyze Mode (very slow)"))))
+    # generic = forms.ChoiceField(label=_('Search GenericForeignKeys'),
+    #                             help_text=_("Search for generic relation"),
+    #                             choices=((GEN_IGNORE, _("No")),
+    #                                      (GEN_RELATED, _("Only Related (look for Managers)")),
+    #                                      (GEN_DEEP, _("Analyze Mode (very slow)"))))
 
     master_pk = forms.CharField(widget=HiddenInput)
     other_pk = forms.CharField(widget=HiddenInput)
 
     def action_fields(self):
-        for fieldname in ['generic', 'dependencies', 'master_pk', 'other_pk']:
+        for fieldname in ['dependencies', 'master_pk', 'other_pk']:
             bf = self[fieldname]
             yield HiddenInput().render(fieldname, bf.value())
 
