@@ -1,3 +1,4 @@
+~*
 *.log
 *.pot
 *.pyc
@@ -5,6 +6,7 @@
 *.sqlite
 .idea
 .tox
+.cache
 /dist
 /build
 /docs/build

@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.models import ModelForm
-import unicodecsv as csv
+from .api import csv
 from django.forms.widgets import SelectMultiple
 from django.utils import formats
 from adminactions.api import delimiters, quotes
