@@ -6,8 +6,7 @@ from django.test import LiveServerTestCase
 import time
 from adminactions.tests.common import SETTINGS
 
-
-selenium_can_start = lambda: getattr(settings, 'ENABLE_SELENIUM', True) and 'DISPLAY' in os.environ
+selenium_can_start = lambda: getattr(settings, 'ENABLE_SELENIUM', not os.environ.get('DISABLE_SELENIUM', 0)) and 'DISPLAY' in os.environ
 
 try:
     import selenium.webdriver.firefox.webdriver
@@ -19,7 +18,7 @@ except ImportError as e:
 
 class SkipSeleniumTestChecker(type):
     def __new__(mcs, name, bases, attrs):
-        super_new = super(SkipSeleniumTestChecker, mcs).__new__
+        # super_new = super(SkipSeleniumTestChecker, mcs).__new__
         if not selenium_can_start():
             for name, func in attrs.items():
                 if callable(func) and name.startswith('test'):
@@ -110,5 +109,3 @@ class FireFoxLiveTest(FirefoxDriverMixin, SeleniumTestCase):
 #    def setUp(self):
 #        self.settings(SETTINGS)
 #        super(FireFoxLiveTest, self).setUp()
-
-

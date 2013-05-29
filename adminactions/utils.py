@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 
 
-def clone_instance(instance):
+def clone_instance(instance, fieldnames=None):
     """
         returns a copy of the passed instance.
 
@@ -11,9 +11,17 @@ def clone_instance(instance):
     :param instance: `django.db.models.Model`_ instance
     :return: `django.db.models.Model`_ instance
     """
-    new_kwargs = dict([(fld.name, getattr(instance, fld.name)) for fld in instance._meta.fields])
+
+    if fieldnames is None:
+        # fields = [fld for fld in instance._meta.fields if fld.name in fieldnames]
+    # else:
+        fieldnames = [fld.name for fld in instance._meta.fields]
+
+    new_kwargs = dict([(name, getattr(instance, name)) for name in fieldnames])
     return instance.__class__(**new_kwargs)
 
+def get_copy_of_instance(instance):
+    return instance.__class__.objects.get(pk=instance.pk)
 
 def get_field_value(obj, field, usedisplay=True):
     """
@@ -24,7 +32,7 @@ def get_field_value(obj, field, usedisplay=True):
     :param usedisplay: boolean if True return the get_FIELD_display() result
     :return: field value
 
-    >>> from django.contrib.auth.models import User, Permission
+    >>> from django.contrib.auth.models import Permission
     >>> p = Permission(name='perm')
     >>> print get_field_value(p, 'name')
     perm
@@ -54,7 +62,7 @@ def get_field_by_path(model, field_path):
     :return: :class:`django.db.models.Field`
 
 
-    >>> from django.contrib.auth.models import User, Permission
+    >>> from django.contrib.auth.models import Permission
 
     >>> p = Permission(name='perm')
     >>> f = get_field_by_path(Permission, 'content_type')

@@ -2,16 +2,11 @@ language: python
 python:
   - "2.6"
   - "2.7"
-script: nosetests
 env:
   - DJANGO_VERSION="Django==1.4.3"
-  - DJANGO_VERSION=https://www.djangoproject.com/download/1.5c1/tarball/
+  - DJANGO_VERSION="Django==1.5.1"
 install:
-#  - pip install pep8 --use-mirrors
   - pip install -q $DJANGO_VERSION
   - python setup.py -q install
-  - pip install -r requirements.txt --use-mirrors
 
 script: django-admin.py test adminactions --settings=adminactions.tests.settings
-before_script:
-#   - "pep8 --exclude=migrations --ignore=E501,E225 src"

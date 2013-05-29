@@ -20,12 +20,12 @@ class MassUpdateFireFox(FireFoxLiveTest):
         driver = self.driver
         self.go(self._url)
         self.assertIn("Select user to change", driver.title)
-        driver.find_element_by_xpath("//input[@id='action-toggle']").click() # select all
-        driver.find_element_by_xpath("//input[@name='_selected_action' and @value='1']").click() # unselect sax
+        driver.find_element_by_xpath("//input[@id='action-toggle']").click()  # select all
+        driver.find_element_by_xpath("//input[@name='_selected_action' and @value='1']").click()  # unselect sax
         Select(driver.find_element_by_name("action")).select_by_visible_text("Mass update")
-        driver.find_element_by_name("index").click() # execute
+        driver.find_element_by_name("index").click()  # execute
         self.assertIn("Mass update users", driver.title)
-        driver.find_element_by_xpath("//div[@id='col1']/form/table/tbody/tr[10]/td[5]/a[2]").click() # False
+        driver.find_element_by_xpath("//div[@id='col1']/form/table/tbody/tr[10]/td[5]/a[2]").click()  # False
         driver.find_element_by_name("apply").click()
         self.assertIn("Select user to change", driver.title)
 

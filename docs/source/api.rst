@@ -14,6 +14,8 @@ API
 
 .. autosummary::
     actions.add_to_site
+    api.export_as_csv
+    api.merge
     utils.clone_instance
     utils.get_field_by_path
     utils.get_field_value
@@ -22,7 +24,18 @@ API
     templatetags.actions.field_display
     templatetags.actions.raw_value
 
+
 .. autofunction:: adminactions.actions.add_to_site
+
+
+.. _api_export_as_csv:
+
+.. autofunction:: adminactions.api.export_as_csv
+
+
+.. _api_merge:
+
+.. autofunction:: adminactions.api.merge
 
 
 .. _get_export_as_csv_filename:

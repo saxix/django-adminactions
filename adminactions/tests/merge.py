@@ -1,9 +1,106 @@
 # -*- coding: utf-8 -*-
-from django.contrib.auth.models import User
+from django.contrib.admin.models import LogEntry
+from django.contrib.auth.models import User, Group, Permission
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
+from adminactions.api import merge, ALL_FIELDS
 
 from .common import BaseTestCaseMixin
+
+class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
+    urls = "adminactions.tests.urls"
+
+    def setUp(self):
+        super(MergeTestApi, self).setUp()
+        self.master_pk = 2
+        self.other_pk = 3
+
+    def test_merge_success_no_commit(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        result = merge(master, other)
+
+        self.assertTrue(User.objects.filter(pk=master.pk).exists())
+        self.assertTrue(User.objects.filter(pk=other.pk).exists())
+
+        self.assertEqual(result.pk, master.pk)
+        self.assertEqual(result.first_name, other.first_name)
+        self.assertEqual(result.last_name, other.last_name)
+        self.assertEqual(result.password, other.password)
+
+    def test_merge_success_fields_no_commit(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        result = merge(master, other, ['password', 'last_login'])
+
+        master = User.objects.get(pk=master.pk)
+
+        self.assertTrue(User.objects.filter(pk=master.pk).exists())
+        self.assertTrue(User.objects.filter(pk=other.pk).exists())
+
+        self.assertNotEqual(result.last_login, master.last_login)
+        self.assertEqual(result.last_login, other.last_login)
+        self.assertEqual(result.password, other.password)
+
+        self.assertNotEqual(result.last_name, other.last_name)
+
+    def test_merge_success_commit(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        result = merge(master, other, commit=True)
+
+        master = User.objects.get(pk=result.pk) # reload
+        self.assertTrue(User.objects.filter(pk=master.pk).exists())
+        self.assertFalse(User.objects.filter(pk=other.pk).exists())
+
+        self.assertEqual(result.pk, master.pk)
+        self.assertEqual(master.first_name, other.first_name)
+        self.assertEqual(master.last_name, other.last_name)
+        self.assertEqual(master.password, other.password)
+
+    def test_merge_success_m2m(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        group = Group.objects.get_or_create(name='G1')[0]
+        other.groups.add(group)
+        other.save()
+
+        result = merge(master, other, commit=True, m2m=['groups'])
+        master = User.objects.get(pk=result.pk) # reload
+        self.assertSequenceEqual(master.groups.all(), [group])
+
+    def test_merge_success_m2m_all(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        group = Group.objects.get_or_create(name='G1')[0]
+        perm = Permission.objects.all()[0]
+        other.groups.add(group)
+        other.user_permissions.add(perm)
+        other.save()
+
+        result = merge(master, other, commit=True, m2m=ALL_FIELDS)
+        self.assertSequenceEqual(master.groups.all(), [group])
+        self.assertSequenceEqual(master.user_permissions.all(), [perm])
+
+    def test_merge_success_related_all(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+        result = merge(master, other, commit=True, related=ALL_FIELDS)
+        master = User.objects.get(pk=result.pk) # reload
+        self.assertSequenceEqual(master.logentry_set.all(), [entry])
+        self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_merge_ignore_related(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+        result = merge(master, other, commit=True, related=None)
+
+        master = User.objects.get(pk=result.pk) # reload
+        self.assertSequenceEqual(master.logentry_set.all(), [])
+        self.assertFalse(User.objects.filter(pk=other.pk).exists())
+        self.assertFalse(LogEntry.objects.filter(pk=entry.pk).exists())
 
 
 class MergeTest(BaseTestCaseMixin, TransactionTestCase):

@@ -12,6 +12,14 @@ FAQ
 .. contents::
     :local:
 
+.. _selenium_test:
+
+It's possible to disable selenium tests?
+========================================
+
+Simply add ``ENABLE_SELENIUM=False`` to your ``settings`` file, or set DISABLE_SELENUIM environment variable
+
+
 .. _fixture_vs_tree:
 
 Difference between :ref:`export_delete_tree` and :ref:`export_as_fixture`

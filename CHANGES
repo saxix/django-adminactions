@@ -1,7 +1,11 @@
 .. release:: dev
 
-Release 0.1 (in development)
-============================
+Release 0.1
+===========
+
+* new api module
+* pull out core export_csv functionalites as `_export_as_csv() <api.html#adminactions.export._export_as_csv>`_
+ to be used by custom code
 * New exported filename callback for easy customize the filename ( see :ref:`filename_callbacks`)
 * New registration shortcut `add_to_site() <api.html#adminactions.actions.add_to_site>`_
 * New action: :ref:`merge`
@@ -36,7 +40,7 @@ Release 0.0.2
 
 * name changed from django-actions to django-adminactions
 
-.. release:: 0_0_2
+.. release:: 0_0_1
 
 Release 0.0.1
 =============

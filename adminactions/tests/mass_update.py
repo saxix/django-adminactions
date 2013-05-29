@@ -31,7 +31,8 @@ class MassUpdateTest(BaseTestCase):
     def test_action_post(self):
         response = self._run_action()
         self.assertEquals(response.status_code, 302)
-        self.assertSequenceEqual(self.selected_rows, User.objects.filter(is_active=False).order_by('id').values_list('id', flat=True))
+        self.assertSequenceEqual(self.selected_rows,
+                                 User.objects.filter(is_active=False).order_by('id').values_list('id', flat=True))
 
     def test_many_to_many(self):
         target_ids = [2, 4, 10]

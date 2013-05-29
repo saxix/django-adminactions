@@ -30,7 +30,7 @@ def link_fields_values(d, k):
     """
     ret = []
     for v in d.get(k, []):
-        if v == '': # ignore empty
+        if v == '':  # ignore empty
             continue
         ret.append('<a href="#" class="fastfieldvalue %s value">%s</a>' % (k, force_unicode(v)))
 
@@ -80,6 +80,3 @@ def field_function(model, form_field):
         options_attrs[label] = {'class': classes[param], 'label': label}
         choices.append((label, label))
     return SelectOptionsAttribute(attrs, choices, options_attrs).render("func_id_%s" % form_field.name, "")
-
-
-

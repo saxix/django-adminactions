@@ -10,7 +10,7 @@ from adminactions.forms import GenericActionForm
 
 class AnyForm(GenericActionForm):
     _number = forms.BooleanField(label='Number',
-        help_text="Number of records to create")
+                                 help_text="Number of records to create")
 
 
 def create_random_records(modeladmin, request, queryset):
@@ -27,8 +27,8 @@ def create_random_records(modeladmin, request, queryset):
     ctx = {'adminform': adminForm,
            'form': form,
            'title': u"Create  random %s records" % force_unicode(modeladmin.opts.verbose_name_plural),
-#           'grouped': grouped,
-#           'fieldvalues': json.dumps(grouped, default=dthandler),
+           #           'grouped': grouped,
+           #           'fieldvalues': json.dumps(grouped, default=dthandler),
            'change': True,
            'is_popup': False,
            'save_as': False,
@@ -42,5 +42,6 @@ def create_random_records(modeladmin, request, queryset):
            'selection': queryset}
 
     return render_to_response(tpl, RequestContext(request, ctx))
+
 
 create_random_records.short_description = "Create random records"

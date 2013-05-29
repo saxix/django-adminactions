@@ -67,7 +67,7 @@ class CheckSignalsMixin(object):
 
         try:
             adminaction_end.connect(myhandler, sender=Permission)
-            response = self._run_action(code3=200)
+            self._run_action(code3=200)
             self.assertTrue(myhandler.invoked)
         finally:
             adminaction_end.disconnect(myhandler, sender=Permission)
@@ -149,7 +149,7 @@ class ExportAsCsvTest(BaseExportTest, CheckSignalsMixin):
 
     def test_permission(self):
         # test if right permission is checked
-        self.login('user_0', '123') # normal user
+        self.login('user_0', '123')  # normal user
         self.add_permission('auth.change_permission')
         response = self._run_action(code2=302)
         self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
@@ -190,7 +190,7 @@ class ExportAsFixtureTest(BaseExportTest, CheckSignalsMixin):
 
     def test_permission(self):
         # test if right permission is checked
-        self.login('user_0', '123') # normal user
+        self.login('user_0', '123')  # normal user
         self.add_permission('auth.change_permission')
         response = self._run_action(code2=302)
         self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
@@ -208,8 +208,7 @@ class ExportDeleteTreeTest(BaseExportTest, CheckSignalsMixin):
 
     def test_permission(self):
         # test if right permission is checked
-        self.login('user_0', '123') # normal user
+        self.login('user_0', '123')  # normal user
         self.add_permission('auth.change_permission')
         response = self._run_action(code2=302)
         self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
-

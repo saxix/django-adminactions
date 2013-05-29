@@ -1,11 +1,14 @@
-/.idea
-/dist
-/build
-/docs/build
+~*
 *.log
 *.pot
 *.pyc
 *.egg-info
-/MANIFEST
 *.sqlite
+.idea
+.tox
+.cache
+/dist
+/build
+/docs/build
+/MANIFEST
 

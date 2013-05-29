@@ -1,2 +1,3 @@
 unicodecsv>=0.9.0
-
+mock
+selenium
