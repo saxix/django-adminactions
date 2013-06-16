@@ -41,7 +41,7 @@ def graph_form_factory(model):
 def graph_queryset(modeladmin, request, queryset):
     MForm = graph_form_factory(modeladmin.model)
 
-    graph_type = table = data_labels = data = total = None
+    graph_type = table = None
     try:
         adminaction_requested.send(sender=modeladmin.model,
                                    action='graph_queryset',

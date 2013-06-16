@@ -20,8 +20,10 @@ def clone_instance(instance, fieldnames=None):
     new_kwargs = dict([(name, getattr(instance, name)) for name in fieldnames])
     return instance.__class__(**new_kwargs)
 
+
 def get_copy_of_instance(instance):
     return instance.__class__.objects.get(pk=instance.pk)
+
 
 def get_field_value(obj, field, usedisplay=True):
     """

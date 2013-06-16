@@ -7,6 +7,7 @@ from adminactions.api import merge, ALL_FIELDS
 
 from .common import BaseTestCaseMixin
 
+
 class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
     urls = "adminactions.tests.urls"
 
@@ -49,7 +50,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         other = User.objects.get(pk=self.other_pk)
         result = merge(master, other, commit=True)
 
-        master = User.objects.get(pk=result.pk) # reload
+        master = User.objects.get(pk=result.pk)  # reload
         self.assertTrue(User.objects.filter(pk=master.pk).exists())
         self.assertFalse(User.objects.filter(pk=other.pk).exists())
 
@@ -66,7 +67,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         other.save()
 
         result = merge(master, other, commit=True, m2m=['groups'])
-        master = User.objects.get(pk=result.pk) # reload
+        master = User.objects.get(pk=result.pk)  # reload
         self.assertSequenceEqual(master.groups.all(), [group])
 
     def test_merge_success_m2m_all(self):
@@ -78,7 +79,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         other.user_permissions.add(perm)
         other.save()
 
-        result = merge(master, other, commit=True, m2m=ALL_FIELDS)
+        merge(master, other, commit=True, m2m=ALL_FIELDS)
         self.assertSequenceEqual(master.groups.all(), [group])
         self.assertSequenceEqual(master.user_permissions.all(), [perm])
 
@@ -87,7 +88,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         other = User.objects.get(pk=self.other_pk)
         entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
         result = merge(master, other, commit=True, related=ALL_FIELDS)
-        master = User.objects.get(pk=result.pk) # reload
+        master = User.objects.get(pk=result.pk)  # reload
         self.assertSequenceEqual(master.logentry_set.all(), [entry])
         self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
 
@@ -97,7 +98,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
         result = merge(master, other, commit=True, related=None)
 
-        master = User.objects.get(pk=result.pk) # reload
+        master = User.objects.get(pk=result.pk)  # reload
         self.assertSequenceEqual(master.logentry_set.all(), [])
         self.assertFalse(User.objects.filter(pk=other.pk).exists())
         self.assertFalse(LogEntry.objects.filter(pk=entry.pk).exists())

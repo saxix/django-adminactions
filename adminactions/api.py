@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import datetime
 from django.db import transaction
-from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.db.models.fields.related import ManyToManyField
 from django.http import HttpResponse
 from adminactions.templatetags.actions import get_field_value
 try:
@@ -24,6 +24,7 @@ delimiters = ",;|:"
 quotes = "'\"`"
 escapechars = " \\"
 ALL_FIELDS = -999
+
 
 def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     """
@@ -79,7 +80,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
 
             if commit:
                 for name, elements in all_related.items():
-                    dest = getattr(result, name)
+                    # dest = getattr(result, name)
                     for rel_fieldname, element in elements:
                         setattr(element, rel_fieldname, master)
                         element.save()
