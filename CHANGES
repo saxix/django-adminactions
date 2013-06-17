@@ -1,5 +1,12 @@
 .. release:: dev
 
+Release 0.2 (in development)
+============================
+
+* Added `modeladmin` in providing_args of signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
+
+.. release:: 0_1
+
 Release 0.1
 ===========
 
