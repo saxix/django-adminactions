@@ -242,6 +242,7 @@ def mass_update(modeladmin, request, queryset):
                                          action='mass_update',
                                          request=request,
                                          queryset=queryset,
+                                         modeladmin=modeladmin,
                                          form=form,
                                          errors=errors,
                                          updated=updated)
