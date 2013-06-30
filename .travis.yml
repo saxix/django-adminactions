@@ -9,4 +9,5 @@ install:
   - pip install -q $DJANGO_VERSION
   - python setup.py -q install
 
-script: django-admin.py test adminactions --settings=adminactions.tests.settings
+script:
+  - django-admin.py test adminactions --settings=adminactions.tests.settings

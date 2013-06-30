@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
 import datetime
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models.fields.related import ManyToManyField
+from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from adminactions.templatetags.actions import get_field_value
 try:
@@ -10,7 +11,7 @@ except ImportError:
     import csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
-from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance
+from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance  # NOQA
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -72,11 +73,20 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
                         all_m2m[fieldname].append(r)
             if related:
                 for name in set(related):
+                    related_object = get_field_by_path(master, name)
                     all_related[name] = []
-                    accessor = getattr(other, name)
-                    rel_fieldname = accessor.core_filters.keys()[0].split('__')[0]
-                    for r in accessor.all():
-                        all_related[name].append((rel_fieldname, r))
+                    if related_object and isinstance(related_object.field, OneToOneField):
+                        try:
+                            accessor = getattr(other, name)
+                            all_related[name] = [(related_object.field.name, accessor)]
+                        except ObjectDoesNotExist:
+                            #nothing to merge
+                            pass
+                    else:
+                        accessor = getattr(other, name)
+                        rel_fieldname = accessor.core_filters.keys()[0].split('__')[0]
+                        for r in accessor.all():
+                            all_related[name].append((rel_fieldname, r))
 
             if commit:
                 for name, elements in all_related.items():

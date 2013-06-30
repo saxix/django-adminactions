@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from django.utils.unittest import skipIf
+from django.conf import settings
+from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import User, Group, Permission
 from django.core.urlresolvers import reverse
@@ -8,6 +12,24 @@ from adminactions.api import merge, ALL_FIELDS
 from .common import BaseTestCaseMixin
 
 
+def assert_profile(user):
+    p = None
+    try:
+        user.get_profile()
+    except ObjectDoesNotExist:
+        app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
+        model = models.get_model(app_label, model_name)
+        p, __ = model.objects.get_or_create(user=user)
+
+    return p
+
+
+def get_profile(user):
+    app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
+    model = models.get_model(app_label, model_name)
+    return model.objects.get(user=user)
+
+
 class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
     urls = "adminactions.tests.urls"
 
@@ -15,6 +37,9 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         super(MergeTestApi, self).setUp()
         self.master_pk = 2
         self.other_pk = 3
+
+    def tearDown(self):
+        super(MergeTestApi, self).tearDown()
 
     def test_merge_success_no_commit(self):
         master = User.objects.get(pk=self.master_pk)
@@ -87,10 +112,29 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
         entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+
         result = merge(master, other, commit=True, related=ALL_FIELDS)
+
         master = User.objects.get(pk=result.pk)  # reload
         self.assertSequenceEqual(master.logentry_set.all(), [entry])
         self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
+
+    @skipIf(not hasattr(settings, 'AUTH_PROFILE_MODULE'), "")
+    def test_merge_one_to_one_field(self):
+        master = User.objects.get(pk=self.master_pk)
+        other = User.objects.get(pk=self.other_pk)
+        profile = assert_profile(other)
+        if profile:
+            entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+
+            result = merge(master, other, commit=True, related=ALL_FIELDS)
+
+            master = User.objects.get(pk=result.pk)  # reload
+            self.assertSequenceEqual(master.logentry_set.all(), [entry])
+            self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
+            self.assertEqual(get_profile(result), profile)
+            self.assertEqual(master.get_profile(), profile)
+
 
     def test_merge_ignore_related(self):
         master = User.objects.get(pk=self.master_pk)
