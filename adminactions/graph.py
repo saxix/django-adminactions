@@ -15,6 +15,7 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import force_unicode
 from django.contrib.admin import helpers
+
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested, adminaction_start
 
@@ -41,12 +42,13 @@ def graph_form_factory(model):
 def graph_queryset(modeladmin, request, queryset):
     MForm = graph_form_factory(modeladmin.model)
 
-    graph_type = table = data_labels = data = total = None
+    graph_type = table = None
     try:
         adminaction_requested.send(sender=modeladmin.model,
                                    action='graph_queryset',
                                    request=request,
-                                   queryset=queryset)
+                                   queryset=queryset,
+                                   modeladmin=modeladmin)
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
@@ -59,6 +61,7 @@ def graph_queryset(modeladmin, request, queryset):
                                        action='graph_queryset',
                                        request=request,
                                        queryset=queryset,
+                                       modeladmin=modeladmin,
                                        form=form)
             except ActionInterrupted as e:
                 messages.error(request, str(e))

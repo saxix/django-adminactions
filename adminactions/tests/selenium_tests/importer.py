@@ -1,7 +1,7 @@
 import os
 from adminactions.tests.selenium_tests.common import FireFoxLiveTest
 
-__all__ = ['CSVImportTest', 'CSVImportFireFox']
+__all__ = ['CSVImportFireFox']
 
 DATADIR = os.path.join(os.path.dirname(__file__), 'data')
 

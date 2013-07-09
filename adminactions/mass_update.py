@@ -3,6 +3,7 @@ import json
 import datetime
 import string
 from collections import defaultdict
+
 from django import forms
 from django.db import IntegrityError, transaction
 from django.db.models import fields as df
@@ -108,7 +109,7 @@ class MassUpdateForm(GenericActionForm):
                                    help_text="if checked use obj.save() instead of manager.update()")
     _unique_transaction = forms.BooleanField(label='Unique transaction',
                                              help_text="If checked create one transaction for the whole update. "
-                                                       "If some record cannot be updated everything will be rolled-back")
+                                                       "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
         super(MassUpdateForm, self).__init__(*args, **kwargs)
@@ -175,7 +176,11 @@ def mass_update(modeladmin, request, queryset):
         return
 
     try:
-        adminaction_requested.send(sender=modeladmin.model, action='mass_update', request=request, queryset=queryset)
+        adminaction_requested.send(sender=modeladmin.model,
+                                   action='mass_update',
+                                   request=request,
+                                   queryset=queryset,
+                                   modeladmin=modeladmin)
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
@@ -191,8 +196,12 @@ def mass_update(modeladmin, request, queryset):
         form = MForm(request.POST)
         if form.is_valid():
             try:
-                adminaction_start.send(sender=modeladmin.model, action='mass_update',
-                                       request=request, queryset=queryset, form=form)
+                adminaction_start.send(sender=modeladmin.model,
+                                       action='mass_update',
+                                       request=request,
+                                       queryset=queryset,
+                                       modeladmin=modeladmin,
+                                       form=form)
             except ActionInterrupted as e:
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.get_full_path())
@@ -233,8 +242,10 @@ def mass_update(modeladmin, request, queryset):
                                          action='mass_update',
                                          request=request,
                                          queryset=queryset,
+                                         modeladmin=modeladmin,
                                          form=form,
-                                         errors=errors)
+                                         errors=errors,
+                                         updated=updated)
                     if need_transaction:
                         transaction.commit()
                 except ActionInterrupted:

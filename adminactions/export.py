@@ -2,25 +2,26 @@
 
 from itertools import chain
 from operator import attrgetter
+
 from django.core.serializers import get_serializer_formats
 from django.db import router
 from django.db.models import ManyToManyField, ForeignKey
 from django.db.models.deletion import Collector
-
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
+from django.utils.safestring import mark_safe
+from django.contrib.admin import helpers
+from django.core import serializers as ser
+
 from adminactions.api import csv_options_default
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVOptions
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 from adminactions.api import export_as_csv as _export_as_csv
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
-from django.utils.safestring import mark_safe
-from django.contrib.admin import helpers
-import django.core.serializers as ser
 
 
 def export_as_csv(modeladmin, request, queryset):
@@ -35,7 +36,8 @@ def export_as_csv(modeladmin, request, queryset):
         adminaction_requested.send(sender=modeladmin.model,
                                    action='export_as_csv',
                                    request=request,
-                                   queryset=queryset)
+                                   queryset=queryset,
+                                   modeladmin=modeladmin)
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
@@ -56,6 +58,7 @@ def export_as_csv(modeladmin, request, queryset):
                                        action='export_as_csv',
                                        request=request,
                                        queryset=queryset,
+                                       modeladmin=modeladmin,
                                        form=form)
             except ActionInterrupted as e:
                 messages.error(request, str(e))
@@ -73,8 +76,12 @@ def export_as_csv(modeladmin, request, queryset):
             except Exception as e:
                 messages.error(request, "Error: (%s)" % str(e))
             else:
-                adminaction_end.send(sender=modeladmin.model, action='export_as_csv', request=request,
-                                     queryset=queryset)
+                adminaction_end.send(sender=modeladmin.model,
+                                     action='export_as_csv',
+                                     request=request,
+                                     queryset=queryset,
+                                     modeladmin=modeladmin,
+                                     form=form)
                 return response
     else:
         form = CSVOptions(initial=initial)
@@ -200,7 +207,8 @@ def export_as_fixture(modeladmin, request, queryset):
         adminaction_requested.send(sender=modeladmin.model,
                                    action='export_as_fixture',
                                    request=request,
-                                   queryset=queryset)
+                                   queryset=queryset,
+                                   modeladmin=modeladmin)
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
@@ -213,6 +221,7 @@ def export_as_fixture(modeladmin, request, queryset):
                                        action='export_as_fixture',
                                        request=request,
                                        queryset=queryset,
+                                       modeladmin=modeladmin,
                                        form=form)
             except ActionInterrupted as e:
                 messages.error(request, str(e))
@@ -221,8 +230,12 @@ def export_as_fixture(modeladmin, request, queryset):
                 _collector = ForeignKeysCollector if form.cleaned_data.get('add_foreign_keys') else FlatCollector
                 c = _collector(None)
                 c.collect(queryset)
-                adminaction_end.send(sender=modeladmin.model, action='export_as_fixture', request=request,
-                                     queryset=queryset, form=form)
+                adminaction_end.send(sender=modeladmin.model,
+                                     action='export_as_fixture',
+                                     request=request,
+                                     queryset=queryset,
+                                     modeladmin=modeladmin,
+                                     form=form)
 
                 if hasattr(modeladmin, 'get_export_as_fixture_filename'):
                     filename = modeladmin.get_export_as_fixture_filename(request, queryset)
@@ -268,7 +281,8 @@ def export_delete_tree(modeladmin, request, queryset):
         adminaction_requested.send(sender=modeladmin.model,
                                    action='export_delete_tree',
                                    request=request,
-                                   queryset=queryset)
+                                   queryset=queryset,
+                                   modeladmin=modeladmin)
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
@@ -287,6 +301,7 @@ def export_delete_tree(modeladmin, request, queryset):
                                        action='export_delete_tree',
                                        request=request,
                                        queryset=queryset,
+                                       modeladmin=modeladmin,
                                        form=form)
             except ActionInterrupted as e:
                 messages.error(request, str(e))
@@ -300,8 +315,12 @@ def export_delete_tree(modeladmin, request, queryset):
                 data = []
                 for model, instances in c.data.items():
                     data.extend(instances)
-                adminaction_end.send(sender=modeladmin.model, action='export_delete_tree', request=request,
-                                     queryset=queryset)
+                adminaction_end.send(sender=modeladmin.model,
+                                     action='export_delete_tree',
+                                     request=request,
+                                     queryset=queryset,
+                                     modeladmin=modeladmin,
+                                     form=form)
                 if hasattr(modeladmin, 'get_export_delete_tree_filename'):
                     filename = modeladmin.get_export_delete_tree_filename(request, queryset)
                 else:

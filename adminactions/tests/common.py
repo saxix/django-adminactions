@@ -11,6 +11,7 @@ SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
             'AUTHENTICATION_BACKENDS': ('django.contrib.auth.backends.ModelBackend',),
             'TEMPLATE_LOADERS': ('django.template.loaders.filesystem.Loader',
                                  'django.template.loaders.app_directories.Loader'),
+            # 'AUTH_PROFILE_MODULE': None,
             'TEMPLATE_CONTEXT_PROCESSORS': ("django.contrib.auth.context_processors.auth",
                                             "django.core.context_processors.debug",
                                             "django.core.context_processors.i18n",
@@ -28,8 +29,8 @@ class BaseTestCaseMixin(object):
     def setUp(self):
         super(BaseTestCaseMixin, self).setUp()
         self.sett = self.settings(**SETTINGS)
-        self.login()
         self.sett.enable()
+        self.login()
 
     def tearDown(self):
         self.sett.disable()

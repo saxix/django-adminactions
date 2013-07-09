@@ -3,15 +3,13 @@ import sys
 import os
 
 here = os.path.dirname(__file__)
-sys.path.append(os.path.abspath(os.path.join(here, '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(here, os.pardir, os.pardir)))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-DATABASES = {
-    'default': {'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-                'NAME': 'DEMODB.sqlite',  # Not used with sqlite3.
-                'HOST': '',  # Set to empty string for localhost. Not used with sqlite3.
-                'PORT': '',  # Set to empty string for default. Not used with sqlite3.
-    }}  # NOQA
+DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3',
+                         'NAME': 'DEMODB.sqlite',
+                         'HOST': '',
+                         'PORT': ''}}  # NOQA
 
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'
@@ -50,3 +48,5 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'adminactions')
+
+TEST_RUNNER='django.test.simple.DjangoTestSuiteRunner'

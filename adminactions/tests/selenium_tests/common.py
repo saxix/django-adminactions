@@ -6,19 +6,23 @@ from django.test import LiveServerTestCase
 import time
 from adminactions.tests.common import SETTINGS
 
-selenium_can_start = lambda: getattr(settings, 'ENABLE_SELENIUM', not os.environ.get('DISABLE_SELENIUM', 0)) and 'DISPLAY' in os.environ
 
 try:
     import selenium.webdriver.firefox.webdriver
     import selenium.webdriver.chrome.webdriver
     from selenium.webdriver.support.wait import WebDriverWait
+
+    def selenium_can_start():
+        return getattr(settings, 'ENABLE_SELENIUM',
+                       not os.environ.get('DISABLE_SELENIUM', 0)) and 'DISPLAY' in os.environ
+
+
 except ImportError as e:
     selenium_can_start = lambda: False
 
 
 class SkipSeleniumTestChecker(type):
     def __new__(mcs, name, bases, attrs):
-        # super_new = super(SkipSeleniumTestChecker, mcs).__new__
         if not selenium_can_start():
             for name, func in attrs.items():
                 if callable(func) and name.startswith('test'):
@@ -93,6 +97,7 @@ class ChromeDriverMixin(object):
 
 class FireFoxLiveTest(FirefoxDriverMixin, SeleniumTestCase):
     pass
+
 #    INSTALLED_APPS = (
 #        'django.contrib.auth',
 #        'django.contrib.contenttypes',

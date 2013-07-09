@@ -15,7 +15,7 @@ clean:
 docs:
 	mkdir -p ${BUILDDIR}/docs
 	sphinx-build docs/source ${BUILDDIR}/docs
-ifdef OPENDOCS
+ifdef BROWSE
 	firefox ${BUILDDIR}/docs/index.html
 endif
 

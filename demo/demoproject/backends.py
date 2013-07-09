@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.backends import ModelBackend
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission
 
 
 class AnyUserBackend(ModelBackend):

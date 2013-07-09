@@ -13,7 +13,5 @@ if not django.contrib.auth.models.Permission in admin.site._registry:
 actions.add_to_site(admin.site)
 
 urlpatterns = patterns('',
-    (r'^admin/', include(admin.site.urls)),
-   (r'^adminactions/', include(include(adminactions.urls))),
-
-)
+                       (r'^admin/', include(admin.site.urls)),
+                       (r'^adminactions/', include(include(adminactions.urls))))

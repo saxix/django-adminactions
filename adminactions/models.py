@@ -1,5 +1,8 @@
-from django.contrib.auth.management import _get_permission_codename
 from django.db.models import signals
+
+
+def _get_permission_codename(action, opts):
+    return '%s_%s' % (action, opts.object_name.lower())
 
 
 def create_extra_permission(sender, **kwargs):
