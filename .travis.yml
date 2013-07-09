@@ -3,10 +3,12 @@ python:
   - "2.6"
   - "2.7"
 env:
-  - DJANGO_VERSION="Django==1.4.3"
-  - DJANGO_VERSION="Django==1.5.1"
+  - DJANGO="Django==1.4.5"
+  - DJANGO="Django==1.5.1"
+  - DJANGO="https://www.djangoproject.com/download/1.6b1/tarball/"
+
 install:
-  - pip install -q $DJANGO_VERSION
+  - pip install -q $DJANGO
   - python setup.py -q install
 
 script:
