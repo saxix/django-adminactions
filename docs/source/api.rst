@@ -11,31 +11,50 @@ API
 
 .. currentmodule:: adminactions
 
-
-.. autosummary::
-    actions.add_to_site
-    api.export_as_csv
-    api.merge
-    utils.clone_instance
-    utils.get_field_by_path
-    utils.get_field_value
-    utils.get_verbose_name
-    templatetags.actions.verbose_name
-    templatetags.actions.field_display
-    templatetags.actions.raw_value
-
-
-.. autofunction:: adminactions.actions.add_to_site
-
+-------------------
+Functions
+-------------------
 
 .. _api_export_as_csv:
 
-.. autofunction:: adminactions.api.export_as_csv
+
+export_as_csv
+-------------
+
+.. function:: adminactions.api.export_as_csv
+
+Exports a queryset as csv from a queryset with the given fields.
+
+Usage examples
+
+Returns  :class:`django:django.http.HttpResponse`::
+
+    response = export_as_csv(User.objects.all())
+
+Write to file::
+
+    users = export_as_csv(User.objects.all(), out=open('users.csv', 'w'))
+    users.close()
+
+Write to buffer::
+
+    users = export_as_csv(User.objects.all(), out=StringIO())
+
+    with open('users.csv', 'w') as f:
+        f.write(users.getvalue())
+
+
+
+
 
 
 .. _api_merge:
 
+merge
+-----
+
 .. autofunction:: adminactions.api.merge
+
 
 
 .. _get_export_as_csv_filename:
@@ -43,6 +62,8 @@ API
 .. _get_export_delete_tree_filename:
 .. _filename_callbacks:
 
+
+-------------------
 Filename callbacks
 -------------------
 To use custom names for yours exports simply implements ``get_export_<TYPE>_filename``
@@ -64,7 +85,7 @@ Available callbacks:
 * ``get_export_delete_tree_filename``
 
 
-
+-----
 Utils
 -----
 
@@ -72,8 +93,9 @@ Utils
 .. autofunction:: adminactions.utils.get_field_by_path
 .. autofunction:: adminactions.utils.get_field_value
 .. autofunction:: adminactions.utils.get_verbose_name
+.. autofunction:: adminactions.actions.add_to_site
 
-
+------------
 Templatetags
 ------------
 .. autofunction:: adminactions.templatetags.actions.verbose_name
