@@ -52,3 +52,6 @@ INSTALLED_APPS = (
     'demoproject.demoapp')
 
 AUTH_PROFILE_MODULE = 'demoapp.UserProfile'
+
+TEST_RUNNER='django.test.simple.DjangoTestSuiteRunner'
+
