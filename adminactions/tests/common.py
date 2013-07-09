@@ -29,8 +29,8 @@ class BaseTestCaseMixin(object):
     def setUp(self):
         super(BaseTestCaseMixin, self).setUp()
         self.sett = self.settings(**SETTINGS)
-        self.login()
         self.sett.enable()
+        self.login()
 
     def tearDown(self):
         self.sett.disable()

@@ -48,3 +48,5 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'adminactions')
+
+TEST_RUNNER='django.test.simple.DjangoTestSuiteRunner'
