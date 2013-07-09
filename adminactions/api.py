@@ -110,7 +110,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     return result
 
 
-def export_as_csv(queryset, fields=None, header=False, filename=None, options=None):
+def export_as_csv(queryset, fields=None, header=False, filename=None, options=None, out=None):
     """
         Exports a queryset as csv from a queryset with the given fields.
 
@@ -119,19 +119,31 @@ def export_as_csv(queryset, fields=None, header=False, filename=None, options=No
     :param header: if True, the exported file will have the first row as column names
     :param filename: name of the filename
     :param options: CSVOptions() instance or none
+    :param: out: object that implements File protocol. HttpResponse if None.
+
     :return: HttpResponse instance
     """
     filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-    response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
+    if out is None:
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
+    else:
+        response = out
+
     if options is None:
-        options = csv_options_default
+        config = csv_options_default
+    else:
+        config = csv_options_default.copy()
+        config.update(options)
+
+    if fields is None:
+        fields = [f.name for f in queryset.model._meta.fields]
 
     writer = csv.writer(response,
-                        escapechar=str(options['escapechar']),
-                        delimiter=str(options['delimiter']),
-                        quotechar=str(options['quotechar']),
-                        quoting=int(options['quoting']))
+                        escapechar=str(config['escapechar']),
+                        delimiter=str(config['delimiter']),
+                        quotechar=str(config['quotechar']),
+                        quoting=int(config['quoting']))
     if header:
         writer.writerow([f for f in fields])
     for obj in queryset:
@@ -139,11 +151,12 @@ def export_as_csv(queryset, fields=None, header=False, filename=None, options=No
         for fieldname in fields:
             value = get_field_value(obj, fieldname)
             if isinstance(value, datetime.datetime):
-                value = dateformat.format(value, options['datetime_format'])
+                value = dateformat.format(value, config['datetime_format'])
             elif isinstance(value, datetime.date):
-                value = dateformat.format(value, options['date_format'])
+                value = dateformat.format(value, config['date_format'])
             elif isinstance(value, datetime.time):
-                value = dateformat.format(value, options['time_format'])
+                value = dateformat.format(value, config['time_format'])
             row.append(smart_str(value))
         writer.writerow(row)
+
     return response
