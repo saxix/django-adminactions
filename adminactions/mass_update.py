@@ -274,7 +274,16 @@ def mass_update(modeladmin, request, queryset):
                    'select_across': request.POST.get('select_across') == '1',
                    'action': 'mass_update',
                    '_validate': 1}
-        form = MForm(initial=initial)
+
+        prefill_with = request.POST.get('prefill-with', None)
+        prefill_instance = None
+        try:
+            # Gets the instance directly from the queryset for data security
+            prefill_instance = queryset.get(pk=prefill_with)
+        except ObjectDoesNotExist:
+            pass
+
+        form = MForm(initial=initial, instance=prefill_instance)
 
         for el in queryset.all()[:10]:
             for f in modeladmin.model._meta.fields:
