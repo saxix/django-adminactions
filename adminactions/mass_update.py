@@ -11,7 +11,7 @@ from django.forms import fields as ff
 from django.forms.models import modelform_factory, ModelMultipleChoiceField
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
