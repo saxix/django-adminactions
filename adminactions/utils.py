@@ -117,8 +117,16 @@ def get_verbose_name(model_or_queryset, field):
     username
     >>> print unicode(get_verbose_name(User.objects.all(), 'username'))
     username
+    >>> print unicode(get_verbose_name(User.objects, 'username'))
+    username
+    >>> print unicode(get_verbose_name(User.objects, user._meta.get_field_by_name('username')[0]))
+    username
     >>> print unicode(get_verbose_name(p, 'content_type.model'))
     python model class name
+    >>> get_verbose_name(object, 'aaa')
+    Traceback (most recent call last):
+    ...
+    ValueError: `get_verbose_name` expects Manager, Queryset or Model as first parameter (got <type 'type'>)
     """
 
     if isinstance(model_or_queryset, models.Manager):
