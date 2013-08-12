@@ -13,7 +13,7 @@ install:
   - python setup.py -q install
 
 script:
-  - coverage run django-admin.py test adminactions --settings=adminactions.tests.settings
+  - make coverage
 
 after_success:
   - coveralls -c .coveragerc
