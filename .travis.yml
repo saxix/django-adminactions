@@ -8,8 +8,12 @@ env:
   - DJANGO="https://www.djangoproject.com/download/1.6b1/tarball/"
 
 install:
+  - pip install coverage python-coveralls
   - pip install -q $DJANGO
   - python setup.py -q install
 
 script:
-  - django-admin.py test adminactions --settings=adminactions.tests.settings
+  - coverage run django-admin.py test adminactions --settings=adminactions.tests.settings
+
+after_success:
+  - coveralls -c .coveragerc
