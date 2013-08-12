@@ -1,6 +1,10 @@
-BUILDDIR='~build'
+BUILDDIR=~build
 PYTHONPATH := ${PWD}/demo/:${PWD}
 DJANGO_SETTINGS_MODULE:=demoproject.settings
+
+mkbuilddir:
+	mkdir -p ${BUILDDIR}
+
 
 test:
 	cd demo && DISABLE_SELENIUM=1 ./manage.py test adminactions
@@ -18,10 +22,13 @@ coverage:
 	coverage report
 
 clean:
-	rm -fr ${BUILDDIR} dist *.egg-info .coverage
+	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST
+	find . -name __pycache__ -prune | xargs rm -rf
+	find . -name "*.py?" -prune | xargs rm -rf
+	find . -name "*.orig" -prune | xargs rm -rf
 	find adminactions/locale -name django.mo | xargs rm -f
 
-docs:
+docs: mkbuilddir
 	mkdir -p ${BUILDDIR}/docs
 	sphinx-build docs/source ${BUILDDIR}/docs
 ifdef BROWSE
