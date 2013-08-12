@@ -55,34 +55,34 @@ class BaseTestCaseMixin(object):
 
         target.save()
 
-    def assert_post_form(self, response, context_forms=None):
-        """Assert that a POST response was successful
-
-        otherwise raise self.failureException with the forms errors,
-        or other access denied or redirection errors
-        """
-        ctx_forms = context_forms or ['form']
-        if response.status_code == 200:
-            msgs = []
-            for form_name in ctx_forms:
-                form = response.context[form_name]
-                if not form.is_valid():
-                    errors = form.errors
-                    if errors:
-                        msgs.append(str(errors))
-                    if hasattr(form, 'non_form_errors'):
-                        non_form_errors = form.non_form_errors()
-                        if non_form_errors:
-                            msgs.append(str(non_form_errors))
-            raise self.failureException("\n".join(msgs))
-        elif response.status_code == 403:
-            msg = "Access denied for user {0} to url `{1}`".format(self.logged_user, response.request['PATH_INFO'])
-            raise self.failureException(msg)
-        elif response.status_code != 302:
-            raise self.failureException(
-                'Response did not redirect properly. status_code was %i' % response.status_code)
-
-    assertPostForm = assert_post_form
+    # def assert_post_form(self, response, context_forms=None):
+    #     """Assert that a POST response was successful
+    #
+    #     otherwise raise self.failureException with the forms errors,
+    #     or other access denied or redirection errors
+    #     """
+    #     ctx_forms = context_forms or ['form']
+    #     if response.status_code == 200:
+    #         msgs = []
+    #         for form_name in ctx_forms:
+    #             form = response.context[form_name]
+    #             if not form.is_valid():
+    #                 errors = form.errors
+    #                 if errors:
+    #                     msgs.append(str(errors))
+    #                 if hasattr(form, 'non_form_errors'):
+    #                     non_form_errors = form.non_form_errors()
+    #                     if non_form_errors:
+    #                         msgs.append(str(non_form_errors))
+    #         raise self.failureException("\n".join(msgs))
+    #     elif response.status_code == 403:
+    #         msg = "Access denied for user {0} to url `{1}`".format(self.logged_user, response.request['PATH_INFO'])
+    #         raise self.failureException(msg)
+    #     elif response.status_code != 302:
+    #         raise self.failureException(
+    #             'Response did not redirect properly. status_code was %i' % response.status_code)
+    #
+    # assertPostForm = assert_post_form
 
 
 class BaseTestCase(BaseTestCaseMixin, TestCase):
@@ -93,34 +93,34 @@ class CheckSignalsMixin(object):
     MESSAGE = 'Action Interrupted Test'
     SELECTION = [2, 3, 4]
 
-    def test_signal_sent(self):
-        def handler_factory(name):
-            def myhandler(sender, action, request, queryset, **kwargs):
-                handler_factory.invoked[name] = True
-                self.assertEqual(action, self.action_name)
-                self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
-            return myhandler
-        handler_factory.invoked = {}
-
-        try:
-            m1 = handler_factory('adminaction_requested')
-            adminaction_requested.connect(m1, sender=self.sender_model)
-
-            m2 = handler_factory('adminaction_start')
-            adminaction_start.connect(m2, sender=self.sender_model)
-
-            m3 = handler_factory('adminaction_end')
-            adminaction_end.connect(m3, sender=self.sender_model)
-
-            self._run_action()
-            self.assertIn('adminaction_requested', handler_factory.invoked)
-            self.assertIn('adminaction_start', handler_factory.invoked)
-            self.assertIn('adminaction_end', handler_factory.invoked)
-
-        finally:
-            adminaction_requested.disconnect(m1, sender=self.sender_model)
-            adminaction_start.disconnect(m2, sender=self.sender_model)
-            adminaction_end.disconnect(m3, sender=self.sender_model)
+    # def test_signal_sent(self):
+    #     def handler_factory(name):
+    #         def myhandler(sender, action, request, queryset, **kwargs):
+    #             handler_factory.invoked[name] = True
+    #             self.assertEqual(action, self.action_name)
+    #             self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
+    #         return myhandler
+    #     handler_factory.invoked = {}
+    #
+    #     try:
+    #         m1 = handler_factory('adminaction_requested')
+    #         adminaction_requested.connect(m1, sender=self.sender_model)
+    #
+    #         m2 = handler_factory('adminaction_start')
+    #         adminaction_start.connect(m2, sender=self.sender_model)
+    #
+    #         m3 = handler_factory('adminaction_end')
+    #         adminaction_end.connect(m3, sender=self.sender_model)
+    #
+    #         self._run_action()
+    #         self.assertIn('adminaction_requested', handler_factory.invoked)
+    #         self.assertIn('adminaction_start', handler_factory.invoked)
+    #         self.assertIn('adminaction_end', handler_factory.invoked)
+    #
+    #     finally:
+    #         adminaction_requested.disconnect(m1, sender=self.sender_model)
+    #         adminaction_start.disconnect(m2, sender=self.sender_model)
+    #         adminaction_end.disconnect(m3, sender=self.sender_model)
 
 
 #    def test_signal_requested(self):

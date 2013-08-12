@@ -4,6 +4,7 @@ source = adminactions
 include =
 
 omit = adminactions/__init__.py
+        adminactions/tests/settings.py
 
 [report]
 # Regexes for lines to exclude from consideration
