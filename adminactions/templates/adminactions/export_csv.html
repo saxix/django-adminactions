@@ -26,7 +26,7 @@
                             }
                     );
                 };
-                $('#id_datetime_format, #id_date_format, #id_time_format,').after('&nbsp;&nbsp;<span class="sample"></span>').keyup(function () {
+                $('#id_datetime_format, #id_date_format, #id_time_format').after('&nbsp;&nbsp;<span class="sample"></span>').keyup(function () {
                     clearTimeout($(this).data('timer'));
                     var target = $(this);
                     var wait = setTimeout(function () {
