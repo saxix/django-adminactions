@@ -1,6 +1,8 @@
 BUILDDIR=~build
 PYTHONPATH := ${PWD}/demo/:${PWD}
 DJANGO_SETTINGS_MODULE:=demoproject.settings
+CASPERJS_DIR=${BUILDDIR}/casperjs
+PHANTOMJS_DIR=${BUILDDIR}/phantomjs
 
 mkbuilddir:
 	mkdir -p ${BUILDDIR}
@@ -36,4 +38,21 @@ ifdef BROWSE
 endif
 
 
+
+install-phantomjs: mkbuilddir
+	@cd ${BUILDDIR} && \
+	    wget -O - https://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2 | tar -jxvf -
+
+install-phantomjs-dev: install-phantomjs
+	ln -sf `pwd`/${BUILDDIR}/phantomjs-1.9.1-linux-x86_64/bin/phantomjs ../../bin/phantomjs
+
+install-casperjs: install-phantomjs
+	rm -Rf ${CASPERJS_DIR}
+	git clone git://github.com/n1k0/casperjs.git ${CASPERJS_DIR}
+
+install-casperjs-dev:
+	ln -sf `pwd`/${CASPERJS_DIR}/bin/casperjs ../../bin/casperjs
+
+
 .PHONY: docs test
+

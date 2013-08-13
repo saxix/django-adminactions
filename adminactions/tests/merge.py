@@ -135,7 +135,6 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
             self.assertEqual(get_profile(result), profile)
             self.assertEqual(master.get_profile(), profile)
 
-
     def test_merge_ignore_related(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
