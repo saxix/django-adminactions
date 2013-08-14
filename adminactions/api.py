@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 import datetime
-from docutils.nodes import header
 import xlwt
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
