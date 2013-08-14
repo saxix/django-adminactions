@@ -1,50 +1,10 @@
 #!/usr/bin/env python
-from setuptools import setup
-from distutils.command.install import INSTALL_SCHEMES
 import os
+from setuptools import setup
 import adminactions as app
 
 NAME = app.NAME
 RELEASE = app.get_version()
-
-for scheme in INSTALL_SCHEMES.values():
-    scheme['data'] = scheme['purelib']
-
-packages, data_files = [], []
-root_dir = os.path.dirname(__file__)
-if root_dir != '':
-    os.chdir(root_dir)
-
-
-def fullsplit(path, result=None):
-    """
-    Split a pathname into components (the opposite of os.path.join) in a
-    platform-neutral way.
-    """
-    if result is None:
-        result = []
-    head, tail = os.path.split(path)
-    if head == '':
-        return [tail] + result
-    if head == path:
-        return result
-    return fullsplit(head, [tail] + result)
-
-
-def scan_dir(target, packages=[], data_files=[]):
-    for dirpath, dirnames, filenames in os.walk(target):
-        # Ignore dirnames that start with '.'
-        for i, dirname in enumerate(dirnames):
-            if dirname.startswith('.'):
-                del dirnames[i]
-        if '__init__.py' in filenames:
-            packages.append('.'.join(fullsplit(dirpath)))
-        elif filenames:
-            data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
-    return packages, data_files
-
-
-packages, data_files = scan_dir('adminactions')
 
 
 def fread(fname):
@@ -59,8 +19,11 @@ setup(
     author_email='sax@os4d.org',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
-    packages=packages,
-    data_files=data_files,
+    packages=["concurrency",
+              "concurrency.tests",
+              "concurrency.templatetags"
+    ],
+    include_package_data=True,
     install_requires=fread('adminactions/requirements.pip').split('\n'),
     zip_safe=False,
     platforms=['any'],
