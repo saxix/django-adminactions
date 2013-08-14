@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 import adminactions as app
 
 NAME = app.NAME
@@ -19,10 +19,7 @@ setup(
     author_email='sax@os4d.org',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
-    packages=["concurrency",
-              "concurrency.tests",
-              "concurrency.templatetags"
-    ],
+    packages=find_packages(),
     include_package_data=True,
     install_requires=fread('adminactions/requirements.pip').split('\n'),
     zip_safe=False,
