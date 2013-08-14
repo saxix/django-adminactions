@@ -16,6 +16,7 @@ Actions
 ================
 
 * Export as CSV
+* Export as Excel
 * Export as fixture
 * Export delete tree
 * Mass update records

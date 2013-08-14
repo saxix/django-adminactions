@@ -43,7 +43,7 @@ Update one or more fields of the selected queryset to a common value and/or appl
 .. versionadded:: 0.0.4
 
 Is possible to update fields applying function. |app| comes with a predefined set of functions.
-You can anyway :ref:`register your own funcrions <register_transform_function>`
+You can anyway :ref:`register your own functions <register_transform_function>`
 
 
 **common to all models**
@@ -180,7 +180,6 @@ Export selected queryset as fixtures using any registered Serializer.
 
 ``Export Delete Tree``
 ======================
-
 .. versionadded:: 0.0.4
 
 
@@ -209,7 +208,24 @@ see `export_as_fixture`_ for details
 .. figure:: _static/export_as_fixture.png
 
 
+.. _export_as_xls:
 
+``Export as Excel``
+===================
+
+.. versionadded:: 0.3
+
+
+Export selected queryset as Excel (xls) file.
+
+Available options:
+
+===================   ===========================================================================================
+**header**            add the header line to the file
+
+**columns**           Which columns will be included in the dump
+
+===================   ===========================================================================================
 
 
 .. _graph_queryset:

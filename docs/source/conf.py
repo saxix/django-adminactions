@@ -45,6 +45,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.coverage',
               'sphinx.ext.viewcode',
+              # 'djangodocs',
               'version',
               'github']
 
@@ -52,7 +53,7 @@ extensions = ['sphinx.ext.autodoc',
 #issuetracker = 'github'
 #issuetracker_project = 'saxix/django-adminactions'
 #issuetracker_plaintext_issues = True
-next_version = '0.1'
+next_version = '0.3'
 github_project_url = 'https://github.com/saxix/django-adminactions/'
 github_project_url_basesource = 'https://github.com/saxix/django-adminactions/'
 
@@ -171,7 +172,13 @@ html_theme_path = ['.']
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-#html_use_smartypants = True
+html_use_smartypants = True
+
+# HTML translator class for the builder
+# html_translator_class = "version.HTMLTranslator"
+
+# Content template for the index page.
+#html_index = ''
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}

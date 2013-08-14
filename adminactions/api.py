@@ -1,10 +1,13 @@
 # -*- encoding: utf-8 -*-
 import datetime
+from docutils.nodes import header
+import xlwt
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from adminactions.templatetags.actions import get_field_value
+
 try:
     import unicodecsv as csv
 except ImportError:
@@ -16,6 +19,7 @@ from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_in
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
                        'time_format': 'P',
+                       'header': False,
                        'quotechar': '"',
                        'quoting': csv.QUOTE_ALL,
                        'delimiter': ';',
@@ -110,7 +114,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     return result
 
 
-def export_as_csv(queryset, fields=None, header=False, filename=None, options=None, out=None):
+def export_as_csv(queryset, fields=None, header=None, filename=None, options=None, out=None):
     """
         Exports a queryset as csv from a queryset with the given fields.
 
@@ -123,8 +127,8 @@ def export_as_csv(queryset, fields=None, header=False, filename=None, options=No
 
     :return: HttpResponse instance
     """
-    filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
     if out is None:
+        filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = HttpResponse(mimetype='text/csv')
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
     else:
@@ -139,13 +143,22 @@ def export_as_csv(queryset, fields=None, header=False, filename=None, options=No
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields]
 
-    writer = csv.writer(response,
-                        escapechar=str(config['escapechar']),
-                        delimiter=str(config['delimiter']),
-                        quotechar=str(config['quotechar']),
-                        quoting=int(config['quoting']))
-    if header:
-        writer.writerow([f for f in fields])
+    dialect = config.get('dialect', None)
+    if dialect is not None:
+        writer = csv.writer(response, dialect=dialect)
+    else:
+        writer = csv.writer(response,
+                            escapechar=str(config['escapechar']),
+                            delimiter=str(config['delimiter']),
+                            quotechar=str(config['quotechar']),
+                            quoting=int(config['quoting']))
+
+    if bool(header):
+        if isinstance(header, (list, tuple)):
+            writer.writerow(header)
+        else:
+            writer.writerow([f for f in fields])
+
     for obj in queryset:
         row = []
         for fieldname in fields:
@@ -160,3 +173,105 @@ def export_as_csv(queryset, fields=None, header=False, filename=None, options=No
         writer.writerow(row)
 
     return response
+
+
+xls_options_default = {'date_format': 'd/m/Y',
+                       'datetime_format': 'N j, Y, P',
+                       'time_format': 'P',
+                       'sheet_name': 'Sheet1',
+                       'DateField': 'DD MMM-YY',
+                       'DateTimeField': 'DD MMD YY hh:mm',
+                       'TimeField': 'hh:mm',
+                       'IntegerField': '#,##',
+                       'PositiveIntegerField': '#,##',
+                       'PositiveSmallIntegerField': '#,##',
+                       'BigIntegerField': '#,##',
+                       'DecimalField': '#,##0.00',
+                       'BooleanField': 'boolean',
+                       'NullBooleanField': 'boolean',
+                       'EmailField': lambda value : 'HYPERLINK("mailto:%s","%s")' % (value, value),
+                       'URLField': lambda value : 'HYPERLINK("%s","%s")' % (value, value),
+                       'CurrencyColumn': '"$"#,##0.00);[Red]("$"#,##0.00)', }
+
+
+def export_as_xls(queryset, fields=None, header=None, filename=None, options=None, out=None):
+# sheet_name=None,  header_alt=None,
+#             formatting=None, out=None):
+    """
+    Exports a queryset as xls from a queryset with the given fields.
+
+    :param queryset: queryset to export (can also be list of namedtuples)
+    :param fields: list of fields names to export. None for all fields
+    :param header: if True, the exported file will have the first row as column names
+    :param out: object that implements File protocol.
+    :param header_alt: if is not None, and header is True, the first row will be as header_alt (same nr columns)
+    :param formatting: if is None will use formatting_default
+    :return: HttpResponse instance if out not supplied, otherwise out
+    """
+
+    def _get_qs_formats(queryset):
+        formats = {}
+        if hasattr(queryset, 'model'):
+            for i, fieldname in enumerate(fields):
+                f, __,__, __,  = queryset.model._meta.get_field_by_name(fieldname)
+                fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, 'general'))
+                formats[i] = fmt
+            # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
+            # styles[i] = xls_options_default.get(col_class, 'general')
+
+        return formats
+
+    if out is None:
+        filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+        response = HttpResponse(mimetype='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
+    else:
+        response = out
+
+    if options is None:
+        config = xls_options_default
+    else:
+        config = xls_options_default.copy()
+        config.update(options)
+
+    if fields is None:
+        fields = [f.name for f in queryset.model._meta.fields]
+
+    book = xlwt.Workbook(encoding="UTF-8")
+    sheet_name = config.pop('sheet_name')
+
+    sheet = book.add_sheet(sheet_name)
+    style = xlwt.XFStyle()
+    row = 0
+    heading_xf = xlwt.easyxf('font:height 200; font: bold on; align: wrap on, vert centre, horiz center')
+    sheet.write(row, 0, '#', style)
+    if header:
+        if not isinstance(header, (list, tuple)):
+            header = [unicode(f.verbose_name) for f in queryset.model._meta.fields]
+
+        for col, fieldname in enumerate(header, start=1):
+            sheet.write(row, col, fieldname, heading_xf)
+            sheet.col(col).width = 5000
+
+    sheet.row(row).height = 500
+    formats = _get_qs_formats(queryset)
+
+    for rownum, row in enumerate(queryset):
+        sheet.write(rownum + 1, 0, rownum + 1)
+        for idx, fieldname in enumerate(fields):
+            fmt = formats.get(idx, 'general')
+            try:
+                value = getattr(row, fieldname)
+                if callable(fmt):
+                    value = xlwt.Formula(fmt(value))
+                    style = xlwt.easyxf(num_format_str='formula')
+                else:
+                    style = xlwt.easyxf(num_format_str=fmt)
+                sheet.write(rownum + 1, idx + 1, value, style)
+            except Exception as e:
+                #logger.warning("TODO refine this exception: %s" % e)
+                sheet.write(rownum + 1, idx + 1, str(e), style)
+
+    book.save(response)
+    return response
+

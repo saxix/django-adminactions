@@ -8,13 +8,11 @@ def clone_instance(instance, fieldnames=None):
 
         .. warning: All fields are copied, even primary key
 
-    :param instance: `django.db.models.Model`_ instance
-    :return: `django.db.models.Model`_ instance
+    :param instance: :py:class:`django.db.models.Model` instance
+    :return: :py:class:`django.db.models.Model` instance
     """
 
     if fieldnames is None:
-        # fields = [fld for fld in instance._meta.fields if fld.name in fieldnames]
-    # else:
         fieldnames = [fld.name for fld in instance._meta.fields]
 
     new_kwargs = dict([(name, getattr(instance, name)) for name in fieldnames])

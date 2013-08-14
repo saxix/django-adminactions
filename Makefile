@@ -32,7 +32,7 @@ clean:
 
 docs: mkbuilddir
 	mkdir -p ${BUILDDIR}/docs
-	sphinx-build docs/source ${BUILDDIR}/docs
+	sphinx-build -aE docs/source ${BUILDDIR}/docs
 ifdef BROWSE
 	firefox ${BUILDDIR}/docs/index.html
 endif

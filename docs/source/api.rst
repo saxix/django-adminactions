@@ -31,12 +31,16 @@ Returns  :class:`django:django.http.HttpResponse`::
 
     response = export_as_csv(User.objects.all())
 
-Write to file::
+Write to file
+
+.. code-block:: python
 
     users = export_as_csv(User.objects.all(), out=open('users.csv', 'w'))
     users.close()
 
-Write to buffer::
+Write to buffer
+
+.. code-block:: python
 
     users = export_as_csv(User.objects.all(), out=StringIO())
 
@@ -45,6 +49,15 @@ Write to buffer::
 
 
 
+
+.. _api_export_as_xls:
+
+
+export_as_xls
+-------------
+.. versionadded:: 0.3
+
+.. autofunction:: adminactions.api.export_as_xls
 
 
 

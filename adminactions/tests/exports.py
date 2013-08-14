@@ -10,7 +10,8 @@ from adminactions.tests.common import BaseTestCase
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 
 
-__all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportDeleteTreeTest']
+__all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportDeleteTreeTest',
+           'ExportAsXlsTest']
 
 
 class BaseExportTest(BaseTestCase, ExecuteActionMixin):
@@ -132,3 +133,25 @@ class ExportDeleteTreeTest(BaseExportTest, CheckSignalsMixin):
         self.add_permission('auth.change_permission')
         response = self._run_action(code2=302)
         self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
+
+
+class ExportAsXlsTest():
+    pass
+
+# class ExportAsXlsTest(BaseExportTest, CheckSignalsMixin):
+#     urls = "adminactions.tests.urls"
+#     action_name = 'export_as_xls'
+#     selected_rows = [2, 3, 4]
+#     suffix = 'csv'
+#     sender_model = Permission
+#
+#     def setUp(self):
+#         super(ExportAsXlsTest, self).setUp()
+#         self._url = reverse('admin:auth_permission_changelist')
+#
+#     def test_permission(self):
+#         # test if right permission is checked
+#         self.login('user_0', '123')  # normal user
+#         self.add_permission('auth.change_permission')
+#         response = self._run_action(code2=302)
+#         self.assertIn("Sorry you do not have rights to execute this action", response.cookies['messages'].value)
