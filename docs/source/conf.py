@@ -12,6 +12,7 @@
 # serve to show the default.
 
 import sys, os
+
 here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 up = lambda base, level: os.path.abspath(os.path.join(base, *([os.pardir] * level)))
 sys.path.insert(0, up(here, 2))
@@ -57,9 +58,9 @@ github_project_url_basesource = 'https://github.com/saxix/django-adminactions/'
 
 todo_include_todos = True
 intersphinx_mapping = {
-   'python': ('http://python.readthedocs.org/en/latest/', None),
-   'django': ('http://django.readthedocs.org/en/1.5.x/', None),
-   'sphinx': ('http://sphinx.readthedocs.org/en/latest/', None)}
+    'python': ('http://python.readthedocs.org/en/latest/', None),
+    'django': ('http://django.readthedocs.org/en/1.5.x/', None),
+    'sphinx': ('http://sphinx.readthedocs.org/en/latest/', None)}
 intersphinx_cache_limit = 90 # days
 
 # Add any paths that contain templates here, relative to this directory.

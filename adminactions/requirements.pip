@@ -1,3 +1,5 @@
 unicodecsv>=0.9.0
 mock
 selenium
+django_webtest
+webtest

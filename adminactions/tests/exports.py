@@ -1,99 +1,16 @@
 # -*- encoding: utf-8 -*-
 import StringIO
 import csv
+from adminactions.tests.common import ExecuteActionMixin, CheckSignalsMixin
 import mock
 import django.contrib.admin
 from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
-from django.forms import Form
 from adminactions.tests.common import BaseTestCase
-from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 
 
 __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportDeleteTreeTest']
-
-
-class CheckSignalsMixin(object):
-    def test_signal_requested(self):
-        # test if adminaction_requested Signal can stop the action
-
-        MESSAGE = 'Action Interrupted Test'
-
-        def myhandler(sender, action, request, queryset, **kwargs):
-            myhandler.invoked = True
-            self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
-            raise ActionInterrupted(MESSAGE)
-
-        try:
-            adminaction_requested.connect(myhandler, sender=Permission)
-            response = self._run_action(code2=302)
-            self.assertTrue(myhandler.invoked)
-            self.assertIn(MESSAGE, response.cookies['messages'].value)
-        finally:
-            adminaction_requested.disconnect(myhandler, sender=Permission)
-
-    def test_signal_start(self):
-        # test if adminaction_start Signal can stop the action
-
-        MESSAGE = 'Action Interrupted Test'
-        SELECTION = [2, 3, 4]
-
-        def myhandler(sender, action, request, queryset, form, **kwargs):
-            myhandler.invoked = True
-            self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), SELECTION)
-            self.assertTrue(isinstance(form, Form))
-            raise ActionInterrupted(MESSAGE)
-
-        try:
-            adminaction_start.connect(myhandler, sender=Permission)
-            response = self._run_action(code3=302)
-            self.assertTrue(myhandler.invoked)
-            self.assertIn(MESSAGE, response.cookies['messages'].value)
-        finally:
-            adminaction_start.disconnect(myhandler, sender=Permission)
-
-    def test_signal_end(self):
-        # test if adminaction_start Signal can stop the action
-
-        SELECTION = [2, 3, 4]
-
-        def myhandler(sender, action, request, queryset, **kwargs):
-            myhandler.invoked = True
-            self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), SELECTION)
-
-        try:
-            adminaction_end.connect(myhandler, sender=Permission)
-            self._run_action(code3=200)
-            self.assertTrue(myhandler.invoked)
-        finally:
-            adminaction_end.disconnect(myhandler, sender=Permission)
-
-
-class ExecuteActionMixin(object):
-    def _run_action(self, code1=200, code2=200, code3=200, **kwargs):
-        kwargs.setdefault('select_across', 0)
-        kwargs.setdefault('_selected_action', self.selected_rows)
-        kwargs.setdefault('index', 0)
-        kwargs.setdefault('action', self.action_name)
-
-        url = kwargs.pop('url', self._url)
-
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, code1)
-        response = self.client.post(url, kwargs)
-        self.assertEqual(response.status_code, code2)
-        #post the form
-        if code2 == 200:
-            data = response.context['adminform'].form.initial
-            data.update({'apply': 'Export'})
-            response = self.client.post(url, data)
-
-            self.assertEqual(response.status_code, code3)
-        return response
 
 
 class BaseExportTest(BaseTestCase, ExecuteActionMixin):
@@ -142,6 +59,7 @@ class ExportAsCsvTest(BaseExportTest, CheckSignalsMixin):
     action_name = 'export_as_csv'
     selected_rows = [2, 3, 4]
     suffix = 'csv'
+    sender_model = Permission
 
     def setUp(self):
         super(ExportAsCsvTest, self).setUp()
@@ -183,6 +101,7 @@ class ExportAsFixtureTest(BaseExportTest, CheckSignalsMixin):
     action_name = 'export_as_fixture'
     selected_rows = [2, 3, 4]
     suffix = 'json'
+    sender_model = Permission
 
     def setUp(self):
         super(ExportAsFixtureTest, self).setUp()
@@ -201,6 +120,7 @@ class ExportDeleteTreeTest(BaseExportTest, CheckSignalsMixin):
     action_name = 'export_delete_tree'
     selected_rows = [2, 3, 4]
     suffix = 'json'
+    sender_model = Permission
 
     def setUp(self):
         super(ExportDeleteTreeTest, self).setUp()
