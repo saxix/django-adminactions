@@ -65,8 +65,8 @@ class VersionDirective(Directive):
             link = 'release-%s' % arg0
 
         node['version'] = version
-        inodes, messages = self.state.inline_text(self.version_text[self.name] % version, self.lineno+1)
-        node.extend(inodes)
+        # inodes, messages = self.state.inline_text(self.version_text[self.name] % version, self.lineno+1)
+        # node.extend(inodes)
         if link:
             text = ' Please see the changelog <%s>' % link
             xrefs = roles.XRefRole()('std:ref', text, text, self.lineno, self.state)

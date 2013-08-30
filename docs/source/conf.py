@@ -20,8 +20,8 @@ sys.path.insert(0, up(here, 2))
 import adminactions as app
 from django.conf import settings
 
-settings.configure()
-settings.SITE_ID = 1
+settings.configure(SITE_ID=1)
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

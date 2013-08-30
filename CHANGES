@@ -2,7 +2,8 @@
 
 Release 0.3 (in development)
 ============================
-
+* add feature to :ref:`use callable as columns <export_with_callable>`
+* add feature to :ref:`export dictionaries <export_with_dictionaries>`
 * new action :ref:`export_as_xls`
 * custom headers to :ref:`export_as_csv`
 
