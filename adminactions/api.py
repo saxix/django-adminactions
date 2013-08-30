@@ -127,7 +127,8 @@ def export_as_csv(queryset, fields=None, header=None, filename=None, options=Non
     :return: HttpResponse instance
     """
     if out is None:
-        filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+        if filename is None:
+            filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = HttpResponse(mimetype='text/csv')
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
     else:
@@ -221,7 +222,8 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
         return formats
 
     if out is None:
-        filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+        if filename is None:
+            filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = HttpResponse(mimetype='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
     else:
