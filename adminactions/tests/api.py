@@ -62,3 +62,28 @@ class TestExportAsExcel(unittest.TestCase):
         self.assertEqual(xls_sheet.row_values(1)[:], [1.0, 111.0, 222.0])
         self.assertEqual(xls_sheet.row_values(2)[:], [2.0, 333.0, 444.0])
         self.assertEqual(xls_sheet.row_values(3)[:], [3.0, 555.0, u'ӼӳӬԖԊ'])
+
+
+class TestExportQuerySetAsExcel(TestCase):
+    def test_queryset_values(self):
+        fields = ['codename', 'content_type__app_label']
+        header = ['Name', 'Application']
+        qs = Permission.objects.filter(codename='add_user').values('codename', 'content_type__app_label')
+        mem = StringIO.StringIO()
+        export_as_xls(queryset=qs, fields=fields, header=header, out=mem)
+        mem.seek(0)
+        w = xlrd.open_workbook(file_contents=mem.read())
+        sheet = w.sheet_by_index(0)
+        self.assertEquals(sheet.cell_value(1,1), u'add_user')
+        self.assertEquals(sheet.cell_value(1,2), u'auth')
+
+    def test_callable_method(self):
+        fields = ['codename', 'natural_key']
+        qs = Permission.objects.filter(codename='add_user')
+        mem = StringIO.StringIO()
+        export_as_xls(queryset=qs, fields=fields, out=mem)
+        mem.seek(0)
+        w = xlrd.open_workbook(file_contents=mem.read())
+        sheet = w.sheet_by_index(0)
+        self.assertEquals(sheet.cell_value(1,1), u'add_user')
+        self.assertEquals(sheet.cell_value(1,2), u'add_userauthuser')

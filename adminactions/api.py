@@ -3,6 +3,7 @@ import datetime
 import xlwt
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from adminactions.templatetags.actions import get_field_value
@@ -13,7 +14,7 @@ except ImportError:
     import csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
-from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance  # NOQA
+from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance, getattr_or_item  # NOQA
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -213,9 +214,12 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
         formats = {}
         if hasattr(queryset, 'model'):
             for i, fieldname in enumerate(fields):
-                f, __,__, __,  = queryset.model._meta.get_field_by_name(fieldname)
-                fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, 'general'))
-                formats[i] = fmt
+                try:
+                    f, __,__, __,  = queryset.model._meta.get_field_by_name(fieldname)
+                    fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, 'general'))
+                    formats[i] = fmt
+                except FieldDoesNotExist:
+                    pass
             # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
             # styles[i] = xls_options_default.get(col_class, 'general')
 
@@ -229,10 +233,8 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
     else:
         response = out
 
-    if options is None:
-        config = xls_options_default
-    else:
-        config = xls_options_default.copy()
+    config = xls_options_default.copy()
+    if options:
         config.update(options)
 
     if fields is None:
@@ -262,7 +264,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
         for idx, fieldname in enumerate(fields):
             fmt = formats.get(idx, 'general')
             try:
-                value = getattr(row, fieldname)
+                value = get_field_value(row, fieldname, usedisplay=False, raw_callable=False)
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))
                     style = xlwt.easyxf(num_format_str='formula')

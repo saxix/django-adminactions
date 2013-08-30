@@ -33,7 +33,7 @@ def getattr_or_item(obj, name):
             raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
 
 
-def get_field_value(obj, field, usedisplay=True):
+def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     """
     returns the field value or field representation if get_FIELD_display exists
 
@@ -55,12 +55,12 @@ def get_field_value(obj, field, usedisplay=True):
     else:
         raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance ')
 
-    if hasattr(obj, 'get_%s_display' % fieldname) and usedisplay:
+    if usedisplay and hasattr(obj, 'get_%s_display' % fieldname):
         value = getattr(obj, 'get_%s_display' % fieldname)()
     else:
         value = getattr_or_item(obj, fieldname)
 
-    if callable(value):
+    if not raw_callable and callable(value):
         return value()
 
     return value
