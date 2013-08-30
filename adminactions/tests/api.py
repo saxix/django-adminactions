@@ -20,6 +20,15 @@ class TestExportQuerySetAsCsv(TestCase):
         csv_dump = mem.read()
         self.assertEquals(csv_dump.decode('utf8'), u'"Name";"Application"\r\n"add_user";"auth"\r\n')
 
+    def test_callable_method(self):
+        fields = ['codename', 'natural_key']
+        qs = Permission.objects.filter(codename='add_user')
+        mem = StringIO.StringIO()
+        export_as_csv(queryset=qs, fields=fields, out=mem)
+        mem.seek(0)
+        csv_dump = mem.read()
+        self.assertEquals(csv_dump.decode('utf8'), u'"add_user";"(u\'add_user\', u\'auth\', u\'user\')"\r\n')
+
 
 class TestExportAsCsv(unittest.TestCase):
     def test_export_as_csv(self):

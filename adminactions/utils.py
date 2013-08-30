@@ -29,8 +29,8 @@ def getattr_or_item(obj, name):
     except AttributeError:
         try:
             return obj[name]
-        except AttributeError:
-            raise AttributeError("%s object has no attribute neither item '%s'" % (obj.__class__.__name__, name))
+        except KeyError:
+            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
 
 
 def get_field_value(obj, field, usedisplay=True):
@@ -59,6 +59,9 @@ def get_field_value(obj, field, usedisplay=True):
         value = getattr(obj, 'get_%s_display' % fieldname)()
     else:
         value = getattr_or_item(obj, fieldname)
+
+    if callable(value):
+        return value()
 
     return value
 
