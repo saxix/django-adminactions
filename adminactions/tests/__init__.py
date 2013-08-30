@@ -4,7 +4,7 @@ from .mass_update import *  # NOQA
 from .exports import *  # NOQA
 from .merge import MergeTest, MergeTestApi  # NOQA
 from .graph import TestGraph  # NOQA
-from .api import TestExportAsCsv, TestExportAsExcel
+from .api import TestExportAsCsv, TestExportAsExcel, TestExportQuerySetAsCsv
 
 if getattr(settings, 'ENABLE_SELENIUM', True):
     try:

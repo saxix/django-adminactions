@@ -1,11 +1,26 @@
 # -*- encoding: utf-8 -*-
+import unicodecsv as csv
 import unittest
 import xlrd
+from django.contrib.auth.models import Permission
+from django.test import TestCase
 from adminactions.api import export_as_csv, export_as_xls
 import StringIO
 from collections import namedtuple
 
-#ӼӳӬԖԊ
+
+class TestExportQuerySetAsCsv(TestCase):
+    def test_queryset_values(self):
+        fields = ['codename', 'content_type__app_label']
+        header = ['Name', 'Application']
+        qs = Permission.objects.filter(codename='add_user').values('codename', 'content_type__app_label')
+        mem = StringIO.StringIO()
+        export_as_csv(queryset=qs, fields=fields, header=header, out=mem)
+        mem.seek(0)
+        csv_dump = mem.read()
+        self.assertEquals(csv_dump.decode('utf8'), u'"Name";"Application"\r\n"add_user";"auth"\r\n')
+
+
 class TestExportAsCsv(unittest.TestCase):
     def test_export_as_csv(self):
         fields = ['field1', 'field2']

@@ -23,6 +23,16 @@ def get_copy_of_instance(instance):
     return instance.__class__.objects.get(pk=instance.pk)
 
 
+def getattr_or_item(obj, name):
+    try:
+        return getattr(obj, name)
+    except AttributeError:
+        try:
+            return obj[name]
+        except AttributeError:
+            raise AttributeError("%s object has no attribute neither item '%s'" % (obj.__class__.__name__, name))
+
+
 def get_field_value(obj, field, usedisplay=True):
     """
     returns the field value or field representation if get_FIELD_display exists
@@ -48,7 +58,7 @@ def get_field_value(obj, field, usedisplay=True):
     if hasattr(obj, 'get_%s_display' % fieldname) and usedisplay:
         value = getattr(obj, 'get_%s_display' % fieldname)()
     else:
-        value = getattr(obj, fieldname)
+        value = getattr_or_item(obj, fieldname)
 
     return value
 
