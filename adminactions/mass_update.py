@@ -11,7 +11,7 @@ from django.forms import fields as ff
 from django.forms.models import modelform_factory, ModelMultipleChoiceField, construct_instance, InlineForeignKeyField
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -301,7 +301,16 @@ def mass_update(modeladmin, request, queryset):
             return HttpResponseRedirect(request.get_full_path())
     else:
         initial.update({'action': 'mass_update', '_validate': 1})
-        form = MForm(initial=initial)
+        #form = MForm(initial=initial)
+        prefill_with = request.POST.get('prefill-with', None)
+        prefill_instance = None
+        try:
+            # Gets the instance directly from the queryset for data security
+            prefill_instance = queryset.get(pk=prefill_with)
+        except ObjectDoesNotExist:
+            pass
+
+        form = MForm(initial=initial, instance=prefill_instance)
 
     for el in queryset.all()[:10]:
         for f in modeladmin.model._meta.fields:
