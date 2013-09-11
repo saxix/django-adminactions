@@ -13,21 +13,33 @@ class TestExportQuerySetAsCsv(TestCase):
     def test_queryset_values(self):
         fields = ['codename', 'content_type__app_label']
         header = ['Name', 'Application']
-        qs = Permission.objects.filter(codename='add_user').values('codename', 'content_type__app_label')
         mem = StringIO.StringIO()
-        export_as_csv(queryset=qs, fields=fields, header=header, out=mem)
+        with self.assertNumQueries(1):
+            qs = Permission.objects.filter(codename='add_user').values('codename', 'content_type__app_label')
+            export_as_csv(queryset=qs, fields=fields, header=header, out=mem)
         mem.seek(0)
         csv_dump = mem.read()
         self.assertEquals(csv_dump.decode('utf8'), u'"Name";"Application"\r\n"add_user";"auth"\r\n')
 
     def test_callable_method(self):
         fields = ['codename', 'natural_key']
-        qs = Permission.objects.filter(codename='add_user')
         mem = StringIO.StringIO()
-        export_as_csv(queryset=qs, fields=fields, out=mem)
+        with self.assertNumQueries(2):
+            qs = Permission.objects.filter(codename='add_user')
+            export_as_csv(queryset=qs, fields=fields, out=mem)
         mem.seek(0)
         csv_dump = mem.read()
         self.assertEquals(csv_dump.decode('utf8'), u'"add_user";"(u\'add_user\', u\'auth\', u\'user\')"\r\n')
+
+    def test_deep_attr(self):
+        fields = ['codename', 'content_type.app_label']
+        mem = StringIO.StringIO()
+        with self.assertNumQueries(1):
+            qs = Permission.objects.select_related().filter(codename='add_user')
+            export_as_csv(queryset=qs, fields=fields, out=mem)
+        mem.seek(0)
+        csv_dump = mem.read()
+        self.assertEquals(csv_dump.decode('utf8'), u'"add_user";"auth"\r\n')
 
 
 class TestExportAsCsv(unittest.TestCase):

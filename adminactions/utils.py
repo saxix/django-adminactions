@@ -23,15 +23,40 @@ def get_copy_of_instance(instance):
     return instance.__class__.objects.get(pk=instance.pk)
 
 
+def get_attr(obj, attr, default=None):
+    """Recursive get object's attribute. May use dot notation.
+
+    >>> class C(object): pass
+    >>> a = C()
+    >>> a.b = C()
+    >>> a.b.c = 4
+    >>> get_attr(a, 'b.c')
+    4
+
+    >>> get_attr(a, 'b.c.y', None)
+
+    >>> get_attr(a, 'b.c.y', 1)
+    1
+    """
+    if '.' not in attr:
+        ret = getattr(obj, attr, default)
+    else:
+        L = attr.split('.')
+        ret = get_attr(getattr(obj, L[0], default), '.'.join(L[1:]), default)
+
+    if isinstance(ret, BaseException):
+        raise ret
+    return ret
+
 def getattr_or_item(obj, name):
     try:
-        return getattr(obj, name)
+        ret = get_attr(obj, name, AttributeError())
     except AttributeError:
         try:
-            return obj[name]
+            ret = obj[name]
         except KeyError:
             raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
-
+    return ret
 
 def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     """

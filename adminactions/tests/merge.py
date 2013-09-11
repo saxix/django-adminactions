@@ -16,6 +16,7 @@ def assert_profile(user):
     p = None
     try:
         user.get_profile()
+        #warnings.filters.pop()
     except ObjectDoesNotExist:
         app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
         model = models.get_model(app_label, model_name)

@@ -6,6 +6,13 @@ from .merge import MergeTest, MergeTestApi  # NOQA
 from .graph import TestGraph  # NOQA
 from .api import TestExportAsCsv, TestExportAsExcel, TestExportQuerySetAsCsv, TestExportQuerySetAsExcel
 
+import warnings
+warnings.filterwarnings("ignore",
+                                append=True,
+                                category=DeprecationWarning,
+                                message=".*AUTH_PROFILE_MODULE.*")
+
+
 if getattr(settings, 'ENABLE_SELENIUM', True):
     try:
         import selenium  # NOQA
