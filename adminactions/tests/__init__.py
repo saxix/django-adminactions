@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 from django.conf import settings
-from .mass_update import *  # NOQA
-from .exports import *  # NOQA
-from .merge import MergeTest, MergeTestApi  # NOQA
-from .graph import TestGraph  # NOQA
-from .api import TestExportAsCsv, TestExportAsExcel, TestExportQuerySetAsCsv, TestExportQuerySetAsExcel
+from .test_mass_update import *  # NOQA
+from .test_exports import *  # NOQA
+from .test_merge import MergeTest, MergeTestApi  # NOQA
+from .test_graph import TestGraph  # NOQA
+from .test_api import TestExportAsCsv, TestExportAsExcel, TestExportQuerySetAsCsv, TestExportQuerySetAsExcel
 
 import warnings
 warnings.filterwarnings("ignore",
