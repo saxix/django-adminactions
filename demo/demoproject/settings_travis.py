@@ -5,7 +5,7 @@ if db == 'pg':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'concurrency',
+            'NAME': 'adminactions',
             'HOST': '127.0.0.1',
             'PORT': '',
             'USER': 'postgres',
@@ -14,7 +14,7 @@ elif db == 'mysql':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'concurrency',
+            'NAME': 'adminactions',
             'HOST': '127.0.0.1',
             'PORT': '',
             'USER': 'root',
@@ -23,6 +23,6 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'concurrency.sqlite',
+            'NAME': 'adminactions.sqlite',
             'HOST': '',
             'PORT': ''}}
