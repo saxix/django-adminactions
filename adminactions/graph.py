@@ -9,7 +9,7 @@ from django.db.models.fields.related import ForeignKey
 from django.forms.fields import CharField, BooleanField, ChoiceField
 from django.forms.forms import Form, DeclarativeFieldsMetaclass
 from django.forms.widgets import HiddenInput, MultipleHiddenInput
-from django.utils import simplejson as json
+import json
 from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext

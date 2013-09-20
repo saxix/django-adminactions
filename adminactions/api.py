@@ -130,7 +130,7 @@ def export_as_csv(queryset, fields=None, header=None, filename=None, options=Non
     if out is None:
         if filename is None:
             filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        response = HttpResponse(mimetype='text/csv')
+        response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
     else:
         response = out

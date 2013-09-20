@@ -23,11 +23,23 @@ coverage:
 	coverage run demo/manage.py test adminactions
 	coverage report
 
+ci:
+	@[ "${DJANGO}" = "1.4.x" ] && pip install django==1.4.8 || :
+	@[ "${DJANGO}" = "1.5.x" ] && pip install django==1.5.4 || :
+	@[ "${DJANGO}" = "1.6.x" ] && pip install https://www.djangoproject.com/m/releases/1.6/Django-1.6b4.tar.gz || :
+	@[ "${DJANGO}" = "dev" ] && pip install git+git://github.com/django/django.git || :
+
+	@[ "${DBENGINE}" = "pg" ] && pip install -q psycopg2 || :
+	@[ "${DBENGINE}" = "mysql" ] && pip install git+git@github.com:django/django.git || :
+
+	@pip install coverage
+	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
+
+	DISABLE_SELENIUM=1 $(MAKE) coverage
+
 clean:
 	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST
-	find . -name __pycache__ -prune | xargs rm -rf
-	find . -name "*.py?" -prune | xargs rm -rf
-	find . -name "*.orig" -prune | xargs rm -rf
+	find . -name __pycache__ -o -name "*.py?" -o -name "*.orig" -prune | xargs rm -rf
 	find adminactions/locale -name django.mo | xargs rm -f
 
 docs: mkbuilddir
@@ -36,7 +48,6 @@ docs: mkbuilddir
 ifdef BROWSE
 	firefox ${BUILDDIR}/docs/index.html
 endif
-
 
 
 install-phantomjs: mkbuilddir

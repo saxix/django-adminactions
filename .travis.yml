@@ -1,14 +1,12 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
-  - "3.2"
 
 env:
-  - DJANGO="Django==1.4.8"
-  - DJANGO="Django==1.5.4"
-  - DJANGO="https://www.djangoproject.com/download/1.6b4/tarball/"
-  - DJANGO="git+https://github.com/django/django.git"
+  - DJANGO="1.4.x"
+  - DJANGO="1.5.x"
+  - DJANGO="1.6.x"
+  - DJANGO="dev"
 
 install:
   - pip install coverage python-coveralls
@@ -16,7 +14,7 @@ install:
   - python setup.py -q install
 
 script:
-  - make coverage
+  - make ci
 
 after_success:
   - coveralls -c .coveragerc

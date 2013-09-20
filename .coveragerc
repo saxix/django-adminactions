@@ -1,5 +1,5 @@
 [run]
-branch = False
+branch = True
 source = adminactions
 include =
 

@@ -208,7 +208,7 @@ def _dump_qs(form, queryset, data, filename):
     ret = json.serialize(data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
                          indent=form.cleaned_data.get('indent'))
 
-    response = HttpResponse(mimetype='text/plain')
+    response = HttpResponse(content_type='text/plain')
     if not form.cleaned_data.get('on_screen', False):
         filename = filename or "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
