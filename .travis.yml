@@ -3,14 +3,14 @@ python:
   - "2.7"
 
 env:
-  - DJANGO="1.4.x"
-  - DJANGO="1.5.x"
-  - DJANGO="1.6.x"
-  - DJANGO="dev"
+  - DJANGO="1.4.x" DBENGINE=pg
+  - DJANGO="1.5.x" DBENGINE=pg
+  - DJANGO="1.6.x" DBENGINE=pg
+  - DJANGO="dev" DBENGINE=pg
 
 install:
   - pip install coverage python-coveralls
-  - pip install -q $DJANGO
+  - pip install -q psycopg2
   - python setup.py -q install
 
 script:

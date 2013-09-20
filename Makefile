@@ -35,7 +35,7 @@ ci:
 	@pip install coverage
 	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
 
-	DISABLE_SELENIUM=1 $(MAKE) coverage
+	DISABLE_SELENIUM=1 coverage run demo/manage.py test adminactions --settings=demoproject.settings_travis
 
 clean:
 	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST

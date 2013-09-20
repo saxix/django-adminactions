@@ -8,6 +8,11 @@ sys.path.append(os.path.abspath(os.path.join(here, '..', '..')))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+db = os.environ.get('DBENGINE', None)
+if db:
+    mod = __import__('demoproject.settings_%s' % db, fromlist=['demoproject'])
+    DATABASES = mod.DATABASES
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
