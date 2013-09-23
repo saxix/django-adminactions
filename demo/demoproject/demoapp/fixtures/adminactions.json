@@ -1,0 +1,236 @@
+[
+    {
+        "pk":1,
+        "model":"auth.user",
+        "fields":{
+            "username":"sax",
+            "first_name":"",
+            "last_name":"",
+            "is_active":true,
+            "is_superuser":true,
+            "is_staff":true,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"sha1$eec82$d1cebb645395e1ea755e57e5eeda6d192128ad6b",
+            "email":"sax@os4d.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":2,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_00",
+            "first_name":"FirstName 0",
+            "last_name":"LastName 0",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":true,
+            "last_login": "2020-01-01T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"sha1$eec82$d1cebb645395e1ea755e57e5eeda6d192128ad6b",
+            "email":"user_0@test.org",
+            "date_joined": "2020-01-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":3,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_01",
+            "first_name":"FirstName 1",
+            "last_name":"LastName 1",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"sha1$eec82$d1cebb645395e1ea755e57e5eeda6d192128ad6b",
+            "email":"user_1@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":4,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_02",
+            "first_name":"FirstName 2",
+            "last_name":"LastName 2",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_2@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":5,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_03",
+            "first_name":"FirstName 3",
+            "last_name":"LastName 3",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_3@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":6,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_04",
+            "first_name":"FirstName 4",
+            "last_name":"LastName 4",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_4@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":7,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_05",
+            "first_name":"FirstName 5",
+            "last_name":"LastName 5",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_5@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":8,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_06",
+            "first_name":"FirstName 6",
+            "last_name":"LastName 6",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_6@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":9,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_07",
+            "first_name":"FirstName 7",
+            "last_name":"LastName 7",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_7@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":10,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_08",
+            "first_name":"FirstName 8",
+            "last_name":"LastName 8",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_8@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":11,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_09",
+            "first_name":"FirstName 9",
+            "last_name":"LastName 9",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_9@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+    {
+        "pk":12,
+        "model":"auth.user",
+        "fields":{
+            "username":"user_10",
+            "first_name":"FirstName 10",
+            "last_name":"LastName 10",
+            "is_active":true,
+            "is_superuser":false,
+            "is_staff":false,
+            "last_login":"2011-07-07T17:00:00Z",
+            "groups":[],
+            "user_permissions":[],
+            "password":"",
+            "email":"user_10@test.org",
+            "date_joined":"2011-07-01T17:00:00Z"
+        }
+    },
+
+    {
+        "pk":2,
+        "model":"auth.group",
+        "fields":{
+            "name":"admin",
+            "permissions":[]
+        }
+    },
+    {
+        "pk":1,
+        "model":"auth.group",
+        "fields":{
+            "name":"guest",
+            "permissions":[]
+        }
+    }
+
+]

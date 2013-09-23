@@ -34,13 +34,14 @@
                 <th>Field</th>
                 <th>Master #<span id='master_pk'>{{ master.pk }}</span> (This will be preserved)
                     {#                    <input type="hidden" value="{{ master.pk }}" name="master-pk">#}
-                    {{ adminform.form.master_pk }}
+                    {{ adminform.form.master_pk.value }}
                 </th>
                 <th><a class="swap" href="#">swap</a></th>
                 <th>Result</th>
                 <th></th>
                 <th>Other #<span id='other_pk'>{{ other.pk }}</span> (This will be removed)
-                    {{ adminform.form.other_pk }}</th>
+                    {{ adminform.form.other_pk.value }}
+                </th>
             </tr>
             {% for field in fields %}
                 <tr class="{% cycle "row1" "row2" %}">

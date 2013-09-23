@@ -20,7 +20,7 @@
     {% endif %}
     {{ data }}
     <div id='form'>
-        <form action="." method="post">
+        <form method="post">
             {% csrf_token %}
             <table>
                 {{ adminform.form }}

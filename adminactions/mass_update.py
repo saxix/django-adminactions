@@ -21,6 +21,7 @@ from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
+from adminactions.models import get_permission_codename
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import GenericActionForm
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
@@ -196,7 +197,9 @@ def mass_update(modeladmin, request, queryset):
         kwargs['required'] = False
         return field.formfield(**kwargs)
 
-    if not request.user.has_perm('adminactions_massupdate'):
+    opts = modeladmin.model._meta
+    perm = "{0}.{1}".format( opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts) )
+    if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
 

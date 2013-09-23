@@ -1,0 +1,207 @@
+# -*- encoding: utf-8 -*-
+from __future__ import absolute_import
+import StringIO
+import xlrd
+import csv
+import mock
+from django_webtest import WebTest
+from django_dynamic_fixture import G
+from django.contrib.auth.models import User, Permission
+from django.contrib import admin
+from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from webtests.utils import user_grant_permission, admin_register, CheckSignalsMixin
+import django.contrib.admin
+
+__all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportDeleteTreeTest',
+           'ExportAsXlsTest']
+
+
+class ExportMixin(object):
+    fixtures = ['adminactions', 'demoproject']
+    urls = 'demoproject.urls'
+
+    def setUp(self):
+        super(ExportMixin, self).setUp()
+        self.user = G(User, username='user', is_staff=True, is_active=True)
+
+
+class ExportAsFixtureTest(ExportMixin, WebTest):
+    def test_no_permission(self):
+        with user_grant_permission(self.user, ['auth.change_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'export_as_fixture'
+            form.set('_selected_action', True, 0)
+            res = form.submit().follow()
+            assert 'Sorry you do not have rights to execute this action' in res.body
+
+    def test_success(self):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'export_as_fixture'
+            form.set('_selected_action', True, 0)
+            form.set('_selected_action', True, 1)
+            res = form.submit()
+            res.form['use_natural_key'] = True
+            res = res.form.submit('apply')
+            assert res.json[0]['pk'] == 1
+
+
+class ExportAsCsvTest(ExportMixin, CheckSignalsMixin, WebTest):
+    sender_model = User
+    action_name = 'export_as_csv'
+    selected_rows = [1, 13]
+
+    def test_no_permission(self):
+        with user_grant_permission(self.user, ['auth.change_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'export_as_csv'
+            form.set('_selected_action', True, 0)
+            res = form.submit().follow()
+            assert 'Sorry you do not have rights to execute this action' in res.body
+
+    def test_success(self):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'export_as_csv'
+            form.set('_selected_action', True, 0)
+            form.set('_selected_action', True, 1)
+            res = form.submit()
+            res = res.form.submit('apply')
+            io = StringIO.StringIO(res.body)
+            csv_reader = csv.reader(io)
+            rows = 0
+            for c in csv_reader:
+                rows += 1
+            self.assertEqual(rows, 2)
+
+    def test_custom_filename(self):
+        """
+            if the ModelAdmin has `get_export_as_csv_filename()` use that method to get the
+            attachment filename
+        """
+        md = admin_register(User)
+
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+            with mock.patch.object(md, 'get_export_as_csv_filename', lambda r, q: 'new.test', create=True):
+                res = self.app.get('/', user='user')
+                res = res.click('Users')
+                form = res.forms['changelist-form']
+                form['action'] = 'export_as_csv'
+                form.set('_selected_action', True, 0)
+                form['select_across'] = 1
+                res = form.submit()
+                res = res.form.submit('apply')
+                self.assertEqual(res.content_disposition, u'attachment;filename="new.test"')
+
+    def _run_action(self, steps=2):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            if steps >= 1:
+                form = res.forms['changelist-form']
+                form['action'] = 'export_as_csv'
+                form.set('_selected_action', True, 0)
+                form.set('_selected_action', True, 1)
+                res = form.submit()
+            if steps >= 2:
+                res = res.form.submit('apply')
+        return res
+
+
+class ExportAsXlsTest(ExportMixin, CheckSignalsMixin, WebTest):
+    sender_model = User
+    action_name = 'export_as_xls'
+    selected_rows = [1, 13]
+
+    def _run_action(self, step=3):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            if step>=1:
+                form = res.forms['changelist-form']
+                form['action'] = 'export_as_xls'
+                form.set('_selected_action', True, 0)
+                form.set('_selected_action', True, 1)
+                res = form.submit()
+            if step >=2:
+                res.form['header'] = 1
+                res = res.form.submit('apply')
+            return res
+
+    def test_no_permission(self):
+        with user_grant_permission(self.user, ['auth.change_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'export_as_xls'
+            form.set('_selected_action', True, 0)
+            res = form.submit().follow()
+            assert 'Sorry you do not have rights to execute this action' in res.body
+
+    def test_success(self):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'export_as_xls'
+            form.set('_selected_action', True, 0)
+            form.set('_selected_action', True, 1)
+            form.set('_selected_action', True, 2)
+            res = form.submit()
+            res.form['header'] = 1
+            res = res.form.submit('apply')
+            io = StringIO.StringIO(res.body)
+
+            io.seek(0)
+            w = xlrd.open_workbook(file_contents=io.read())
+            sheet = w.sheet_by_index(0)
+            self.assertEquals(sheet.cell_value(0, 0), u'#')
+            self.assertEquals(sheet.cell_value(0, 1), u'ID')
+            self.assertEquals(sheet.cell_value(0, 2), u'username')
+            self.assertEquals(sheet.cell_value(0, 3), u'first name')
+            self.assertEquals(sheet.cell_value(1, 1), 1.0)
+            self.assertEquals(sheet.cell_value(1, 2), u'sax')
+            self.assertEquals(sheet.cell_value(2, 2), u'user')
+            self.assertEquals(sheet.cell_value(3, 2), u'user_00')
+
+    #
+    # def test_custom_filename(self):
+    #     """
+    #         if the ModelAdmin has `get_export_as_csv_filename()` use that method to get the
+    #         attachment filename
+    #     """
+    #     md = admin_register(User)
+    #
+    #     with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+    #         with mock.patch.object(md, 'get_export_as_csv_filename', lambda r, q: 'new.test', create=True):
+    #             res = self.app.get('/', user='user')
+    #             res = res.click('Users')
+    #             form = res.forms['changelist-form']
+    #             form['action'] = 'export_as_csv'
+    #             form.set('_selected_action', True, 0)
+    #             form['select_across'] = 1
+    #             res = form.submit()
+    #             res = res.form.submit('apply')
+    #             self.assertEqual(res.content_disposition, u'attachment;filename="new.test"')
+    #
+    # def _run_action(self, steps=2):
+    #     with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+    #         res = self.app.get('/', user='user')
+    #         res = res.click('Users')
+    #         if steps >= 1:
+    #             form = res.forms['changelist-form']
+    #             form['action'] = 'export_as_csv'
+    #             form.set('_selected_action', True, 0)
+    #             form.set('_selected_action', True, 1)
+    #             res = form.submit()
+    #         if steps >= 2:
+    #             res = res.form.submit('apply')
+    #     return res

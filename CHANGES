@@ -6,6 +6,7 @@ Release 0.3 (in development)
 * add feature to :ref:`export dictionaries <export_with_dictionaries>`
 * new action :ref:`export_as_xls`
 * custom headers to :ref:`export_as_csv`
+* new permission :ref:`adminactions_massupdate`
 
 .. _release-0.2:
 

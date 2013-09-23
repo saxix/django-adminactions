@@ -20,6 +20,7 @@ from django.core import serializers as ser
 from adminactions.api import csv_options_default
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVOptions, XLSOptions
+from adminactions.models import get_permission_codename
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 from adminactions.api import export_as_csv as _export_as_csv, export_as_xls as _export_as_xls
 
@@ -28,8 +29,10 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
     """
         export a queryset to csv file
     """
-    if not request.user.has_perm('adminactions.export'):
-        messages.error(request, _('Sorry you do not have rights to execute this action'))
+    opts = modeladmin.model._meta
+    perm = "{0}.{1}".format( opts.app_label.lower(), get_permission_codename('adminactions_export', opts) )
+    if not request.user.has_perm(perm):
+        messages.error(request, _('Sorry you do not have rights to execute this action (%s)' % perm))
         return
 
     try:
@@ -47,7 +50,7 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
                'select_across': request.POST.get('select_across') == '1',
                'action': request.POST.get('action'),
                'columns': [x for x, v in cols]}
-    initial.update(csv_options_default)
+    # initial.update(csv_options_default)
 
     if 'apply' in request.POST:
         form = form_class(request.POST)
@@ -208,7 +211,7 @@ def _dump_qs(form, queryset, data, filename):
     ret = json.serialize(data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
                          indent=form.cleaned_data.get('indent'))
 
-    response = HttpResponse(content_type='text/plain')
+    response = HttpResponse(content_type='application/json')
     if not form.cleaned_data.get('on_screen', False):
         filename = filename or "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
@@ -222,9 +225,12 @@ def export_as_fixture(modeladmin, request, queryset):
                'action': request.POST.get('action'),
                'serializer': 'json',
                'indent': 4}
-    if not request.user.has_perm('adminactions_export'):
-        messages.error(request, _('Sorry you do not have rights to execute this action'))
+    opts = modeladmin.model._meta
+    perm = "{0}.{1}".format( opts.app_label.lower(), get_permission_codename('adminactions_export', opts) )
+    if not request.user.has_perm(perm):
+        messages.error(request, _('Sorry you do not have rights to execute this action (%s)' % perm))
         return
+
     try:
         adminaction_requested.send(sender=modeladmin.model,
                                    action='export_as_fixture',

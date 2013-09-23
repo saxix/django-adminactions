@@ -37,7 +37,7 @@ class BaseTestCaseMixin(object):
     def tearDown(self):
         self.sett.disable()
 
-    def login(self, username='sax', password='123'):
+    def login(self, username='user_0', password='123'):
         logged = self.client.login(username=username, password=password)
         assert logged, 'Unable login with credentials'
         self._user = authenticate(username=username, password=password)
