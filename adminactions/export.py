@@ -1,8 +1,5 @@
 # -*- encoding: utf-8 -*-
-
 from itertools import chain
-from operator import attrgetter
-
 from django.core.serializers import get_serializer_formats
 from django.db import router
 from django.db.models import ManyToManyField, ForeignKey
@@ -16,8 +13,6 @@ from django.template.context import RequestContext
 from django.utils.safestring import mark_safe
 from django.contrib.admin import helpers
 from django.core import serializers as ser
-
-from adminactions.api import csv_options_default
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVOptions, XLSOptions
 from adminactions.models import get_permission_codename
@@ -174,20 +169,6 @@ class ForeignKeysCollector(object):
 
     def __str__(self):
         return mark_safe(self.data)
-
-
-class DependenciesCollector(Collector):
-    def collect(self, objs, source=None, nullable=False, collect_related=True, source_attr=None,
-                reverse_dependency=False):
-        super(DependenciesCollector, self).collect(objs, source, nullable, collect_related, source_attr,
-                                                   reverse_dependency)
-        alls = []
-        for model, instances in self.data.items():
-            alls.extend(sorted(instances, key=attrgetter("pk")))
-        self.data = alls
-
-    def delete(self):
-        pass
 
 
 class FixtureOptions(forms.Form):
@@ -381,4 +362,3 @@ def export_delete_tree(modeladmin, request, queryset):
 
 
 export_delete_tree.short_description = "Export delete tree"
-

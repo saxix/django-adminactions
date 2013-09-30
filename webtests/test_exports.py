@@ -53,6 +53,20 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             res = res.form.submit('apply')
             assert res.json[0]['pk'] == 1
 
+    def test_add_foreign_keys(self):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = self.action_name
+            form.set('_selected_action', True, 0)
+            form.set('_selected_action', True, 1)
+            res = form.submit()
+            res.form['use_natural_key'] = True
+            res.form['add_foreign_keys'] = True
+            res = res.form.submit('apply')
+            assert res.json[0]['pk'] == 1
+
     def _run_action(self, steps=2):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
             res = self.app.get('/', user='user')

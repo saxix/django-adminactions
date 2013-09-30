@@ -48,6 +48,7 @@ def get_attr(obj, attr, default=None):
         raise ret
     return ret
 
+
 def getattr_or_item(obj, name):
     try:
         ret = get_attr(obj, name, AttributeError())
@@ -57,6 +58,7 @@ def getattr_or_item(obj, name):
         except KeyError:
             raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
     return ret
+
 
 def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     """

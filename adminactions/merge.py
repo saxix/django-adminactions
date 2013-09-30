@@ -52,11 +52,10 @@ def merge(modeladmin, request, queryset):
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format( opts.app_label.lower(), get_permission_codename('adminactions_merge', opts) )
+    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_merge', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action (%s)' % perm))
         return
-
 
     def raw_widget(field, **kwargs):
         """ force all fields as not required"""

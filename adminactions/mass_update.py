@@ -145,7 +145,7 @@ class MassUpdateForm(GenericActionForm):
             for f_name, field in self.fields.items():
                 if isinstance(field, InlineForeignKeyField):
                     exclude.append(f_name)
-                # Clean the model instance's fields.
+                    # Clean the model instance's fields.
             try:
                 self.instance.clean_fields(exclude=exclude)
             except ValidationError, e:
@@ -203,7 +203,7 @@ def mass_update(modeladmin, request, queryset):
         return field.formfield(**kwargs)
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format( opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts) )
+    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
