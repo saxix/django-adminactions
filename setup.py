@@ -16,7 +16,7 @@ setup(
     url='https://github.com/saxix/django-adminactions',
     download_url='https://github.com/saxix/django-adminactions',
     author='sax',
-    author_email='sax@os4d.org',
+    author_email='s.apostolico@gmail.com',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
     packages=find_packages(),

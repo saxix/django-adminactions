@@ -10,12 +10,6 @@ def pytest_configure(config):
     if not settings.configured:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'demoproject.settings'
 
-    settings.LOGGING['loggers'][''] = {'handlers': ['null'],
-                          'propagate': True,
-                          'level': 'DEBUG'}
-
-    os.environ['PREFIX'] = os.path.join(here, "~build")
-
 
 def runtests(args=None):
     import pytest

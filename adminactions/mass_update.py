@@ -121,9 +121,8 @@ class MassUpdateForm(GenericActionForm):
         super(MassUpdateForm, self).__init__(*args, **kwargs)
         self._errors = None
 
-    def is_valid(self):
-        return super(MassUpdateForm, self).is_valid()
-
+    #def is_valid(self):
+    #    return super(MassUpdateForm, self).is_valid()
 
     def _get_validation_exclusions(self):
         exclude = super(MassUpdateForm, self)._get_validation_exclusions()
@@ -185,6 +184,12 @@ class MassUpdateForm(GenericActionForm):
 
     def clean__validate(self):
         return bool(self.data.get('_validate', 0))
+
+    def clean__unique_transaction(self):
+        return bool(self.data.get('_unique_transaction', 0))
+
+    def clean__clean(self):
+        return bool(self.data.get('_clean', 0))
 
 
 def mass_update(modeladmin, request, queryset):

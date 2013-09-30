@@ -16,7 +16,7 @@ class TestExportQuerySetAsCsv(TestCase):
             qs = Permission.objects.select_related().filter(codename='add_user')
             ret = export_as_csv(queryset=qs)
         self.assertIsInstance(ret, HttpResponse)
-        self.assertEquals(ret.content.decode('utf8'), u'"16";"Can add user";"user";"add_user"\r\n')
+        self.assertEquals(ret.content.decode('utf8'), u'"%s";"Can add user";"user";"add_user"\r\n' % qs[0].pk)
 
     def test_header_is_true(self):
         mem = StringIO.StringIO()

@@ -228,7 +228,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
     if out is None:
         if filename is None:
             filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        response = HttpResponse(mimetype='application/vnd.ms-excel')
+        response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
     else:
         response = out
@@ -250,7 +250,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
     sheet.write(row, 0, '#', style)
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [unicode(f.verbose_name) for f in queryset.model._meta.fields]
+            header = [unicode(f.verbose_name) for f in queryset.model._meta.fields if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, fieldname, heading_xf)

@@ -10,13 +10,40 @@ from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 
 
-def admin_register(model):
-    try:
-        admin.site.register(model)
-    except AlreadyRegistered:
-        pass
+class admin_register(object):
+    def __init__(self, model, model_admin=None, unregister=False):
+        self.model = model
+        self.model_admin = model_admin
+        self.unregister = unregister
 
-    return admin.site._registry[model]
+    def __enter__(self):
+        try:
+            admin.site.register(self.model, self.model_admin)
+            self.unregister = True
+        except AlreadyRegistered:
+            pass
+        return admin.site._registry[self.model]
+
+    def __exit__(self, *exc_info):
+        if self.unregister:
+            admin.site.unregister(self.model)
+
+    def start(self):
+        """Activate a patch, returning any created mock."""
+        result = self.__enter__()
+        return result
+
+    def stop(self):
+        """Stop an active patch."""
+        return self.__exit__()
+
+#def admin_register(model):
+#    try:
+#        admin.site.register(model)
+#    except AlreadyRegistered:
+#        pass
+#
+#    return admin.site._registry[model]
 
 
 def text(length, choices=string.ascii_letters):
@@ -77,17 +104,32 @@ class user_grant_permission(object):
         return self.__exit__()
 
 
+class SelectRowsMixin(object):
+    _selected_rows = []
+    _selected_values = []
+
+    def _select_rows(self, form, selected_rows=None):
+        if selected_rows is None:
+            selected_rows = self._selected_rows
+
+        self._selected_values = []
+        for r in selected_rows:
+            chk = form.get('_selected_action', r, default=None)
+            if chk:
+                form.set('_selected_action', True, r)
+                self._selected_values.append(int(chk.value))
+
 
 class CheckSignalsMixin(object):
     MESSAGE = 'Action Interrupted Test'
-    SELECTION = [2, 3, 4]
 
     def test_signal_sent(self):
         def handler_factory(name):
             def myhandler(sender, action, request, queryset, **kwargs):
                 handler_factory.invoked[name] = True
                 self.assertEqual(action, self.action_name)
-                self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
+                self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
+                                         sorted(self._selected_values))
 
             return myhandler
 
@@ -119,7 +161,8 @@ class CheckSignalsMixin(object):
         def myhandler(sender, action, request, queryset, **kwargs):
             myhandler.invoked = True
             self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
+            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
+                                     sorted(self._selected_values))
             raise ActionInterrupted(self.MESSAGE)
 
         try:
@@ -136,15 +179,16 @@ class CheckSignalsMixin(object):
         def myhandler(sender, action, request, queryset, form, **kwargs):
             myhandler.invoked = True
             self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
+            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
+                                     sorted(self._selected_values))
             self.assertTrue(isinstance(form, BaseForm))
             raise ActionInterrupted(self.MESSAGE)
 
         try:
             adminaction_start.connect(myhandler, sender=self.sender_model)
-            response = self._run_action(2)
+            res = self._run_action(2)
             self.assertTrue(myhandler.invoked)
-            self.assertIn(self.MESSAGE,  self.app.cookies['messages'])
+            self.assertIn(self.MESSAGE, self.app.cookies['messages'])
         finally:
             adminaction_start.disconnect(myhandler, sender=self.sender_model)
 
@@ -154,7 +198,8 @@ class CheckSignalsMixin(object):
         def myhandler(sender, action, request, queryset, **kwargs):
             myhandler.invoked = True
             self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True), self.selected_rows)
+            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
+                                     sorted(self._selected_values))
 
         try:
             adminaction_end.connect(myhandler, sender=self.sender_model)

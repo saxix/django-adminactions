@@ -182,7 +182,7 @@ def get_verbose_name(model_or_queryset, field):
     elif isinstance(field, models.Field):
         field = field
     else:
-        raise ValueError('`get_verbose_name` field_path muset be string or Field class')
+        raise ValueError('`get_verbose_name` field_path must be string or Field class')
 
     return field.verbose_name
 
