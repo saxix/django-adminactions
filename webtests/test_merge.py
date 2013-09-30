@@ -7,15 +7,19 @@ from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import User, Group, Permission
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
+from django_dynamic_fixture import G
+from django_webtest import WebTest, WebTestMixin
 from adminactions.api import merge, ALL_FIELDS
 
 from .common import BaseTestCaseMixin
+from .utils import CheckSignalsMixin, SelectRowsMixin
+from webtests.utils import user_grant_permission
 
 
 def assert_profile(user):
     p = None
     try:
-        user.get_profile()
+        get_profile(user)
     except ObjectDoesNotExist:
         app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
         model = models.get_model(app_label, model_name)
@@ -133,7 +137,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
             self.assertSequenceEqual(master.logentry_set.all(), [entry])
             self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
             self.assertEqual(get_profile(result), profile)
-            self.assertEqual(master.get_profile(), profile)
+            # self.assertEqual(master.get_profile(), profile)
 
     def test_merge_ignore_related(self):
         master = User.objects.get(pk=self.master_pk)
@@ -146,106 +150,107 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertFalse(User.objects.filter(pk=other.pk).exists())
         self.assertFalse(LogEntry.objects.filter(pk=entry.pk).exists())
 
-
-class MergeTest(BaseTestCaseMixin, TransactionTestCase):
-    urls = "adminactions.tests.urls"
+#
+class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
+    fixtures = ['adminactions.json', 'demoproject.json']
+    urls = 'demoproject.urls'
+    sender_model = User
+    action_name = 'merge'
+    _selected_rows = [1, 2]
 
     def setUp(self):
+        super(TestMerge, self).setUp()
         self.url = reverse('admin:auth_user_changelist')
-        super(MergeTest, self).setUp()
+        self.user = G(User, username='user', is_staff=True, is_active=True)
 
-    def test_error_if_too_many_records(self):
-        response = self.client.post(self.url, {'action': 'merge', 'select_across': 0, '_selected_action': [2, 3, 4]})
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("Please select exactly 2 records", response.cookies['messages'].value)
+    def _run_action(self, steps=3, page_start=None):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+            if isinstance(steps, int):
+                steps = range(1, steps + 1)
+                res = self.app.get('/', user='user')
+                res = res.click('Users')
+            else:
+                res = page_start
+            if 1 in steps:
+                form = res.forms['changelist-form']
+                form['action'] = 'merge'
+                self._select_rows(form)
+                res = form.submit()
+            if 2 in steps:
+                res.form['username'] = res.form['form-1-username'].value
+                res.form['email'] = res.form['form-1-email'].value
+                res.form['last_login'] = res.form['form-1-last_login'].value
+                res.form['date_joined'] = res.form['form-1-date_joined'].value
+                res = res.form.submit('preview')
+            if 3 in steps:
+                res = res.form.submit('apply')
+            return res
 
-    def _action_init(self):
-        FIRST, SECOND = 2, 3
-        url = reverse('admin:auth_user_changelist')
-        base_data = {'action': 'merge', 'select_across': 0, '_selected_action': [FIRST, SECOND]}
-        response = self.client.post(url, base_data)
-        other = response.context['other']
-        master = response.context['master']
-
-        assert master.username != other.username
-        assert master.email != other.email
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Merge records")
-        data = response.context['adminform'].form.initial
-        other_data = response.context['formset'][1].initial
-        master_data = response.context['formset'][0].initial
-        assert other.username == other_data['username'], (other.username, other_data['username'])
-        assert master.username == master_data['username'], (master.username, master_data['username'])
-        assert data.get('username') == master_data['username'] != other_data['username']
-        assert data['email'] != other_data['email']
-
-        return response, master, other, base_data, data, master_data, other_data
-
-    def _action_preview(self, data):
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'adminactions/merge_preview.html')
-        self.assertContains(response, "Preview")
-        self.assertIn('original', response.context)
-        return response
+    def test_no_permission(self):
+        with user_grant_permission(self.user, ['auth.change_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'merge'
+            self._select_rows(form)
+            res = form.submit().follow()
+            assert 'Sorry you do not have rights to execute this action' in res.body
 
     def test_success(self):
-        response, master, other, base_data, data, master_data, other_data = self._action_init()
-        # merge
-        data['first_name'] = other_data['first_name']
-        data['email'] = other_data['email']
-        data['preview'] = 'preview'
+        res = self._run_action(1)
+        preserved = User.objects.get(pk=self._selected_values[0])
+        removed = User.objects.get(pk=self._selected_values[1])
 
-        # we need to override these values because form.initial values are not valid
-        # as widget's entry for date/datetime
-        data['last_login'] = response.context['formset'][0]['last_login'].value()
-        data['date_joined'] = response.context['formset'][0]['date_joined'].value()
-        response = self._action_preview(data)
+        assert preserved.email != removed.email  # sanity check
 
-        data = response.context['adminform'].form.data
-        data.update(base_data)
-        del data['preview']
-        data['apply'] = 'apply'
-        assert data['first_name'] == other_data['first_name'] != master_data['first_name']
+        res = self._run_action([2, 3], res)
 
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 302)
+        self.assertFalse(User.objects.filter(pk=removed.pk).exists())
+        self.assertTrue(User.objects.filter(pk=preserved.pk).exists())
 
-        merged_record = User.objects.get(pk=master.pk)
-        self.assertFalse(User.objects.filter(pk=other.pk).exists())
+        preserved_after = User.objects.get(pk=self._selected_values[0])
+        self.assertEqual(preserved_after.email, removed.email)
+        self.assertFalse(LogEntry.objects.filter(pk=removed.pk).exists())
 
-        self.assertEqual(merged_record.first_name, other.first_name)
-        self.assertEqual(merged_record.email, other.email)
+    def test_error_if_too_many_records(self):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'merge'
+            self._select_rows(form, [1, 2, 3])
+            res = form.submit().follow()
+            self.assertContains(res, 'Please select exactly 2 records')
 
     def test_swap(self):
-        response, master, other, base_data, data, master_data, other_data = self._action_init()
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+            #removed = User.objects.get(pk=self._selected_rows[0])
+            #preserved = User.objects.get(pk=self._selected_rows[1])
 
-        data['first_name'] = other_data['first_name']
-        data['email'] = other_data['email']
-        data['preview'] = 'preview'
-        #swap records. We want preserve 'other'
-        data['master_pk'] = other.pk
-        data['other_pk'] = master.pk
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'merge'
+            self._select_rows(form, [1, 2])
+            res = form.submit()
+            removed = User.objects.get(pk=self._selected_values[0])
+            preserved = User.objects.get(pk=self._selected_values[1])
 
-        # we need to override these values because form.initial values are not valid
-        # as widget's entry for date/datetime
-        data['last_login'] = response.context['formset'][0]['last_login'].value()
-        data['date_joined'] = response.context['formset'][0]['date_joined'].value()
+            # steps = 2:
+            res.form['master_pk'] = self._selected_values[1]
+            res.form['other_pk'] = self._selected_values[0]
 
-        response = self._action_preview(data)
-        data = response.context['adminform'].form.data
-        data.update(base_data)
-        del data['preview']
-        data['apply'] = 'apply'
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 302)
+            res.form['username'] = res.form['form-0-username'].value
+            res.form['email'] = res.form['form-0-email'].value
+            res.form['last_login'] = res.form['form-1-last_login'].value
+            res.form['date_joined'] = res.form['form-1-date_joined'].value
+            res = res.form.submit('preview')
+            # steps = 3:
+            res = res.form.submit('apply')
 
-        merged_record = User.objects.get(pk=other.pk)
-        self.assertFalse(User.objects.filter(pk=master.pk).exists())
+            preserved_after = User.objects.get(pk=self._selected_values[1])
+            self.assertFalse(User.objects.filter(pk=removed.pk).exists())
+            self.assertTrue(User.objects.filter(pk=preserved.pk).exists())
 
-        self.assertEqual(merged_record.first_name, other.first_name)
-        self.assertEqual(merged_record.email, other.email)
-
-    def test_signal_start(self):
-        pass
+            self.assertEqual(preserved_after.email, removed.email)
+            self.assertFalse(LogEntry.objects.filter(pk=removed.pk).exists())

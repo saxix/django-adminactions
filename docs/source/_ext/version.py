@@ -1,9 +1,8 @@
 import re
-
 from sphinx import addnodes, roles
 from sphinx.util.compat import Directive
+from sphinx.writers.html import SmartyPantsHTMLTranslator
 
-# RE for option descriptions without a '--' prefix
 simple_option_desc_re = re.compile(
     r'([-_a-zA-Z0-9]+)(\s*.*?)(?=,\s+(?:/|-|--)|$)')
 
@@ -38,41 +37,40 @@ def setup(app):
         indextemplate="pair: %s; release",
     )
 
-
 class VersionDirective(Directive):
     has_content = True
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
     option_spec = {}
+    version_text = {
+        'deprecated':       'Deprecated in %s.',
+        'versionchanged':   'Changed in %s.',
+        'versionadded':     'New in %s.',
+    }
 
     def run(self):
         env = self.state.document.settings.env
         arg0 = self.arguments[0]
-        is_nextversion = env.config.next_version == arg0
         ret = []
         node = addnodes.versionmodified()
         ret.append(node)
-        if is_nextversion:
-            node['version'] = "Development version"
-        else:
-            if len(self.arguments) == 1:
-            #                linktext = 'Please, see the Changelog <0_0_4>'
-            #                xrefs = roles.XRefRole()('release', linktext, linktext, self.lineno, self.state)
-            #                node.extend(xrefs[0])
 
-                linktext = 'Please, see the Changelog <changes>'
-                xrefs = roles.XRefRole()('doc', linktext, linktext, self.lineno, self.state)
-                node.extend(xrefs[0])
-
-        node['version'] = arg0
         node['type'] = self.name
-        if len(self.arguments) == 2:
-            inodes, messages = self.state.inline_text(self.arguments[1], self.lineno + 1)
-            node.extend(inodes)
-            if self.content:
-                self.state.nested_parse(self.content, self.content_offset, node)
-            ret = ret + messages
+        if env.config.next_version == arg0:
+            version = "Development version"
+            link = None
+        else:
+            version = arg0
+            link = 'release-%s' % arg0
+
+        node['version'] = version
+        # inodes, messages = self.state.inline_text(self.version_text[self.name] % version, self.lineno+1)
+        # node.extend(inodes)
+        if link:
+            text = ' Please see the changelog <%s>' % link
+            xrefs = roles.XRefRole()('std:ref', text, text, self.lineno, self.state)
+            node.extend(xrefs[0])
         env.note_versionchange(node['type'], node['version'], node, self.lineno)
         return ret
 

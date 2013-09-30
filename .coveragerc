@@ -1,10 +1,11 @@
 [run]
-branch = False
+branch = True
 source = adminactions
 include =
+    adminactions/**
 
 omit = adminactions/__init__.py
-        adminactions/tests/settings.py
+       adminactions/tests/**
 
 [report]
 # Regexes for lines to exclude from consideration

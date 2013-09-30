@@ -1,19 +1,28 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
+
 env:
-  - DJANGO="Django==1.4.5"
-  - DJANGO="Django==1.5.1"
-  - DJANGO="https://www.djangoproject.com/download/1.6b1/tarball/"
+  - DJANGO="1.4.x" DBENGINE=pg
+  - DJANGO="1.5.x" DBENGINE=pg
+  - DJANGO="1.6.x" DBENGINE=pg
+  - DJANGO="dev" DBENGINE=pg
 
 install:
   - pip install coverage python-coveralls
-  - pip install -q $DJANGO
   - python setup.py -q install
 
 script:
-  - make coverage
+  - make ci
+
+before_install:
+  - sh -c "if [ '$DBENGINE' = 'pg' ]; then psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi"
+  - sh -c "if [ '$DBENGINE' = 'mysql' ]; then mysql -e 'DROP DATABASE IF EXISTS adminactions;'; fi"
+
+before_script:
+  - sh -c "if [ '$DBENGINE' = 'pg' ]; then psql -c 'CREATE DATABASE adminactions;' -U postgres; fi"
+  - sh -c "if [ '$DBENGINE' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS adminactions;'; fi"
 
 after_success:
   - coveralls -c .coveragerc
+

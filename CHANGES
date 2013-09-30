@@ -1,20 +1,33 @@
-.. release:: 0_2
+.. _release-0.3:
 
-Release 0.2 (in development)
+Release 0.3
+===========
+
+* fixed :ghissue:`26`
+* add feature to :ref:`use callable as columns <export_with_callable>`
+* add feature to :ref:`export dictionaries <export_with_dictionaries>`
+* new action :ref:`export_as_xls`
+* added custom headers to :ref:`export_as_csv`
+* new permission :ref:`adminactions_massupdate`
+* new permission :ref:`adminactions_merge`
+
+.. _release-0.2:
+
+Release 0.2
 ============================
 
-* improved :ref:`_export_as_csv`
+* improved :ref:`export_as_csv`
 * Django 1.6 compatibility
 * Added `modeladmin` in providing_args of signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
 
-.. release:: 0_1
+.. _release-0.1:
 
 Release 0.1
 ===========
 
 * new api module
 * pull out core export_csv functionalites as `_export_as_csv() <api.html#adminactions.export._export_as_csv>`_
- to be used by custom code
+to be used by custom code
 * New exported filename callback for easy customize the filename ( see :ref:`filename_callbacks`)
 * New registration shortcut `add_to_site() <api.html#adminactions.actions.add_to_site>`_
 * New action: :ref:`merge`
@@ -22,7 +35,7 @@ Release 0.1
 * Added :ref:`permissions`
 * New signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
 
-.. release:: 0_0_4
+.. _release-0.0.4:
 
 Release 0.0.4
 =============
@@ -35,21 +48,21 @@ Release 0.0.4
 * NEW: :ref:`transform_operations`
 * NEW: url to preview date format in `export_as_csv`
 
-.. release:: 0_0_3
+.. _release-0.0.3:
 
 Release 0.0.3
 =============
 
 * added demo project
 
-.. release:: 0_0_2
+.. _release-0.0.2:
 
 Release 0.0.2
 =============
 
 * name changed from django-actions to django-adminactions
 
-.. release:: 0_0_1
+.. _release-0.0.1:
 
 Release 0.0.1
 =============

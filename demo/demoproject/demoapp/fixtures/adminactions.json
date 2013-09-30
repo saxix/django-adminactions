@@ -21,7 +21,7 @@
         "pk":2,
         "model":"auth.user",
         "fields":{
-            "username":"user_0",
+            "username":"user_00",
             "first_name":"FirstName 0",
             "last_name":"LastName 0",
             "is_active":true,
@@ -39,7 +39,7 @@
         "pk":3,
         "model":"auth.user",
         "fields":{
-            "username":"user_1",
+            "username":"user_01",
             "first_name":"FirstName 1",
             "last_name":"LastName 1",
             "is_active":true,
@@ -57,7 +57,7 @@
         "pk":4,
         "model":"auth.user",
         "fields":{
-            "username":"user_2",
+            "username":"user_02",
             "first_name":"FirstName 2",
             "last_name":"LastName 2",
             "is_active":true,
@@ -75,7 +75,7 @@
         "pk":5,
         "model":"auth.user",
         "fields":{
-            "username":"user_3",
+            "username":"user_03",
             "first_name":"FirstName 3",
             "last_name":"LastName 3",
             "is_active":true,
@@ -93,7 +93,7 @@
         "pk":6,
         "model":"auth.user",
         "fields":{
-            "username":"user_4",
+            "username":"user_04",
             "first_name":"FirstName 4",
             "last_name":"LastName 4",
             "is_active":true,
@@ -111,7 +111,7 @@
         "pk":7,
         "model":"auth.user",
         "fields":{
-            "username":"user_5",
+            "username":"user_05",
             "first_name":"FirstName 5",
             "last_name":"LastName 5",
             "is_active":true,
@@ -129,7 +129,7 @@
         "pk":8,
         "model":"auth.user",
         "fields":{
-            "username":"user_6",
+            "username":"user_06",
             "first_name":"FirstName 6",
             "last_name":"LastName 6",
             "is_active":true,
@@ -147,7 +147,7 @@
         "pk":9,
         "model":"auth.user",
         "fields":{
-            "username":"user_7",
+            "username":"user_07",
             "first_name":"FirstName 7",
             "last_name":"LastName 7",
             "is_active":true,
@@ -165,7 +165,7 @@
         "pk":10,
         "model":"auth.user",
         "fields":{
-            "username":"user_8",
+            "username":"user_08",
             "first_name":"FirstName 8",
             "last_name":"LastName 8",
             "is_active":true,
@@ -183,7 +183,7 @@
         "pk":11,
         "model":"auth.user",
         "fields":{
-            "username":"user_9",
+            "username":"user_09",
             "first_name":"FirstName 9",
             "last_name":"LastName 9",
             "is_active":true,

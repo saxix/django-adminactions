@@ -8,14 +8,33 @@ sys.path.append(os.path.abspath(os.path.join(here, '..', '..')))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'DEMODB.sqlite', # Not used with sqlite3.
-        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.
-    }
-}
+db = os.environ.get('DBENGINE', None)
+if db == 'pg':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'adminactions',
+            'HOST': '127.0.0.1',
+            'PORT': '',
+            'USER': 'postgres',
+            'PASSWORD': ''}}
+elif db == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'adminactions',
+            'HOST': '127.0.0.1',
+            'PORT': '',
+            'USER': 'root',
+            'PASSWORD': ''}}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'adminactions.sqlite',
+            'HOST': '',
+            'PORT': ''}}
+
 
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'
@@ -38,7 +57,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'demoproject.urls'
 WSGI_APPLICATION = 'demoproject.wsgi.application'
 
-AUTHENTICATION_BACKENDS = ('demoproject.backends.AnyUserBackend',)
+# AUTHENTICATION_BACKENDS = ('demoproject.backends.AnyUserBackend',)
 
 INSTALLED_APPS = (
     'django.contrib.auth',

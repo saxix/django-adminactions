@@ -9,7 +9,7 @@ from django.db.models.fields.related import ForeignKey
 from django.forms.fields import CharField, BooleanField, ChoiceField
 from django.forms.forms import Form, DeclarativeFieldsMetaclass
 from django.forms.widgets import HiddenInput, MultipleHiddenInput
-from django.utils import simplejson as json
+import json
 from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -17,7 +17,7 @@ from django.utils.encoding import force_unicode
 from django.contrib.admin import helpers
 
 from adminactions.exceptions import ActionInterrupted
-from adminactions.signals import adminaction_requested, adminaction_start
+from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 
 
 def graph_form_factory(model):
@@ -88,6 +88,13 @@ def graph_queryset(modeladmin, request, queryset):
                 table = zip(data_labels, data)
             except Exception as e:
                 messages.error(request, 'Unable to produce valid data: %s' % str(e))
+            else:
+                adminaction_end.send(sender=modeladmin.model,
+                                     action='graph_queryset',
+                                     request=request,
+                                     queryset=queryset,
+                                     modeladmin=modeladmin,
+                                     form=form)
     elif request.method == 'POST':
         # total = queryset.all().count()
         initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),

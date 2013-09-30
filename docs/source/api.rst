@@ -27,24 +27,59 @@ Exports a queryset as csv from a queryset with the given fields.
 
 Usage examples
 
-Returns  :class:`django:django.http.HttpResponse`::
+Returns  :class:`~django:django.http.HttpResponse`::
 
     response = export_as_csv(User.objects.all())
 
-Write to file::
+Write to file
 
-    users = export_as_csv(User.objects.all(), out=open('users.csv', 'w'))
-    users.close()
+.. code-block:: python
 
-Write to buffer::
+    >>> users = export_as_csv(User.objects.all(), out=open('users.csv', 'w'))
+    >>> users.close()
 
-    users = export_as_csv(User.objects.all(), out=StringIO())
+Write to buffer
 
-    with open('users.csv', 'w') as f:
-        f.write(users.getvalue())
+.. code-block:: python
+
+    >>> users = export_as_csv(User.objects.all(), out=StringIO())
+    >>> with open('users.csv', 'w') as f:
+            f.write(users.getvalue())
 
 
+.. _export_with_callable:
 
+Export with callable
+
+.. code-block:: python
+
+    >>> fields = ['username', 'get_full_name']
+    >>> export_as_csv(User.objects.all(), fields=fields, out=sys.stdout)
+    "sax";"FirstName 9 LastName 9"
+    "user_0";"FirstName 0 LastName 0"
+    "user_1";"FirstName 1 LastName 1"
+
+
+.. _export_with_dictionaries:
+
+Export with dictionaries
+
+.. code-block:: python
+
+    >>> fields = ['codename', 'content_type__app_label']
+    >>> qs = Permission.objects.filter(codename='add_user').values('codename', 'content_type__app_label')
+    >>> __ = export_as_csv(qs, fields=fields, out=sys.stdout)
+    "add_user";"auth"
+
+
+.. _api_export_as_xls:
+
+
+export_as_xls
+-------------
+.. versionadded:: 0.3
+
+Exports a queryset as csv from a queryset with the given fields.
 
 
 
@@ -53,7 +88,12 @@ Write to buffer::
 merge
 -----
 
-.. autofunction:: adminactions.api.merge
+Merge 'other' into master.
+
+        `fields` is a list of fieldnames that must be readed from ``other`` to put into master.
+        If ``fields`` is None ``master`` will get all the ``other`` values except primary_key.
+        Finally ``other`` will be deleted and master will be preserved
+
 
 
 

@@ -37,7 +37,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware')
 
-ROOT_URLCONF = 'adminactions.tests.urls'
+ROOT_URLCONF = 'demoproject.urls'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'adminactions')
+    'adminactions',
+    'demoproject.demoapp')
 
 TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
