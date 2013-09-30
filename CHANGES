@@ -1,9 +1,9 @@
 .. _release-0.3:
 
-Release 0.3 (in development)
-============================
+Release 0.3
+===========
 
-* fixed :ghissue:`20`
+* fixed :ghissue:`26`
 * add feature to :ref:`use callable as columns <export_with_callable>`
 * add feature to :ref:`export dictionaries <export_with_dictionaries>`
 * new action :ref:`export_as_xls`
