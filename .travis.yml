@@ -26,8 +26,3 @@ before_script:
 after_success:
   - coveralls -c .coveragerc
 
-
-matrix:
-  exclude:
-    - python: 2.6
-      env: DJANGO="git+https://github.com/django/django.git"
