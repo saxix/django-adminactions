@@ -10,3 +10,4 @@ coverage
 pytest
 pytest-django
 pytest-cov
+django
