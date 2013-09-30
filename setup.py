@@ -24,11 +24,6 @@ setup(
     install_requires=fread('adminactions/requirements.pip').split('\n'),
     zip_safe=False,
     platforms=['any'],
-    command_options={
-        'build_sphinx': {
-            'version': ('setup.py', app.VERSION),
-            'release': ('setup.py', app.VERSION)}
-    },
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',

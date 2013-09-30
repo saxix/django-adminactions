@@ -9,11 +9,6 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 db = os.environ.get('DBENGINE', None)
-if db:
-    mod = __import__('demoproject.settings_%s' % db, fromlist=['demoproject'])
-    DATABASES = mod.DATABASES
-
-db = os.environ.get('DBENGINE', None)
 if db == 'pg':
     DATABASES = {
         'default': {
