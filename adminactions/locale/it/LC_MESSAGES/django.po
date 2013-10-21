@@ -74,6 +74,58 @@ msgstr ""
 msgid "Preview"
 msgstr "Anteprima"
 
+#: templates/adminactions/merge.html:34
+msgid "Field"
+msgstr "Campo"
+
+#: templates/adminactions/merge.html:34
+msgid "Master"
+msgstr "Originale"
+
+#: templates/adminactions/merge.html:34
+msgid "This will be preserved"
+msgstr "Questo verra conservato"
+
+#: templates/adminactions/merge.html:39
+msgid "swap"
+msgstr "inverti"
+
+#: templates/adminactions/merge.html:40
+msgid "Result"
+msgstr "Risultato"
+
+#: templates/adminactions/merge.html:42
+msgid "Other"
+msgstr "Altro"
+
+#: templates/adminactions/merge.html:42
+msgid "This will be removed"
+msgstr "Questo verra rimosso"
+
+#: templates/adminactions/merge.html:42
+msgid "Merge records"
+msgstr "Unione"
+
 #: templates/adminactions/merge_preview.html:40
 msgid "Merge"
 msgstr "Unisci"
+
+#: templates/adminactions/merge_preview.html:19
+msgid "Key"
+msgstr "Chiave"
+
+#: templates/adminactions/merge_preview.html:24
+msgid "Original"
+msgstr "Originale"
+
+#: templates/adminactions/merge_preview.html:40
+msgid "After Merging"
+msgstr "Dopo l'unione"
+
+#: merge.py:141
+msgid "Merge selected records"
+msgstr "Unisci gli oggetti selezionati"
+
+#: merge.py:141
+msgid "Merge selected %(verbose_name_plural)s"
+msgstr "Unisci %(verbose_name_plural)s selezionati/e"

@@ -133,5 +133,4 @@ def merge(modeladmin, request, queryset):
                 'other': other})
     return render_to_response(tpl, RequestContext(request, ctx))
 
-
-merge.short_description = "Merge selected records"
+merge.short_description = _("Merge selected %(verbose_name_plural)s")
