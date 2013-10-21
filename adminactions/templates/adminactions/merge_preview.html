@@ -5,8 +5,8 @@
         <a href="../../">{% trans "Home" %}</a> &rsaquo;
         <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
         <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-        <a href="javascript:history.back();">Merge records</a> &rsaquo;
-        Preview
+        <a href="javascript:history.back();">{% trans "Merge records" %}</a> &rsaquo;
+        {% trans "Preview" %}
     </div>
 {% endif %}{% endblock %}
 {% block content %}
@@ -16,13 +16,13 @@
 {#        {{adminform.form.action_fields }}#}
     <table class="mergetable">
         <tr class="row1">
-            <th>Key</th>
+            <th>{% trans "Key" %}</th>
             <td colspan="2">{{ master.pk }}</td>
         </tr>
         <tr class="row1">
             <th></th>
-            <th>Original</th>
-            <th>After Merging</th>
+            <th>{% trans "Original" %}</th>
+            <th>{% trans "After Merging" %}</th>
         </tr>
         {% for field in fields %}
         <tr class="{% cycle "row2" "row1" %}">
