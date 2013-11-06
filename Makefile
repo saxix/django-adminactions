@@ -48,7 +48,7 @@ ci:
 	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
 	@echo "Database:" ${DBENGINE}
 
-	@pip install -r adminactions/requirements.pip
+	@pip install -r adminactions/requirements/install.pip -r adminactions/requirements/testing.pip
 
 	DISABLE_SELENIUM=1 $(MAKE) coverage
 

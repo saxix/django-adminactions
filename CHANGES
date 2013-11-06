@@ -3,6 +3,7 @@
 Release 0.3 (in development)
 ============================
 
+* fixed :ghissue:`33`
 * fixed :ghissue:`20`
 * add feature to :ref:`use callable as columns <export_with_callable>`
 * add feature to :ref:`export dictionaries <export_with_dictionaries>`

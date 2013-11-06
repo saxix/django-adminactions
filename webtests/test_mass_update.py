@@ -1,14 +1,15 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
-from django_webtest import WebTest
+from django_webtest import WebTestMixin
+from django.test import TestCase, TransactionTestCase
 from webtests.utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
 
 
 __all__ = ['MassUpdateTest', ]
 
 
-class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTest):
+class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demoproject.urls'
 

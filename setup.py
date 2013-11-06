@@ -10,6 +10,11 @@ RELEASE = app.get_version()
 def fread(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+#if 'test' in sys.argv:
+#    setup_requires.append('pytest')
+
+tests_require = fread('adminactions/requirements/testing.pip')
+
 setup(
     name=NAME,
     version=RELEASE,
@@ -21,7 +26,13 @@ setup(
     license='BSD',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=fread('adminactions/requirements.pip').split('\n'),
+    install_requires=fread('adminactions/requirements/install.pip'),
+    test_require=tests_require,
+    extras_require={
+        'tests': tests_require,
+    },
+    test_suite='conftest.runtests',
+    #cmdclass={'test': 'conftest.runtests'},
     zip_safe=False,
     platforms=['any'],
     classifiers=[
