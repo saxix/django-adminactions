@@ -190,8 +190,8 @@ xls_options_default = {'date_format': 'd/m/Y',
                        'DecimalField': '#,##0.00',
                        'BooleanField': 'boolean',
                        'NullBooleanField': 'boolean',
-                       'EmailField': lambda value : 'HYPERLINK("mailto:%s","%s")' % (value, value),
-                       'URLField': lambda value : 'HYPERLINK("%s","%s")' % (value, value),
+                       'EmailField': lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
+                       'URLField': lambda value: 'HYPERLINK("%s","%s")' % (value, value),
                        'CurrencyColumn': '"$"#,##0.00);[Red]("$"#,##0.00)', }
 
 
@@ -215,13 +215,13 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
         if hasattr(queryset, 'model'):
             for i, fieldname in enumerate(fields):
                 try:
-                    f, __,__, __,  = queryset.model._meta.get_field_by_name(fieldname)
+                    f, __, __, __, = queryset.model._meta.get_field_by_name(fieldname)
                     fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, 'general'))
                     formats[i] = fmt
                 except FieldDoesNotExist:
                     pass
-            # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
-            # styles[i] = xls_options_default.get(col_class, 'general')
+                    # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
+                    # styles[i] = xls_options_default.get(col_class, 'general')
 
         return formats
 
@@ -277,4 +277,3 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
 
     book.save(response)
     return response
-

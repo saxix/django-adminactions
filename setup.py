@@ -24,7 +24,9 @@ setup(
     author_email='s.apostolico@gmail.com',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
-    packages=find_packages(),
+    #  ['adminactions', 'webtests', 'adminactions.templatetags']
+    # packages=find_packages(),
+    packages=['adminactions', 'adminactions.templatetags'],
     include_package_data=True,
     install_requires=fread('adminactions/requirements/install.pip'),
     test_require=tests_require,

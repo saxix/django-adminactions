@@ -45,7 +45,6 @@ class CSVOptions(forms.Form):
     columns = forms.MultipleChoiceField(widget=SelectMultiple(attrs={'size': 20}))
 
 
-
 class XLSOptions(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     select_across = forms.BooleanField(label='', required=False, initial=0,
@@ -66,4 +65,5 @@ class XLSOptions(forms.Form):
     # date_format = forms.CharField(initial=formats.get_format('DATE_FORMAT'))
     # time_format = forms.CharField(initial=formats.get_format('TIME_FORMAT'))
     columns = forms.MultipleChoiceField(widget=SelectMultiple(attrs={'size': 20}))
+
 #
