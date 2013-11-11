@@ -29,7 +29,7 @@ setup(
     packages=['adminactions', 'adminactions.templatetags'],
     include_package_data=True,
     install_requires=fread('adminactions/requirements/install.pip'),
-    test_require=tests_require,
+    tests_require=tests_require,
     extras_require={
         'tests': tests_require,
     },
