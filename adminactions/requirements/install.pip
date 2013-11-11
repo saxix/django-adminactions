@@ -1,1 +1,2 @@
 unicodecsv>=0.9.4
+xlwt>=0.7.5
