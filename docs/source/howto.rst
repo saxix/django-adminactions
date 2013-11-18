@@ -33,7 +33,7 @@ Customize Massupdate Form
 .. versionadded:: 0.0.4
 
 To customize the Form used by the massupdate action simply create your own Form class and set it as value
-of the ``mass_updated_form`` attribute to your ``ModelAdmin``. ie::
+of the ``mass_update_form`` attribute to your ``ModelAdmin``. ie::
 
     class MyMassUpdateForm(ModelForm):
         class Meta:
@@ -41,7 +41,7 @@ of the ``mass_updated_form`` attribute to your ``ModelAdmin``. ie::
 
 
     class MyModelAdmin(admin.ModelAdmin):
-        mass_updated_form = MyMassUpdateForm
+        mass_update_form = MyMassUpdateForm
 
 
     admin.register(MyModel, MyModelAdmin)
