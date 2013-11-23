@@ -2,9 +2,9 @@ VERSION=2.0.0
 BUILDDIR='~build'
 DJANGO_SETTINGS_MODULE:=demoproject.settings
 PYTHONPATH := ${PWD}/demo/:${PWD}
-DJANGO_14=django==1.4.8
-DJANGO_15=django==1.5.4
-DJANGO_16=https://www.djangoproject.com/m/releases/1.6/Django-1.6b4.tar.gz
+DJANGO_14=django==1.4.9
+DJANGO_15=django==1.5.5
+DJANGO_16=django==1.6
 DJANGO_DEV=git+git://github.com/django/django.git
 
 
@@ -33,7 +33,6 @@ init-db:
 	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS adminactions;'; fi"
 	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then pip install MySQL-python; fi"
 
-	@sh -c "if [ '${DBENGINE}' = 'pg' ]; then psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi"
 	@sh -c "if [ '${DBENGINE}' = 'pg' ]; then psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi"
 	@sh -c "if [ '${DBENGINE}' = 'pg' ]; then psql -c 'CREATE DATABASE adminactions;' -U postgres; fi"
 	@sh -c "if [ '${DBENGINE}' = 'pg' ]; then pip install -q psycopg2; fi"
