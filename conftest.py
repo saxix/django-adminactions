@@ -10,7 +10,6 @@ def pytest_configure(config):
     if not settings.configured:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'demoproject.settings'
 
-
 def runtests(args=None):
     import pytest
 
