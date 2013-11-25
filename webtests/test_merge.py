@@ -35,7 +35,6 @@ def get_profile(user):
 
 
 class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
-    urls = "adminactions.tests.urls"
 
     def setUp(self):
         super(MergeTestApi, self).setUp()
