@@ -11,6 +11,8 @@ DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3',
                          'HOST': '',
                          'PORT': ''}}  # NOQA
 
+TEST_COLLATION='utf8_general_ci'
+
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
