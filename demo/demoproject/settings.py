@@ -26,7 +26,11 @@ elif db == 'mysql':
             'HOST': '127.0.0.1',
             'PORT': '',
             'USER': 'root',
-            'PASSWORD': ''}}
+            'PASSWORD': '',
+            'CHARSET': 'utf8',
+            'COLLATION': 'utf8_general_ci',
+            'TEST_CHARSET': 'utf8',
+            'TEST_COLLATION': 'utf8_general_ci'}}
 else:
     DATABASES = {
         'default': {
@@ -34,7 +38,6 @@ else:
             'NAME': 'adminactions.sqlite',
             'HOST': '',
             'PORT': ''}}
-
 
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'
