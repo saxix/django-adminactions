@@ -25,7 +25,6 @@ SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
 
 
 class BaseTestCaseMixin(object):
-    urls = 'adminactions.tests.urls'
     fixtures = ['adminactions.json', ]
 
     def setUp(self):
