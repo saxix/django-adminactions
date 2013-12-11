@@ -47,7 +47,7 @@
         <a href="{% url 'admin:index' %}{{ app_label}}">{{ app_label|capfirst }}</a> &rsaquo;
         {% if has_change_permission %}<a
                 href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %} &rsaquo;
-        CSV Export Options
+        {% trans "CSV Export Options" %}
     </div>
 {% endif %}{% endblock %}
 
@@ -66,7 +66,7 @@
                 {{ adminform.form }}
             </table>
 {#            <input type="hidden" name="action" value="{{ action }}"/>#}
-            <input type="submit" name="apply" value="Export"/>
+            <input type="submit" name="apply" value="{% trans 'Export' %}"/>
         </form>
     </div>
     {% url 'adminactions.format_date' as url_format_date %}

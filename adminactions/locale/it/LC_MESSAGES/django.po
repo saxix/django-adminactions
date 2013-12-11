@@ -129,3 +129,11 @@ msgstr "Unisci gli oggetti selezionati"
 #: merge.py:141
 msgid "Merge selected %(verbose_name_plural)s"
 msgstr "Unisci %(verbose_name_plural)s selezionati/e"
+
+#: templates/adminactions/export_csv.html:50
+msgid "CSV Export Options"
+msgstr "Opzioni esportazione CSV"
+
+#: templates/adminactions/export_csv.html:69
+msgid "Export"
+msgstr "Esporta"
