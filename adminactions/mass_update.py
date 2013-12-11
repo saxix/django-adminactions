@@ -106,6 +106,7 @@ OPERATIONS = OperationManager({
 
 
 class MassUpdateForm(GenericActionForm):
+    _no_sample_for =[]
     _clean = forms.BooleanField(label='clean()',
                                 required=False,
                                 help_text="if checked calls obj.clean()")
@@ -322,17 +323,18 @@ def mass_update(modeladmin, request, queryset):
 
     for el in queryset.all()[:10]:
         for f in modeladmin.model._meta.fields:
-            if hasattr(f, 'flatchoices') and f.flatchoices:
-                grouped[f.name] = dict(getattr(f, 'flatchoices')).values()
-            elif hasattr(f, 'choices') and f.choices:
-                grouped[f.name] = dict(getattr(f, 'choices')).values()
-            elif isinstance(f, df.BooleanField):
-                grouped[f.name] = [True, False]
-            else:
-                value = getattr(el, f.name)
-                if value is not None and value not in grouped[f.name]:
-                    grouped[f.name].append(value)
-            initial[f.name] = initial.get(f.name, value)
+            if f.name not in form._no_sample_for:
+                if hasattr(f, 'flatchoices') and f.flatchoices:
+                    grouped[f.name] = dict(getattr(f, 'flatchoices')).values()
+                elif hasattr(f, 'choices') and f.choices:
+                    grouped[f.name] = dict(getattr(f, 'choices')).values()
+                elif isinstance(f, df.BooleanField):
+                    grouped[f.name] = [True, False]
+                else:
+                    value = getattr(el, f.name)
+                    if value is not None and value not in grouped[f.name]:
+                        grouped[f.name].append(value)
+                    initial[f.name] = initial.get(f.name, value)
 
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media

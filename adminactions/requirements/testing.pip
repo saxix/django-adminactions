@@ -1,0 +1,10 @@
+mock>=1.0.1
+selenium>=2.32.0
+django-webtest>=1.7.5
+WebTest>=2.0.7
+django-dynamic-fixture
+coverage
+pytest
+pytest-django
+pytest-cov
+django
