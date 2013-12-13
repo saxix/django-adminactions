@@ -47,8 +47,8 @@ class MergeForm(GenericActionForm):
         return int(self.cleaned_data['dependencies'])
 
     class Media:
-        js = ['adminactions/js/merge.js']
-        css = {'all': ['adminactions/css/adminactions.css']}
+        js = ['adminactions/js/merge.min.js']
+        css = {'all': ['adminactions/css/adminactions.min.css']}
 
 
 def merge(modeladmin, request, queryset):
