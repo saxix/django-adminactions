@@ -2,7 +2,7 @@ VERSION=2.0.0
 BUILDDIR='~build'
 DJANGO_SETTINGS_MODULE:=demoproject.settings
 PYTHONPATH := ${PWD}/demo/:${PWD}
-DJANGO_14=django==1.4.9
+DJANGO_14=django==1.4.10
 DJANGO_15=django==1.5.5
 DJANGO_16=django==1.6
 DJANGO_DEV=git+git://github.com/django/django.git
