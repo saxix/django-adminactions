@@ -113,7 +113,7 @@ def export_as_csv(modeladmin, request, queryset):
                        form_class=CSVOptions)
 
 
-export_as_csv.short_description = "Export as CSV"
+export_as_csv.short_description = _("Export as CSV")
 
 
 def export_as_xls(modeladmin, request, queryset):
@@ -125,7 +125,7 @@ def export_as_xls(modeladmin, request, queryset):
                        form_class=XLSOptions)
 
 
-export_as_xls.short_description = "Export as XLS"
+export_as_xls.short_description = _("Export as XLS")
 
 
 class FlatCollector(object):
@@ -275,7 +275,7 @@ def export_as_fixture(modeladmin, request, queryset):
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
-export_as_fixture.short_description = "Export as fixture"
+export_as_fixture.short_description = _("Export as fixture")
 
 
 def export_delete_tree(modeladmin, request, queryset):
@@ -361,4 +361,4 @@ def export_delete_tree(modeladmin, request, queryset):
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
-export_delete_tree.short_description = "Export delete tree"
+export_delete_tree.short_description = _("Export delete tree")
