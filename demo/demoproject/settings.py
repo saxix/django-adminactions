@@ -77,3 +77,5 @@ AUTH_PROFILE_MODULE = 'demoapp.UserProfile'
 
 TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
+
+DDF_DEFAULT_DATA_FIXTURE = 'demoproject.demoapp.util.DataFixtureClass'
