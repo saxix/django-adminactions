@@ -43,6 +43,7 @@ def graph_queryset(modeladmin, request, queryset):
     MForm = graph_form_factory(modeladmin.model)
 
     graph_type = table = None
+    extra = '{}'
     try:
         adminaction_requested.send(sender=modeladmin.model,
                                    action='graph_queryset',
@@ -70,6 +71,7 @@ def graph_queryset(modeladmin, request, queryset):
                 x = form.cleaned_data['axes_x']
                 #            y = form.cleaned_data['axes_y']
                 graph_type = form.cleaned_data['graph_type']
+
                 field, model, direct, m2m = modeladmin.model._meta.get_field_by_name(x)
                 cc = queryset.values_list(x).annotate(Count(x)).order_by()
                 if isinstance(field, ForeignKey):
@@ -85,7 +87,31 @@ def graph_queryset(modeladmin, request, queryset):
                 else:
                     data_labels = [str(l) for l, v in cc]
                 data = [v for l, v in cc]
-                table = zip(data_labels, data)
+
+                if graph_type == 'BarChart':
+                    table = [[10, 20]]
+                    extra = """{seriesDefaults:{renderer:$.jqplot.BarRenderer,
+                                                rendererOptions: {fillToZero: true,
+                                                                  barDirection: 'horizontal'},
+                                                shadowAngle: -135,
+                                               },
+                                series:[%s],
+                                axes: {yaxis: {renderer: $.jqplot.CategoryAxisRenderer,
+                                                ticks: %s},
+                                       xaxis: {pad: 1.05,
+                                               tickOptions: {formatString: '%%d'}}
+                                      }
+                                }"""  % (json.dumps(data_labels), json.dumps(data_labels))
+                elif graph_type == 'PieChart':
+                    table = [zip(data_labels, data)]
+                    extra = """{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,
+                                                rendererOptions: {fill: true,
+                                                                    showDataLabels: true,
+                                                                    sliceMargin: 4,
+                                                                    lineWidth: 5}},
+                             legend: {show: true, location: 'e'}}"""
+
+
             except Exception as e:
                 messages.error(request, 'Unable to produce valid data: %s' % str(e))
             else:
@@ -113,6 +139,7 @@ def graph_queryset(modeladmin, request, queryset):
            'opts': modeladmin.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': media,
+           'extra': extra,
            'as_json': json.dumps(table),
            'graph_type': graph_type}
     return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
