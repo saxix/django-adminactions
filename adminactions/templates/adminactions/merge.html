@@ -25,8 +25,8 @@
                 <td>{{ adminform.form.dependencies }}</td>
             </tr>
             <tr>
-                <td>{{ adminform.form.generic.label }}</td>
-                <td>{{ adminform.form.generic }}</td>
+                <td>{{ adminform.form.field_names.label }}</td>
+                <td>{{ adminform.form.field_names }}</td>
             </tr>
         </table>
         <table class="mergetable">
@@ -34,18 +34,18 @@
                 <th>{% trans "Field" %}</th>
                 <th>{% trans "Master" %} #<span id='master_pk'>{{ master.pk }}</span> ({% trans "This will be preserved" %})
                     {#                    <input type="hidden" value="{{ master.pk }}" name="master-pk">#}
-                    {{ adminform.form.master_pk.value }}
+{#                    {{ adminform.form.master_pk.value }}#}
                 </th>
                 <th><a class="swap" href="#">{% trans "swap" %}</a></th>
                 <th>{% trans "Result" %}</th>
                 <th></th>
                 <th>{% trans "Other" %} #<span id='other_pk'>{{ other.pk }}</span> ({% trans "This will be removed" %})
-                    {{ adminform.form.other_pk.value }}
+{#                    {{ adminform.form.other_pk.value }}#}
                 </th>
             </tr>
             {% for field in fields %}
-                <tr class="{% cycle "row1" "row2" %}">
-                    <td class="column label">{{ master|verbose_name:field.name }}</td>
+                <tr class="{% cycle "row1" "row2" %} merge-row">
+                    <td class="column label" data-content="{{ field.name }}">{{ master|verbose_name:field.name }}</td>
 
                     <td class="column origin">
                         {{ formset.0|widget:field.name }}

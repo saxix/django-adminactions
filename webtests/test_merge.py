@@ -10,18 +10,20 @@ from django.test import TransactionTestCase
 from django_dynamic_fixture import G
 from django_webtest import WebTest, WebTestMixin
 from adminactions.api import merge, ALL_FIELDS
+from adminactions.merge import MergeForm
 
 from .common import BaseTestCaseMixin
 from .utils import CheckSignalsMixin, SelectRowsMixin
 from webtests.utils import user_grant_permission
 
+PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'demoapp.UserProfile')
 
 def assert_profile(user):
     p = None
     try:
         get_profile(user)
     except ObjectDoesNotExist:
-        app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
+        app_label, model_name = PROFILE_MODULE.split('.')
         model = models.get_model(app_label, model_name)
         p, __ = model.objects.get_or_create(user=user)
 
@@ -29,7 +31,7 @@ def assert_profile(user):
 
 
 def get_profile(user):
-    app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
+    app_label, model_name = PROFILE_MODULE.split('.')
     model = models.get_model(app_label, model_name)
     return model.objects.get(user=user)
 
@@ -122,7 +124,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertSequenceEqual(master.logentry_set.all(), [entry])
         self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
 
-    @skipIf(not hasattr(settings, 'AUTH_PROFILE_MODULE'), "")
+    # @skipIf(not hasattr(settings, 'AUTH_PROFILE_MODULE'), "")
     def test_merge_one_to_one_field(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
@@ -235,7 +237,7 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             removed = User.objects.get(pk=self._selected_values[0])
             preserved = User.objects.get(pk=self._selected_values[1])
 
-            # steps = 2:
+            # steps = 2 (swap):
             res.form['master_pk'] = self._selected_values[1]
             res.form['other_pk'] = self._selected_values[0]
 
@@ -243,6 +245,9 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             res.form['email'] = res.form['form-0-email'].value
             res.form['last_login'] = res.form['form-1-last_login'].value
             res.form['date_joined'] = res.form['form-1-date_joined'].value
+
+            # res.form['field_names'] = 'username,email'
+
             res = res.form.submit('preview')
             # steps = 3:
             res = res.form.submit('apply')
@@ -253,3 +258,74 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
 
             self.assertEqual(preserved_after.email, removed.email)
             self.assertFalse(LogEntry.objects.filter(pk=removed.pk).exists())
+
+    def test_merge_move_detail(self):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+            #removed = User.objects.get(pk=self._selected_rows[0])
+            #preserved = User.objects.get(pk=self._selected_rows[1])
+
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'merge'
+            self._select_rows(form, [1, 2])
+            res = form.submit()
+            removed = User.objects.get(pk=self._selected_values[0])
+            preserved = User.objects.get(pk=self._selected_values[1])
+
+            removed.userdetail_set.create(note='1')
+            preserved.userdetail_set.create(note='2')
+
+            # steps = 2:
+            res.form['master_pk'] = self._selected_values[1]
+            res.form['other_pk'] = self._selected_values[0]
+
+
+            res.form['username'] = res.form['form-0-username'].value
+            res.form['email'] = res.form['form-0-email'].value
+            res.form['last_login'] = res.form['form-1-last_login'].value
+            res.form['date_joined'] = res.form['form-1-date_joined'].value
+            res.form['dependencies'] = MergeForm.DEP_MOVE
+            res = res.form.submit('preview')
+            # steps = 3:
+            res = res.form.submit('apply')
+
+            preserved_after = User.objects.get(pk=self._selected_values[1])
+            self.assertEqual(preserved_after.userdetail_set.count(), 2)
+            self.assertFalse(User.objects.filter(pk=removed.pk).exists())
+
+
+    def test_merge_delete_detail(self):
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+            #removed = User.objects.get(pk=self._selected_rows[0])
+            #preserved = User.objects.get(pk=self._selected_rows[1])
+
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = 'merge'
+            self._select_rows(form, [1, 2])
+            res = form.submit()
+            removed = User.objects.get(pk=self._selected_values[0])
+            preserved = User.objects.get(pk=self._selected_values[1])
+
+            removed.userdetail_set.create(note='1')
+            preserved.userdetail_set.create(note='2')
+
+            # steps = 2:
+            res.form['master_pk'] = self._selected_values[1]
+            res.form['other_pk'] = self._selected_values[0]
+
+
+            res.form['username'] = res.form['form-0-username'].value
+            res.form['email'] = res.form['form-0-email'].value
+            res.form['last_login'] = res.form['form-1-last_login'].value
+            res.form['date_joined'] = res.form['form-1-date_joined'].value
+            res.form['dependencies'] = MergeForm.DEP_DELETE
+            res = res.form.submit('preview')
+            # steps = 3:
+            res = res.form.submit('apply')
+
+            preserved_after = User.objects.get(pk=self._selected_values[1])
+            self.assertEqual(preserved_after.userdetail_set.count(), 1)
+            self.assertFalse(User.objects.filter(pk=removed.pk).exists())

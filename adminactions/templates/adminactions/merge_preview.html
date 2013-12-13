@@ -13,7 +13,6 @@
     <form method="post" action=".">{% csrf_token %}
         {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
         {% for f in adminform.form.action_fields %}{{ f }}{% endfor %}
-{#        {{adminform.form.action_fields }}#}
     <table class="mergetable">
         <tr class="row1">
             <th>{% trans "Key" %}</th>
