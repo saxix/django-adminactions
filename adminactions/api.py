@@ -44,7 +44,8 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     @param fields: list of fieldnames to  merge
     @return:
     """
-    fields = fields or [f.name for f in master._meta.fields]
+    if fields == None:
+        fields = [f.name for f in master._meta.fields]
     all_m2m = {}
     all_related = {}
 
