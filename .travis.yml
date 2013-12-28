@@ -12,7 +12,7 @@ env:
   - DJANGO="dev" DBENGINE=pg
 
 install:
-  - export PATH=".:$PATH" pip install coverage python-coveralls
+  - export PATH=.:$PATH pip install coverage python-coveralls
 
 script:
   - make init-db ci
