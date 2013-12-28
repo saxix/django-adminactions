@@ -1,5 +1,6 @@
 VERSION=2.0.0
-BUILDDIR='~build'
+BUILDDIR=./~build
+BINDIR=./~build/bin
 DJANGO_SETTINGS_MODULE:=demoproject.settings
 PYTHONPATH := ${PWD}/demo/:${PWD}
 DJANGO_14=django==1.4.10
@@ -26,6 +27,12 @@ locale:
 coverage: mkbuilddir
 	py.test --cov=adminactions --cov-report=html --cov-config=.coveragerc -vvv
 
+install-casperjs: mkbuilddir
+	rm -Rf ${CASPERJS_DIR}
+	git clone git://github.com/n1k0/casperjs.git ${CASPERJS_DIR}
+	ln -sf `pwd`/${CASPERJS_DIR}/bin/casperjs ${BINDIR}/casperjs
+
+
 init-db:
 	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then mysql -e 'DROP DATABASE IF EXISTS adminactions;'; fi"
 	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS adminactions CHARSET=utf-8 COLLATE=utf8_general_ci;'; fi"
@@ -45,7 +52,7 @@ ci: init-db
 	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
 	@echo "Database:" ${DBENGINE}
 
-	@pip install -r adminactions/requirements/testing.pip
+	@pip install -r adminactions/requirements/install.pip -r adminactions/requirements/testing.pip
 
 	DISABLE_SELENIUM=1 $(MAKE) coverage
 
