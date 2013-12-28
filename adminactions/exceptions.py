@@ -7,5 +7,6 @@ class ActionInterrupted(Exception):
      to prevent action to be executed
     """
 
+
 class FakeTransaction(Exception):
     pass

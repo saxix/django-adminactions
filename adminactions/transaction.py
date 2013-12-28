@@ -13,4 +13,3 @@ try:
 
 except:
     from django.db.transaction import commit_manually, rollback
-

@@ -2,6 +2,9 @@ language: python
 python:
   - "2.7"
 
+branches:
+  only:
+    - feature/casper
 env:
   - DJANGO="1.4.x" DBENGINE=pg
   - DJANGO="1.5.x" DBENGINE=pg
@@ -13,10 +16,13 @@ install:
   - python setup.py -q install
 
 script:
-  - make ci
+  - make init-db ci
 
 before_script:
   - make init-db
+  - "export DISPLAY=:99.0"
+  - sleep 5
+  - "export PHANTOMJS_EXECUTABLE='phantomjs --local-to-remote-url-access=yes --ignore-ssl-errors=yes'"
 
 after_success:
   - coveralls -c .coveragerc

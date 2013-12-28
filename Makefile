@@ -17,8 +17,6 @@ mkbuilddir:
 test:
 	py.test
 
-selenium:
-	cd demo && ./manage.py test adminactions
 
 locale:
 	cd adminactions && django-admin.py makemessages -l en
@@ -47,7 +45,7 @@ ci: init-db
 	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
 	@echo "Database:" ${DBENGINE}
 
-	@pip install -r adminactions/requirements/install.pip -r adminactions/requirements/testing.pip
+	@pip install -r adminactions/requirements/testing.pip
 
 	DISABLE_SELENIUM=1 $(MAKE) coverage
 

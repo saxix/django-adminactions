@@ -167,7 +167,7 @@ class CheckSignalsMixin(object):
 
         try:
             adminaction_requested.connect(myhandler, sender=self.sender_model)
-            response = self._run_action(1)
+            self._run_action(1)
             self.assertTrue(myhandler.invoked)
             self.assertIn(self.MESSAGE, self.app.cookies['messages'])
         finally:
@@ -186,7 +186,7 @@ class CheckSignalsMixin(object):
 
         try:
             adminaction_start.connect(myhandler, sender=self.sender_model)
-            res = self._run_action(2)
+            self._run_action(2)
             self.assertTrue(myhandler.invoked)
             self.assertIn(self.MESSAGE, self.app.cookies['messages'])
         finally:
@@ -207,5 +207,3 @@ class CheckSignalsMixin(object):
             self.assertTrue(myhandler.invoked)
         finally:
             adminaction_end.disconnect(myhandler, sender=self.sender_model)
-
-

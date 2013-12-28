@@ -3,7 +3,6 @@ from adminactions import api
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django import forms
-from adminactions import transaction
 from django.forms import TextInput, HiddenInput
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, model_to_dict
@@ -12,10 +11,9 @@ from django.template import RequestContext
 from django.utils.safestring import mark_safe
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
-from adminactions.exceptions import FakeTransaction
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
-from adminactions.utils import clone_instance
+from adminactions.utils import clone_instance, model_supports_transactions
 
 
 class MergeForm(GenericActionForm):
@@ -36,7 +34,7 @@ class MergeForm(GenericActionForm):
 
     master_pk = forms.CharField(widget=HiddenInput)
     other_pk = forms.CharField(widget=HiddenInput)
-    field_names = forms.CharField(required=False)
+    field_names = forms.CharField(required=False, widget=HiddenInput)
 
     def action_fields(self):
         for fieldname in ['dependencies', 'master_pk', 'other_pk', 'field_names']:
@@ -45,6 +43,12 @@ class MergeForm(GenericActionForm):
 
     def clean_dependencies(self):
         return int(self.cleaned_data['dependencies'])
+
+    def clean_field_names(self):
+        return self.cleaned_data['field_names'].split(',')
+
+    def is_valid(self):
+        return super(MergeForm, self).is_valid()
 
     class Media:
         js = ['adminactions/js/merge.min.js']
@@ -71,14 +75,15 @@ def merge(modeladmin, request, queryset):
 
         # Allows to specified a custom Form in the ModelAdmin
 
-    #    MForm = getattr(modeladmin, 'merge_form', MergeForm)
     merge_form = getattr(modeladmin, 'merge_form', MergeForm)
     MForm = modelform_factory(modeladmin.model, form=merge_form, formfield_callback=raw_widget)
     OForm = modelform_factory(modeladmin.model, formfield_callback=raw_widget)
     tpl = 'adminactions/merge.html'
+    transaction_supported = model_supports_transactions(modeladmin.model)
 
     ctx = {
         '_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+        'transaction_supported': transaction_supported,
         'select_across': request.POST.get('select_across') == '1',
         'action': request.POST.get('action'),
         'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable],
@@ -88,42 +93,42 @@ def merge(modeladmin, request, queryset):
 
     if 'preview' in request.POST:
         master = queryset.get(pk=request.POST.get('master_pk'))
-        original = clone_instance(master)
         other = queryset.get(pk=request.POST.get('other_pk'))
-        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.commit_manually():
-            form = MForm(request.POST, instance=master)
-            other.delete()
-            form_is_valid = form.is_valid()
-            transaction.rollback()
+        original = clone_instance(master)
 
-        if form_is_valid:
-            ctx.update({'original': original})
-            tpl = 'adminactions/merge_preview.html'
+        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
+        form = MForm(request.POST, instance=master)
+
+        form_is_valid = form.is_valid()
+
+        if not form_is_valid:
+            messages.error(request, form.errors)
+
+        fields = form.cleaned_data['field_names']
+        if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
+            related = api.ALL_FIELDS
         else:
-            raise Exception(form.errors)
+            related = None
+        api.merge(master, other, fields=fields, commit=False, related=related)
+        ctx.update({'original': original})
+        tpl = 'adminactions/merge_preview.html'
+
     elif 'apply' in request.POST:
         master = queryset.get(pk=request.POST.get('master_pk'))
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.commit_manually():
-            form = MForm(request.POST, instance=master)
-            stored_pk = other.pk
-            other.delete()
-            ok = form.is_valid()
-            transaction.rollback()
-            other.pk = stored_pk
-        if ok:
+        form = MForm(request.POST, instance=master)
+        form_is_valid = form.is_valid()
+        try:
+            fields = form.cleaned_data['field_names']
             if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
                 related = api.ALL_FIELDS
             else:
                 related = None
-            fields = form.cleaned_data['field_names']
             api.merge(master, other, fields=fields, commit=True, related=related)
             return HttpResponseRedirect(request.path)
-        else:
-            messages.error(request, form.errors)
-
+        except Exception as e:
+            messages.error(request, e)
     else:
         try:
             master, other = queryset.all()

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.utils.unittest import skipIf
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,15 +7,16 @@ from django.contrib.auth.models import User, Group, Permission
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
 from django_dynamic_fixture import G
-from django_webtest import WebTest, WebTestMixin
+from django_webtest import WebTestMixin
 from adminactions.api import merge, ALL_FIELDS
 from adminactions.merge import MergeForm
 
 from .common import BaseTestCaseMixin
-from .utils import CheckSignalsMixin, SelectRowsMixin
-from webtests.utils import user_grant_permission
+from .utils import SelectRowsMixin
+from .utils import user_grant_permission
 
 PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'demoapp.UserProfile')
+
 
 def assert_profile(user):
     p = None
@@ -37,7 +37,6 @@ def get_profile(user):
 
 
 class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
-
     def setUp(self):
         super(MergeTestApi, self).setUp()
         self.master_pk = 2
@@ -151,7 +150,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertFalse(User.objects.filter(pk=other.pk).exists())
         self.assertFalse(LogEntry.objects.filter(pk=entry.pk).exists())
 
-#
+
 class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions.json', 'demoproject.json']
     urls = 'demoproject.urls'
@@ -280,7 +279,6 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             res.form['master_pk'] = self._selected_values[1]
             res.form['other_pk'] = self._selected_values[0]
 
-
             res.form['username'] = res.form['form-0-username'].value
             res.form['email'] = res.form['form-0-email'].value
             res.form['last_login'] = res.form['form-1-last_login'].value
@@ -293,7 +291,6 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 2)
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
-
 
     def test_merge_delete_detail(self):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
@@ -315,7 +312,6 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             # steps = 2:
             res.form['master_pk'] = self._selected_values[1]
             res.form['other_pk'] = self._selected_values[0]
-
 
             res.form['username'] = res.form['form-0-username'].value
             res.form['email'] = res.form['form-0-email'].value

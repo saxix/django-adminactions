@@ -19,22 +19,20 @@
     {{ adminform.form.non_field_errors }}
     <form method="post">{% csrf_token %}
         {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
+        {{ adminform.form.field_names }}
         <table>
             <tr>
                 <td>{{ adminform.form.dependencies.label }}</td>
-                <td>{{ adminform.form.dependencies }}</td>
-            </tr>
-            <tr>
-                <td>{{ adminform.form.field_names.label }}</td>
-                <td>{{ adminform.form.field_names }}</td>
+                <td>{{ adminform.form.dependencies }}
+                {% if not transaction_supported %}
+                <div>Warning: your database does not support transactios. Merge cannot be validated and/or undone</div>
+                {% endif %}</td>
             </tr>
         </table>
         <table class="mergetable">
             <tr class="header">
                 <th>{% trans "Field" %}</th>
                 <th>{% trans "Master" %} #<span id='master_pk'>{{ master.pk }}</span> ({% trans "This will be preserved" %})
-                    {#                    <input type="hidden" value="{{ master.pk }}" name="master-pk">#}
-{#                    {{ adminform.form.master_pk.value }}#}
                 </th>
                 <th><a class="swap" href="#">{% trans "swap" %}</a></th>
                 <th>{% trans "Result" %}</th>
@@ -49,7 +47,7 @@
 
                     <td class="column origin">
                         {{ formset.0|widget:field.name }}
-                        <span class="display">{{ master|field_display:field }}</span>
+                        <span class="display">{{ master|field_display:field}}</span>
                     </td>
                     <td><a class="origin" href="#"> &gt;&gt; </a></td>
 
