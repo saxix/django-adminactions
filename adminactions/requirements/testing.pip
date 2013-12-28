@@ -8,3 +8,4 @@ pytest
 pytest-django
 pytest-cov
 django
+django-casper
