@@ -13,7 +13,6 @@ env:
 
 install:
   - pip install coverage python-coveralls
-  - python setup.py -q install
 
 script:
   - make init-db ci
