@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.db import transaction
+# from django.db import transaction
 from adminactions import api
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -15,7 +15,7 @@ from django.utils.translation import gettext as _
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
 from adminactions.utils import clone_instance, model_supports_transactions
-
+import adminactions.compat as transaction
 
 class MergeForm(GenericActionForm):
     DEP_MOVE = 1
@@ -103,11 +103,10 @@ def merge(modeladmin, request, queryset):
         original = clone_instance(master)
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.commit_manually():
+        with transaction.nocommit():
             form = MForm(request.POST, instance=master)
             other.delete()
             form_is_valid = form.is_valid()
-            transaction.rollback()
         if form_is_valid:
             ctx.update({'original': original})
             tpl = 'adminactions/merge_preview.html'
@@ -115,12 +114,11 @@ def merge(modeladmin, request, queryset):
         master = queryset.get(pk=request.POST.get('master_pk'))
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.commit_manually():
+        with transaction.nocommit():
             form = MForm(request.POST, instance=master)
             stored_pk = other.pk
             other.delete()
             ok = form.is_valid()
-            transaction.rollback()
             other.pk = stored_pk
         if ok:
             if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:

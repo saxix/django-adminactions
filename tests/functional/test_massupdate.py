@@ -14,7 +14,6 @@ class MassUpdateTest(WebTestMixin, CasperTestCase):
         self.client = Client()
         self.user = User.objects.create_superuser('sax', '', '123')
         self.client.login(username=self.user.username, password='123')
-
         G(User, n=5)
 
     def test_success(self):
@@ -24,7 +23,6 @@ class MassUpdateTest(WebTestMixin, CasperTestCase):
         selection = User.objects.filter(is_superuser=False)
         ids = list_to_string(selection.values_list('pk', flat=True))
 
-
         url = reverse('admin:auth_user_changelist')
         test_file = os.path.join(os.path.dirname(__file__), 'casper-tests/massupdate_success.js')
         self.assertTrue(self.casper(test_file,
@@ -33,7 +31,6 @@ class MassUpdateTest(WebTestMixin, CasperTestCase):
                                     last_name=new_last_name,
                                     ids=ids,
                                     engine='phantomjs'))
-
 
         result = User.objects.filter(last_name=new_last_name,
                                      first_name=new_first_name)
@@ -47,7 +44,6 @@ class MassUpdateTest(WebTestMixin, CasperTestCase):
         selection = User.objects.filter(is_superuser=False)
         ids = list_to_string(selection.values_list('pk', flat=True))
 
-
         url = reverse('admin:auth_user_changelist')
         test_file = os.path.join(os.path.dirname(__file__), 'casper-tests/massupdate_clean.js')
         self.assertTrue(self.casper(test_file,
@@ -56,7 +52,6 @@ class MassUpdateTest(WebTestMixin, CasperTestCase):
                                     last_name=new_last_name,
                                     ids=ids,
                                     engine='phantomjs'))
-
 
         result = User.objects.filter(last_name=new_last_name,
                                      first_name=new_first_name)

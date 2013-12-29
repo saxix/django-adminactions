@@ -1,6 +1,6 @@
 VERSION=2.0.0
-BUILDDIR=$PWD/~build
-BINDIR=$PWD/~build/bin
+BUILDDIR=${PWD}/~build
+BINDIR=${PWD}/~build/bin
 DJANGO_SETTINGS_MODULE:=demoproject.settings
 PYTHONPATH := ${PWD}/demo/:${PWD}
 DJANGO_14=django==1.4.10
@@ -49,11 +49,9 @@ ci: init-db
 	@pip install coverage
 	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
 	@echo "Database:" ${DBENGINE}
+	@pip install -qr adminactions/requirements/install.pip -qr adminactions/requirements/testing.pip
 
-	@pip install -r adminactions/requirements/install.pip -r adminactions/requirements/testing.pip
-
-	export PATH=${CASPERJS_DIR}/bin:$${PATH}
-	$(MAKE) coverage
+	export PATH=${CASPERJS_DIR}/bin:$${PATH} && $(MAKE) coverage
 
 
 clean:
