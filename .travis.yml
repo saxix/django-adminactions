@@ -12,7 +12,7 @@ env:
   - DJANGO="dev" DBENGINE=pg
 
 install:
-  - "export PATH=.:$PATH"
+  - "export PATH=$PWD/~build/casperjs/bin:$PATH"
   - pip install coverage python-coveralls
 
 script:
@@ -23,8 +23,7 @@ before_script:
   - "export DISPLAY=:99.0"
   - sleep 5
   - "export PHANTOMJS_EXECUTABLE='phantomjs --local-to-remote-url-access=yes --ignore-ssl-errors=yes'"
-  - git clone git://github.com/n1k0/casperjs.git CASPERJS
-  - ln -sf ${CASPERJS}/bin/casperjs ./casperjs
+
 
 after_success:
   - coveralls -c .coveragerc

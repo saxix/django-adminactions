@@ -9,63 +9,65 @@
     </div>
 {% endif %}{% endblock %}
 {% block content %}
-    {% if adminform.form.errors %}
-        <ol>
-            {% for error in form.errors %}
-                <li><strong>{{ error|escape }}</strong></li>
-            {% endfor %}
-        </ol>
-    {% endif %}
-    {{ adminform.form.non_field_errors }}
-    <form method="post">{% csrf_token %}
-        {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
-        {{ adminform.form.field_names }}
-        <table>
-            <tr>
-                <td>{{ adminform.form.dependencies.label }}</td>
-                <td>{{ adminform.form.dependencies }}
-                {% if not transaction_supported %}
-                <div>Warning: your database does not support transactios. Merge cannot be validated and/or undone</div>
-                {% endif %}</td>
-            </tr>
-        </table>
-        <table class="mergetable">
-            <tr class="header">
-                <th>{% trans "Field" %}</th>
-                <th>{% trans "Master" %} #<span id='master_pk'>{{ master.pk }}</span> ({% trans "This will be preserved" %})
-                </th>
-                <th><a class="swap" href="#">{% trans "swap" %}</a></th>
-                <th>{% trans "Result" %}</th>
-                <th></th>
-                <th>{% trans "Other" %} #<span id='other_pk'>{{ other.pk }}</span> ({% trans "This will be removed" %})
-{#                    {{ adminform.form.other_pk.value }}#}
-                </th>
-            </tr>
-            {% for field in fields %}
-                <tr class="{% cycle "row1" "row2" %} merge-row">
-                    <td class="column label" data-content="{{ field.name }}">{{ master|verbose_name:field.name }}</td>
+    {% if not transaction_supported %}
+        <div>Warning: your database does not support transactios. Merge cannot be validated and/or undone</div>
+    {% else %}
 
-                    <td class="column origin">
-                        {{ formset.0|widget:field.name }}
-                        <span class="display">{{ master|field_display:field}}</span>
-                    </td>
-                    <td><a class="origin" href="#"> &gt;&gt; </a></td>
-
-                    <td class="column result">
-                        {{ adminform.form|widget:field.name }}
-                        <span class="display"></span>
-                        {{ adminform.form|errors:field.name }}
-                    </td>
-
-                    <td><a class="other" href="#"> &lt;&lt; </a></td>
-
-                    <td class="column other">
-                        {{ formset.1|widget:field.name }}
-                        <span class="display">{{ other|field_display:field }}</span>
-                   </td>
+        {% if adminform.form.errors %}
+            <ol>
+                {% for error in form.errors %}
+                    <li><strong>{{ error|escape }}</strong></li>
+                {% endfor %}
+            </ol>
+        {% endif %}
+        {{ adminform.form.non_field_errors }}
+        <form method="post">{% csrf_token %}
+            {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
+            {{ adminform.form.field_names }}
+            <table>
+                <tr>
+                    <td>{{ adminform.form.dependencies.label }}</td>
+                    <td>{{ adminform.form.dependencies }}</td>
                 </tr>
-            {% endfor %}
-        </table>
-        <input type="submit" value="{% trans "Preview" %}" name="preview">
-    </form>
+            </table>
+            <table class="mergetable">
+                <tr class="header">
+                    <th>{% trans "Field" %}</th>
+                    <th>{% trans "Master" %} #<span id='master_pk'>{{ master.pk }}</span> ({% trans "This will be preserved" %})
+                    </th>
+                    <th><a class="swap" href="#">{% trans "swap" %}</a></th>
+                    <th>{% trans "Result" %}</th>
+                    <th></th>
+                    <th>{% trans "Other" %} #<span id='other_pk'>{{ other.pk }}</span> ({% trans "This will be removed" %})
+    {#                    {{ adminform.form.other_pk.value }}#}
+                    </th>
+                </tr>
+                {% for field in fields %}
+                    <tr class="{% cycle "row1" "row2" %} merge-row">
+                        <td class="column label" data-content="{{ field.name }}">{{ master|verbose_name:field.name }}</td>
+
+                        <td class="column origin">
+                            {{ formset.0|widget:field.name }}
+                            <span class="display">{{ master|field_display:field}}</span>
+                        </td>
+                        <td><a class="origin" href="#"> &gt;&gt; </a></td>
+
+                        <td class="column result">
+                            {{ adminform.form|widget:field.name }}
+                            <span class="display"></span>
+                            {{ adminform.form|errors:field.name }}
+                        </td>
+
+                        <td><a class="other" href="#"> &lt;&lt; </a></td>
+
+                        <td class="column other">
+                            {{ formset.1|widget:field.name }}
+                            <span class="display">{{ other|field_display:field }}</span>
+                       </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <input type="submit" value="{% trans "Preview" %}" name="preview">
+        </form>
+    {% endif %}
 {% endblock %}
