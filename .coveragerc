@@ -2,7 +2,7 @@
 branch = True
 source = adminactions
 include =
-    tests/**
+    adminactions/**
 
 omit = adminactions/__init__.py
        adminactions/tests/**

@@ -17,11 +17,13 @@ class MassUpdateTest(WebTestMixin, CasperTestCase):
 
         G(User, n=5)
 
-    def test_something(self):
+    def test_success(self):
         new_first_name = '**FIRST_NAME**'
         new_last_name = '**LAST_NAME**'
+
         selection = User.objects.filter(is_superuser=False)
         ids = list_to_string(selection.values_list('pk', flat=True))
+
 
         url = reverse('admin:auth_user_changelist')
         test_file = os.path.join(os.path.dirname(__file__), 'casper-tests/test_massupdate.js')
@@ -31,6 +33,7 @@ class MassUpdateTest(WebTestMixin, CasperTestCase):
                                     last_name=new_last_name,
                                     ids=ids,
                                     engine='phantomjs'))
+
 
         result = User.objects.filter(last_name=new_last_name,
                                      first_name=new_first_name)

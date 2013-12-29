@@ -16,7 +16,7 @@ install:
   - pip install coverage python-coveralls
 
 script:
-  - make init-db ci
+  - make install-casperjs init-db ci
 
 before_script:
   - make init-db

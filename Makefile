@@ -1,6 +1,6 @@
 VERSION=2.0.0
-BUILDDIR=./~build
-BINDIR=./~build/bin
+BUILDDIR=$PWD/~build
+BINDIR=$PWD/~build/bin
 DJANGO_SETTINGS_MODULE:=demoproject.settings
 PYTHONPATH := ${PWD}/demo/:${PWD}
 DJANGO_14=django==1.4.10
@@ -12,8 +12,9 @@ DJANGO_DEV=git+git://github.com/django/django.git
 CASPERJS_DIR=${BUILDDIR}/casperjs
 PHANTOMJS_DIR=${BUILDDIR}/phantomjs
 
+
 mkbuilddir:
-	mkdir -p ${BUILDDIR}
+	mkdir -p ${BUILDDIR} ${BINDIR}
 
 test:
 	py.test
@@ -28,10 +29,7 @@ coverage: mkbuilddir
 	py.test --cov=adminactions --cov-report=html --cov-config=.coveragerc -vvv
 
 install-casperjs: mkbuilddir
-	rm -Rf ${CASPERJS_DIR}
-	git clone git://github.com/n1k0/casperjs.git ${CASPERJS_DIR}
-	ln -sf `pwd`/${CASPERJS_DIR}/bin/casperjs ${BINDIR}/casperjs
-
+	@sh -c "if [ -d ${CASPERJS_DIR} ]; then cd ${CASPERJS_DIR} && git pull; else git clone git://github.com/n1k0/casperjs.git ${CASPERJS_DIR}; fi"
 
 init-db:
 	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then mysql -e 'DROP DATABASE IF EXISTS adminactions;'; fi"
@@ -54,7 +52,8 @@ ci: init-db
 
 	@pip install -r adminactions/requirements/install.pip -r adminactions/requirements/testing.pip
 
-	DISABLE_SELENIUM=1 $(MAKE) coverage
+	export PATH=${CASPERJS_DIR}/bin:$${PATH}
+	$(MAKE) coverage
 
 
 clean:
