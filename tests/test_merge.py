@@ -176,6 +176,7 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
                 form['action'] = 'merge'
                 self._select_rows(form)
                 res = form.submit()
+
             if 2 in steps:
                 res.form['username'] = res.form['form-1-username'].value
                 res.form['email'] = res.form['form-1-email'].value
