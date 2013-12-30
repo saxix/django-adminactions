@@ -30,11 +30,3 @@ def test_rollback():
         G(Group, name='name')
         compat.rollback()
     assert not Group.objects.filter(name='name').exists()
-
-
-@pytest.mark.django_db(transaction=False)
-def test_nocommit():
-    with compat.nocommit():
-        G(Group, name='name')
-    assert not Group.objects.filter(name='name').exists()
-
