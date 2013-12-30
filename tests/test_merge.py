@@ -151,7 +151,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertFalse(LogEntry.objects.filter(pk=entry.pk).exists())
 
 
-class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
+class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions.json', 'demoproject.json']
     urls = 'demoproject.urls'
     sender_model = User
@@ -159,7 +159,7 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
     _selected_rows = [1, 2]
 
     def setUp(self):
-        super(TestMerge, self).setUp()
+        super(TestMergeAction, self).setUp()
         self.url = reverse('admin:auth_user_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
@@ -176,6 +176,7 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
                 form['action'] = 'merge'
                 self._select_rows(form)
                 res = form.submit()
+                assert not hasattr(res.form, 'errors')
 
             if 2 in steps:
                 res.form['username'] = res.form['form-1-username'].value
@@ -183,6 +184,8 @@ class TestMerge(SelectRowsMixin, WebTestMixin, TransactionTestCase):
                 res.form['last_login'] = res.form['form-1-last_login'].value
                 res.form['date_joined'] = res.form['form-1-date_joined'].value
                 res = res.form.submit('preview')
+                assert not hasattr(res.form, 'errors')
+
             if 3 in steps:
                 res = res.form.submit('apply')
             return res

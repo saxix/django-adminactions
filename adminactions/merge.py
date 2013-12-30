@@ -17,6 +17,7 @@ from adminactions.models import get_permission_codename
 from adminactions.utils import clone_instance, model_supports_transactions
 import adminactions.compat as transaction
 
+
 class MergeForm(GenericActionForm):
     DEP_MOVE = 1
     DEP_DELETE = 2
@@ -87,7 +88,7 @@ def merge(modeladmin, request, queryset):
     OForm = modelform_factory(modeladmin.model, formfield_callback=raw_widget)
     tpl = 'adminactions/merge.html'
     transaction_supported = model_supports_transactions(modeladmin.model)
-
+    transaction_supported = True
     ctx = {
         '_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
         'transaction_supported': transaction_supported,
@@ -103,10 +104,11 @@ def merge(modeladmin, request, queryset):
         original = clone_instance(master)
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.nocommit():
+        with transaction.atomic():
             form = MForm(request.POST, instance=master)
             other.delete()
             form_is_valid = form.is_valid()
+            transaction.rollback()
         if form_is_valid:
             ctx.update({'original': original})
             tpl = 'adminactions/merge_preview.html'
@@ -114,12 +116,13 @@ def merge(modeladmin, request, queryset):
         master = queryset.get(pk=request.POST.get('master_pk'))
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.nocommit():
+        with transaction.atomic():
             form = MForm(request.POST, instance=master)
             stored_pk = other.pk
             other.delete()
             ok = form.is_valid()
             other.pk = stored_pk
+            transaction.rollback()
         if ok:
             if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
                 related = api.ALL_FIELDS
