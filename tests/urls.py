@@ -3,6 +3,13 @@ from django.conf.urls import patterns, include
 from adminactions import actions
 import adminactions.urls
 
+try:
+    from django.apps import AppConfig
+    import django
+
+    django.setup()
+except ImportError:
+    pass
 
 admin.autodiscover()
 actions.add_to_site(admin.site)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import string
 from random import choice
+import django
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.auth.models import Group, Permission

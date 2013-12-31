@@ -9,14 +9,13 @@ from django.test import TransactionTestCase
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from adminactions.api import merge, ALL_FIELDS
-from adminactions.merge import MergeForm
+
 
 from .common import BaseTestCaseMixin
 from .utils import SelectRowsMixin
 from .utils import user_grant_permission
 
 PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'demoapp.UserProfile')
-
 
 def assert_profile(user):
     p = None
@@ -263,6 +262,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             self.assertFalse(LogEntry.objects.filter(pk=removed.pk).exists())
 
     def test_merge_move_detail(self):
+        from adminactions.merge import MergeForm
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
             #removed = User.objects.get(pk=self._selected_rows[0])
             #preserved = User.objects.get(pk=self._selected_rows[1])
@@ -297,6 +297,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
 
     def test_merge_delete_detail(self):
+        from adminactions.merge import MergeForm
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
             #removed = User.objects.get(pk=self._selected_rows[0])
             #preserved = User.objects.get(pk=self._selected_rows[1])
