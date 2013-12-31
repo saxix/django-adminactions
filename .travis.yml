@@ -16,12 +16,11 @@ install:
   - pip install coverage python-coveralls
 
 script:
-  - make install-casperjs init-db ci
+  - make ci
 
 before_script:
-  - make init-db
+  - make init-db install-casperjs
   - "export DISPLAY=:99.0"
-  - sleep 5
   - "export PHANTOMJS_EXECUTABLE='phantomjs --local-to-remote-url-access=yes --ignore-ssl-errors=yes'"
 
 
