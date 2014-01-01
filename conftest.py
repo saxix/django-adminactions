@@ -6,7 +6,6 @@ from django.conf import settings
 def pytest_configure(config):
     here = os.path.dirname(__file__)
     sys.path.insert(0, os.path.join(here, 'demo'))
-    sys.path.insert(0, os.path.join(here, 'webtests'))
 
     if not settings.configured:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.settings'
