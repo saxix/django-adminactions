@@ -136,6 +136,7 @@ def graph_queryset(modeladmin, request, queryset):
     ctx = {'adminform': adminForm,
            'action': 'graph_queryset',
            'opts': modeladmin.model._meta,
+            'title': u"Graph %s" % force_unicode(modeladmin.opts.verbose_name_plural),
            'app_label': queryset.model._meta.app_label,
            'media': media,
            'extra': extra,
