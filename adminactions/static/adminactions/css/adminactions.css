@@ -2,6 +2,12 @@
     width: 100%;
     border: 1px solid black;
 }
+p.display {
+    width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
+    /*word-wrap: break-word;*/
+}
 
 .mergetable tr.header th {
     font-weight: bold;
@@ -9,20 +15,23 @@
 }
 
 .mergetable td {
+    /*width: 30%;*/
     vertical-align: middle;
     border-right: 1px solid #000000;
 }
 
 .mergetable .column {
+     /*width: 30%;*/
 }
 
 .mergetable .origin *, .mergetable .result * {
-    width: 100px;
-    word-wrap: break-word;
+    /*width: 30%;*/
+    /*word-wrap: break-word;*/
+    /*white-space:pre-line;*/
 }
 
 .mergetable .label {
-    width: 10%;
+    /*width: 10%;*/
     font-weight: bold;
 }
 
@@ -35,7 +44,7 @@
 }
 
 .mergetable input.raw-value {
-    width: 200px;
+    /*width: 200px;*/
     border: 0px transparent;
     background-color: transparent;
     display: none;

@@ -22,10 +22,10 @@
 
                 if ($('input.raw-value', $result).val() == $('input.raw-value', $left).val()) {
                     $(this).find('td.origin').addClass("selected");
-                    $('span.display', $result).text($('span.display', $left).text());
+                    $('p.display', $result).text($('p.display', $left).text());
                 } else if ($('input.raw-value', $result).val() == $('input.raw-value', $right).val()) {
                     $(this).find('td.other').addClass("selected");
-                    $('span.display', $result).text($('span.display', $right).text());
+                    $('p.display', $result).text($('p.display', $right).text());
                     RIGHT.push(field_name);
                 }else if ($('.original .display', this).text() !== $('.result .display', this).text()){
                     $(this).addClass("changed");

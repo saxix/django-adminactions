@@ -9,7 +9,6 @@ env:
   - DJANGO="1.4.x" DBENGINE=pg
   - DJANGO="1.5.x" DBENGINE=pg
   - DJANGO="1.6.x" DBENGINE=pg
-  - DJANGO="dev" DBENGINE=pg
 
 install:
   - "export PATH=$PWD/~build/casperjs/bin:$PATH"
