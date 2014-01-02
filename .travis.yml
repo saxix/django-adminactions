@@ -2,9 +2,6 @@ language: python
 python:
   - "2.7"
 
-branches:
-  only:
-    - feature/casper
 env:
   - DJANGO="1.4.x" DBENGINE=pg
   - DJANGO="1.5.x" DBENGINE=pg
