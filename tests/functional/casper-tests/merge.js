@@ -38,7 +38,6 @@ helper.scenario(
         this.click('#other_last_name');
         this.click('#other_first_name');
         this.waitForSelector("td.column,other,selected");
-        casper.capture("AAAAAAA.png");
         this.click('input[name=preview]');
         this.waitForSelector("table.mergetable",
             null,
@@ -48,6 +47,7 @@ helper.scenario(
     },
     function (response) {
          /* preview */
+        casper.capture("page1.png");
         casper.test.assertTextExists('After Merging');
         casper.capture("page.png");
         this.click('input[name=apply]');
