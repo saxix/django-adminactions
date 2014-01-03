@@ -9,7 +9,7 @@ env:
 
 install:
   - "export PATH=$PWD/~build/casperjs/bin:$PATH"
-  - pip install coverage python-coveralls
+  - pip install coverage python-coveralls py.test
 
 script:
   - make ci
