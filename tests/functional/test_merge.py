@@ -33,6 +33,7 @@ class MergeTest(WebTestMixin, CasperTestCase):
 
         url = reverse('admin:auth_user_changelist')
         test_file = os.path.join(os.path.dirname(__file__), 'casper-tests/merge.js')
+        assert os.path.exists(test_file)
         self.assertTrue(self.casper(test_file,
                                     url=url,
                                     ids=ids,

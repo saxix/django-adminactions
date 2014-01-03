@@ -10,6 +10,14 @@ def pytest_configure(config):
     if not settings.configured:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.settings'
 
+    try:
+        from django.apps import AppConfig
+        import django
+
+        django.setup()
+    except ImportError:
+        pass
+
 
 def runtests(args=None):
     import pytest
