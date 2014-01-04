@@ -48,20 +48,22 @@ class MergeTest(WebTestMixin, CasperTestCase):
         assert not User.objects.filter(pk=other.pk).exists()
 
 
-    # def test_swap(self):
-    #     master = User.objects.get(username='username-0')
-    #     other = User.objects.get(username='username-1')
-    #     ids = list_to_string([master.pk, other.pk])
-    #
-    #     url = reverse('admin:auth_user_changelist')
-    #     test_file = os.path.join(os.path.dirname(__file__), 'casper-tests/merge_swap.js')
-    #     self.assertTrue(self.casper(test_file,
-    #                                 url=url,
-    #                                 ids=ids,
-    #                                 engine='phantomjs'))
-    #
-    #     result = User.objects.get(id=other.pk)
-    #     assert result.username == other.username
-    #     assert result.last_name == master.last_name
-    #     assert result.first_name == master.first_name
-    #     assert not User.objects.filter(pk=master.pk).exists()
+    def test_swap(self):
+        master = User.objects.get(username='username-0')
+        other = User.objects.get(username='username-1')
+        ids = list_to_string([master.pk, other.pk])
+
+        url = reverse('admin:auth_user_changelist')
+        test_file = os.path.join(os.path.dirname(__file__), 'casper-tests/merge_swap.js')
+        self.assertTrue(self.casper(test_file,
+                                    url=url,
+                                    ids=ids,
+                                    master_id=master.pk,
+                                    other_id=other.pk,
+                                    engine='phantomjs'))
+
+        result = User.objects.get(id=other.pk)
+        assert result.username == other.username
+        assert result.last_name == master.last_name
+        assert result.first_name == master.first_name
+        assert not User.objects.filter(pk=master.pk).exists()

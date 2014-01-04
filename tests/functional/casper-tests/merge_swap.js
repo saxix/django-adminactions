@@ -36,7 +36,8 @@ helper.scenario(
         tools.assertStatusCode(response);
         casper.test.assertTextExists('Master #' + casper.cli.options['master_id']);
         this.click('#swap_cols');
-        this.waitForText("Master #" + casper.cli.options['other_id'], null,
+        this.waitForText("Master #" + casper.cli.options['other_id'],
+            null,
             function () {
                 casper.capture("pageError.png");
             });
@@ -45,6 +46,9 @@ helper.scenario(
         /*
             merge
          */
+        tools.assertStatusCode(response);
+        casper.test.assertTextExists('Master #' + casper.cli.options['other_id']);
+
         this.click('#master_username');
         this.click('#other_last_name');
         this.click('#other_first_name');
