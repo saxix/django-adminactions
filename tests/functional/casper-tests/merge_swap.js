@@ -65,7 +65,11 @@ helper.scenario(
          */
         casper.test.assertTextExists('After Merging');
         this.click('input[name=apply]');
-        this.waitForSelector("#changelist-form");
+        this.waitForSelector("#changelist-form",
+            null,
+            function () {
+                casper.capture("pageError.png");
+            });
     },
     function (response) {
         this.test.assert(true);

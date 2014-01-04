@@ -47,11 +47,16 @@ helper.scenario(
     },
     function (response) {
          /* preview */
-        casper.capture("page1.png");
-        casper.test.assertTextExists('After Merging');
-        casper.capture("page.png");
+        casper.test.assertTextExists('After Merging',
+            function () {
+                casper.capture("pageError.png");
+            });
         this.click('input[name=apply]');
-        this.waitForSelector("#changelist-form");
+        this.waitForSelector("#changelist-form",
+            null,
+            function () {
+                casper.capture("pageError.png");
+            });
     },
     function (response) {
         this.test.assert(true);
