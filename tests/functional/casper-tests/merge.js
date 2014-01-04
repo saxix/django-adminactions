@@ -47,10 +47,7 @@ helper.scenario(
     },
     function (response) {
          /* preview */
-        casper.test.assertTextExists('After Merging',
-            function () {
-                casper.capture("pageError.png");
-            });
+        casper.test.assertTextExists('After Merging');
         this.click('input[name=apply]');
         this.waitForSelector("#changelist-form",
             null,

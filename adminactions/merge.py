@@ -89,7 +89,7 @@ def merge(modeladmin, request, queryset):
     OForm = modelform_factory(modeladmin.model, formfield_callback=raw_widget)
     tpl = 'adminactions/merge.html'
     transaction_supported = model_supports_transactions(modeladmin.model)
-    # transaction_supported = True
+    transaction_supported = True
     ctx = {
         '_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
         'transaction_supported': transaction_supported,
