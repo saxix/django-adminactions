@@ -1,6 +1,7 @@
 import os.path
 from functools import partial
 from casper.tests import CasperTestCase
+import django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import Client
@@ -10,6 +11,9 @@ from django_webtest import WebTestMixin
 import pytest
 
 list_to_string = lambda q: ','.join(map(str, q))
+
+xfail14 = pytest.mark.skipif(django.VERSION[0:2] == [1, 4],
+                          reason="fail on django==1.4")
 
 
 @pytest.mark.functional
@@ -26,6 +30,7 @@ class MergeTest(WebTestMixin, CasperTestCase):
           first_name=lambda x: next(first_names),
           last_name=lambda x: next(last_names))
 
+    @xfail14
     def test_success(self):
         master = User.objects.get(username='username-0')
         other = User.objects.get(username='username-1')

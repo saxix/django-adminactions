@@ -29,23 +29,22 @@ helper.scenario(
         this.waitForSelector("#id_last_name",
             null,
             function () {
-                casper.capture("pageError.png");
+//                casper.capture("pageError1.png");
             });
     },
     function (response) {
+         /* swap */
         tools.assertStatusCode(response);
         casper.test.assertTextExists('Master #' + casper.cli.options['master_id']);
         this.click('#swap_cols');
         this.waitForText("Master #" + casper.cli.options['other_id'],
             null,
             function () {
-                casper.capture("pageError.png");
+//                casper.capture("pageError2.png");
             });
     },
     function (response) {
-        /*
-            merge
-         */
+        /* merge */
         tools.assertStatusCode(response);
         casper.test.assertTextExists('Master #' + casper.cli.options['other_id']);
 
@@ -55,24 +54,21 @@ helper.scenario(
 
         this.waitForSelector("td.column,other,selected");
 
-
         this.click('input[name=preview]');
-        this.waitForSelector("table.mergetable",
+        this.waitForText("After Merging",
             null,
             function () {
-                casper.capture("pageError.png");
+//                casper.capture("pageError3.png");
             });
     },
     function (response) {
-        /*
-            preview
-         */
+        /* preview */
         casper.test.assertTextExists('After Merging');
         this.click('input[name=apply]');
         this.waitForSelector("#changelist-form",
             null,
             function () {
-                casper.capture("pageError.png");
+//                casper.capture("pageError4.png");
             });
     },
     function (response) {

@@ -16,6 +16,7 @@ var helper = require('./djangocasper.js'),
 
 helper.scenario(
     casper.cli.options['url'],
+
     function (response) {
         /*
          select records in changelist
@@ -28,31 +29,35 @@ helper.scenario(
         this.waitForSelector("#id_last_name",
             null,
             function () {
-                casper.capture("pageError.png");
+//                casper.capture("pageError1.png");
             });
     },
     function (response) {
         /* merge */
         tools.assertStatusCode(response);
         casper.test.assertTextExists('Master #' + casper.cli.options['master_id']);
+
+        this.click('#master_username');
         this.click('#other_last_name');
         this.click('#other_first_name');
+
         this.waitForSelector("td.column,other,selected");
+
         this.click('input[name=preview]');
-        this.waitForSelector("table.mergetable",
+        this.waitForText("After Merging",
             null,
             function () {
-                casper.capture("pageError.png");
+//                casper.capture("pageError2.png");
             });
     },
     function (response) {
-         /* preview */
+        /* preview */
         casper.test.assertTextExists('After Merging');
         this.click('input[name=apply]');
         this.waitForSelector("#changelist-form",
             null,
             function () {
-                casper.capture("pageError.png");
+//                casper.capture("pageError3.png");
             });
     },
     function (response) {
