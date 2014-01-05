@@ -10,8 +10,6 @@ RELEASE = app.get_version()
 def fread(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-#if 'test' in sys.argv:
-#    setup_requires.append('pytest')
 
 tests_require = fread('adminactions/requirements/testing.pip')
 
@@ -24,9 +22,8 @@ setup(
     author_email='s.apostolico@gmail.com',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
-    #  ['adminactions', 'webtests', 'adminactions.templatetags']
-    # packages=find_packages(),
-    packages=['adminactions', 'adminactions.templatetags'],
+    packages=find_packages(),
+    # packages=['adminactions', 'adminactions.templatetags'],
     include_package_data=True,
     install_requires=fread('adminactions/requirements/install.pip'),
     tests_require=tests_require,

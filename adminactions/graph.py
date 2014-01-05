@@ -101,7 +101,7 @@ def graph_queryset(modeladmin, request, queryset):
                                        xaxis: {pad: 1.05,
                                                tickOptions: {formatString: '%%d'}}
                                       }
-                                }"""  % (json.dumps(data_labels), json.dumps(data_labels))
+                                }""" % (json.dumps(data_labels), json.dumps(data_labels))
                 elif graph_type == 'PieChart':
                     table = [zip(data_labels, data)]
                     extra = """{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,
@@ -110,7 +110,6 @@ def graph_queryset(modeladmin, request, queryset):
                                                                     sliceMargin: 4,
                                                                     lineWidth: 5}},
                              legend: {show: true, location: 'e'}}"""
-
 
             except Exception as e:
                 messages.error(request, 'Unable to produce valid data: %s' % str(e))
@@ -137,6 +136,7 @@ def graph_queryset(modeladmin, request, queryset):
     ctx = {'adminform': adminForm,
            'action': 'graph_queryset',
            'opts': modeladmin.model._meta,
+            'title': u"Graph %s" % force_unicode(modeladmin.opts.verbose_name_plural),
            'app_label': queryset.model._meta.app_label,
            'media': media,
            'extra': extra,

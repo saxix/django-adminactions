@@ -48,6 +48,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     """
 
     fields = fields or [f.name for f in master._meta.fields]
+
     all_m2m = {}
     all_related = {}
 
@@ -66,7 +67,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
 
             for fieldname in fields:
                 f = get_field_by_path(master, fieldname)
-                if not f.primary_key:
+                if f and not f.primary_key:
                     setattr(result, fieldname, getattr(other, fieldname))
 
             if m2m:
@@ -97,7 +98,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
 
             if commit:
                 for name, elements in all_related.items():
-                    # dest = getattr(result, name)
                     for rel_fieldname, element in elements:
                         setattr(element, rel_fieldname, master)
                         element.save()

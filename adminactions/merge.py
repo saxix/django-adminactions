@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+# from django.db import transaction
+import django
+from datetime import datetime
+from django.utils.encoding import force_unicode
 from adminactions import api
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django import forms
-from adminactions import transaction
-from django.forms import TextInput, HiddenInput
+from django.forms import TextInput, HiddenInput, DateTimeField
+from django.db import models
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, model_to_dict
 from django.shortcuts import render_to_response
@@ -12,10 +16,10 @@ from django.template import RequestContext
 from django.utils.safestring import mark_safe
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
-from adminactions.exceptions import FakeTransaction
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
-from adminactions.utils import clone_instance
+from adminactions.utils import clone_instance, model_supports_transactions
+import adminactions.compat as transaction
 
 
 class MergeForm(GenericActionForm):
@@ -36,7 +40,7 @@ class MergeForm(GenericActionForm):
 
     master_pk = forms.CharField(widget=HiddenInput)
     other_pk = forms.CharField(widget=HiddenInput)
-    field_names = forms.CharField(required=False)
+    field_names = forms.CharField(required=False, widget=HiddenInput)
 
     def action_fields(self):
         for fieldname in ['dependencies', 'master_pk', 'other_pk', 'field_names']:
@@ -45,6 +49,18 @@ class MergeForm(GenericActionForm):
 
     def clean_dependencies(self):
         return int(self.cleaned_data['dependencies'])
+
+    def clean_field_names(self):
+        return self.cleaned_data['field_names'].split(',')
+
+    def full_clean(self):
+        super(MergeForm, self).full_clean()
+
+    def clean(self):
+        return super(MergeForm, self).clean()
+
+    def is_valid(self):
+        return super(MergeForm, self).is_valid()
 
     class Media:
         js = ['adminactions/js/merge.min.js']
@@ -65,20 +81,19 @@ def merge(modeladmin, request, queryset):
 
     def raw_widget(field, **kwargs):
         """ force all fields as not required"""
-        kwargs['widget'] = TextInput({'class': 'raw-value', 'readonly': 'readonly'})
-        kwargs['widget'] = TextInput({'class': 'raw-value', 'size': '30'})
+        kwargs['widget'] = TextInput({'class': 'raw-value'})
         return field.formfield(**kwargs)
 
-        # Allows to specified a custom Form in the ModelAdmin
-
-    #    MForm = getattr(modeladmin, 'merge_form', MergeForm)
     merge_form = getattr(modeladmin, 'merge_form', MergeForm)
     MForm = modelform_factory(modeladmin.model, form=merge_form, formfield_callback=raw_widget)
     OForm = modelform_factory(modeladmin.model, formfield_callback=raw_widget)
-    tpl = 'adminactions/merge.html'
 
+    tpl = 'adminactions/merge.html'
+    transaction_supported = model_supports_transactions(modeladmin.model)
+    transaction_supported = True
     ctx = {
         '_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+        'transaction_supported': transaction_supported,
         'select_across': request.POST.get('select_across') == '1',
         'action': request.POST.get('action'),
         'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable],
@@ -91,27 +106,26 @@ def merge(modeladmin, request, queryset):
         original = clone_instance(master)
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.commit_manually():
+        with transaction.nocommit():
             form = MForm(request.POST, instance=master)
             other.delete()
             form_is_valid = form.is_valid()
-            transaction.rollback()
-
         if form_is_valid:
             ctx.update({'original': original})
             tpl = 'adminactions/merge_preview.html'
         else:
-            raise Exception(form.errors)
+            master = queryset.get(pk=request.POST.get('master_pk'))
+            other = queryset.get(pk=request.POST.get('other_pk'))
+
     elif 'apply' in request.POST:
         master = queryset.get(pk=request.POST.get('master_pk'))
         other = queryset.get(pk=request.POST.get('other_pk'))
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        with transaction.commit_manually():
+        with transaction.nocommit():
             form = MForm(request.POST, instance=master)
             stored_pk = other.pk
             other.delete()
             ok = form.is_valid()
-            transaction.rollback()
             other.pk = stored_pk
         if ok:
             if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
@@ -123,10 +137,17 @@ def merge(modeladmin, request, queryset):
             return HttpResponseRedirect(request.path)
         else:
             messages.error(request, form.errors)
-
     else:
         try:
             master, other = queryset.all()
+            # django 1.4 need to remove the trailing milliseconds
+            for field in master._meta.fields:
+                if isinstance(field, models.DateTimeField):
+                    for target in (master, other):
+                        raw_value = getattr(target, field.name)
+                        fixed_value = datetime(raw_value.year, raw_value.month, raw_value.day,
+                                               raw_value.hour, raw_value.minute, raw_value.second)
+                        setattr(target, field.name, fixed_value)
         except ValueError:
             messages.error(request, _('Please select exactly 2 records'))
             return
@@ -146,6 +167,7 @@ def merge(modeladmin, request, queryset):
     ctx.update({'adminform': adminForm,
                 'formset': formset,
                 'media': mark_safe(media),
+                'title': u"Merge %s" % force_unicode(modeladmin.opts.verbose_name_plural),
                 'master': master,
                 'other': other})
     return render_to_response(tpl, RequestContext(request, ctx))

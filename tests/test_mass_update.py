@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
-from django.test import TestCase, TransactionTestCase
-from webtests.utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
+from django.test import TransactionTestCase
+from .utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
 
 
 __all__ = ['MassUpdateTest', ]
@@ -22,7 +22,6 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
         super(MassUpdateTest, self).setUp()
         self._url = reverse('admin:auth_user_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
-
 
     def _run_action(self, steps=2, **kwargs):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_massupdate_user']):
@@ -55,24 +54,24 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
             assert 'Sorry you do not have rights to execute this action' in res.body
 
     def test_validate_on(self):
-        res = self._run_action(**{'_validate': 1})
+        self._run_action(**{'_validate': 1})
         assert User.objects.filter(username='USER').exists()
         assert not User.objects.filter(username='user').exists()
         assert User.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
 
     def test_validate_off(self):
-        res = self._run_action(**{'_validate': 0})
-        self.assertIn("Unable no mass update using operators without",  self.app.cookies['messages'])
+        self._run_action(**{'_validate': 0})
+        self.assertIn("Unable no mass update using operators without", self.app.cookies['messages'])
         #assert "Unable no mass update using operators without" in res.body
 
     def test_clean_on(self):
-        res = self._run_action(**{'_clean': 1})
+        self._run_action(**{'_clean': 1})
         assert User.objects.filter(username='USER').exists()
         assert not User.objects.filter(username='user').exists()
         assert User.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
 
     def test_unique_transaction(self):
-        res = self._run_action(**{'_unique_transaction': 1})
+        self._run_action(**{'_unique_transaction': 1})
         assert User.objects.filter(username='USER').exists()
         assert not User.objects.filter(username='user').exists()
         assert User.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)

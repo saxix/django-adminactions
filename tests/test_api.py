@@ -89,7 +89,7 @@ class TestExportAsExcel(TestCase):
         mem.seek(0)
         xls_workbook = xlrd.open_workbook(file_contents=mem.read())
         xls_sheet = xls_workbook.sheet_by_index(0)
-        self.assertEqual(xls_sheet.row_values(0)[:],  [u'#', u'ID', u'name', u'content type', u'codename'])
+        self.assertEqual(xls_sheet.row_values(0)[:], [u'#', u'ID', u'name', u'content type', u'codename'])
 
     def test_export_as_xls(self):
         fields = ['field1', 'field2']

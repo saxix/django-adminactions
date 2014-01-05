@@ -106,7 +106,7 @@ OPERATIONS = OperationManager({
 
 
 class MassUpdateForm(GenericActionForm):
-    _no_sample_for =[]
+    _no_sample_for = []
     _clean = forms.BooleanField(label='clean()',
                                 required=False,
                                 help_text="if checked calls obj.clean()")
