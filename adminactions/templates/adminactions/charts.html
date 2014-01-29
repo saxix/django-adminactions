@@ -1,31 +1,15 @@
-{% extends "admin/change_form.html" %}
-{% load i18n admin_modify admin_urls %}{% load url from future %}
+{% extends "admin/change_form.html" %}{% load i18n static admin_modify admin_urls %}{% load url from future %}
 {% block extrahead %}
     {{ block.super }}
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
+    <link rel="stylesheet" type="text/css" href="{% static 'adminactions/js/jqplot/jquery.jqplot.min.css' %}"/>
+    <script>(function ($) {
+        jQuery = $.noConflict(true);
+    })(django.jQuery);</script>
+    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/jquery.jqplot.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.pieRenderer.js' %}"></script>
+    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.barRenderer.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.categoryAxisRenderer.min.js' %}"></script>
 
-        // Load the Visualization API and the piechart package.
-        google.load('visualization', '1', {'packages':['corechart']});
-
-        // Set a callback to run when the Google Visualization API is loaded.
-        google.setOnLoadCallback(drawChart);
-
-        // Callback that creates and populates a data table,
-        // instantiates the pie chart, passes in the data and
-        // draws it.
-        function drawChart() {
-            // Create our data table.
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Topping');
-            data.addColumn('number', 'Slices');
-            data.addRows({{ as_json|safe }});
-
-            // Instantiate and draw our chart, passing in some options.
-            var chart = new google.visualization.{{ graph_type }}(document.getElementById('chart_div'));
-            chart.draw(data, {width: 800, height: 600});
-        }
-    </script>
 
 {% endblock %}
 
@@ -51,6 +35,14 @@
         </form>
     </div>
     {% if graph_type %}
-            <div id="chart_div" class='left'></div>
+        <div id="chart_div2" class='left'></div>
+        <div id="chart_div" style="height:300px; width:800px;"></div>
     {% endif %}
+    <script type="text/javascript">
+        {%  if graph_type %}
+            (function ($) {
+                var plot1 = $.jqplot('chart_div', {{ as_json|safe }}, {{ extra|safe }});
+            })(django.jQuery);
+        {% endif %}
+    </script>
 {% endblock %}

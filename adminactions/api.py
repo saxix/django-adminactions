@@ -42,9 +42,13 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     @param master:  Model instance
     @param other: Model instance
     @param fields: list of fieldnames to  merge
+    @param m2m: list of m2m fields to merge. If empty will be removed
+    @param related: list of related fieldnames to merge. If empty will be removed
     @return:
     """
+
     fields = fields or [f.name for f in master._meta.fields]
+
     all_m2m = {}
     all_related = {}
 
@@ -63,7 +67,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
 
             for fieldname in fields:
                 f = get_field_by_path(master, fieldname)
-                if not f.primary_key:
+                if f and not f.primary_key:
                     setattr(result, fieldname, getattr(other, fieldname))
 
             if m2m:
@@ -94,7 +98,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
 
             if commit:
                 for name, elements in all_related.items():
-                    # dest = getattr(result, name)
                     for rel_fieldname, element in elements:
                         setattr(element, rel_fieldname, master)
                         element.save()
@@ -240,7 +243,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields]
 
-    book = xlwt.Workbook(encoding="UTF-8")
+    book = xlwt.Workbook(encoding="UTF-8", style_compression=2)
     sheet_name = config.pop('sheet_name')
 
     sheet = book.add_sheet(sheet_name)
