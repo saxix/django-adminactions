@@ -243,7 +243,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields]
 
-    book = xlwt.Workbook(encoding="UTF-8")
+    book = xlwt.Workbook(encoding="UTF-8", style_compression=2)
     sheet_name = config.pop('sheet_name')
 
     sheet = book.add_sheet(sheet_name)
