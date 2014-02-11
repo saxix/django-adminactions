@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.query import QuerySet
+from django.db import connections, router
 
 
 def clone_instance(instance, fieldnames=None):
@@ -216,3 +217,8 @@ def flatten(iterable):
         else:
             result.append(el)
     return list(result)
+
+
+def model_supports_transactions(instance):
+    alias = router.db_for_write(instance)
+    return connections[alias].features.supports_transactions

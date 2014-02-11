@@ -3,8 +3,8 @@ include MANIFEST.in
 include AUTHORS
 include CHANGES
 include LICENSE
-include requirements.txt
 include setup.py
 recursive-include adminactions *.*
 recursive-exclude adminactions *.pyc
+recursive-include requirements *.pip
 

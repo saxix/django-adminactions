@@ -6,11 +6,8 @@ import csv
 import mock
 from django_webtest import WebTest
 from django_dynamic_fixture import G
-from django.contrib.auth.models import User, Permission
-from django.contrib import admin
-from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
-from webtests.utils import user_grant_permission, admin_register, CheckSignalsMixin, SelectRowsMixin
-import django.contrib.admin
+from django.contrib.auth.models import User
+from .utils import user_grant_permission, admin_register, CheckSignalsMixin, SelectRowsMixin
 
 __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportDeleteTreeTest',
            'ExportAsXlsTest']
@@ -121,7 +118,6 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
                 res = res.form.submit('apply')
         return res
 
-
     def test_custom_filename(self):
         """
             if the ModelAdmin has `get_export_as_csv_filename()` use that method to get the
@@ -214,12 +210,12 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
             res = self.app.get('/', user='user')
             res = res.click('Users')
-            if step>=1:
+            if step >= 1:
                 form = res.forms['changelist-form']
                 form['action'] = self.action_name
                 self._select_rows(form)
                 res = form.submit()
-            if step >=2:
+            if step >= 2:
                 res.form['header'] = 1
                 res = res.form.submit('apply')
             return res
@@ -245,7 +241,6 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             #form.set('_selected_action', True, 2)
             self._select_rows(form)
             res = form.submit()
-            #res.showbrowser()
             res.form['header'] = 1
             res.form['columns'] = ['id', 'username', 'first_name'
                                                      '']
@@ -263,4 +258,3 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self.assertEquals(sheet.cell_value(1, 2), u'sax')
             self.assertEquals(sheet.cell_value(2, 2), u'user')
             #self.assertEquals(sheet.cell_value(3, 2), u'user_00')
-

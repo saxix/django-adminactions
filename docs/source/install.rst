@@ -16,7 +16,16 @@ your project or ``PYTHONPATH``.
 
 3. Either symlink the ``adminactions`` directory into your project or copy the directory in. What ever works best for you.
 
-4. Optionally install unicodecsv with ``pip install unicodecsv``
+
+Install test dependencies
+=========================
+
+If you wanto to run :mod:`adminactions` tests you need extra requirements
+
+
+.. code-block:: python
+
+    pip install -U django-adminactions[tests]
 
 
 Configuration

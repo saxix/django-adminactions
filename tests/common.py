@@ -1,11 +1,8 @@
 import os
-from django.forms import BaseForm
-from adminactions.exceptions import ActionInterrupted
 from django.conf import global_settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Permission
 from django.test.testcases import TestCase
-from adminactions.signals import adminaction_requested, adminaction_end, adminaction_start
 
 TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), os.pardir, 'tests', 'templates')
 SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
@@ -25,7 +22,6 @@ SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
 
 
 class BaseTestCaseMixin(object):
-    urls = 'adminactions.tests.urls'
     fixtures = ['adminactions.json', ]
 
     def setUp(self):
@@ -60,4 +56,3 @@ class BaseTestCaseMixin(object):
 
 class BaseTestCase(BaseTestCaseMixin, TestCase):
     pass
-

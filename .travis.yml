@@ -6,22 +6,19 @@ env:
   - DJANGO="1.4.x" DBENGINE=pg
   - DJANGO="1.5.x" DBENGINE=pg
   - DJANGO="1.6.x" DBENGINE=pg
-  - DJANGO="dev" DBENGINE=pg
 
 install:
-  - pip install coverage python-coveralls
-  - python setup.py -q install
+  - "export PATH=$PWD/~build/casperjs/bin:$PATH"
+  - make install-deps
 
 script:
-  - make ci
-
-before_install:
-  - sh -c "if [ '$DBENGINE' = 'pg' ]; then psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi"
-  - sh -c "if [ '$DBENGINE' = 'mysql' ]; then mysql -e 'DROP DATABASE IF EXISTS adminactions;'; fi"
+  - make init-db ci
 
 before_script:
-  - sh -c "if [ '$DBENGINE' = 'pg' ]; then psql -c 'CREATE DATABASE adminactions;' -U postgres; fi"
-  - sh -c "if [ '$DBENGINE' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS adminactions;'; fi"
+  - make init-db install-casperjs
+  - "export DISPLAY=:99.0"
+  - "export PHANTOMJS_EXECUTABLE='phantomjs --local-to-remote-url-access=yes --ignore-ssl-errors=yes'"
+
 
 after_success:
   - coveralls -c .coveragerc

@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTest
-from webtests.utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
+from .utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
 
 
 class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
@@ -20,14 +20,14 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
         with user_grant_permission(self.user, ['auth.change_user']):
             res = self.app.get('/', user='user')
             res = res.click('Users')
-            if steps>=1:
+            if steps >= 1:
                 form = res.forms['changelist-form']
                 form['action'] = 'graph_queryset'
                 self._select_rows(form)
                 #form.set('_selected_action', True, 0)
                 #form.set('_selected_action', True, 1)
                 res = form.submit()
-            if steps>=2:
+            if steps >= 2:
                 res.form['axes_x'] = 'username'
                 res = res.form.submit('apply')
 

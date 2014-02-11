@@ -11,6 +11,8 @@ def fread(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
+tests_require = fread('adminactions/requirements/testing.pip')
+
 setup(
     name=NAME,
     version=RELEASE,
@@ -20,11 +22,16 @@ setup(
     author_email='s.apostolico@gmail.com',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
-    #  ['adminactions', 'webtests', 'adminactions.templatetags']
-    # packages=find_packages(),
-    packages=['adminactions', 'adminactions.templatetags'],
+    packages=find_packages(),
+    # packages=['adminactions', 'adminactions.templatetags'],
     include_package_data=True,
-    install_requires=fread('adminactions/requirements.pip').split('\n'),
+    install_requires=fread('adminactions/requirements/install.pip'),
+    tests_require=tests_require,
+    extras_require={
+        'tests': tests_require,
+    },
+    test_suite='conftest.runtests',
+    #cmdclass={'test': 'conftest.runtests'},
     zip_safe=False,
     platforms=['any'],
     classifiers=[

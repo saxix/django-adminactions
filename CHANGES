@@ -1,3 +1,12 @@
+.. _release-0.4:
+
+Release 0.4
+===========
+
+* fixed :ghissue:`33`
+* fixed :ghissue:`20`
+
+
 .. _release-0.3:
 
 Release 0.3
