@@ -14,7 +14,7 @@ django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
 
 **Requires Django>=1.4**
 
-Please see the changelog at http://django-actions.readthedocs.org/en/latest/changes.html
+Please see the changelog at http://django-adminactions.readthedocs.org/en/latest/changes.html
 
 Actions
 ================
