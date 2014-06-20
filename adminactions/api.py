@@ -7,6 +7,8 @@ from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from adminactions.templatetags.actions import get_field_value
+from django.conf import settings
+import pytz
 
 try:
     import unicodecsv as csv
@@ -163,12 +165,14 @@ def export_as_csv(queryset, fields=None, header=None, filename=None, options=Non
         else:
             writer.writerow([f for f in fields])
 
+    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+
     for obj in queryset:
         row = []
         for fieldname in fields:
             value = get_field_value(obj, fieldname)
             if isinstance(value, datetime.datetime):
-                value = dateformat.format(value, config['datetime_format'])
+                value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
             elif isinstance(value, datetime.date):
                 value = dateformat.format(value, config['date_format'])
             elif isinstance(value, datetime.time):
@@ -262,6 +266,8 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
     sheet.row(row).height = 500
     formats = _get_qs_formats(queryset)
 
+    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
         for idx, fieldname in enumerate(fields):
@@ -273,6 +279,10 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
                     style = xlwt.easyxf(num_format_str='formula')
                 else:
                     style = xlwt.easyxf(num_format_str=fmt)
+
+                if isinstance(value, datetime.datetime):
+                    value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+
                 sheet.write(rownum + 1, idx + 1, value, style)
             except Exception as e:
                 #logger.warning("TODO refine this exception: %s" % e)
