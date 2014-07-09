@@ -3,6 +3,7 @@
 Release 0.5
 ===========
 
+* fix mass_update bug that caused all records in a table to be updated (thanks @jht001)
 * Added timezone support to csv and xls export
 
 .. _release-0.4:
