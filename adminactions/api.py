@@ -90,7 +90,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
                             accessor = getattr(other, name)
                             all_related[name] = [(related_object.field.name, accessor)]
                         except ObjectDoesNotExist:
-                            #nothing to merge
                             pass
                     else:
                         accessor = getattr(other, name)
@@ -203,8 +202,8 @@ xls_options_default = {'date_format': 'd/m/Y',
 
 
 def export_as_xls(queryset, fields=None, header=None, filename=None, options=None, out=None):
-# sheet_name=None,  header_alt=None,
-#             formatting=None, out=None):
+    # sheet_name=None,  header_alt=None,
+    # formatting=None, out=None):
     """
     Exports a queryset as xls from a queryset with the given fields.
 
@@ -285,7 +284,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
 
                 sheet.write(rownum + 1, idx + 1, value, style)
             except Exception as e:
-                #logger.warning("TODO refine this exception: %s" % e)
+                # logger.warning("TODO refine this exception: %s" % e)
                 sheet.write(rownum + 1, idx + 1, str(e), style)
 
     book.save(response)

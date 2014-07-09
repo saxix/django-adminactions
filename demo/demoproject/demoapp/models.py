@@ -38,7 +38,6 @@ class UserProfile(models.Model):
         app_label = 'demoapp'
 
 
-
 class UserDetail(models.Model):
     user = models.ForeignKey(User)
     note = models.CharField(max_length=10, blank=True)

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.core.management.base import BaseCommand, CommandError
-from optparse import make_option
+from django.core.management.base import BaseCommand
 from django_dynamic_fixture import G
 
 
@@ -21,7 +20,7 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
 
     def handle(self, *args, **options):
-        from demoproject.demoapp.models import DemoModel,  UserDetail, UserProfile
+        from demoproject.demoapp.models import DemoModel, UserDetail, UserProfile
 
         for x in range(100):
             G(DemoModel)

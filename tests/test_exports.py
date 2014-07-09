@@ -158,7 +158,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             res = res.click('Users')
             form = res.forms['changelist-form']
             form['action'] = self.action_name
-            #form.set('_selected_action', True, 1)
+            # form.set('_selected_action', True, 1)
             self._select_rows(form)
             res = form.submit()
             res = res.form.submit('apply')
@@ -236,9 +236,9 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             res = res.click('Users')
             form = res.forms['changelist-form']
             form['action'] = self.action_name
-            #form.set('_selected_action', True, 0)
-            #form.set('_selected_action', True, 1)
-            #form.set('_selected_action', True, 2)
+            # form.set('_selected_action', True, 0)
+            # form.set('_selected_action', True, 1)
+            # form.set('_selected_action', True, 2)
             self._select_rows(form)
             res = form.submit()
             res.form['header'] = 1
@@ -257,4 +257,4 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self.assertEquals(sheet.cell_value(1, 1), 1.0)
             self.assertEquals(sheet.cell_value(1, 2), u'sax')
             self.assertEquals(sheet.cell_value(2, 2), u'user')
-            #self.assertEquals(sheet.cell_value(3, 2), u'user_00')
+            # self.assertEquals(sheet.cell_value(3, 2), u'user_00')

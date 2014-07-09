@@ -69,7 +69,7 @@ def graph_queryset(modeladmin, request, queryset):
                 return
             try:
                 x = form.cleaned_data['axes_x']
-                #            y = form.cleaned_data['axes_y']
+                # y = form.cleaned_data['axes_y']
                 graph_type = form.cleaned_data['graph_type']
 
                 field, model, direct, m2m = modeladmin.model._meta.get_field_by_name(x)
@@ -136,7 +136,7 @@ def graph_queryset(modeladmin, request, queryset):
     ctx = {'adminform': adminForm,
            'action': 'graph_queryset',
            'opts': modeladmin.model._meta,
-            'title': u"Graph %s" % force_unicode(modeladmin.opts.verbose_name_plural),
+           'title': u"Graph %s" % force_unicode(modeladmin.opts.verbose_name_plural),
            'app_label': queryset.model._meta.app_label,
            'media': media,
            'extra': extra,

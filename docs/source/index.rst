@@ -22,11 +22,16 @@ Table Of Contents
     signals
     exceptions
     api
-
-    changes
     howto
     faq
 
+Project Info
+============
+.. toctree::
+    :maxdepth: 1
+
+    changes
+    authors
 
 
 .. toctree::
@@ -35,7 +40,7 @@ Table Of Contents
     globals
 
 Links
-~~~~~
+=====
 
    * Project home page: https://github.com/saxix/django-adminactions
    * Issue tracker: https://github.com/saxix/django-adminactions/issues?sort

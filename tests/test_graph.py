@@ -24,8 +24,8 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
                 form = res.forms['changelist-form']
                 form['action'] = 'graph_queryset'
                 self._select_rows(form)
-                #form.set('_selected_action', True, 0)
-                #form.set('_selected_action', True, 1)
+                # form.set('_selected_action', True, 0)
+                # form.set('_selected_action', True, 1)
                 res = form.submit()
             if steps >= 2:
                 res.form['axes_x'] = 'username'
