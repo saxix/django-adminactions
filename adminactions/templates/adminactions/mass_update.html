@@ -40,7 +40,7 @@
     {% endif %}
     {{ form.non_field_errors }}
     <div id='col1'>
-        <form action="." method="post">
+        <form action="" method="post">
             {% csrf_token %}
             <table border="1">
                 {% for field in adminform.form.configured_fields %}
@@ -87,7 +87,7 @@
                 {{ hidden }}
             {% endfor %}
 {#            <input type="hidden" name="action" value="{{ action }}"/>#}
-            <input type="submit" name="apply" value="Update records"/>
+            <input type="submit" name="apply" value="Update {{ selection.count }} records"/>
         </form>
     </div>
 {#    <div id='col2'>#}

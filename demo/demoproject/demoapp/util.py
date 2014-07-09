@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from django.utils.translation import gettext as _
-from random import randrange, choice, shuffle
+from random import randrange, shuffle
 from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
 
 
@@ -21,6 +19,6 @@ def ipaddress(not_valid=None):
                      str(randrange(1, 256)), str(randrange(1, 256))])
 
 
-class DataFixtureClass(RandomDataFixture): # it can inherit of SequentialDataFixture, RandomDataFixture etc.
-    def genericipaddressfield_config(self, field, key): # method name must have the format: FIELDNAME_config
+class DataFixtureClass(RandomDataFixture):  # it can inherit of SequentialDataFixture, RandomDataFixture etc.
+    def genericipaddressfield_config(self, field, key):  # method name must have the format: FIELDNAME_config
         return ipaddress()

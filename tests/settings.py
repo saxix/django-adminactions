@@ -63,7 +63,7 @@ USE_L10N = True
 USE_TZ = True
 MEDIA_ROOT = os.path.join(here, 'media')
 MEDIA_URL = ''
-STATIC_ROOT =  os.path.join(here, 'static')
+STATIC_ROOT = os.path.join(here, 'static')
 STATIC_URL = '/static/'
 SECRET_KEY = 'c73*n!y=)tziu^2)y*@5i2^)$8z$tx#b9*_r3i6o1ohxo%*2^a'
 MIDDLEWARE_CLASSES = (
@@ -90,3 +90,12 @@ TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
 DDF_DEFAULT_DATA_FIXTURE = 'demoproject.demoapp.util.DataFixtureClass'
 WSGI_APPLICATION = 'demoproject.wsgi.application'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
+
+

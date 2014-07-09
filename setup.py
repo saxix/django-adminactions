@@ -23,7 +23,6 @@ setup(
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
     packages=find_packages(),
-    # packages=['adminactions', 'adminactions.templatetags'],
     include_package_data=True,
     install_requires=fread('adminactions/requirements/install.pip'),
     tests_require=tests_require,
@@ -31,7 +30,6 @@ setup(
         'tests': tests_require,
     },
     test_suite='conftest.runtests',
-    #cmdclass={'test': 'conftest.runtests'},
     zip_safe=False,
     platforms=['any'],
     classifiers=[

@@ -62,7 +62,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
     def test_validate_off(self):
         self._run_action(**{'_validate': 0})
         self.assertIn("Unable no mass update using operators without", self.app.cookies['messages'])
-        #assert "Unable no mass update using operators without" in res.body
+        # assert "Unable no mass update using operators without" in res.body
 
     def test_clean_on(self):
         self._run_action(**{'_clean': 1})

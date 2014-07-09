@@ -1,34 +1,33 @@
+from itertools import count
 import os.path
-from functools import partial
 from casper.tests import CasperTestCase
 import django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import Client
 from django_dynamic_fixture import G
-from sample_data_utils.utils import sequence
 from django_webtest import WebTestMixin
 import pytest
 
 list_to_string = lambda q: ','.join(map(str, q))
 
 xfail14 = pytest.mark.skipif(django.VERSION[0:2] == [1, 4],
-                          reason="fail on django==1.4")
+                             reason="fail on django==1.4")
 
 
 @pytest.mark.functional
 class MergeTest(WebTestMixin, CasperTestCase):
     def setUp(self):
-        names = partial(sequence, 'username', cache={})()
-        first_names = partial(sequence, 'First', cache={})()
-        last_names = partial(sequence, 'Last', cache={})()
+        names = lambda b=count(): "{0}-{1}".format('username', next(b))
+        first_names = lambda b=count(): "{0}-{1}".format('First', next(b))
+        last_names = lambda b=count(): "{0}-{1}".format('Last', next(b))
 
         self.client = Client()
         self.user = User.objects.create_superuser('sax', '', '123')
         self.client.login(username=self.user.username, password='123')
-        G(User, n=5, username=lambda x: next(names),
-          first_name=lambda x: next(first_names),
-          last_name=lambda x: next(last_names))
+        G(User, n=5, username=lambda x: names(),
+          first_name=lambda x: first_names(),
+          last_name=lambda x: last_names())
 
     @xfail14
     def test_success(self):
@@ -51,7 +50,6 @@ class MergeTest(WebTestMixin, CasperTestCase):
         assert result.last_name == other.last_name
         assert result.first_name == other.first_name
         assert not User.objects.filter(pk=other.pk).exists()
-
 
     def test_swap(self):
         master = User.objects.get(username='username-0')
