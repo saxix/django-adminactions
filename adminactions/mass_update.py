@@ -122,7 +122,7 @@ class MassUpdateForm(GenericActionForm):
         super(MassUpdateForm, self).__init__(*args, **kwargs)
         self._errors = None
 
-    #def is_valid(self):
+    # def is_valid(self):
     #    return super(MassUpdateForm, self).is_valid()
 
     def _get_validation_exclusions(self):
@@ -133,10 +133,6 @@ class MassUpdateForm(GenericActionForm):
                 exclude.append(name)
         return exclude
 
-    #def _clean_fields(self):
-    #    if self.cleaned_data.get('_clean', False):
-    #        super(MassUpdateForm, self)._clean_fields()
-    #
     def _post_clean(self):
         # must be overriden to bypass instance.clean()
         if self.cleaned_data.get('_clean', False):
@@ -310,7 +306,7 @@ def mass_update(modeladmin, request, queryset):
             return HttpResponseRedirect(request.get_full_path())
     else:
         initial.update({'action': 'mass_update', '_validate': 1})
-        #form = MForm(initial=initial)
+        # form = MForm(initial=initial)
         prefill_with = request.POST.get('prefill-with', None)
         prefill_instance = None
         try:
@@ -354,7 +350,7 @@ def mass_update(modeladmin, request, queryset):
            'has_change_permission': True,
            'opts': modeladmin.model._meta,
            'app_label': modeladmin.model._meta.app_label,
-           #           'action': 'mass_update',
+           # 'action': 'mass_update',
            #           'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}

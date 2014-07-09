@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import string
 from random import choice
-import django
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.auth.models import Group, Permission
@@ -37,14 +36,6 @@ class admin_register(object):
     def stop(self):
         """Stop an active patch."""
         return self.__exit__()
-
-#def admin_register(model):
-#    try:
-#        admin.site.register(model)
-#    except AlreadyRegistered:
-#        pass
-#
-#    return admin.site._registry[model]
 
 
 def text(length, choices=string.ascii_letters):

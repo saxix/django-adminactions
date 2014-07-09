@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-# from django.db import transaction
-import django
 from datetime import datetime
 from django.utils.encoding import force_unicode
 from adminactions import api
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django import forms
-from django.forms import TextInput, HiddenInput, DateTimeField
+from django.forms import TextInput, HiddenInput
 from django.db import models
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, model_to_dict
