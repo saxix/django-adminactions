@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Model
+from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.db import connections, router
 
@@ -90,6 +92,11 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
 
     if not raw_callable and callable(value):
         return value()
+
+    if isinstance(obj, Model):
+        field = get_field_by_path(obj, fieldname)
+        if isinstance(field, ForeignKey):
+            return unicode(value)
 
     return value
 

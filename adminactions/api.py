@@ -16,7 +16,8 @@ except ImportError:
     import csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
-from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance, getattr_or_item  # NOQA
+from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance, getattr_or_item, \
+    get_attr  # NOQA
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -171,14 +172,17 @@ def export_as_csv(queryset, fields=None, header=None, filename=None, options=Non
         for fieldname in fields:
             value = get_field_value(obj, fieldname)
             if isinstance(value, datetime.datetime):
-                value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                try:
+                    value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                except ValueError:
+                    # astimezone() cannot be applied to a naive datetime
+                    value = dateformat.format(value, config['datetime_format'])
             elif isinstance(value, datetime.date):
                 value = dateformat.format(value, config['date_format'])
             elif isinstance(value, datetime.time):
                 value = dateformat.format(value, config['time_format'])
             row.append(smart_str(value))
         writer.writerow(row)
-
     return response
 
 
@@ -272,7 +276,10 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
         for idx, fieldname in enumerate(fields):
             fmt = formats.get(idx, 'general')
             try:
-                value = get_field_value(row, fieldname, usedisplay=False, raw_callable=False)
+                value = get_field_value(row,
+                                        fieldname,
+                                        usedisplay=False,
+                                        raw_callable=False)
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))
                     style = xlwt.easyxf(num_format_str='formula')
@@ -280,7 +287,11 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
                     style = xlwt.easyxf(num_format_str=fmt)
 
                 if isinstance(value, datetime.datetime):
-                    value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                    try:
+                        value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                    except ValueError:
+                        # astimezone() cannot be applied to a naive datetime
+                        value = dateformat.format(value, config['datetime_format'])
 
                 sheet.write(rownum + 1, idx + 1, value, style)
             except Exception as e:
@@ -289,3 +300,4 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
 
     book.save(response)
     return response
+

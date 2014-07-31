@@ -20,7 +20,7 @@
         <a href="{% url 'admin:index' %}{{ app_label}}">{{ app_label|capfirst }}</a> &rsaquo;
         {% if has_change_permission %}<a
                 href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %} &rsaquo;
-        CSV Export Options
+        {% trans "XLS Export Options" %}
     </div>
 {% endif %}{% endblock %}
 
