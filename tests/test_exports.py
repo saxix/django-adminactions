@@ -15,7 +15,7 @@ __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportD
 
 class ExportMixin(object):
     fixtures = ['adminactions', 'demoproject']
-    urls = 'demoproject.urls'
+    urls = 'tests.urls'
 
     def setUp(self):
         super(ExportMixin, self).setUp()

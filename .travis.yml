@@ -8,16 +8,10 @@ env:
   - DJANGO="1.6.x" DBENGINE=pg
 
 install:
-  - "export PATH=$PWD/~build/casperjs/bin:$PATH"
   - make install-deps
 
 script:
   - make init-db ci
-
-before_script:
-  - make init-db install-casperjs
-  - "export DISPLAY=:99.0"
-  - "export PHANTOMJS_EXECUTABLE='phantomjs --local-to-remote-url-access=yes --ignore-ssl-errors=yes'"
 
 
 after_success:

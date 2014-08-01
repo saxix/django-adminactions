@@ -1,7 +1,7 @@
 [
     {
         "pk": 1,
-        "model": "demoapp.demomodel",
+        "model": "tests.demomodel",
         "fields": {
             "nullable": "aaaa",
             "float": 10.1,
@@ -27,7 +27,7 @@
     },
     {
         "pk": 2,
-        "model": "demoapp.demomodel",
+        "model": "tests.demomodel",
         "fields": {
             "nullable": "bbbb",
             "float": 10.1,

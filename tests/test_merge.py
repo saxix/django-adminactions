@@ -13,27 +13,13 @@ from adminactions.api import merge, ALL_FIELDS
 from .common import BaseTestCaseMixin
 from .utils import SelectRowsMixin
 from .utils import user_grant_permission
+from .models import UserDetail
 
-PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'demoapp.UserProfile')
-
-
-def assert_profile(user):
-    p = None
-    try:
-        get_profile(user)
-    except ObjectDoesNotExist:
-        app_label, model_name = PROFILE_MODULE.split('.')
-        model = models.get_model(app_label, model_name)
-        p, __ = model.objects.get_or_create(user=user)
-
-    return p
+PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'tests.UserProfile')
 
 
 def get_profile(user):
-    app_label, model_name = PROFILE_MODULE.split('.')
-    model = models.get_model(app_label, model_name)
-    return model.objects.get(user=user)
-
+    return UserDetail.objects.get_or_create(user=user, note="")[0]
 
 class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
     def setUp(self):
@@ -126,7 +112,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
     def test_merge_one_to_one_field(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
-        profile = assert_profile(other)
+        profile = get_profile(other)
         if profile:
             entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
 
@@ -152,7 +138,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
 
 class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions.json', 'demoproject.json']
-    urls = 'demoproject.urls'
+    urls = 'tests.urls'
     sender_model = User
     action_name = 'merge'
     _selected_rows = [1, 2]

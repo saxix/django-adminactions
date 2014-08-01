@@ -1,3 +1,4 @@
+from django.contrib.admin import ModelAdmin, site
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -27,15 +28,7 @@ class DemoModel(models.Model):
     choices = models.IntegerField(choices=((1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')))
 
     class Meta:
-        app_label = 'demoapp'
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User)
-    note = models.CharField(max_length=10, blank=True)
-
-    class Meta:
-        app_label = 'demoapp'
+        app_label = 'tests'
 
 
 class UserDetail(models.Model):
@@ -43,4 +36,17 @@ class UserDetail(models.Model):
     note = models.CharField(max_length=10, blank=True)
 
     class Meta:
-        app_label = 'demoapp'
+        app_label = 'tests'
+
+
+class UserDetailModelAdmin(ModelAdmin):
+    list_display = [f.name for f in UserDetail._meta.fields]
+
+
+class DemoModelAdmin(ModelAdmin):
+    # list_display = ('char', 'integer', 'logic', 'null_logic',)
+    list_display = [f.name for f in DemoModel._meta.fields]
+
+
+site.register(DemoModel, DemoModelAdmin)
+site.register(UserDetail, UserDetailModelAdmin)

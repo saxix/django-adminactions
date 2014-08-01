@@ -7,7 +7,7 @@ from .utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
 
 class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
     fixtures = ['adminactions', 'demoproject']
-    urls = 'demoproject.urls'
+    urls = 'tests.urls'
     sender_model = User
     action_name = 'graph_queryset'
     _selected_rows = [0, 1]

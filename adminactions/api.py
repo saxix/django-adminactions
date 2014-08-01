@@ -16,8 +16,8 @@ except ImportError:
     import csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
-from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance, getattr_or_item, \
-    get_attr  # NOQA
+from adminactions.utils import (clone_instance, get_field_by_path, get_copy_of_instance,
+                                getattr_or_item)  # NOQA
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
