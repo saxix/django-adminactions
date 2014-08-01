@@ -54,7 +54,7 @@ ci: init-db install-deps
 	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
 	@echo "Database:" ${DBENGINE}
 
-	export PATH=${CASPERJS_DIR}/bin:$${PATH} && $(MAKE) coverage
+	$(MAKE) coverage
 
 demo:
 	django-admin.py syncdb --settings=tests.settings --noinput
