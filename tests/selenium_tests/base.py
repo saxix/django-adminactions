@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import os
 import types
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django_dynamic_fixture import G
 import pytest
 from selenium import webdriver
@@ -71,7 +71,6 @@ def login(browser):
 
 @pytest.fixture(scope='function')
 def administrator():
-    User = get_user_model()
     superuser = User._default_manager.create_superuser(username=ADMIN,
                                                        password=PWD,
                                                        email="sax@noreply.org")
