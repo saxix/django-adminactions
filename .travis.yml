@@ -6,6 +6,8 @@ env:
   - DJANGO="1.4.x" DBENGINE=pg
   - DJANGO="1.5.x" DBENGINE=pg
   - DJANGO="1.6.x" DBENGINE=pg
+  - DJANGO="1.7.x" DBENGINE=pg
+  - DJANGO="dev" DBENGINE=pg
 
 install:
   - make install-deps

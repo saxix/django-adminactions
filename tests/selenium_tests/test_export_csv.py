@@ -11,6 +11,7 @@ from selenium.webdriver.support.select import Select
 
 pytestmark = pytest.mark.selenium
 
+
 @pytest.mark.skipif('django.VERSION[:2]==(1,8)')
 def test_export_as_csv(admin_site):
     browser, administrator = admin_site
@@ -40,6 +41,7 @@ def _test(browser, target, format, sample_num):
     sample = browser.find_elements_by_css_selector("span.sample")[sample_num]
     expected_value = dateformat.format(datetime.datetime.now(), format)
     assert sample.text == expected_value, "Failed Ajax call on %s" % target
+
 
 @pytest.mark.skipif('django.VERSION[:2]==(1,8)')
 def test_datetime_format_ajax(export_csv_page):
