@@ -1,5 +1,5 @@
-Release 0.6 (dev)
-=================
+Release 0.6
+===========
 * fixed :ghissue:`55`
 * fixed :ghissue:`51`
 * added selenium tests
