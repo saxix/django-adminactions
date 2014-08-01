@@ -11,7 +11,7 @@ __all__ = ['MassUpdateTest', ]
 
 class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions', 'demoproject']
-    urls = 'demoproject.urls'
+    urls = 'tests.urls'
 
     _selected_rows = [1, 2, 3, 4]
 

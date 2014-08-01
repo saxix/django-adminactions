@@ -20,6 +20,7 @@ from django.utils.functional import curry
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+from adminactions import compat
 
 from adminactions.models import get_permission_codename
 from adminactions.exceptions import ActionInterrupted
@@ -218,7 +219,9 @@ def mass_update(modeladmin, request, queryset):
     # Allows to specified a custom mass update Form in the ModelAdmin
     mass_update_form = getattr(modeladmin, 'mass_update_form', MassUpdateForm)
 
-    MForm = modelform_factory(modeladmin.model, form=mass_update_form, formfield_callback=not_required)
+    MForm = modelform_factory(modeladmin.model, form=mass_update_form,
+                              exclude=('pk',),
+                              formfield_callback=not_required)
     grouped = defaultdict(lambda: [])
     selected_fields = []
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
@@ -243,52 +246,38 @@ def mass_update(modeladmin, request, queryset):
             validate = form.cleaned_data.get('_validate', False)
             clean = form.cleaned_data.get('_clean', False)
 
-            updated = 0
-            errors = {}
             if validate:
-                if need_transaction:
-                    transaction.enter_transaction_management()
-                    transaction.managed(True)
-                for record in queryset:
-                    for field_name, value_or_func in form.cleaned_data.items():
-                        if callable(value_or_func):
-                            old_value = getattr(record, field_name)
-                            setattr(record, field_name, value_or_func(old_value))
-                        else:
-                            setattr(record, field_name, value_or_func)
-                    try:
-                        if clean:
-                            record.clean()
-                        record.save()
-                    except IntegrityError as e:
-                        errors[record.pk] = str(e)
-                        if need_transaction:
-                            transaction.rollback()
-                            updated = 0
-                            break
-                    else:
-                        updated += 1
-                if updated:
-                    messages.info(request, _("Updated %s records") % updated)
-                if len(errors):
-                    messages.error(request, "%s records not updated due errors" % len(errors))
-                try:
+
+                def _doit():
+                    errors = {}
+                    updated = 0
+                    for record in queryset:
+                        for field_name, value_or_func in form.cleaned_data.items():
+                            if callable(value_or_func):
+                                old_value = getattr(record, field_name)
+                                setattr(record, field_name, value_or_func(old_value))
+                            else:
+                                setattr(record, field_name, value_or_func)
+                            if clean:
+                                record.clean()
+                            record.save()
+                            updated += 1
+                    if updated:
+                        messages.info(request, _("Updated %s records") % updated)
+
+                    if len(errors):
+                        messages.error(request, "%s records not updated due errors" % len(errors))
                     adminaction_end.send(sender=modeladmin.model,
-                                         action='mass_update',
-                                         request=request,
-                                         queryset=queryset,
-                                         modeladmin=modeladmin,
-                                         form=form,
-                                         errors=errors,
-                                         updated=updated)
-                    if need_transaction:
-                        transaction.commit()
-                except ActionInterrupted:
-                    if need_transaction:
-                        transaction.rollback()
-                finally:
-                    if need_transaction:
-                        transaction.leave_transaction_management()
+                                             action='mass_update',
+                                             request=request,
+                                             queryset=queryset,
+                                             modeladmin=modeladmin,
+                                             form=form,
+                                             errors=errors,
+                                             updated=updated)
+
+                with compat.atomic():
+                    _doit()
 
             else:
                 values = {}

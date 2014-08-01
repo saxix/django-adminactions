@@ -2,7 +2,6 @@
 import datetime
 import xlwt
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
@@ -16,7 +15,9 @@ except ImportError:
     import csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
-from adminactions.utils import clone_instance, get_field_by_path, get_copy_of_instance, getattr_or_item  # NOQA
+from adminactions import compat
+from adminactions.utils import (clone_instance, get_field_by_path, get_copy_of_instance,
+                                getattr_or_item)  # NOQA
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -48,8 +49,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     @param related: list of related fieldnames to merge. If empty will be removed
     @return:
     """
-    if fields == None:
-        fields = [f.name for f in master._meta.fields]
+
+    fields = fields or [f.name for f in master._meta.fields]
+
     all_m2m = {}
     all_related = {}
 
@@ -62,59 +64,51 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
 
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
-    with transaction.commit_manually():
-        try:
-            result = clone_instance(master)
+    with compat.atomic():
+        result = clone_instance(master)
 
-            for fieldname in fields:
-                f = get_field_by_path(master, fieldname)
-                if f and not f.primary_key:
-                    setattr(result, fieldname, getattr(other, fieldname))
+        for fieldname in fields:
+            f = get_field_by_path(master, fieldname)
+            if f and not f.primary_key:
+                setattr(result, fieldname, getattr(other, fieldname))
 
-            if m2m:
-                for fieldname in set(m2m):
-                    all_m2m[fieldname] = []
-                    field_object = get_field_by_path(master, fieldname)
-                    if not isinstance(field_object, ManyToManyField):
-                        raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
-                    source_m2m = getattr(other, field_object.name)
-                    for r in source_m2m.all():
-                        all_m2m[fieldname].append(r)
-            if related:
-                for name in set(related):
-                    related_object = get_field_by_path(master, name)
-                    all_related[name] = []
-                    if related_object and isinstance(related_object.field, OneToOneField):
-                        try:
-                            accessor = getattr(other, name)
-                            all_related[name] = [(related_object.field.name, accessor)]
-                        except ObjectDoesNotExist:
-                            pass
-                    else:
+        if m2m:
+            for fieldname in set(m2m):
+                all_m2m[fieldname] = []
+                field_object = get_field_by_path(master, fieldname)
+                if not isinstance(field_object, ManyToManyField):
+                    raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
+                source_m2m = getattr(other, field_object.name)
+                for r in source_m2m.all():
+                    all_m2m[fieldname].append(r)
+        if related:
+            for name in set(related):
+                related_object = get_field_by_path(master, name)
+                all_related[name] = []
+                if related_object and isinstance(related_object.field, OneToOneField):
+                    try:
                         accessor = getattr(other, name)
-                        rel_fieldname = accessor.core_filters.keys()[0].split('__')[0]
-                        for r in accessor.all():
-                            all_related[name].append((rel_fieldname, r))
+                        all_related[name] = [(related_object.field.name, accessor)]
+                    except ObjectDoesNotExist:
+                        pass
+                else:
+                    accessor = getattr(other, name)
+                    rel_fieldname = accessor.core_filters.keys()[0].split('__')[0]
+                    for r in accessor.all():
+                        all_related[name].append((rel_fieldname, r))
 
-            if commit:
-                for name, elements in all_related.items():
-                    # dest = getattr(result, name)
-                    for rel_fieldname, element in elements:
-                        setattr(element, rel_fieldname, master)
-                        element.save()
+        if commit:
+            for name, elements in all_related.items():
+                for rel_fieldname, element in elements:
+                    setattr(element, rel_fieldname, master)
+                    element.save()
 
-                other.delete()
-                result.save()
-                for fieldname, elements in all_m2m.items():
-                    dest_m2m = getattr(result, fieldname)
-                    for element in elements:
-                        dest_m2m.add(element)
-
-        except:
-            transaction.rollback()
-            raise
-        else:
-            transaction.commit()
+            other.delete()
+            result.save()
+            for fieldname, elements in all_m2m.items():
+                dest_m2m = getattr(result, fieldname)
+                for element in elements:
+                    dest_m2m.add(element)
     return result
 
 
@@ -171,14 +165,17 @@ def export_as_csv(queryset, fields=None, header=None, filename=None, options=Non
         for fieldname in fields:
             value = get_field_value(obj, fieldname)
             if isinstance(value, datetime.datetime):
-                value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                try:
+                    value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                except ValueError:
+                    # astimezone() cannot be applied to a naive datetime
+                    value = dateformat.format(value, config['datetime_format'])
             elif isinstance(value, datetime.date):
                 value = dateformat.format(value, config['date_format'])
             elif isinstance(value, datetime.time):
                 value = dateformat.format(value, config['time_format'])
             row.append(smart_str(value))
         writer.writerow(row)
-
     return response
 
 
@@ -272,7 +269,10 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
         for idx, fieldname in enumerate(fields):
             fmt = formats.get(idx, 'general')
             try:
-                value = get_field_value(row, fieldname, usedisplay=False, raw_callable=False)
+                value = get_field_value(row,
+                                        fieldname,
+                                        usedisplay=False,
+                                        raw_callable=False)
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))
                     style = xlwt.easyxf(num_format_str='formula')
@@ -280,7 +280,11 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
                     style = xlwt.easyxf(num_format_str=fmt)
 
                 if isinstance(value, datetime.datetime):
-                    value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                    try:
+                        value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                    except ValueError:
+                        # astimezone() cannot be applied to a naive datetime
+                        value = dateformat.format(value, config['datetime_format'])
 
                 sheet.write(rownum + 1, idx + 1, value, style)
             except Exception as e:
@@ -289,3 +293,4 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
 
     book.save(response)
     return response
+

@@ -1,10 +1,9 @@
 # Django settings for demoproject project.
 import os
-import sys
 
 here = os.path.dirname(__file__)
-sys.path.append(os.path.abspath(os.path.join(here, os.pardir)))
-sys.path.append(os.path.abspath(os.path.join(here, os.pardir, 'demo')))
+# sys.path.append(os.path.abspath(os.path.join(here, os.pardir)))
+# sys.path.append(os.path.abspath(os.path.join(here, os.pardir, 'demo')))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -51,9 +50,10 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': 'adminactions.sqlite',
-            'TEST_NAME': 'test_adminactions.sqlite',
+            'TEST_NAME': ':memory:',
             'HOST': '',
-            'PORT': ''}}
+            'PORT': '',
+            'ATOMIC_REQUESTS': True}}
 
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'
@@ -83,13 +83,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'adminactions',
-    'demoproject.demoapp',  # for demo fixtures
     'tests']
 
 TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
-DDF_DEFAULT_DATA_FIXTURE = 'demoproject.demoapp.util.DataFixtureClass'
-WSGI_APPLICATION = 'demoproject.wsgi.application'
+DDF_DEFAULT_DATA_FIXTURE = 'tests.util.DataFixtureClass'
 
 CACHES = {
     'default': {
@@ -98,4 +96,5 @@ CACHES = {
     }
 }
 
+ENABLE_SELENIUM = True
 

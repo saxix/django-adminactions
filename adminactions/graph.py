@@ -89,7 +89,7 @@ def graph_queryset(modeladmin, request, queryset):
                 data = [v for l, v in cc]
 
                 if graph_type == 'BarChart':
-                    table = [[10, 20]]
+                    table = [data]
                     extra = """{seriesDefaults:{renderer:$.jqplot.BarRenderer,
                                                 rendererOptions: {fillToZero: true,
                                                                   barDirection: 'horizontal'},

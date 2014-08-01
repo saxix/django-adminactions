@@ -2,12 +2,12 @@ VERSION=2.0.0
 BUILDDIR=${PWD}/~build
 BINDIR=${PWD}/~build/bin
 PYTHONPATH := ${PWD}/demo/:${PWD}
-DJANGO_14=django==1.4.10
-DJANGO_15=django==1.5.5
-DJANGO_16=django==1.6
+
+DJANGO_14='django>=1.4,<1.5'
+DJANGO_15='django>=1.5,<1.6'
+DJANGO_16='django>=1.6,<1.7'
+DJANGO_17='https://www.djangoproject.com/download/1.7c2/tarball/'
 DJANGO_DEV=git+git://github.com/django/django.git
-CASPERJS_DIR=${BUILDDIR}/casperjs
-PHANTOMJS_DIR=${BUILDDIR}/phantomjs
 
 mkbuilddir:
 	mkdir -p ${BUILDDIR} ${BINDIR}
@@ -18,10 +18,6 @@ install-deps:
 	        -r adminactions/requirements/install.pip \
 	        -r adminactions/requirements/testing.pip \
 	        python-coveralls
-
-
-install-casperjs: mkbuilddir
-	@sh -c "if [ -d ${CASPERJS_DIR} ]; then cd ${CASPERJS_DIR} && git pull; else git clone git://github.com/n1k0/casperjs.git ${CASPERJS_DIR}; fi"
 
 
 locale:
@@ -44,20 +40,26 @@ test:
 
 
 coverage: mkbuilddir
-	py.test --cov=adminactions --cov-report=html --cov-config=.coveragerc -vvv
+	py.test tests --cov=adminactions --cov-report=html --cov-config=.coveragerc -vvv
 
 
 ci: init-db install-deps
 	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install ${DJANGO_14}; fi"
 	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install ${DJANGO_15}; fi"
 	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install ${DJANGO_16}; fi"
+	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install ${DJANGO_17}; fi"
 	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install ${DJANGO_DEV}; fi"
 
 	@pip install coverage
 	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
 	@echo "Database:" ${DBENGINE}
 
-	export PATH=${CASPERJS_DIR}/bin:$${PATH} && $(MAKE) coverage
+	$(MAKE) coverage
+
+demo:
+	django-admin.py syncdb --settings=tests.settings --noinput
+	django-admin.py loaddata adminactions.json demoproject.json --settings=tests.settings
+	django-admin.py runserver --settings=tests.settings
 
 
 clean:
