@@ -14,8 +14,8 @@ register = Library()
 def fields_values(d, k):
     """
     >>> data = {'name1': ['value1.1', 'value1.2'], 'name2': ['value2.1', 'value2.2'], }
-    >>> fields_values(data, 'name1')
-    value1.1, value1.2
+    >>> print(fields_values(data, 'name1'))
+    value1.1,value1.2
     """
     values = d.get(k, [])
     return ",".join(map(str, values))
@@ -26,7 +26,7 @@ def link_fields_values(d, k):
     """
     >>> data = {'name1': ['value1.1', 'value1.2'], 'name2': ['value2.1', 'value2.2'], }
     >>> link_fields_values(data, 'name1')
-    u'<a href="#" class="fastfieldvalue name1">value1.1</a>, <a href="#" class="fastfieldvalue name1">value1.2</a>'
+    u'<a href="#" class="fastfieldvalue name1 value">value1.1</a>, <a href="#" class="fastfieldvalue name1 value">value1.2</a>'
     """
     ret = []
     for v in d.get(k, []):
