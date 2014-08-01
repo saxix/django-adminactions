@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import django  # noqa
 from django.contrib.auth.models import User
 from .base import *  # noqa
 from selenium.webdriver.support.select import Select
@@ -6,6 +7,7 @@ from selenium.webdriver.support.select import Select
 pytestmark = pytest.mark.selenium
 
 
+@pytest.mark.skipif('django.VERSION[:2]==(1,8)')
 def test_mass_update_1(admin_site):
     """
     Check Boolean Field.

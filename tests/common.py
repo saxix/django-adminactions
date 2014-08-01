@@ -1,7 +1,8 @@
 import os
+import pytest
 from django.conf import global_settings
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, User
 from django.test.testcases import TestCase
 
 TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), os.pardir, 'tests', 'templates')
@@ -20,6 +21,10 @@ SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
                                             "django.core.context_processors.tz",
                                             "django.contrib.messages.context_processors.messages")}
 
+ADMIN = 'sax'
+USER = 'user'
+PWD = '123'
+USER_EMAIL = 'user@moreply.org'
 
 class BaseTestCaseMixin(object):
     fixtures = ['adminactions.json', ]
@@ -56,3 +61,16 @@ class BaseTestCaseMixin(object):
 
 class BaseTestCase(BaseTestCaseMixin, TestCase):
     pass
+
+
+
+@pytest.fixture(scope='function')
+def administrator():
+    superuser = User._default_manager.create_superuser(username=ADMIN,
+                                                       password=PWD,
+                                                       email="sax@noreply.org")
+    return superuser
+
+
+
+

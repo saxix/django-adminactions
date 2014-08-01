@@ -1,20 +1,12 @@
 from contextlib import contextmanager
+import django
 import django.db.transaction as t
 
-try:  # django >= 1.6
-    from django.db.transaction import atomic  # noqa
 
-    @contextmanager
-    def nocommit(using=None):
-        backup = t.get_autocommit(using)
-        t.set_autocommit(False, using)
-        t.enter_transaction_management(managed=True, using=using)
-        yield
-        t.rollback(using)
-        t.leave_transaction_management(using)
-        t.set_autocommit(backup, using)
+version = django.VERSION[:2]
 
-except ImportError:  # django <=1.5
+
+if version == (1, 5) or version == (1, 4):
 
     @contextmanager
     def nocommit(using=None):
@@ -23,3 +15,38 @@ except ImportError:  # django <=1.5
         yield
         t.rollback()
         t.leave_transaction_management(using=using)
+
+
+    class atomic(object):
+        def __init__(self, using=None):
+            self.using = using
+
+        def __enter__(self):
+            t.enter_transaction_management(using=self.using)
+            t.managed(True, using=self.using)
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            try:
+                if exc_type is not None:
+                    if t.is_dirty(using=self.using):
+                        t.rollback(using=self.using)
+                else:
+                    if t.is_dirty(using=self.using):
+                        try:
+                            t.commit(using=self.using)
+                        except:
+                            t.rollback(using=self.using)
+                            raise
+            finally:
+                t.leave_transaction_management(using=self.using)
+
+
+elif version in [(1,6), (1,7), (1,8)]:
+    from django.db.transaction import atomic  # noqa
+
+    class NoCommit(t.Atomic):
+        def __exit__(self, exc_type, exc_value, traceback):
+            super(NoCommit, self).__exit__(Exception, Exception(), None)
+
+    def nocommit(using=None, savepoint=True):
+        return NoCommit(using, savepoint)

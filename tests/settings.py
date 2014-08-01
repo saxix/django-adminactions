@@ -52,7 +52,8 @@ else:
             'NAME': 'adminactions.sqlite',
             'TEST_NAME': ':memory:',
             'HOST': '',
-            'PORT': ''}}
+            'PORT': '',
+            'ATOMIC_REQUESTS': True}}
 
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'

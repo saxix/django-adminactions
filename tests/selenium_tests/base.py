@@ -2,20 +2,15 @@
 from __future__ import absolute_import
 import os
 import types
-from django.contrib.auth.models import User
 from django_dynamic_fixture import G
 import pytest
 from selenium import webdriver
 from ..models import DemoModel, UserDetail
+from ..common import administrator, ADMIN, PWD
 
-
-ADMIN = 'sax'
-USER = 'user'
-PWD = '123'
-USER_EMAIL = 'user@moreply.org'
 
 browsers = {
-    'firefox': webdriver.Firefox,
+    # 'firefox': webdriver.Firefox,
     'chrome': webdriver.Chrome,
 }
 
@@ -67,14 +62,6 @@ def login(browser):
     browser.find_element_by_css_selector("input[type=\"submit\"]").click()
 
     return browser
-
-
-@pytest.fixture(scope='function')
-def administrator():
-    superuser = User._default_manager.create_superuser(username=ADMIN,
-                                                       password=PWD,
-                                                       email="sax@noreply.org")
-    return superuser
 
 
 @pytest.fixture(scope='function')

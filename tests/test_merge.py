@@ -318,3 +318,5 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 1)
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
+
+

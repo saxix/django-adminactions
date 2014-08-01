@@ -2,7 +2,6 @@
 import datetime
 import xlwt
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
@@ -16,6 +15,7 @@ except ImportError:
     import csv
 from django.utils.encoding import smart_str
 from django.utils import dateformat
+from adminactions import compat
 from adminactions.utils import (clone_instance, get_field_by_path, get_copy_of_instance,
                                 getattr_or_item)  # NOQA
 
@@ -64,58 +64,51 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
 
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
-    with transaction.commit_manually():
-        try:
-            result = clone_instance(master)
+    with compat.atomic():
+        result = clone_instance(master)
 
-            for fieldname in fields:
-                f = get_field_by_path(master, fieldname)
-                if f and not f.primary_key:
-                    setattr(result, fieldname, getattr(other, fieldname))
+        for fieldname in fields:
+            f = get_field_by_path(master, fieldname)
+            if f and not f.primary_key:
+                setattr(result, fieldname, getattr(other, fieldname))
 
-            if m2m:
-                for fieldname in set(m2m):
-                    all_m2m[fieldname] = []
-                    field_object = get_field_by_path(master, fieldname)
-                    if not isinstance(field_object, ManyToManyField):
-                        raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
-                    source_m2m = getattr(other, field_object.name)
-                    for r in source_m2m.all():
-                        all_m2m[fieldname].append(r)
-            if related:
-                for name in set(related):
-                    related_object = get_field_by_path(master, name)
-                    all_related[name] = []
-                    if related_object and isinstance(related_object.field, OneToOneField):
-                        try:
-                            accessor = getattr(other, name)
-                            all_related[name] = [(related_object.field.name, accessor)]
-                        except ObjectDoesNotExist:
-                            pass
-                    else:
+        if m2m:
+            for fieldname in set(m2m):
+                all_m2m[fieldname] = []
+                field_object = get_field_by_path(master, fieldname)
+                if not isinstance(field_object, ManyToManyField):
+                    raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
+                source_m2m = getattr(other, field_object.name)
+                for r in source_m2m.all():
+                    all_m2m[fieldname].append(r)
+        if related:
+            for name in set(related):
+                related_object = get_field_by_path(master, name)
+                all_related[name] = []
+                if related_object and isinstance(related_object.field, OneToOneField):
+                    try:
                         accessor = getattr(other, name)
-                        rel_fieldname = accessor.core_filters.keys()[0].split('__')[0]
-                        for r in accessor.all():
-                            all_related[name].append((rel_fieldname, r))
+                        all_related[name] = [(related_object.field.name, accessor)]
+                    except ObjectDoesNotExist:
+                        pass
+                else:
+                    accessor = getattr(other, name)
+                    rel_fieldname = accessor.core_filters.keys()[0].split('__')[0]
+                    for r in accessor.all():
+                        all_related[name].append((rel_fieldname, r))
 
-            if commit:
-                for name, elements in all_related.items():
-                    for rel_fieldname, element in elements:
-                        setattr(element, rel_fieldname, master)
-                        element.save()
+        if commit:
+            for name, elements in all_related.items():
+                for rel_fieldname, element in elements:
+                    setattr(element, rel_fieldname, master)
+                    element.save()
 
-                other.delete()
-                result.save()
-                for fieldname, elements in all_m2m.items():
-                    dest_m2m = getattr(result, fieldname)
-                    for element in elements:
-                        dest_m2m.add(element)
-
-        except:
-            transaction.rollback()
-            raise
-        else:
-            transaction.commit()
+            other.delete()
+            result.save()
+            for fieldname, elements in all_m2m.items():
+                dest_m2m = getattr(result, fieldname)
+                for element in elements:
+                    dest_m2m.add(element)
     return result
 
 

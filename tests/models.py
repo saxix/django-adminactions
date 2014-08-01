@@ -6,8 +6,8 @@ from django.db import models
 class DemoModel(models.Model):
     char = models.CharField(max_length=255)
     integer = models.IntegerField()
-    logic = models.BooleanField()
-    null_logic = models.NullBooleanField()
+    logic = models.BooleanField(default=False)
+    null_logic = models.NullBooleanField(default=None)
     date = models.DateField()
     datetime = models.DateTimeField()
     time = models.TimeField()

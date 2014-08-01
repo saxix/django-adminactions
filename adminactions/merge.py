@@ -83,15 +83,19 @@ def merge(modeladmin, request, queryset):
         return field.formfield(**kwargs)
 
     merge_form = getattr(modeladmin, 'merge_form', MergeForm)
-    MForm = modelform_factory(modeladmin.model, form=merge_form, formfield_callback=raw_widget)
-    OForm = modelform_factory(modeladmin.model, formfield_callback=raw_widget)
+    MForm = modelform_factory(modeladmin.model,
+                              form=merge_form,
+                              exclude=('pk', ),
+                              formfield_callback=raw_widget)
+    OForm = modelform_factory(modeladmin.model,
+                              exclude=('pk', ),
+                              formfield_callback=raw_widget)
 
     tpl = 'adminactions/merge.html'
-    transaction_supported = model_supports_transactions(modeladmin.model)
-    transaction_supported = True
+    # transaction_supported = model_supports_transactions(modeladmin.model)
     ctx = {
         '_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
-        'transaction_supported': transaction_supported,
+        'transaction_supported': 'Un',
         'select_across': request.POST.get('select_across') == '1',
         'action': request.POST.get('action'),
         'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable],
