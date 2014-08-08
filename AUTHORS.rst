@@ -2,8 +2,8 @@
 Credits
 =======
 
-Development Lead
-----------------
+Author
+------
 
 * Stefano Apostolico <s.apostolico@gmail.com>
 

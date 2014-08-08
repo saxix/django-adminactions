@@ -7,5 +7,6 @@ pytest
 pytest-cache
 pytest-cov
 pytest-django
+pytest-echo
 selenium>=2.42.0
 WebTest>=2.0.7

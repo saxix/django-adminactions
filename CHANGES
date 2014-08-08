@@ -1,6 +1,6 @@
 Release 0.7 (dev)
 ================
-* UNDER DEVELOPMENT
+* fixes issue in mass_update due wrong indentaion
 
 Release 0.6
 ===========
