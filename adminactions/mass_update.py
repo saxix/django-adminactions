@@ -200,6 +200,34 @@ def mass_update(modeladmin, request, queryset):
         kwargs['required'] = False
         return field.formfield(**kwargs)
 
+    def _doit():
+        errors = {}
+        updated = 0
+        for record in queryset:
+            for field_name, value_or_func in form.cleaned_data.items():
+                if callable(value_or_func):
+                    old_value = getattr(record, field_name)
+                    setattr(record, field_name, value_or_func(old_value))
+                else:
+                    setattr(record, field_name, value_or_func)
+            if clean:
+                record.clean()
+            record.save()
+            updated += 1
+        if updated:
+            messages.info(request, _("Updated %s records") % updated)
+
+        if len(errors):
+            messages.error(request, "%s records not updated due errors" % len(errors))
+        adminaction_end.send(sender=modeladmin.model,
+                                 action='mass_update',
+                                 request=request,
+                                 queryset=queryset,
+                                 modeladmin=modeladmin,
+                                 form=form,
+                                 errors=errors,
+                                 updated=updated)
+
     opts = modeladmin.model._meta
     perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts))
     if not request.user.has_perm(perm):
@@ -247,35 +275,6 @@ def mass_update(modeladmin, request, queryset):
             clean = form.cleaned_data.get('_clean', False)
 
             if validate:
-
-                def _doit():
-                    errors = {}
-                    updated = 0
-                    for record in queryset:
-                        for field_name, value_or_func in form.cleaned_data.items():
-                            if callable(value_or_func):
-                                old_value = getattr(record, field_name)
-                                setattr(record, field_name, value_or_func(old_value))
-                            else:
-                                setattr(record, field_name, value_or_func)
-                            if clean:
-                                record.clean()
-                            record.save()
-                            updated += 1
-                    if updated:
-                        messages.info(request, _("Updated %s records") % updated)
-
-                    if len(errors):
-                        messages.error(request, "%s records not updated due errors" % len(errors))
-                    adminaction_end.send(sender=modeladmin.model,
-                                             action='mass_update',
-                                             request=request,
-                                             queryset=queryset,
-                                             modeladmin=modeladmin,
-                                             form=form,
-                                             errors=errors,
-                                             updated=updated)
-
                 with compat.atomic():
                     _doit()
 
