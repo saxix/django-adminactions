@@ -52,6 +52,7 @@ class XLSOptions(forms.Form):
     action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
 
     header = forms.BooleanField(required=False)
+    use_display = forms.BooleanField(required=False)
     # delimiter = forms.ChoiceField(choices=zip(delimiters, delimiters), initial=',')
     # quotechar = forms.ChoiceField(choices=zip(quotes, quotes), initial="'")
     # quoting = forms.ChoiceField(
