@@ -70,9 +70,3 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
         assert DemoModel.objects.filter(char='BBB').exists()
         assert not DemoModel.objects.filter(char='bbb').exists()
         # assert DemoModel.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
-
-    def test_unique_transaction(self):
-        self._run_action(**{'_unique_transaction': 1})
-        assert DemoModel.objects.filter(char='BBB').exists()
-        assert not DemoModel.objects.filter(char='bbb').exists()
-        # assert DemoModel.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
