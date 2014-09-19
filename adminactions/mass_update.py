@@ -114,10 +114,10 @@ class MassUpdateForm(GenericActionForm):
 
     _validate = forms.BooleanField(label='Validate',
                                    help_text="if checked use obj.save() instead of manager.update()")
-    _unique_transaction = forms.BooleanField(label='Unique transaction',
-                                             required=False,
-                                             help_text="If checked create one transaction for the whole update. "
-                                                       "If any record cannot be updated everything will be rolled-back")
+    # _unique_transaction = forms.BooleanField(label='Unique transaction',
+    #                                          required=False,
+    #                                          help_text="If checked create one transaction for the whole update. "
+    #                                                    "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
         super(MassUpdateForm, self).__init__(*args, **kwargs)
@@ -270,7 +270,7 @@ def mass_update(modeladmin, request, queryset):
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.get_full_path())
 
-            need_transaction = form.cleaned_data.get('_unique_transaction', False)
+            # need_transaction = form.cleaned_data.get('_unique_transaction', False)
             validate = form.cleaned_data.get('_validate', False)
             clean = form.cleaned_data.get('_clean', False)
 
@@ -287,7 +287,8 @@ def mass_update(modeladmin, request, queryset):
                     elif callable(value):
                         messages.error(request, "Unable no mass update using operators without 'validate'")
                         return HttpResponseRedirect(request.get_full_path())
-                    elif field_name not in ['_selected_action', '_validate', 'select_across', 'action']:
+                    elif field_name not in ['_selected_action', '_validate', 'select_across', 'action',
+                                            '_unique_transaction','_clean']:
                         values[field_name] = value
                 queryset.update(**values)
 
