@@ -1,6 +1,8 @@
 Release 0.7 (dev)
 ================
 * fixes issue in mass_update due wrong indentaion
+* fixed :ghissue:`49`
+* removed options to enable/disable transactions during mass_update.
 
 Release 0.6
 ===========
