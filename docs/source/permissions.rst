@@ -1,5 +1,5 @@
 .. include:: globals.rst
-.. _index:
+.. _permissions:
 
 ===========
 Permissions
@@ -29,8 +29,9 @@ Required to execute :ref:`massupdate`
 
 .. _adminactions_merge:
 
+
 adminactions_merge
-===================
+==================
 
 Required to execute :ref:`merge`
 

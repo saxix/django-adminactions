@@ -3,9 +3,8 @@
 .. _PyPI: http://pypi.python.org/
 .. _virtualenv: http://virtualenv.openplans.org/
 
-.. |standard_admin| replace:: :py:mod:`csv`
 .. |app| replace:: django-adminactions
 
 
 .. _app: https://github.com/saxix/django-adminactions
-
+.. _django_admin: https://docs.djangoproject.com/en/dev/ref/contrib/admin/
