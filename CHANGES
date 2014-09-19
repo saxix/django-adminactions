@@ -3,6 +3,8 @@ Release 0.7 (dev)
 * fixes issue in mass_update due wrong indentaion
 * fixed :ghissue:`49`
 * removed options to enable/disable transactions during mass_update.
+* fixed :ghissue:`60`
+
 
 Release 0.6
 ===========
@@ -42,8 +44,7 @@ Release 0.2
 Release 0.1
 ===========
 * new api module
-* pull out core export_csv functionalites as `_export_as_csv() <api.html#adminactions.export._export_as_csv>`_
-to be used by custom code
+* pull out core export_csv functionalites as `_export_as_csv() <api.html#adminactions.export._export_as_csv>`_ to be used by custom code
 * New exported filename callback for easy customize the filename ( see :ref:`filename_callbacks`)
 * New registration shortcut `add_to_site() <api.html#adminactions.actions.add_to_site>`_
 * New action: :ref:`merge`
