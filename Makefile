@@ -40,7 +40,7 @@ test:
 
 
 coverage: mkbuilddir
-	py.test tests --cov=adminactions --cov-report=html --cov-config=.coveragerc -vvv
+	py.test tests --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc -vvv
 
 
 ci: init-db install-deps

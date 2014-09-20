@@ -17,7 +17,7 @@ django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
 Please see the changelog at http://django-adminactions.readthedocs.org/en/latest/changes.html
 
 Actions
-================
+=======
 
 * Export as CSV
 * Export as Excel

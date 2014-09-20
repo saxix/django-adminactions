@@ -10,7 +10,7 @@ Installing django-adminactions is as simple as checking out the source and addin
 your project or ``PYTHONPATH``.
 
 
-1. First of all follow the instruction to install `standard admin <standard_admin>`_ application,
+1. First of all follow the instruction to install `django_admin`_ application,
 
 2. Either check out django-adminactions from `GitHub`_ or to pull a release off `PyPI`_. Doing ``pip install django-adminactions`` or ``easy_install django-adminactions`` is all that should be required.
 

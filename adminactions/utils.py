@@ -118,12 +118,12 @@ def get_field_by_path(model, field_path):
     >>> p = Permission(name='perm')
     >>> f = get_field_by_path(Permission, 'content_type')
     >>> print f
-    <django.db.models.fields.related.ForeignKey: content_type>
+    auth.Permission.content_type
 
     >>> p = Permission(name='perm')
     >>> f = get_field_by_path(p, 'content_type.app_label')
     >>> print f
-    <django.db.models.fields.CharField: app_label>
+    contenttypes.ContentType.app_label
 
     """
     parts = field_path.split('.')

@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from django.test import TransactionTestCase
+from tests.models import DemoModel
 from .utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
 
 
@@ -13,40 +14,41 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
     fixtures = ['adminactions', 'demoproject']
     urls = 'tests.urls'
 
-    _selected_rows = [1, 2, 3, 4]
+    _selected_rows = [0, 1]
 
     action_name = 'mass_update'
-    sender_model = User
+    sender_model = DemoModel
 
     def setUp(self):
         super(MassUpdateTest, self).setUp()
-        self._url = reverse('admin:auth_user_changelist')
+        self._url = reverse('admin:tests_demomodel_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
     def _run_action(self, steps=2, **kwargs):
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_massupdate_user']):
+        selected_rows = kwargs.pop('selected_rows', self._selected_rows)
+        with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_massupdate_demomodel']):
             res = self.app.get('/', user='user')
-            res = res.click('Users')
+            res = res.click('Demo models')
             if steps >= 1:
                 form = res.forms['changelist-form']
                 form['action'] = 'mass_update'
-                self._select_rows(form)
+                self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
                 for k, v in kwargs.items():
                     res.form[k] = v
-                res.form['chk_id_username'].checked = True
-                res.form['chk_id_last_name'].checked = True
-                res.form['func_id_username'] = 'upper'
-                res.form['func_id_last_name'] = 'set'
-                res.form['last_name'] = 'LASTNAME'
+                res.form['chk_id_char'].checked = True
+                res.form['func_id_char'] = 'upper'
+                res.form['chk_id_choices'].checked = True
+                res.form['func_id_choices'] = 'set'
+                res.form['choices'] = '1'
                 res = res.form.submit('apply')
         return res
 
     def test_no_permission(self):
-        with user_grant_permission(self.user, ['auth.change_user']):
+        with user_grant_permission(self.user, ['tests.change_demomodel']):
             res = self.app.get('/', user='user')
-            res = res.click('Users')
+            res = res.click('Demo models')
             form = res.forms['changelist-form']
             form['action'] = 'mass_update'
             form.set('_selected_action', True, 0)
@@ -55,23 +57,26 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
 
     def test_validate_on(self):
         self._run_action(**{'_validate': 1})
-        assert User.objects.filter(username='USER').exists()
-        assert not User.objects.filter(username='user').exists()
-        assert User.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
+        assert DemoModel.objects.filter(char='BBB').exists()
+        assert not DemoModel.objects.filter(char='bbb').exists()
 
     def test_validate_off(self):
         self._run_action(**{'_validate': 0})
         self.assertIn("Unable no mass update using operators without", self.app.cookies['messages'])
-        # assert "Unable no mass update using operators without" in res.body
 
     def test_clean_on(self):
         self._run_action(**{'_clean': 1})
-        assert User.objects.filter(username='USER').exists()
-        assert not User.objects.filter(username='user').exists()
-        assert User.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
+        assert DemoModel.objects.filter(char='BBB').exists()
+        assert not DemoModel.objects.filter(char='bbb').exists()
 
-    def test_unique_transaction(self):
-        self._run_action(**{'_unique_transaction': 1})
-        assert User.objects.filter(username='USER').exists()
-        assert not User.objects.filter(username='user').exists()
-        assert User.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
+    def test_messages(self):
+        with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_massupdate_demomodel']):
+            res = self._run_action(**{'_clean': 1}).follow()
+            messages = [m.message for m in list(res.context['messages'])]
+            self.assertTrue(messages)
+            self.assertEqual('Updated 2 records', messages[0])
+
+            res = self._run_action(selected_rows=[1]).follow()
+            messages = [m.message for m in list(res.context['messages'])]
+            self.assertTrue(messages)
+            self.assertEqual('Updated 1 records', messages[0])

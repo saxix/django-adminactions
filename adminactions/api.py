@@ -245,6 +245,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
 
     book = xlwt.Workbook(encoding="UTF-8", style_compression=2)
     sheet_name = config.pop('sheet_name')
+    use_display = config.get('use_display', False)
 
     sheet = book.add_sheet(sheet_name)
     style = xlwt.XFStyle()
@@ -271,7 +272,7 @@ def export_as_xls(queryset, fields=None, header=None, filename=None, options=Non
             try:
                 value = get_field_value(row,
                                         fieldname,
-                                        usedisplay=False,
+                                        usedisplay=use_display,
                                         raw_callable=False)
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))

@@ -114,10 +114,10 @@ class MassUpdateForm(GenericActionForm):
 
     _validate = forms.BooleanField(label='Validate',
                                    help_text="if checked use obj.save() instead of manager.update()")
-    _unique_transaction = forms.BooleanField(label='Unique transaction',
-                                             required=False,
-                                             help_text="If checked create one transaction for the whole update. "
-                                                       "If any record cannot be updated everything will be rolled-back")
+    # _unique_transaction = forms.BooleanField(label='Unique transaction',
+    #                                          required=False,
+    #                                          help_text="If checked create one transaction for the whole update. "
+    #                                                    "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
         super(MassUpdateForm, self).__init__(*args, **kwargs)
@@ -200,6 +200,34 @@ def mass_update(modeladmin, request, queryset):
         kwargs['required'] = False
         return field.formfield(**kwargs)
 
+    def _doit():
+        errors = {}
+        updated = 0
+        for record in queryset:
+            for field_name, value_or_func in form.cleaned_data.items():
+                if callable(value_or_func):
+                    old_value = getattr(record, field_name)
+                    setattr(record, field_name, value_or_func(old_value))
+                else:
+                    setattr(record, field_name, value_or_func)
+            if clean:
+                record.clean()
+            record.save()
+            updated += 1
+        if updated:
+            messages.info(request, _("Updated %s records") % updated)
+
+        if len(errors):
+            messages.error(request, "%s records not updated due errors" % len(errors))
+        adminaction_end.send(sender=modeladmin.model,
+                                 action='mass_update',
+                                 request=request,
+                                 queryset=queryset,
+                                 modeladmin=modeladmin,
+                                 form=form,
+                                 errors=errors,
+                                 updated=updated)
+
     opts = modeladmin.model._meta
     perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts))
     if not request.user.has_perm(perm):
@@ -242,40 +270,11 @@ def mass_update(modeladmin, request, queryset):
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.get_full_path())
 
-            need_transaction = form.cleaned_data.get('_unique_transaction', False)
+            # need_transaction = form.cleaned_data.get('_unique_transaction', False)
             validate = form.cleaned_data.get('_validate', False)
             clean = form.cleaned_data.get('_clean', False)
 
             if validate:
-
-                def _doit():
-                    errors = {}
-                    updated = 0
-                    for record in queryset:
-                        for field_name, value_or_func in form.cleaned_data.items():
-                            if callable(value_or_func):
-                                old_value = getattr(record, field_name)
-                                setattr(record, field_name, value_or_func(old_value))
-                            else:
-                                setattr(record, field_name, value_or_func)
-                            if clean:
-                                record.clean()
-                            record.save()
-                            updated += 1
-                    if updated:
-                        messages.info(request, _("Updated %s records") % updated)
-
-                    if len(errors):
-                        messages.error(request, "%s records not updated due errors" % len(errors))
-                    adminaction_end.send(sender=modeladmin.model,
-                                             action='mass_update',
-                                             request=request,
-                                             queryset=queryset,
-                                             modeladmin=modeladmin,
-                                             form=form,
-                                             errors=errors,
-                                             updated=updated)
-
                 with compat.atomic():
                     _doit()
 
@@ -288,7 +287,8 @@ def mass_update(modeladmin, request, queryset):
                     elif callable(value):
                         messages.error(request, "Unable no mass update using operators without 'validate'")
                         return HttpResponseRedirect(request.get_full_path())
-                    elif field_name not in ['_selected_action', '_validate', 'select_across', 'action']:
+                    elif field_name not in ['_selected_action', '_validate', 'select_across', 'action',
+                                            '_unique_transaction','_clean']:
                         values[field_name] = value
                 queryset.update(**values)
 

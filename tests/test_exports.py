@@ -258,3 +258,75 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self.assertEquals(sheet.cell_value(1, 2), u'sax')
             self.assertEquals(sheet.cell_value(2, 2), u'user')
             # self.assertEquals(sheet.cell_value(3, 2), u'user_00')
+
+    def test_use_display_ok(self):
+        with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_export_demomodel']):
+            res = self.app.get('/', user='user')
+            res = res.click('Demo models')
+            form = res.forms['changelist-form']
+            form['action'] = self.action_name
+            self._select_rows(form)
+            res = form.submit()
+            res.form['header'] = 1
+            res.form['use_display'] = 1
+            res.form['columns'] = ['char', 'text', 'bigint', 'choices'
+                                                             '']
+            res = res.form.submit('apply')
+            io = StringIO.StringIO(res.body)
+
+            io.seek(0)
+            w = xlrd.open_workbook(file_contents=io.read())
+            sheet = w.sheet_by_index(0)
+            self.assertEquals(sheet.cell_value(0, 1), u'Chäř')
+            self.assertEquals(sheet.cell_value(0, 2), u'bigint')
+            self.assertEquals(sheet.cell_value(0, 3), u'text')
+            self.assertEquals(sheet.cell_value(0, 4), u'choices')
+            self.assertEquals(sheet.cell_value(1, 1), u'Pizzä ïs Gööd')
+            self.assertEquals(sheet.cell_value(1, 2), 333333333.0)
+            self.assertEquals(sheet.cell_value(1, 3), u'lorem ipsum')
+            self.assertEquals(sheet.cell_value(1, 4), u'Choice 2')
+
+    def test_use_display_ko(self):
+        with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_export_demomodel']):
+            res = self.app.get('/', user='user')
+            res = res.click('Demo models')
+            form = res.forms['changelist-form']
+            form['action'] = self.action_name
+            self._select_rows(form)
+            res = form.submit()
+            res.form['header'] = 1
+            res.form['columns'] = ['char', 'text', 'bigint', 'choices'
+                                                             '']
+            res = res.form.submit('apply')
+            io = StringIO.StringIO(res.body)
+
+            io.seek(0)
+            w = xlrd.open_workbook(file_contents=io.read())
+            sheet = w.sheet_by_index(0)
+            self.assertEquals(sheet.cell_value(0, 1), u'Chäř')
+            self.assertEquals(sheet.cell_value(0, 2), u'bigint')
+            self.assertEquals(sheet.cell_value(0, 3), u'text')
+            self.assertEquals(sheet.cell_value(0, 4), u'choices')
+            self.assertEquals(sheet.cell_value(1, 1), u'Pizzä ïs Gööd')
+            self.assertEquals(sheet.cell_value(1, 2), 333333333.0)
+            self.assertEquals(sheet.cell_value(1, 3), u'lorem ipsum')
+            self.assertEquals(sheet.cell_value(1, 4), 2.0)
+
+    def test_unicode(self):
+       with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_export_demomodel']):
+            res = self.app.get('/', user='user')
+            res = res.click('Demo models')
+            form = res.forms['changelist-form']
+            form['action'] = self.action_name
+            self._select_rows(form)
+            res = form.submit()
+            res.form['header'] = 1
+            res.form['columns'] = ['char',]
+            res = res.form.submit('apply')
+            io = StringIO.StringIO(res.body)
+
+            io.seek(0)
+            w = xlrd.open_workbook(file_contents=io.read())
+            sheet = w.sheet_by_index(0)
+            self.assertEquals(sheet.cell_value(0, 1), u'Chäř')
+            self.assertEquals(sheet.cell_value(1, 1), u'Pizzä ïs Gööd')
