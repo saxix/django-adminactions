@@ -25,13 +25,14 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
     def _run_action(self, steps=2, **kwargs):
+        selected_rows = kwargs.pop('selected_rows', self._selected_rows)
         with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_massupdate_demomodel']):
             res = self.app.get('/', user='user')
             res = res.click('Demo models')
             if steps >= 1:
                 form = res.forms['changelist-form']
                 form['action'] = 'mass_update'
-                self._select_rows(form)
+                self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
                 for k, v in kwargs.items():
@@ -58,15 +59,24 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
         self._run_action(**{'_validate': 1})
         assert DemoModel.objects.filter(char='BBB').exists()
         assert not DemoModel.objects.filter(char='bbb').exists()
-        # assert DemoModel.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
 
     def test_validate_off(self):
         self._run_action(**{'_validate': 0})
         self.assertIn("Unable no mass update using operators without", self.app.cookies['messages'])
-        # assert "Unable no mass update using operators without" in res.body
 
     def test_clean_on(self):
         self._run_action(**{'_clean': 1})
         assert DemoModel.objects.filter(char='BBB').exists()
         assert not DemoModel.objects.filter(char='bbb').exists()
-        # assert DemoModel.objects.filter(last_name='LASTNAME').count() == len(self._selected_rows)
+
+    def test_messages(self):
+        with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_massupdate_demomodel']):
+            res = self._run_action(**{'_clean': 1}).follow()
+            messages = [m.message for m in list(res.context['messages'])]
+            self.assertTrue(messages)
+            self.assertEqual('Updated 2 records', messages[0])
+
+            res = self._run_action(selected_rows=[1]).follow()
+            messages = [m.message for m in list(res.context['messages'])]
+            self.assertTrue(messages)
+            self.assertEqual('Updated 1 records', messages[0])
