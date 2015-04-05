@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from django.http import HttpResponse
 import unicodecsv as csv
 import unittest
@@ -25,7 +26,7 @@ class TestExportQuerySetAsCsv(TestCase):
             export_as_csv(queryset=qs, header=True, out=mem)
         mem.seek(0)
         csv_reader = csv.reader(mem)
-        self.assertEqual(csv_reader.next(), [u'id;"name";"content_type";"codename"'])
+        self.assertEqual(next(csv_reader), [u'id;"name";"content_type";"codename"'])
 
     def test_queryset_values(self):
         fields = ['codename', 'content_type__app_label']

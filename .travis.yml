@@ -11,6 +11,7 @@ env:
 
 install:
   - make install-deps
+  - pip install python-coveralls coveralls
 
 script:
   - make init-db ci

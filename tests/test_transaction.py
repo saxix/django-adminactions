@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from adminactions.exceptions import ActionInterrupted
 import pytest
 import mock
@@ -8,7 +9,7 @@ from django.contrib.auth.models import Group, User
 from django_dynamic_fixture import G
 from adminactions import compat
 from adminactions.signals import adminaction_end
-from .common import administrator
+from demo.common import administrator
 
 @pytest.fixture(scope='function')
 def users():

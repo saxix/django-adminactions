@@ -1,9 +1,11 @@
+from __future__ import absolute_import, unicode_literals
 from django.db import models
 from django.db.models import Model
 from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.db import connections, router
 from django.utils.encoding import smart_str, smart_text
+import six
 
 
 def clone_instance(instance, fieldnames=None):
@@ -79,7 +81,7 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     perm
 
     """
-    if isinstance(field, basestring):
+    if isinstance(field, six.string_types):
         fieldname = field
     elif isinstance(field, models.Field):
         fieldname = field.name
@@ -190,7 +192,7 @@ def get_verbose_name(model_or_queryset, field):
         raise ValueError('`get_verbose_name` expects Manager, Queryset or Model as first parameter (got %s)' % type(
             model_or_queryset))
 
-    if isinstance(field, basestring):
+    if isinstance(field, six.string_types):
         field = get_field_by_path(model, field)
     elif isinstance(field, models.Field):
         field = field
@@ -222,7 +224,7 @@ def flatten(iterable):
 
     result = list()
     for el in iterable:
-        if hasattr(el, "__iter__") and not isinstance(el, basestring):
+        if hasattr(el, "__iter__") and not isinstance(el, six.string_types):
             result.extend(flatten(el))
         else:
             result.append(el)

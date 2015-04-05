@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
@@ -10,10 +11,11 @@ from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from adminactions.api import merge, ALL_FIELDS
 
-from .common import BaseTestCaseMixin
-from .utils import SelectRowsMixin
-from .utils import user_grant_permission
-from .models import UserDetail
+from demo.common import BaseTestCaseMixin
+from demo.utils import SelectRowsMixin
+from demo.utils import user_grant_permission
+from demo.models import UserDetail
+from six.moves import range
 
 PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'tests.UserProfile')
 
@@ -138,7 +140,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
 
 class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions.json', 'demoproject.json']
-    urls = 'tests.urls'
+    urls = 'demo.urls'
     sender_model = User
     action_name = 'merge'
     _selected_rows = [1, 2]
@@ -151,7 +153,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
     def _run_action(self, steps=3, page_start=None):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
             if isinstance(steps, int):
-                steps = range(1, steps + 1)
+                steps = list(range(1, steps + 1))
                 res = self.app.get('/', user='user')
                 res = res.click('Users')
             else:

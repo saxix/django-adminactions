@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from django.forms import widgets
 from django.forms.util import flatatt
 from django.template import Library
@@ -5,6 +6,7 @@ from django.utils.encoding import force_unicode
 from django.utils.html import escape, conditional_escape
 from django.utils.safestring import mark_safe
 from adminactions.mass_update import OPERATIONS
+from six.moves import map
 
 
 register = Library()
@@ -76,7 +78,7 @@ def field_function(model, form_field):
     options_attrs = {}
     choices = []
     classes = {True: 'param', False: 'noparam'}
-    for label, (__, param, enabler, __) in OPERATIONS.get_for_field(model_object).items():
+    for label, (__, param, enabler, __) in list(OPERATIONS.get_for_field(model_object).items()):
         options_attrs[label] = {'class': classes[param], 'label': label}
         choices.append((label, label))
     return SelectOptionsAttribute(attrs, choices, options_attrs).render("func_id_%s" % form_field.name, "")

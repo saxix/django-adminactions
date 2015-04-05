@@ -1,23 +1,16 @@
 VERSION=2.0.0
 BUILDDIR=${PWD}/~build
 BINDIR=${PWD}/~build/bin
-PYTHONPATH := ${PWD}/demo/:${PWD}
-
-DJANGO_14='django>=1.4,<1.5'
-DJANGO_15='django>=1.5,<1.6'
-DJANGO_16='django>=1.6,<1.7'
-DJANGO_17='https://www.djangoproject.com/download/1.7c2/tarball/'
-DJANGO_DEV=git+git://github.com/django/django.git
+PYTHONPATH:=${PWD}/demo/:${PWD}
+DJANGO?='1.7.x'
 
 mkbuilddir:
 	mkdir -p ${BUILDDIR} ${BINDIR}
 
 
 install-deps:
-	pip install -q \
-	        -r adminactions/requirements/install.pip \
-	        -r adminactions/requirements/testing.pip \
-	        python-coveralls
+	pip install -e .
+	pip install -r adminactions/requirements/testing.pip
 
 
 locale:
@@ -44,15 +37,12 @@ coverage: mkbuilddir
 
 
 ci: init-db install-deps
-	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install ${DJANGO_14}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install ${DJANGO_15}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install ${DJANGO_16}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install ${DJANGO_17}; fi"
-	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install ${DJANGO_DEV}; fi"
-
-	@pip install coverage
-	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
-	@echo "Database:" ${DBENGINE}
+	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install django>=1.4,<1.5; fi"
+	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install django>=1.5,<1.6}; fi"
+	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install django>=1.6,<1.7}; fi"
+	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install django>=1.7,<1.8}; fi"
+	@sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install django>=1.8,<1.9}; fi"
+	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install git+git://github.com/django/django.git; fi"
 
 	$(MAKE) coverage
 
@@ -64,8 +54,18 @@ demo:
 
 clean:
 	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST
-	find . -name __pycache__ -o -name "*.py?" -o -name "*.orig" -prune | xargs rm -rf
+	find . -name __pycache__ | xargs rm -rf
+	find . -name "*.py?" -o -name "*.orig" -prune | xargs rm -rf
 	find adminactions/locale -name django.mo | xargs rm -f
+
+fullclean:
+	rm -fr .tox .cache
+	rm -fr *.sqlite
+	$(MAKE) clean
+	mysql -e 'DROP DATABASE IF EXISTS adminactions;';
+	psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi
+	mysql -e 'DROP DATABASE IF EXISTS test_adminactions;';
+	psql -c 'DROP DATABASE IF EXISTS test_adminactions;' -U postgres; fi
 
 
 clonedigger: mkbuilddir

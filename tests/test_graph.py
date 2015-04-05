@@ -1,13 +1,15 @@
+from __future__ import absolute_import
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTest
-from .utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
+from demo.utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
+from six.moves import range
 
 
 class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
     fixtures = ['adminactions', 'demoproject']
-    urls = 'tests.urls'
+    urls = 'demo.urls'
     sender_model = User
     action_name = 'graph_queryset'
     _selected_rows = [0, 1]

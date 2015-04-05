@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 # pylint: disable-msg= W0611
 from .merge import merge
 from .mass_update import mass_update

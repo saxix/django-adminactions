@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 import StringIO
 import xlrd
 import csv
@@ -7,7 +7,8 @@ import mock
 from django_webtest import WebTest
 from django_dynamic_fixture import G
 from django.contrib.auth.models import User
-from .utils import user_grant_permission, admin_register, CheckSignalsMixin, SelectRowsMixin
+from demo.utils import (user_grant_permission, admin_register,
+                        CheckSignalsMixin, SelectRowsMixin)
 
 __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportDeleteTreeTest',
            'ExportAsXlsTest']
@@ -15,7 +16,7 @@ __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest', 'ExportD
 
 class ExportMixin(object):
     fixtures = ['adminactions', 'demoproject']
-    urls = 'tests.urls'
+    urls = 'demo.urls'
 
     def setUp(self):
         super(ExportMixin, self).setUp()
@@ -260,7 +261,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             # self.assertEquals(sheet.cell_value(3, 2), u'user_00')
 
     def test_use_display_ok(self):
-        with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_export_demomodel']):
+        with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_export_demomodel']):
             res = self.app.get('/', user='user')
             res = res.click('Demo models')
             form = res.forms['changelist-form']
@@ -287,7 +288,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self.assertEquals(sheet.cell_value(1, 4), u'Choice 2')
 
     def test_use_display_ko(self):
-        with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_export_demomodel']):
+        with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_export_demomodel']):
             res = self.app.get('/', user='user')
             res = res.click('Demo models')
             form = res.forms['changelist-form']
@@ -313,7 +314,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self.assertEquals(sheet.cell_value(1, 4), 2.0)
 
     def test_unicode(self):
-       with user_grant_permission(self.user, ['tests.change_demomodel', 'tests.adminactions_export_demomodel']):
+       with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_export_demomodel']):
             res = self.app.get('/', user='user')
             res = res.click('Demo models')
             form = res.forms['changelist-form']

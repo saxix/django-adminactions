@@ -16,7 +16,7 @@ browsers = {
 
 
 @pytest.fixture(scope='session',
-                params=browsers.keys())
+                params=list(browsers.keys()))
 def driver(request):
     if 'DISPLAY' not in os.environ:
         pytest.skip('Test requires display server (export DISPLAY)')

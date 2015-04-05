@@ -4,6 +4,7 @@ Created on 28/ott/2009
 
 @author: sax
 '''
+from __future__ import absolute_import, unicode_literals
 from django.db.models.aggregates import Count
 from django.db.models.fields.related import ForeignKey
 from django.forms.fields import CharField, BooleanField, ChoiceField
@@ -18,6 +19,7 @@ from django.contrib.admin import helpers
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from six.moves import zip
 
 
 def graph_form_factory(model):
@@ -103,7 +105,7 @@ def graph_queryset(modeladmin, request, queryset):
                                       }
                                 }""" % (json.dumps(data_labels), json.dumps(data_labels))
                 elif graph_type == 'PieChart':
-                    table = [zip(data_labels, data)]
+                    table = [list(zip(data_labels, data))]
                     extra = """{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,
                                                 rendererOptions: {fill: true,
                                                                     showDataLabels: true,
