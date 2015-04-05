@@ -1,11 +1,10 @@
 from __future__ import absolute_import, unicode_literals
+import six
 from django.db import models
-from django.db.models import Model
-from django.db.models.fields.related import ForeignKey
+# from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.db import connections, router
-from django.utils.encoding import smart_str, smart_text
-import six
+from django.utils.encoding import smart_text
 
 
 def clone_instance(instance, fieldnames=None):
@@ -94,14 +93,17 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
         value = getattr_or_item(obj, fieldname)
 
     if not raw_callable and callable(value):
-        return value()
+        value = value()
 
     if isinstance(value, models.Model):
         return smart_text(value)
+
     # if isinstance(obj, Model):
     #     field = get_field_by_path(obj, fieldname)
     #     if isinstance(field, ForeignKey):
     #         return unicode(value)
+    if isinstance(value, six.string_types):
+        value = smart_text(value)
 
     return value
 

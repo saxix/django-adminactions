@@ -1,12 +1,16 @@
 from __future__ import absolute_import, unicode_literals
+import six
 import re
 import json
 import datetime
-import string
-from collections import defaultdict
 
+if six.PY2:
+    import string
+elif six.PY3:
+    string = str
+
+from collections import defaultdict
 from django import forms
-from django.db import IntegrityError, transaction
 from django.db.models import fields as df
 from django.forms import fields as ff
 from django.forms.models import modelform_factory, ModelMultipleChoiceField, construct_instance, InlineForeignKeyField
@@ -16,7 +20,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.encoding import force_unicode
+from django.utils.encoding import smart_text
 from django.utils.functional import curry
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
@@ -93,8 +97,8 @@ OPERATIONS = OperationManager({
     df.CharField: [('upper', (string.upper, False, True, "convert to uppercase")),
                    ('lower', (string.lower, False, True, "convert to lowercase")),
                    ('capitalize', (string.capitalize, False, True, "capitalize first character")),
-                   ('capwords', (string.capwords, False, True, "capitalize each word")),
-                   ('swapcase', (string.swapcase, False, True, "")),
+                   # ('capwords', (string.capwords, False, True, "capitalize each word")),
+                   # ('swapcase', (string.swapcase, False, True, "")),
                    ('trim', (string.strip, False, True, "leading and trailing whitespace"))],
     df.IntegerField: [('add percent', (add_percent, True, True, "add <arg> percent to existing value")),
                       ('sub percent', (sub_percent, True, True, "")),
@@ -116,8 +120,8 @@ class MassUpdateForm(GenericActionForm):
     _validate = forms.BooleanField(label='Validate',
                                    help_text="if checked use obj.save() instead of manager.update()")
     # _unique_transaction = forms.BooleanField(label='Unique transaction',
-    #                                          required=False,
-    #                                          help_text="If checked create one transaction for the whole update. "
+    # required=False,
+    # help_text="If checked create one transaction for the whole update. "
     #                                                    "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
@@ -191,7 +195,7 @@ class MassUpdateForm(GenericActionForm):
         return bool(self.data.get('_clean', 0))
 
 
-def mass_update(modeladmin, request, queryset):
+def mass_update(modeladmin, request, queryset):  # noqa
     """
         mass update queryset
     """
@@ -221,13 +225,13 @@ def mass_update(modeladmin, request, queryset):
         if len(errors):
             messages.error(request, "%s records not updated due errors" % len(errors))
         adminaction_end.send(sender=modeladmin.model,
-                                 action='mass_update',
-                                 request=request,
-                                 queryset=queryset,
-                                 modeladmin=modeladmin,
-                                 form=form,
-                                 errors=errors,
-                                 updated=updated)
+                             action='mass_update',
+                             request=request,
+                             queryset=queryset,
+                             modeladmin=modeladmin,
+                             form=form,
+                             errors=errors,
+                             updated=updated)
 
     opts = modeladmin.model._meta
     perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts))
@@ -289,7 +293,7 @@ def mass_update(modeladmin, request, queryset):
                         messages.error(request, "Unable no mass update using operators without 'validate'")
                         return HttpResponseRedirect(request.get_full_path())
                     elif field_name not in ['_selected_action', '_validate', 'select_across', 'action',
-                                            '_unique_transaction','_clean']:
+                                            '_unique_transaction', '_clean']:
                         values[field_name] = value
                 queryset.update(**values)
 
@@ -328,7 +332,7 @@ def mass_update(modeladmin, request, queryset):
     tpl = 'adminactions/mass_update.html'
     ctx = {'adminform': adminForm,
            'form': form,
-           'title': u"Mass update %s" % force_unicode(modeladmin.opts.verbose_name_plural),
+           'title': u"Mass update %s" % smart_text(modeladmin.opts.verbose_name_plural),
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),
            'change': True,
@@ -341,7 +345,7 @@ def mass_update(modeladmin, request, queryset):
            'opts': modeladmin.model._meta,
            'app_label': modeladmin.model._meta.app_label,
            # 'action': 'mass_update',
-           #           'select_across': request.POST.get('select_across')=='1',
+           # 'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
 

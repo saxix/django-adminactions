@@ -11,6 +11,13 @@ mkbuilddir:
 install-deps:
 	pip install -e .
 	pip install -r adminactions/requirements/testing.pip
+	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install 'django>=1.4,<1.5'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install 'django>=1.5,<1.6'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install 'django>=1.6,<1.7'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install 'django>=1.7,<1.8'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install 'django>=1.8,<1.9'; fi"
+	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install git+git://github.com/django/django.git; fi"
+
 
 
 locale:
@@ -37,13 +44,6 @@ coverage: mkbuilddir
 
 
 ci: init-db install-deps
-	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install django>=1.4,<1.5; fi"
-	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install django>=1.5,<1.6}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install django>=1.6,<1.7}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install django>=1.7,<1.8}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install django>=1.8,<1.9}; fi"
-	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install git+git://github.com/django/django.git; fi"
-
 	$(MAKE) coverage
 
 demo:
@@ -57,6 +57,7 @@ clean:
 	find . -name __pycache__ | xargs rm -rf
 	find . -name "*.py?" -o -name "*.orig" -prune | xargs rm -rf
 	find adminactions/locale -name django.mo | xargs rm -f
+
 
 fullclean:
 	rm -fr .tox .cache

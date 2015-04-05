@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-import io
 import six
 import pytz
 import xlwt
@@ -11,19 +10,16 @@ from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from django.utils import dateformat
-from django.utils.encoding import smart_str, force_str, force_text
+from django.utils.encoding import smart_str, force_text, smart_text
 from adminactions import compat
 from adminactions.templatetags.actions import get_field_value
-from adminactions.utils import (clone_instance, get_field_by_path, get_copy_of_instance,
-                                getattr_or_item)  # NOQA
+from adminactions.utils import (clone_instance, get_field_by_path,  # noqa
+                                get_copy_of_instance, getattr_or_item)  # noqa
 
 if six.PY2:
     import unicodecsv as csv
-    from six import StringIO
 else:
     import csv
-    from io import BytesIO as StringIO
-
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -40,7 +36,7 @@ escapechars = " \\"
 ALL_FIELDS = -999
 
 
-def merge(master, other, fields=None, commit=False, m2m=None, related=None):
+def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # noqa
     """
         Merge 'other' into master.
 
@@ -118,7 +114,8 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):
     return result
 
 
-def export_as_csv(queryset, fields=None, header=None, filename=None, options=None, out=None):
+def export_as_csv(queryset, fields=None, header=None,  # noqa
+                  filename=None, options=None, out=None):
     """
         Exports a queryset as csv from a queryset with the given fields.
 
@@ -135,7 +132,7 @@ def export_as_csv(queryset, fields=None, header=None, filename=None, options=Non
         if filename is None:
             filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
+        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
     else:
         response = out
 
@@ -204,7 +201,8 @@ xls_options_default = {'date_format': 'd/m/Y',
                        'CurrencyColumn': '"$"#,##0.00);[Red]("$"#,##0.00)', }
 
 
-def export_as_xls2(queryset, fields=None, header=None, filename=None, options=None, out=None):
+def export_as_xls2(queryset, fields=None, header=None,  # noqa
+                   filename=None, options=None, out=None):
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """
@@ -238,7 +236,7 @@ def export_as_xls2(queryset, fields=None, header=None, filename=None, options=No
         if filename is None:
             filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
+        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
     else:
         response = out
 
@@ -249,7 +247,7 @@ def export_as_xls2(queryset, fields=None, header=None, filename=None, options=No
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields]
 
-    book = xlwt.Workbook(encoding="UTF-8", style_compression=2)
+    book = xlwt.Workbook(encoding="utf-8", style_compression=2)
     sheet_name = config.pop('sheet_name')
     use_display = config.get('use_display', False)
 
@@ -257,10 +255,10 @@ def export_as_xls2(queryset, fields=None, header=None, filename=None, options=No
     style = xlwt.XFStyle()
     row = 0
     heading_xf = xlwt.easyxf('font:height 200; font: bold on; align: wrap on, vert centre, horiz center')
-    sheet.write(row, 0, '#', style)
+    sheet.write(row, 0, u'#', style)
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [six.text_type(f.verbose_name) for f in queryset.model._meta.fields if f.name in fields]
+            header = [force_text(f.verbose_name) for f in queryset.model._meta.fields if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, fieldname, heading_xf)
@@ -292,11 +290,13 @@ def export_as_xls2(queryset, fields=None, header=None, filename=None, options=No
                     except ValueError:
                         # astimezone() cannot be applied to a naive datetime
                         value = dateformat.format(value, config['datetime_format'])
+                if isinstance(value, (list, tuple)):
+                    value = "".join(value)
 
                 sheet.write(rownum + 1, idx + 1, value, style)
             except Exception as e:
                 # logger.warning("TODO refine this exception: %s" % e)
-                sheet.write(rownum + 1, idx + 1, str(e), style)
+                sheet.write(rownum + 1, idx + 1, smart_str(e), style)
 
     book.save(response)
     return response
@@ -321,7 +321,8 @@ xlsxwriter_options = {'date_format': 'd/m/Y',
                       'CurrencyColumn': '"$"#,##0.00);[Red]("$"#,##0.00)', }
 
 
-def export_as_xls3(queryset, fields=None, header=None, filename=None, options=None, out=None):
+def export_as_xls3(queryset, fields=None, header=None,  # noqa
+                   filename=None, options=None, out=None):
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """
@@ -356,7 +357,7 @@ def export_as_xls3(queryset, fields=None, header=None, filename=None, options=No
     http_response = out is None
     if out is None:
         # if filename is None:
-        #     filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+        # filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         # response = HttpResponse(content_type='application/vnd.ms-excel')
         # response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
         # out = io.BytesIO()
@@ -364,7 +365,8 @@ def export_as_xls3(queryset, fields=None, header=None, filename=None, options=No
         if six.PY2:
             out = six.StringIO()
         elif six.PY3:
-            out = io.BytesIO()
+            out = six.StringIO()
+            # out = io.BytesIO()
         else:
             raise EnvironmentError('Python version not supported')
 
@@ -375,12 +377,11 @@ def export_as_xls3(queryset, fields=None, header=None, filename=None, options=No
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields]
 
-
     book = xlsxwriter.Workbook(out, {'in_memory': True})
     sheet_name = config.pop('sheet_name')
     use_display = config.get('use_display', False)
     sheet = book.add_worksheet(sheet_name)
-
+    book.close()
     formats = _get_qs_formats(queryset)
 
     row = 0
@@ -405,8 +406,8 @@ def export_as_xls3(queryset, fields=None, header=None, filename=None, options=No
                                         raw_callable=False)
                 if callable(fmt):
                     value = fmt(value)
-                if isinstance(value, (list,tuple)):
-                    value = "".join(value)
+                if isinstance(value, (list, tuple)):
+                    value = smart_text(u"".join(value))
 
                 if isinstance(value, datetime.datetime):
                     try:
@@ -415,11 +416,12 @@ def export_as_xls3(queryset, fields=None, header=None, filename=None, options=No
                         value = dateformat.format(value, config['datetime_format'])
 
                 if isinstance(value, six.binary_type):
-                    value = force_str(value)
+                    value = smart_text(value)
 
-                sheet.write(rownum + 1, idx + 1, value, fmt)
+                    sheet.write(rownum + 1, idx + 1, smart_text(value), fmt)
             except Exception as e:
-                sheet.write(rownum + 1, idx + 1, smart_str(e), fmt)
+                raise
+                sheet.write(rownum + 1, idx + 1, smart_text(e), fmt)
 
     book.close()
     out.seek(0)
@@ -428,10 +430,11 @@ def export_as_xls3(queryset, fields=None, header=None, filename=None, options=No
             filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = HttpResponse(out.read(),
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-                                # content_type='application/vnd.ms-excel')
+        # content_type='application/vnd.ms-excel')
         # response['Content-Disposition'] = six.b('attachment;filename="%s"') % six.b(filename.encode('us-ascii', 'replace'))
         response['Content-Disposition'] = six.b('attachment;filename="%s"' % filename)
         return response
     return out
 
-export_as_xls=export_as_xls3
+
+export_as_xls = export_as_xls2

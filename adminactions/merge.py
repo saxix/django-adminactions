@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from datetime import datetime
-from django.utils.encoding import force_unicode
+from django.utils.encoding import smart_text
 from adminactions import api
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -17,7 +17,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
-from adminactions.utils import clone_instance, model_supports_transactions
+from adminactions.utils import clone_instance
 import adminactions.compat as transaction
 
 
@@ -66,7 +66,7 @@ class MergeForm(GenericActionForm):
         css = {'all': ['adminactions/css/adminactions.min.css']}
 
 
-def merge(modeladmin, request, queryset):
+def merge(modeladmin, request, queryset):  # noqa
     """
     Merge two model instances. Move all foreign keys.
 
@@ -170,7 +170,7 @@ def merge(modeladmin, request, queryset):
     ctx.update({'adminform': adminForm,
                 'formset': formset,
                 'media': mark_safe(media),
-                'title': u"Merge %s" % force_unicode(modeladmin.opts.verbose_name_plural),
+                'title': u"Merge %s" % smart_text(modeladmin.opts.verbose_name_plural),
                 'master': master,
                 'other': other})
     return render_to_response(tpl, RequestContext(request, ctx))

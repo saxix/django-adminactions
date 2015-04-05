@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import six
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
@@ -36,7 +37,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
                 self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
-                for k, v in list(kwargs.items()):
+                for k, v in kwargs.items():
                     res.form[k] = v
                 res.form['chk_id_char'].checked = True
                 res.form['func_id_char'] = 'upper'
@@ -54,7 +55,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
             form['action'] = 'mass_update'
             form.set('_selected_action', True, 0)
             res = form.submit().follow()
-            assert 'Sorry you do not have rights to execute this action' in res.body
+            assert six.b('Sorry you do not have rights to execute this action') in res.body
 
     def test_validate_on(self):
         self._run_action(**{'_validate': 1})

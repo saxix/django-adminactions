@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from django.forms import widgets
 from django.forms.util import flatatt
 from django.template import Library
-from django.utils.encoding import force_unicode
+from django.utils.encoding import smart_text
 from django.utils.html import escape, conditional_escape
 from django.utils.safestring import mark_safe
 from adminactions.mass_update import OPERATIONS
@@ -34,7 +34,7 @@ def link_fields_values(d, k):
     for v in d.get(k, []):
         if v == '':  # ignore empty
             continue
-        ret.append('<a href="#" class="fastfieldvalue %s value">%s</a>' % (k, force_unicode(v)))
+        ret.append('<a href="#" class="fastfieldvalue %s value">%s</a>' % (k, smart_text(v)))
 
     return mark_safe(", ".join(ret))
 
@@ -56,7 +56,7 @@ class SelectOptionsAttribute(widgets.Select):
         super(SelectOptionsAttribute, self).__init__(attrs, choices)
 
     def render_option(self, selected_choices, option_value, option_label):
-        option_value = force_unicode(option_value)
+        option_value = smart_text(option_value)
         attrs = flatatt(self.options_attributes.get(option_value, {}))
         if option_value in selected_choices:
             selected_html = u' selected="selected"'
@@ -68,7 +68,7 @@ class SelectOptionsAttribute(widgets.Select):
         return u'<option%s value="%s"%s>%s</option>' % (
             attrs,
             escape(option_value), selected_html,
-            conditional_escape(force_unicode(option_label)))
+            conditional_escape(smart_text(option_label)))
 
 
 @register.simple_tag

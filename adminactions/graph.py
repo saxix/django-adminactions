@@ -14,7 +14,7 @@ import json
 from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.encoding import force_unicode
+from django.utils.encoding import smart_text
 from django.contrib.admin import helpers
 
 from adminactions.exceptions import ActionInterrupted
@@ -41,7 +41,7 @@ def graph_form_factory(model):
     return DeclarativeFieldsMetaclass(str(class_name), (Form,), attrs)
 
 
-def graph_queryset(modeladmin, request, queryset):
+def graph_queryset(modeladmin, request, queryset):  # noqa
     MForm = graph_form_factory(modeladmin.model)
 
     graph_type = table = None
@@ -85,7 +85,7 @@ def graph_queryset(modeladmin, request, queryset):
                 elif hasattr(modeladmin.model, 'get_%s_display' % field.name):
                     data_labels = []
                     for value, cnt in cc:
-                        data_labels.append(force_unicode(dict(field.flatchoices).get(value, value), strings_only=True))
+                        data_labels.append(smart_text(dict(field.flatchoices).get(value, value), strings_only=True))
                 else:
                     data_labels = [str(l) for l, v in cc]
                 data = [v for l, v in cc]
@@ -138,7 +138,7 @@ def graph_queryset(modeladmin, request, queryset):
     ctx = {'adminform': adminForm,
            'action': 'graph_queryset',
            'opts': modeladmin.model._meta,
-           'title': u"Graph %s" % force_unicode(modeladmin.opts.verbose_name_plural),
+           'title': u"Graph %s" % smart_text(modeladmin.opts.verbose_name_plural),
            'app_label': queryset.model._meta.app_label,
            'media': media,
            'extra': extra,

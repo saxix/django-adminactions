@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from django.conf import settings
-from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import User, Group, Permission
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
+import six
 from adminactions.api import merge, ALL_FIELDS
 
 from demo.common import BaseTestCaseMixin
@@ -22,6 +21,7 @@ PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'tests.UserProfile')
 
 def get_profile(user):
     return UserDetail.objects.get_or_create(user=user, note="")[0]
+
 
 class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
     def setUp(self):
@@ -185,7 +185,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             form['action'] = 'merge'
             self._select_rows(form)
             res = form.submit().follow()
-            assert 'Sorry you do not have rights to execute this action' in res.body
+            assert six.b('Sorry you do not have rights to execute this action') in res.body
 
     def test_success(self):
         res = self._run_action(1)

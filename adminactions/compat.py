@@ -6,8 +6,7 @@ import django.db.transaction as t
 
 version = django.VERSION[:2]
 
-
-if version == (1, 5) or version == (1, 4):
+if version in ((1, 5), (1, 4)):  # noqa
 
     @contextmanager
     def nocommit(using=None):
@@ -16,7 +15,6 @@ if version == (1, 5) or version == (1, 4):
         yield
         t.rollback()
         t.leave_transaction_management(using=using)
-
 
     class atomic(object):
         def __init__(self, using=None):
@@ -42,7 +40,7 @@ if version == (1, 5) or version == (1, 4):
                 t.leave_transaction_management(using=self.using)
 
 
-elif version in [(1,6), (1,7), (1,8)]:
+elif version in [(1, 6), (1, 7), (1, 8)]:
     from django.db.transaction import atomic  # noqa
 
     class NoCommit(t.Atomic):
