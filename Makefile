@@ -39,12 +39,11 @@ test:
 	py.test
 
 
-coverage: mkbuilddir
-	PYTHONPATH:=${PWD}/tests/:${PWD} py.test tests --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc -vvv
+coverage: mkbuilddir install-deps init-db
+	echo ${PYTHONPATH};
+	PYTHONPATH=${PWD}/tests/:${PWD} py.test tests -v --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc -q
 
 
-ci: init-db install-deps
-	$(MAKE) coverage
 
 demo:
 	django-admin.py syncdb --settings=tests.settings --noinput

@@ -42,7 +42,13 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        'Framework :: Django :: 1.4',
+        'Framework :: Django :: 1.5',
+        'Framework :: Django :: 1.6',
+        'Framework :: Django :: 1.7',
+        'Framework :: Django :: 1.8',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
         'Intended Audience :: Developers'],
     long_description=open('README.rst').read()
 )
