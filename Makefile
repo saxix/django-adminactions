@@ -1,7 +1,7 @@
 VERSION=2.0.0
 BUILDDIR=${PWD}/~build
 BINDIR=${PWD}/~build/bin
-PYTHONPATH:=${PWD}/demo/:${PWD}
+PYTHONPATH:=${PWD}/tests/:${PWD}
 DJANGO?='1.7.x'
 
 mkbuilddir:
@@ -40,7 +40,7 @@ test:
 
 
 coverage: mkbuilddir
-	py.test tests --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc -vvv
+	PYTHONPATH:=${PWD}/tests/:${PWD} py.test tests --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc -vvv
 
 
 ci: init-db install-deps
