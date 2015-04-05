@@ -26,7 +26,7 @@ install:
 
 
 script:
-  - make coverage
+  - make ci
 
 before_success:
   - coverage erase
