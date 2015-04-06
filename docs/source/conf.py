@@ -53,14 +53,14 @@ extensions = ['sphinx.ext.autodoc',
 #issuetracker = 'github'
 #issuetracker_project = 'saxix/django-adminactions'
 #issuetracker_plaintext_issues = True
-next_version = '0.7'
+next_version = '0.9'
 github_project_url = 'https://github.com/saxix/django-adminactions/'
 github_project_url_basesource = 'https://github.com/saxix/django-adminactions/'
 
 todo_include_todos = True
 intersphinx_mapping = {
     'python': ('http://python.readthedocs.org/en/latest/', None),
-    'django': ('http://django.readthedocs.org/en/1.5.x/', None),
+    'django': ('http://django.readthedocs.org/en/1.7.x/', None),
     'sphinx': ('http://sphinx.readthedocs.org/en/latest/', None)}
 intersphinx_cache_limit = 90 # days
 
