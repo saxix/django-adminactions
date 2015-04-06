@@ -1,3 +1,4 @@
+django
 coverage
 django-dynamic-fixture
 django-webtest>=1.7.5
