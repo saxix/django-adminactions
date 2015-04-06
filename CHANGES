@@ -1,7 +1,8 @@
-Release 0.8 (dev)
-=================
+Release 0.8
+===========
 * python 3.3, 3.4 compatibility
 * add spanish translation (thanks @xangmuve)
+
 
 Release 0.7
 ===========
@@ -44,7 +45,7 @@ Release 0.3
 
 
 Release 0.2
-============================
+===========
 * improved :ref:`export_as_csv`
 * Django 1.6 compatibility
 * Added `modeladmin` in providing_args of signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
