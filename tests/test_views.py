@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from django.utils.encoding import smart_text
 import pytest
 import datetime
 from django.core.urlresolvers import reverse
@@ -13,8 +14,8 @@ def test_format_date(app):
     url = reverse('adminactions.format_date')
     fmt = 'd-m-Y'
     res = app.get("{}?fmt={}".format(url, fmt))
-    assert res.body == dateformat.format(d, fmt)
+    assert smart_text(res.body) == dateformat.format(d, fmt)
 
     fmt = 'd mm Y'
     res = app.get("{}?fmt={}".format(url, fmt))
-    assert res.body == dateformat.format(d, fmt)
+    assert smart_text(res.body) == dateformat.format(d, fmt)
