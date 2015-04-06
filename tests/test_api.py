@@ -7,6 +7,7 @@ from collections import namedtuple
 from django.http import HttpResponse
 from django.contrib.auth.models import Permission
 from django.test import TestCase
+
 if six.PY3:
     import csv
 elif six.PY2:
@@ -88,6 +89,23 @@ class TestExportAsCsv(unittest.TestCase):
             self.assertEquals(csv_dump.decode('utf8'), u'"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n')
         else:
             self.assertEquals(csv_dump, '"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n')
+
+    def test_dialect(self):
+        fields = ['field1', 'field2']
+        header = ['Field 1', 'Field 2']
+        Row = namedtuple('Row', fields)
+        rows = [Row(1, 4),
+                Row(2, 5),
+                Row(3, 'ӼӳӬԖԊ')]
+        mem = six.StringIO()
+        export_as_csv(queryset=rows, fields=fields, header=header,
+                      out=mem, options={'dialect': 'excel'})
+        mem.seek(0)
+        csv_dump = mem.read()
+        if six.PY2:
+            self.assertEquals(csv_dump.decode('utf8'), u'Field 1,Field 2\r\n1,4\r\n2,5\r\n3,ӼӳӬԖԊ\r\n')
+        else:
+            self.assertEquals(csv_dump, 'Field 1,Field 2\r\n1,4\r\n2,5\r\n3,ӼӳӬԖԊ\r\n')
 
 
 class TestExportAsExcel(TestCase):

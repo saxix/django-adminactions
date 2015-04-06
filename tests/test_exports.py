@@ -1,10 +1,16 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from django.utils.encoding import smart_text
+import io
 import six
 import xlrd
-import csv
 import mock
+
+if six.PY2:
+    import unicodecsv as csv
+else:
+    import csv
+
+from django.utils.encoding import smart_text
 from django_webtest import WebTest
 from django_dynamic_fixture import G
 from django.contrib.auth.models import User
@@ -155,18 +161,22 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             assert six.b('Sorry you do not have rights to execute this action') in res.body
 
     def test_success(self):
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_export_user']):
+        with user_grant_permission(self.user, ['demo.change_demomodel',
+                                               'demo.adminactions_export_demomodel']):
             res = self.app.get('/', user='user')
-            res = res.click('Users')
+            res = res.click('Demo models')
             form = res.forms['changelist-form']
             form['action'] = self.action_name
             # form.set('_selected_action', True, 1)
             self._select_rows(form)
             res = form.submit()
             res = res.form.submit('apply')
-            io = six.StringIO(smart_text(res.body))
+            if six.PY2:
+                buff = io.BytesIO(res.body)
+            else:
+                buff = io.StringIO(smart_text(res.body))
+            csv_reader = csv.reader(buff)
 
-            csv_reader = csv.reader(io)
             self.assertEqual(len(list(csv_reader)), 2)
 
     def test_custom_filename(self):

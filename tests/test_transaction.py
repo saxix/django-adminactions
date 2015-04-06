@@ -11,20 +11,6 @@ from adminactions import compat
 from adminactions.signals import adminaction_end
 
 
-@pytest.fixture(scope='function')
-def users():
-    return G(User, n=2, is_staff=False, is_active=False)
-
-
-@pytest.fixture(scope='function')
-def app(request):
-    wtm = django_webtest.WebTestMixin()
-    wtm.csrf_checks = False
-    wtm._patch_settings()
-    request.addfinalizer(wtm._unpatch_settings)
-    return django_webtest.DjangoTestApp()
-
-
 @pytest.mark.django_db(transaction=True)
 def test_nocommit():
     with compat.nocommit():
