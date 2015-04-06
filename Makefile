@@ -11,12 +11,12 @@ mkbuilddir:
 install-deps:
 	pip install -qe .
 	pip install -qr adminactions/requirements/testing.pip
-	sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install -q 'django>=1.4,<1.5'; fi"
-	sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install -q 'django>=1.5,<1.6'; fi"
-	sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install -q 'django>=1.6,<1.7'; fi"
-	sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install -q 'django>=1.7,<1.8'; fi"
-	sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install -q 'django>=1.8,<1.9'; fi"
-	sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install -q git+git://github.com/django/django.git; fi"
+	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install -q 'django>=1.4,<1.5'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install -q 'django>=1.5,<1.6'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install -q 'django>=1.6,<1.7'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install -q 'django>=1.7,<1.8'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install -q 'django>=1.8,<1.9'; fi"
+	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install -q git+git://github.com/django/django.git; fi"
 
 
 
@@ -40,15 +40,13 @@ test:
 
 
 coverage: mkbuilddir install-deps init-db
-	echo ${PYTHONPATH};
-	PYTHONPATH=${PWD}/tests/:${PWD} py.test tests -v --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc -q
-
+	PYTHONPATH=${PWD}/tests/:${PWD} py.test tests -v --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc
 
 
 demo:
 	django-admin.py syncdb --settings=tests.settings --noinput
-	django-admin.py loaddata adminactions.json demoproject.json --settings=tests.settings
-	django-admin.py runserver --settings=tests.settings
+	django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
+	django-admin.py runserver --settings=demo.settings
 
 
 clean:
