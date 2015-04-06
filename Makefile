@@ -9,14 +9,14 @@ mkbuilddir:
 
 
 install-deps:
-	pip install -e .
-	pip install -r adminactions/requirements/testing.pip
-	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install 'django>=1.4,<1.5'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install 'django>=1.5,<1.6'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install 'django>=1.6,<1.7'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install 'django>=1.7,<1.8'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install 'django>=1.8,<1.9'; fi"
-	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install git+git://github.com/django/django.git; fi"
+	pip install -qe .
+	pip install -qr adminactions/requirements/testing.pip
+	sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install -q 'django>=1.4,<1.5'; fi"
+	sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install -q 'django>=1.5,<1.6'; fi"
+	sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install -q 'django>=1.6,<1.7'; fi"
+	sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install -q 'django>=1.7,<1.8'; fi"
+	sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install -q 'django>=1.8,<1.9'; fi"
+	sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install -q git+git://github.com/django/django.git; fi"
 
 
 
