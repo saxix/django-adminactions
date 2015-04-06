@@ -1,0 +1,152 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# abel <cesarabel@johnmay.com.ni>, 2014.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-12-29 10:54+0100\n"
+"PO-Revision-Date: 2014-10-30 19:16-0600\n"
+"Last-Translator: abel <cesarabel@johnmay.com.ni>\n"
+"Language-Team: deltacopiers\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+
+#: export.py:30 export.py:212 export.py:289 merge.py:67
+#, python-format
+msgid "Sorry you do not have rights to execute this action (%s)"
+msgstr "Lo siento tu no tienes permisos para ejecutar esta accion"
+
+#: export.py:111 export.py:116
+msgid "Export as CSV"
+msgstr ""
+
+#: export.py:123 export.py:128
+msgid "Export as XLS"
+msgstr "Exportar como XLS"
+
+#: export.py:265
+msgid "Export as Fixture"
+msgstr "Exportar como Fixture"
+
+#: export.py:278
+msgid "Export as fixture"
+msgstr "Exportar como Fixture"
+
+#: export.py:351
+msgid "Export Delete Tree"
+msgstr "Exportar Arbol de dependencias"
+
+#: export.py:364
+msgid "Export delete tree"
+msgstr "Exportar Arbol de dependencias"
+
+#: mass_update.py:209
+msgid "Sorry you do not have rights to execute this action"
+msgstr "Lo siento tu no tienes permisos para ejecutar esta accion"
+
+#: mass_update.py:276
+#, python-format
+msgid "Updated %s records"
+msgstr "%s registros actualizados"
+
+#: merge.py:26
+msgid "Dependencies"
+msgstr "Dependencias"
+
+#: merge.py:27
+msgid "Move"
+msgstr "Mover"
+
+#: merge.py:27
+msgid "Delete"
+msgstr "Eliminar"
+
+#: merge.py:136
+msgid "Please select exactly 2 records"
+msgstr "Por favor selecciona exactamente 2 registros"
+
+#: merge.py:159
+#, python-format
+msgid "Merge selected %(verbose_name_plural)s"
+msgstr "Eliminar %(verbose_name_plural)s seleccionados/as"
+
+#: templates/adminactions/any_model.html:26
+#: templates/adminactions/charts.html:18
+#: templates/adminactions/export_csv.html:46
+#: templates/adminactions/export_fixture.html:6
+#: templates/adminactions/export_xls.html:19
+#: templates/adminactions/mass_update.html:26
+#: templates/adminactions/merge.html:5
+#: templates/adminactions/merge_preview.html:5
+msgid "Home"
+msgstr "Inicio"
+
+#: templates/adminactions/export_csv.html:50
+msgid "CSV Export Options"
+msgstr "Opciones de exportacion CSV"
+
+#: templates/adminactions/export_csv.html:69
+msgid "Export"
+msgstr "Exportar"
+
+#: templates/adminactions/merge.html:8
+#: templates/adminactions/merge_preview.html:8
+msgid "Merge records"
+msgstr "Unir registros"
+
+#: templates/adminactions/merge.html:34
+msgid "Field"
+msgstr "Campo"
+
+#: templates/adminactions/merge.html:35
+#, fuzzy
+msgid "Master"
+msgstr "Master"
+
+#: templates/adminactions/merge.html:35
+msgid "This will be preserved"
+msgstr "Esto sera preservado"
+
+#: templates/adminactions/merge.html:37
+#, fuzzy
+msgid "swap"
+msgstr "swap"
+
+#: templates/adminactions/merge.html:38
+msgid "Result"
+msgstr "Resultado"
+
+#: templates/adminactions/merge.html:40
+msgid "Other"
+msgstr "Otro"
+
+#: templates/adminactions/merge.html:40
+msgid "This will be removed"
+msgstr "Esto sera preservado"
+
+#: templates/adminactions/merge.html:69
+#: templates/adminactions/merge_preview.html:9
+msgid "Preview"
+msgstr "Vista preliminar"
+
+#: templates/adminactions/merge_preview.html:18
+msgid "Key"
+msgstr "Tecla"
+
+#: templates/adminactions/merge_preview.html:23
+msgid "Original"
+msgstr "Original"
+
+#: templates/adminactions/merge_preview.html:24
+msgid "After Merging"
+msgstr "Despues de la Union"
+
+#: templates/adminactions/merge_preview.html:39
+msgid "Merge"
+msgstr "Unir"
