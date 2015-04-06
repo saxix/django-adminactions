@@ -1,6 +1,6 @@
 include README.rst
 include MANIFEST.in
-include AUTHORS
+include AUTHORS.rst
 include CHANGES
 include LICENSE
 include setup.py
