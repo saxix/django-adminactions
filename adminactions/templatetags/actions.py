@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from django.template import Library
 from adminactions.utils import get_field_value, get_verbose_name
 

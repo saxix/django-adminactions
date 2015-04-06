@@ -5,8 +5,8 @@ import types
 from django_dynamic_fixture import G
 import pytest
 from selenium import webdriver
-from ..models import DemoModel, UserDetail
-from ..common import administrator, ADMIN, PWD
+from demo.models import DemoModel, UserDetail
+from demo.common import *  # noqa
 
 
 browsers = {
@@ -16,7 +16,7 @@ browsers = {
 
 
 @pytest.fixture(scope='session',
-                params=browsers.keys())
+                params=list(browsers.keys()))
 def driver(request):
     if 'DISPLAY' not in os.environ:
         pytest.skip('Test requires display server (export DISPLAY)')

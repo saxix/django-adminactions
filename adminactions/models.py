@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from django.db.models import signals
 
 
@@ -14,7 +15,7 @@ def create_extra_permission(sender, **kwargs):
         for action in ('adminactions_export', 'adminactions_massupdate', 'adminactions_merge'):
             opts = model._meta
             codename = get_permission_codename(action, opts)
-            label = u'Can %s %s (adminactions)' % (action.replace('adminactions_', ""), opts.verbose_name_raw)
+            label = 'Can {} {} (adminactions)'.format(action.replace('adminactions_', ""), opts.verbose_name_raw)
             ct = ContentType.objects.get_for_model(model)
             Permission.objects.get_or_create(codename=codename, content_type=ct, defaults={'name': label[:50]})
 

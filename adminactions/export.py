@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from itertools import chain
 from django.core.serializers import get_serializer_formats
 from django.db import router
@@ -18,6 +19,7 @@ from adminactions.forms import CSVOptions, XLSOptions
 from adminactions.models import get_permission_codename
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 from adminactions.api import export_as_csv as _export_as_csv, export_as_xls as _export_as_xls
+from six.moves import zip
 
 
 def base_export(modeladmin, request, queryset, title, impl, name, template, form_class, ):
@@ -182,7 +184,7 @@ class FixtureOptions(forms.Form):
     add_foreign_keys = forms.BooleanField(required=False)
 
     indent = forms.IntegerField(required=True, max_value=10, min_value=0)
-    serializer = forms.ChoiceField(choices=zip(get_serializer_formats(), get_serializer_formats()))
+    serializer = forms.ChoiceField(choices=list(zip(get_serializer_formats(), get_serializer_formats())))
 
 
 def _dump_qs(form, queryset, data, filename):
@@ -195,7 +197,7 @@ def _dump_qs(form, queryset, data, filename):
     response = HttpResponse(content_type='application/json')
     if not form.cleaned_data.get('on_screen', False):
         filename = filename or "%s.%s" % (queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"), fmt)
-        response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
+        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
     response.content = ret
     return response
 
@@ -324,7 +326,7 @@ def export_delete_tree(modeladmin, request, queryset):
                 c = Collector(using)
                 c.collect(queryset, collect_related=collect_related)
                 data = []
-                for model, instances in c.data.items():
+                for model, instances in list(c.data.items()):
                     data.extend(instances)
                 adminaction_end.send(sender=modeladmin.model,
                                      action='export_delete_tree',

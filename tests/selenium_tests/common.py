@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # import os
 # from django.utils.unittest.case import skip
 # from django.conf import settings
@@ -126,7 +127,7 @@ browsers = {
 
 
 @pytest.fixture(scope='session',
-                params=browsers.keys())
+                params=list(browsers.keys()))
 def driver(request):
     if 'DISPLAY' not in os.environ:
         pytest.skip('Test requires display server (export DISPLAY)')

@@ -1,9 +1,11 @@
+from __future__ import absolute_import, unicode_literals
 from django import forms
 from django.forms.models import ModelForm
 from .api import csv
 from django.forms.widgets import SelectMultiple
 from django.utils import formats
 from adminactions.api import delimiters, quotes
+from six.moves import zip
 
 
 class GenericActionForm(ModelForm):
@@ -30,8 +32,8 @@ class CSVOptions(forms.Form):
     action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
 
     header = forms.BooleanField(required=False)
-    delimiter = forms.ChoiceField(choices=zip(delimiters, delimiters), initial=',')
-    quotechar = forms.ChoiceField(choices=zip(quotes, quotes), initial="'")
+    delimiter = forms.ChoiceField(choices=list(zip(delimiters, delimiters)), initial=',')
+    quotechar = forms.ChoiceField(choices=list(zip(quotes, quotes)), initial="'")
     quoting = forms.ChoiceField(
         choices=((csv.QUOTE_ALL, 'All'),
                  (csv.QUOTE_MINIMAL, 'Minimal'),

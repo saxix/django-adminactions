@@ -1,4 +1,4 @@
-# Django settings for demoproject project.
+from __future__ import absolute_import
 import os
 
 here = os.path.dirname(__file__)
@@ -73,7 +73,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',)
 
-ROOT_URLCONF = 'tests.urls'
+ROOT_URLCONF = 'demo.urls'
 
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -83,11 +83,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'adminactions',
-    'tests']
+    'demo']
 
 TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
-DDF_DEFAULT_DATA_FIXTURE = 'tests.util.DataFixtureClass'
+DDF_DEFAULT_DATA_FIXTURE = 'demo.util.DataFixtureClass'
 
 CACHES = {
     'default': {

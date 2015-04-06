@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import os
 import pytest
 from django.conf import global_settings
@@ -25,6 +26,7 @@ ADMIN = 'sax'
 USER = 'user'
 PWD = '123'
 USER_EMAIL = 'user@moreply.org'
+
 
 class BaseTestCaseMixin(object):
     fixtures = ['adminactions.json', ]
@@ -61,7 +63,6 @@ class BaseTestCaseMixin(object):
 
 class BaseTestCase(BaseTestCaseMixin, TestCase):
     pass
-
 
 
 @pytest.fixture(scope='function')

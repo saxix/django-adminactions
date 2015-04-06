@@ -1,3 +1,8 @@
+Release 0.8 (dev)
+=================
+* python 3.3, 3.4 compatibility
+
+
 Release 0.7
 ===========
 * fixes issue in mass_update due wrong indentaion
@@ -20,10 +25,12 @@ Release 0.5
 * fix mass_update bug that caused all records in a table to be updated (thanks @jht001)
 * Added timezone support to csv and xls export
 
+
 Release 0.4
 ===========
 * fixed :ghissue:`33`
 * fixed :ghissue:`20`
+
 
 Release 0.3
 ===========
@@ -35,11 +42,13 @@ Release 0.3
 * new permission :ref:`adminactions_massupdate`
 * new permission :ref:`adminactions_merge`
 
+
 Release 0.2
 ============================
 * improved :ref:`export_as_csv`
 * Django 1.6 compatibility
 * Added `modeladmin` in providing_args of signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
+
 
 Release 0.1
 ===========
@@ -52,6 +61,7 @@ Release 0.1
 * Added :ref:`permissions`
 * New signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
 
+
 Release 0.0.4
 =============
 * NEW added ``add_foreign_keys`` parameter to :ref:`export_as_fixture` and :ref:`export_delete_tree`
@@ -62,13 +72,16 @@ Release 0.0.4
 * NEW: :ref:`transform_operations`
 * NEW: url to preview date format in `export_as_csv`
 
+
 Release 0.0.3
 =============
 * added demo project
 
+
 Release 0.0.2
 =============
 * name changed from django-actions to django-adminactions
+
 
 Release 0.0.1
 =============

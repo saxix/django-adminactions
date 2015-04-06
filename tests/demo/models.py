@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.auth.models import User
 from django.db import models
 
 
 class DemoModel(models.Model):
-    char = models.CharField(u'Chäř', max_length=255)
+    char = models.CharField('Chäř', max_length=255)
     integer = models.IntegerField()
     logic = models.BooleanField(default=False)
     null_logic = models.NullBooleanField(default=None)
@@ -29,7 +30,7 @@ class DemoModel(models.Model):
     choices = models.IntegerField(choices=((1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')))
 
     class Meta:
-        app_label = 'tests'
+        app_label = 'demo'
 
 
 class UserDetail(models.Model):
@@ -37,7 +38,7 @@ class UserDetail(models.Model):
     note = models.CharField(max_length=10, blank=True)
 
     class Meta:
-        app_label = 'tests'
+        app_label = 'demo'
 
 
 class UserDetailModelAdmin(ModelAdmin):

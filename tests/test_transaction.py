@@ -1,14 +1,15 @@
-from adminactions.exceptions import ActionInterrupted
-import pytest
+from __future__ import absolute_import
 import mock
-from django.db import IntegrityError
 import django_webtest
-from adminactions.api import merge
+from django.db import IntegrityError
 from django.contrib.auth.models import Group, User
 from django_dynamic_fixture import G
+from demo.common import *  # noqa
+from adminactions.exceptions import ActionInterrupted
+from adminactions.api import merge
 from adminactions import compat
 from adminactions.signals import adminaction_end
-from .common import administrator
+
 
 @pytest.fixture(scope='function')
 def users():
@@ -24,8 +25,6 @@ def app(request):
     return django_webtest.DjangoTestApp()
 
 
-
-
 @pytest.mark.django_db(transaction=True)
 def test_nocommit():
     with compat.nocommit():
@@ -33,11 +32,10 @@ def test_nocommit():
     assert not Group.objects.filter(name='name').exists()
 
 
-
 @pytest.mark.django_db(transaction=True)
 def test_transaction_merge(users):
     master, other = users
-    with mock.patch('django.contrib.auth.models.User.delete', side_effect = IntegrityError):
+    with mock.patch('django.contrib.auth.models.User.delete', side_effect=IntegrityError):
         with pytest.raises(IntegrityError):
             merge(master, other, commit=True)
 
@@ -47,10 +45,8 @@ def test_transaction_merge(users):
     assert master.first_name != other.first_name
 
 
-
 @pytest.mark.django_db(transaction=True)
 def test_transaction_mass_update(app, users, administrator):
-
     assert User.objects.filter(is_staff=True).count() == 1  # sanity check
 
     def _handler(*args, **kwargs):

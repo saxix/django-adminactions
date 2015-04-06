@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from random import randrange, shuffle
 from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
+from six.moves import range
 
 
 def ipaddress(not_valid=None):
