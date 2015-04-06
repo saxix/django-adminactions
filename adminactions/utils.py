@@ -24,8 +24,8 @@ def clone_instance(instance, fieldnames=None):
     return instance.__class__(**new_kwargs)
 
 
-def get_copy_of_instance(instance):
-    return instance.__class__.objects.get(pk=instance.pk)
+# def get_copy_of_instance(instance):
+# return instance.__class__.objects.get(pk=instance.pk)
 
 
 def get_attr(obj, attr, default=None):
@@ -55,6 +55,21 @@ def get_attr(obj, attr, default=None):
 
 
 def getattr_or_item(obj, name):
+    """
+    works indifferently on dict or objects, retrieving the
+    'name' attribute or item
+
+    :param obj:  dict or object
+    :param name: attribute or item name
+    :return:
+    >>> from django.contrib.auth.models import Permission
+    >>> p = Permission(name='perm')
+    >>> d ={'one': 1, 'two': 2}
+    >>> getattr_or_item(d, 'one')
+    1
+    >>> print(getattr_or_item(p, 'name'))
+    perm
+    """
     try:
         ret = get_attr(obj, name, AttributeError())
     except AttributeError:

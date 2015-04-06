@@ -13,8 +13,7 @@ from django.utils import dateformat
 from django.utils.encoding import smart_str, force_text, smart_text
 from adminactions import compat
 from adminactions.templatetags.actions import get_field_value
-from adminactions.utils import (clone_instance, get_field_by_path,  # noqa
-                                get_copy_of_instance, getattr_or_item)  # noqa
+from adminactions.utils import (clone_instance, get_field_by_path)
 
 if six.PY2:
     import unicodecsv as csv
@@ -322,7 +321,7 @@ xlsxwriter_options = {'date_format': 'd/m/Y',
 
 
 def export_as_xls3(queryset, fields=None, header=None,  # noqa
-                   filename=None, options=None, out=None):
+                   filename=None, options=None, out=None):  # pragma: no cover
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """

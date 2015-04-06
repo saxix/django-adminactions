@@ -8,17 +8,6 @@ register = Library()
 
 
 @register.filter()
-def raw_value(obj, field):
-    """
-        returns the value  a field
-
-        see `adminactions.utils.get_field_value`_
-    """
-    value = get_field_value(obj, field, False)
-    return str(field.formfield().to_python(value))
-
-
-@register.filter()
 def field_display(obj, field):
     """
         returns the representation (value or ``get_FIELD_display()``) of  a field

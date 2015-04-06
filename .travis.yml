@@ -24,9 +24,11 @@ env:
 install:
   - pip install tox>=1.8
   - pip install python-coveralls>=2.5 coveralls>=0.5
+  - make install-deps
 
 
 script:
+  - make init-db
   - make coverage
 
 before_success:

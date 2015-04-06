@@ -39,7 +39,11 @@ test:
 	py.test
 
 
-coverage: mkbuilddir install-deps init-db
+ci: mkbuilddir install-deps init-db
+	$(MAKE) coverage
+
+
+coverage:
 	PYTHONPATH=${PWD}/tests/:${PWD} py.test tests -v --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc
 
 
