@@ -42,6 +42,20 @@ matrix:
     - env: DJANGO=dev
 
   exclude:
+    - python: "3.2"
+      env: DJANGO=1.4.x
+    - python: "3.2"
+      env: DJANGO=1.5.x
+    - python: "3.2"
+      env: DJANGO=1.6.x
+
+    - python: "3.3"
+      env: DJANGO=1.4.x
+    - python: "3.3"
+      env: DJANGO=1.5.x
+    - python: "3.3"
+      env: DJANGO=1.6.x
+
     - python: "3.4"
       env: DJANGO=1.4.x
     - python: "3.4"
