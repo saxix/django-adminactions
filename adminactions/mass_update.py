@@ -1,11 +1,16 @@
+from __future__ import absolute_import, unicode_literals
+import six
 import re
 import json
 import datetime
-import string
-from collections import defaultdict
 
+if six.PY2:
+    import string
+elif six.PY3:
+    string = str
+
+from collections import defaultdict
 from django import forms
-from django.db import IntegrityError, transaction
 from django.db.models import fields as df
 from django.forms import fields as ff
 from django.forms.models import modelform_factory, ModelMultipleChoiceField, construct_instance, InlineForeignKeyField
@@ -15,7 +20,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.encoding import force_unicode
+from django.utils.encoding import smart_text
 from django.utils.functional import curry
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
@@ -66,7 +71,7 @@ class OperationManager(object):
 
     def __init__(self, _dict):
         self._dict = dict()
-        for field_class, args in _dict.items():
+        for field_class, args in list(_dict.items()):
             self._dict[field_class] = SortedDict(self.COMMON + args)
 
     def get(self, field_class, d=None):
@@ -79,7 +84,7 @@ class OperationManager(object):
         """
         valid = SortedDict()
         operators = self.get(field.__class__)
-        for label, (func, param, enabler, help) in operators.items():
+        for label, (func, param, enabler, help) in list(operators.items()):
             if (callable(enabler) and enabler(field)) or enabler is True:
                 valid[label] = (func, param, enabler, help)
         return valid
@@ -92,8 +97,8 @@ OPERATIONS = OperationManager({
     df.CharField: [('upper', (string.upper, False, True, "convert to uppercase")),
                    ('lower', (string.lower, False, True, "convert to lowercase")),
                    ('capitalize', (string.capitalize, False, True, "capitalize first character")),
-                   ('capwords', (string.capwords, False, True, "capitalize each word")),
-                   ('swapcase', (string.swapcase, False, True, "")),
+                   # ('capwords', (string.capwords, False, True, "capitalize each word")),
+                   # ('swapcase', (string.swapcase, False, True, "")),
                    ('trim', (string.strip, False, True, "leading and trailing whitespace"))],
     df.IntegerField: [('add percent', (add_percent, True, True, "add <arg> percent to existing value")),
                       ('sub percent', (sub_percent, True, True, "")),
@@ -115,8 +120,8 @@ class MassUpdateForm(GenericActionForm):
     _validate = forms.BooleanField(label='Validate',
                                    help_text="if checked use obj.save() instead of manager.update()")
     # _unique_transaction = forms.BooleanField(label='Unique transaction',
-    #                                          required=False,
-    #                                          help_text="If checked create one transaction for the whole update. "
+    # required=False,
+    # help_text="If checked create one transaction for the whole update. "
     #                                                    "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
@@ -128,7 +133,7 @@ class MassUpdateForm(GenericActionForm):
 
     def _get_validation_exclusions(self):
         exclude = super(MassUpdateForm, self)._get_validation_exclusions()
-        for name, field in self.fields.items():
+        for name, field in list(self.fields.items()):
             function = self.data.get('func_id_%s' % name, False)
             if function:
                 exclude.append(name)
@@ -140,17 +145,17 @@ class MassUpdateForm(GenericActionForm):
             opts = self._meta
             self.instance = construct_instance(self, self.instance, opts.fields, opts.exclude)
             exclude = self._get_validation_exclusions()
-            for f_name, field in self.fields.items():
+            for f_name, field in list(self.fields.items()):
                 if isinstance(field, InlineForeignKeyField):
                     exclude.append(f_name)
                     # Clean the model instance's fields.
             try:
                 self.instance.clean_fields(exclude=exclude)
-            except ValidationError, e:
+            except ValidationError as e:
                 self._update_errors(e.message_dict)
 
     def _clean_fields(self):
-        for name, field in self.fields.items():
+        for name, field in list(self.fields.items()):
             raw_value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             try:
                 if isinstance(field, ff.FileField):
@@ -175,7 +180,7 @@ class MassUpdateForm(GenericActionForm):
                     if hasattr(self, 'clean_%s' % name):
                         value = getattr(self, 'clean_%s' % name)()
                         self.cleaned_data[name] = value
-            except ValidationError, e:
+            except ValidationError as e:
                 self._errors[name] = self.error_class(e.messages)
                 if name in self.cleaned_data:
                     del self.cleaned_data[name]
@@ -190,7 +195,7 @@ class MassUpdateForm(GenericActionForm):
         return bool(self.data.get('_clean', 0))
 
 
-def mass_update(modeladmin, request, queryset):
+def mass_update(modeladmin, request, queryset):  # noqa
     """
         mass update queryset
     """
@@ -204,7 +209,7 @@ def mass_update(modeladmin, request, queryset):
         errors = {}
         updated = 0
         for record in queryset:
-            for field_name, value_or_func in form.cleaned_data.items():
+            for field_name, value_or_func in list(form.cleaned_data.items()):
                 if callable(value_or_func):
                     old_value = getattr(record, field_name)
                     setattr(record, field_name, value_or_func(old_value))
@@ -220,13 +225,13 @@ def mass_update(modeladmin, request, queryset):
         if len(errors):
             messages.error(request, "%s records not updated due errors" % len(errors))
         adminaction_end.send(sender=modeladmin.model,
-                                 action='mass_update',
-                                 request=request,
-                                 queryset=queryset,
-                                 modeladmin=modeladmin,
-                                 form=form,
-                                 errors=errors,
-                                 updated=updated)
+                             action='mass_update',
+                             request=request,
+                             queryset=queryset,
+                             modeladmin=modeladmin,
+                             form=form,
+                             errors=errors,
+                             updated=updated)
 
     opts = modeladmin.model._meta
     perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts))
@@ -280,7 +285,7 @@ def mass_update(modeladmin, request, queryset):
 
             else:
                 values = {}
-                for field_name, value in form.cleaned_data.items():
+                for field_name, value in list(form.cleaned_data.items()):
                     if isinstance(form.fields[field_name], ModelMultipleChoiceField):
                         messages.error(request, "Unable no mass update ManyToManyField without 'validate'")
                         return HttpResponseRedirect(request.get_full_path())
@@ -288,7 +293,7 @@ def mass_update(modeladmin, request, queryset):
                         messages.error(request, "Unable no mass update using operators without 'validate'")
                         return HttpResponseRedirect(request.get_full_path())
                     elif field_name not in ['_selected_action', '_validate', 'select_across', 'action',
-                                            '_unique_transaction','_clean']:
+                                            '_unique_transaction', '_clean']:
                         values[field_name] = value
                 queryset.update(**values)
 
@@ -310,9 +315,9 @@ def mass_update(modeladmin, request, queryset):
         for f in modeladmin.model._meta.fields:
             if f.name not in form._no_sample_for:
                 if hasattr(f, 'flatchoices') and f.flatchoices:
-                    grouped[f.name] = dict(getattr(f, 'flatchoices')).values()
+                    grouped[f.name] = list(dict(getattr(f, 'flatchoices')).values())
                 elif hasattr(f, 'choices') and f.choices:
-                    grouped[f.name] = dict(getattr(f, 'choices')).values()
+                    grouped[f.name] = list(dict(getattr(f, 'choices')).values())
                 elif isinstance(f, df.BooleanField):
                     grouped[f.name] = [True, False]
                 else:
@@ -327,7 +332,7 @@ def mass_update(modeladmin, request, queryset):
     tpl = 'adminactions/mass_update.html'
     ctx = {'adminform': adminForm,
            'form': form,
-           'title': u"Mass update %s" % force_unicode(modeladmin.opts.verbose_name_plural),
+           'title': u"Mass update %s" % smart_text(modeladmin.opts.verbose_name_plural),
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),
            'change': True,
@@ -340,7 +345,7 @@ def mass_update(modeladmin, request, queryset):
            'opts': modeladmin.model._meta,
            'app_label': modeladmin.model._meta.app_label,
            # 'action': 'mass_update',
-           #           'select_across': request.POST.get('select_across')=='1',
+           # 'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
 

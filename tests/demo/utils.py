@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 import string
 from random import choice
 from django.contrib import admin
@@ -8,6 +9,7 @@ from django.forms import BaseForm
 from django_dynamic_fixture import G
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from six.moves import range
 
 
 class admin_register(object):

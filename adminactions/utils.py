@@ -1,9 +1,10 @@
+from __future__ import absolute_import, unicode_literals
+import six
 from django.db import models
-from django.db.models import Model
-from django.db.models.fields.related import ForeignKey
+# from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.db import connections, router
-from django.utils.encoding import smart_str, smart_text
+from django.utils.encoding import smart_text
 
 
 def clone_instance(instance, fieldnames=None):
@@ -23,8 +24,8 @@ def clone_instance(instance, fieldnames=None):
     return instance.__class__(**new_kwargs)
 
 
-def get_copy_of_instance(instance):
-    return instance.__class__.objects.get(pk=instance.pk)
+# def get_copy_of_instance(instance):
+# return instance.__class__.objects.get(pk=instance.pk)
 
 
 def get_attr(obj, attr, default=None):
@@ -54,6 +55,21 @@ def get_attr(obj, attr, default=None):
 
 
 def getattr_or_item(obj, name):
+    """
+    works indifferently on dict or objects, retrieving the
+    'name' attribute or item
+
+    :param obj:  dict or object
+    :param name: attribute or item name
+    :return:
+    >>> from django.contrib.auth.models import Permission
+    >>> p = Permission(name='perm')
+    >>> d ={'one': 1, 'two': 2}
+    >>> getattr_or_item(d, 'one')
+    1
+    >>> print(getattr_or_item(p, 'name'))
+    perm
+    """
     try:
         ret = get_attr(obj, name, AttributeError())
     except AttributeError:
@@ -79,7 +95,7 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     perm
 
     """
-    if isinstance(field, basestring):
+    if isinstance(field, six.string_types):
         fieldname = field
     elif isinstance(field, models.Field):
         fieldname = field.name
@@ -92,14 +108,17 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
         value = getattr_or_item(obj, fieldname)
 
     if not raw_callable and callable(value):
-        return value()
+        value = value()
 
     if isinstance(value, models.Model):
         return smart_text(value)
+
     # if isinstance(obj, Model):
     #     field = get_field_by_path(obj, fieldname)
     #     if isinstance(field, ForeignKey):
     #         return unicode(value)
+    if isinstance(value, six.string_types):
+        value = smart_text(value)
 
     return value
 
@@ -190,7 +209,7 @@ def get_verbose_name(model_or_queryset, field):
         raise ValueError('`get_verbose_name` expects Manager, Queryset or Model as first parameter (got %s)' % type(
             model_or_queryset))
 
-    if isinstance(field, basestring):
+    if isinstance(field, six.string_types):
         field = get_field_by_path(model, field)
     elif isinstance(field, models.Field):
         field = field
@@ -222,7 +241,7 @@ def flatten(iterable):
 
     result = list()
     for el in iterable:
-        if hasattr(el, "__iter__") and not isinstance(el, basestring):
+        if hasattr(el, "__iter__") and not isinstance(el, six.string_types):
             result.extend(flatten(el))
         else:
             result.append(el)

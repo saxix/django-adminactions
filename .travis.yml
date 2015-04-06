@@ -1,21 +1,58 @@
 language: python
 python:
   - "2.7"
+  - "3.3"
+  - "3.4"
+
+cache:
+  - pip
+
+sudo: false
+
+services:
+  - MySQL
+  - PostgreSQL
 
 env:
-  - DJANGO="1.4.x" DBENGINE=pg
-  - DJANGO="1.5.x" DBENGINE=pg
-  - DJANGO="1.6.x" DBENGINE=pg
-  - DJANGO="1.7.x" DBENGINE=pg
-  - DJANGO="dev" DBENGINE=pg
+  - DJANGO=1.4.x
+  - DJANGO=1.5.x
+  - DJANGO=1.6.x
+  - DJANGO=1.7.x
+  - DJANGO=1.8.x
+  - DJANGO=dev
 
 install:
+  - pip install tox>=1.8
+  - pip install python-coveralls>=2.5 coveralls>=0.5
   - make install-deps
 
-script:
-  - make init-db ci
 
+script:
+  - make init-db
+  - make coverage
+
+before_success:
+  - coverage erase
 
 after_success:
-  - coveralls -c .coveragerc
+  - coverage combine
+  - coveralls
 
+matrix:
+  allow_failures:
+    - env: DJANGO=dev
+
+  exclude:
+    - python: "3.3"
+      env: DJANGO=1.4.x
+    - python: "3.3"
+      env: DJANGO=1.5.x
+    - python: "3.3"
+      env: DJANGO=1.6.x
+
+    - python: "3.4"
+      env: DJANGO=1.4.x
+    - python: "3.4"
+      env: DJANGO=1.5.x
+    - python: "3.4"
+      env: DJANGO=1.6.x

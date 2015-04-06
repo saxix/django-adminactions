@@ -1,23 +1,23 @@
 VERSION=2.0.0
 BUILDDIR=${PWD}/~build
 BINDIR=${PWD}/~build/bin
-PYTHONPATH := ${PWD}/demo/:${PWD}
-
-DJANGO_14='django>=1.4,<1.5'
-DJANGO_15='django>=1.5,<1.6'
-DJANGO_16='django>=1.6,<1.7'
-DJANGO_17='https://www.djangoproject.com/download/1.7c2/tarball/'
-DJANGO_DEV=git+git://github.com/django/django.git
+PYTHONPATH:=${PWD}/tests/:${PWD}
+DJANGO?='1.7.x'
 
 mkbuilddir:
 	mkdir -p ${BUILDDIR} ${BINDIR}
 
 
 install-deps:
-	pip install -q \
-	        -r adminactions/requirements/install.pip \
-	        -r adminactions/requirements/testing.pip \
-	        python-coveralls
+	pip install -qe .
+	pip install -qr adminactions/requirements/testing.pip
+	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install -q 'django>=1.4,<1.5'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install -q 'django>=1.5,<1.6'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install -q 'django>=1.6,<1.7'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install -q 'django>=1.7,<1.8'; fi"
+	@sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install -q 'django>=1.8,<1.9'; fi"
+	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install -q git+git://github.com/django/django.git; fi"
+
 
 
 locale:
@@ -39,33 +39,35 @@ test:
 	py.test
 
 
-coverage: mkbuilddir
-	py.test tests --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc -vvv
-
-
-ci: init-db install-deps
-	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install ${DJANGO_14}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install ${DJANGO_15}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install ${DJANGO_16}; fi"
-	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install ${DJANGO_17}; fi"
-	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install ${DJANGO_DEV}; fi"
-
-	@pip install coverage
-	@python -c "from __future__ import print_function;import django;print('Django version:', django.get_version())"
-	@echo "Database:" ${DBENGINE}
-
+ci: mkbuilddir install-deps init-db
 	$(MAKE) coverage
+
+
+coverage:
+	PYTHONPATH=${PWD}/tests/:${PWD} py.test tests -v --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc
+
 
 demo:
 	django-admin.py syncdb --settings=tests.settings --noinput
-	django-admin.py loaddata adminactions.json demoproject.json --settings=tests.settings
-	django-admin.py runserver --settings=tests.settings
+	django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
+	django-admin.py runserver --settings=demo.settings
 
 
 clean:
 	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST
-	find . -name __pycache__ -o -name "*.py?" -o -name "*.orig" -prune | xargs rm -rf
+	find . -name __pycache__ | xargs rm -rf
+	find . -name "*.py?" -o -name "*.orig" -prune | xargs rm -rf
 	find adminactions/locale -name django.mo | xargs rm -f
+
+
+fullclean:
+	rm -fr .tox .cache
+	rm -fr *.sqlite
+	$(MAKE) clean
+	mysql -e 'DROP DATABASE IF EXISTS adminactions;';
+	psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi
+	mysql -e 'DROP DATABASE IF EXISTS test_adminactions;';
+	psql -c 'DROP DATABASE IF EXISTS test_adminactions;' -U postgres; fi
 
 
 clonedigger: mkbuilddir

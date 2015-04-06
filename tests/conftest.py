@@ -1,17 +1,12 @@
-import os
-import sys
-from django.conf import settings
+from django.contrib.auth.models import User
+from django_dynamic_fixture import G
+import django_webtest
+import pytest
 
 
 def pytest_configure(config):
-    here = os.path.dirname(__file__)
-    sys.path.insert(0, os.path.join(here, 'demo'))
-
-    if not settings.configured:
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.settings'
-
     try:
-        from django.apps import AppConfig
+        from django.apps import AppConfig  # noqa
         import django
 
         django.setup()
@@ -19,17 +14,18 @@ def pytest_configure(config):
         pass
 
 
-def runtests(args=None):
-    import pytest
-
-    if not args:
-        args = []
-
-    if not any(a for a in args[1:] if not a.startswith('-')):
-        args.append('adminactions')
-
-    sys.exit(pytest.main(args))
+@pytest.fixture(scope='function')
+def app(request):
+    wtm = django_webtest.WebTestMixin()
+    wtm.csrf_checks = False
+    wtm._patch_settings()
+    request.addfinalizer(wtm._unpatch_settings)
+    return django_webtest.DjangoTestApp()
 
 
-if __name__ == '__main__':
-    runtests(sys.argv)
+
+@pytest.fixture(scope='function')
+def users():
+    return G(User, n=2, is_staff=False, is_active=False)
+
+
