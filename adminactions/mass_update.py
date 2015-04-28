@@ -9,6 +9,14 @@ if six.PY2:
 elif six.PY3:
     string = str
 
+# Django's SortedDict has been deprecated since 1.7
+# Use collections.OrderedDict instead.
+from django import VERSION
+if VERSION[0] == 1 and VERSION[1] < 7:
+    from django.utils.datastructures import SortedDict
+else:
+    from collections import OrderedDict as SortedDict
+
 from collections import defaultdict
 from django import forms
 from django.db.models import fields as df
@@ -22,7 +30,6 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.functional import curry
-from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from adminactions import compat
