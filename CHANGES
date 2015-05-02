@@ -1,3 +1,8 @@
+Release 0.8.1
+=============
+* Use collections.OrderedDict instead for Django1.7 or higher. (thanks @rvoicilas)
+
+
 Release 0.8
 ===========
 * python 3.3, 3.4 compatibility
