@@ -1,3 +1,8 @@
+Release 0.8.3
+=============
+* bugfix: support both post_syncdb and post_migrate
+
+
 Release 0.8.2
 =============
 * fixes #64: Export not working when actions enabled on top & bottom
