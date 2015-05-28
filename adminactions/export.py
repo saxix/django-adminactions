@@ -22,6 +22,14 @@ from adminactions.api import export_as_csv as _export_as_csv, export_as_xls as _
 from six.moves import zip
 
 
+def get_action(request):
+    try:
+        action_index = int(request.POST.get('index', 0))
+    except ValueError:
+        action_index = 0
+    return request.POST.getlist('action')[action_index]
+
+
 def base_export(modeladmin, request, queryset, title, impl, name, template, form_class, ):
     """
         export a queryset to csv file
@@ -45,7 +53,7 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
     cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields]
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
-               'action': request.POST.get('action'),
+               'action': get_action(request),
                'columns': [x for x, v in cols]}
     # initial.update(csv_options_default)
 
@@ -205,7 +213,8 @@ def _dump_qs(form, queryset, data, filename):
 def export_as_fixture(modeladmin, request, queryset):
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
-               'action': request.POST.get('action'),
+               'action': get_action(request),
+
                'serializer': 'json',
                'indent': 4}
     opts = modeladmin.model._meta
@@ -302,7 +311,8 @@ def export_delete_tree(modeladmin, request, queryset):
 
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
-               'action': request.POST.get('action'),
+               'action': get_action(request),
+
                'serializer': 'json',
                'indent': 4}
 
