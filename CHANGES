@@ -1,3 +1,8 @@
+Release 0.8.2
+=============
+* fixes #64: Export not working when actions enabled on top & bottom
+* document #62: default of csv is not csv (thanks @oppianmatt)
+
 Release 0.8.1
 =============
 * Use collections.OrderedDict instead for Django1.7 or higher. (thanks @rvoicilas)

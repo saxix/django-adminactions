@@ -31,4 +31,4 @@ def create_extra_permission(sender, **kwargs):
             Permission.objects.get_or_create(codename=codename, content_type=ct, defaults={'name': label[:50]})
 
 
-signals.post_syncdb.connect(create_extra_permission)
+signals.post_migrate.connect(create_extra_permission)
