@@ -63,7 +63,7 @@ def get_group(name=None, permissions=None):
         try:
             permission = Permission.objects.get(content_type__app_label=app_label, codename=codename)
         except Permission.DoesNotExist:
-            raise Permission.DoesNotExist('Permission `{0}` does not exists', permission_name)
+            raise Permission.DoesNotExist('Permission `{0}` does not exist'.format(permission_name))
 
         group.permissions.add(permission)
     return group
