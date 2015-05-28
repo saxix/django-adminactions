@@ -113,7 +113,9 @@ You can anyway :ref:`register your own functions <register_transform_function>`
 
 Export selected queryset as csv file. (see :ref:`csv <python:csv-contents>`)
 
-Available options: (see :ref:`python:csv-fmt-params`)
+Available options: (see :ref:`python:csv-fmt-params`).
+
+.. seealso:: Are you looking for the :ref:`api_export_as_csv` internal api? .
 
 ===================   ===========================================================================================
 **header**            add the header line to the file
@@ -145,6 +147,7 @@ Available options: (see :ref:`python:csv-fmt-params`)
 .. figure:: _static/export_as_csv.png
 
 
+.. seealso:: `csv_defaults`_
 
 
 .. _export_as_fixture:
@@ -172,7 +175,6 @@ Export selected queryset as fixtures using any registered Serializer.
 **Screenshot**
 
 .. figure:: _static/export_as_fixture.png
-
 
 
 .. _export_delete_tree:

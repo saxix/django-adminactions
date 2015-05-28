@@ -11,9 +11,9 @@ API
 
 .. currentmodule:: adminactions
 
--------------------
+---------
 Functions
--------------------
+---------
 
 .. _api_export_as_csv:
 
@@ -21,9 +21,31 @@ Functions
 export_as_csv
 -------------
 
+.. seealso:: Are you looking for the :ref:`export_as_csv` action? .
+
 .. function:: adminactions.api.export_as_csv
 
 Exports a queryset as csv from a queryset with the given fields.
+
+
+.. _csv_defaults:
+
+**Defaults**
+
+.. warning:: Due a mistake the default configuration of `export_as_csv` is not `csv` but `semicolon-csv`
+
+::
+
+    csv_options_default = {'date_format': 'd/m/Y',
+                           'datetime_format': 'N j, Y, P',
+                           'time_format': 'P',
+                           'header': False,
+                           'quotechar': '"',
+                           'quoting': csv.QUOTE_ALL,
+                           'delimiter': ';',
+                           'escapechar': '\\', }
+
+
 
 Usage examples
 
