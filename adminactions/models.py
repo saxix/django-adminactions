@@ -21,9 +21,11 @@ def get_models(app_config):
         return get_models(app_config)
 
 
-def create_extra_permission(app_config, **kwargs):
+def create_extra_permission(sender, **kwargs):
     from django.contrib.auth.models import Permission
     from django.contrib.contenttypes.models import ContentType
+
+    app_config = kwargs.get('app_config', sender)
 
     for model in get_models(app_config):
         for action in ('adminactions_export', 'adminactions_massupdate', 'adminactions_merge'):
