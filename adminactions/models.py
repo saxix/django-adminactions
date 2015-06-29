@@ -7,25 +7,25 @@ def get_permission_codename(action, opts):
     return '%s_%s' % (action, opts.object_name.lower())
 
 
-def get_models(sender):
+def get_models(app_config):
     """Handles deprecation of django.db.models.loading in Django1.9"""
 
     try:
         from django.apps import apps
 
-        return [m for m in sender.get_models(sender)]
+        return [m for m in app_config.get_models()]
     except ImportError:
         # Default to django.db.models.loading when Django version < 1.7
         from django.db.models.loading import get_models
 
-        return get_models(sender)
+        return get_models(app_config)
 
 
-def create_extra_permission(sender, **kwargs):
+def create_extra_permission(app_config, **kwargs):
     from django.contrib.auth.models import Permission
     from django.contrib.contenttypes.models import ContentType
 
-    for model in get_models(sender):
+    for model in get_models(app_config):
         for action in ('adminactions_export', 'adminactions_massupdate', 'adminactions_merge'):
             opts = model._meta
             codename = get_permission_codename(action, opts)
