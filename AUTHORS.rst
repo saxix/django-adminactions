@@ -23,6 +23,7 @@ Contributors
 * Bertrand Bordage  (`@BertrandBordage`_)
 * jht001 (`@jht001`_)
 * Cesar Abel (`@xangmuve`_)
+* Viator (`@viatoriche`_)
 
 .. _`@tdruez`: https://github.com/tdruez
 .. _`@jht001`: https://github.com/jht001
@@ -35,4 +36,5 @@ Contributors
 .. _`@hanfeisun`: https://github.com/hanfeisun
 .. _`@ipmb`: https://github.com/ipmb
 .. _`@xangmuve`: https://github.com/xangmuve
+.. _`@viatoriche`: https://github.com/viatoriche
 

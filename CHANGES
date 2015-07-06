@@ -1,3 +1,9 @@
+Release 0.8.4
+=============
+* fixes :ghissue:`70` get_models return incorrect models in django 1.7+
+* closes :ghissue:`71`
+
+
 Release 0.8.3
 =============
 * bugfix: support both post_syncdb and post_migrate
