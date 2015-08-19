@@ -148,9 +148,15 @@ def merge(modeladmin, request, queryset):  # noqa
                 if isinstance(field, models.DateTimeField):
                     for target in (master, other):
                         raw_value = getattr(target, field.name)
-                        fixed_value = datetime(raw_value.year, raw_value.month, raw_value.day,
-                                               raw_value.hour, raw_value.minute, raw_value.second)
-                        setattr(target, field.name, fixed_value)
+                        if raw_value:
+                            fixed_value = datetime(
+                                raw_value.year,
+                                raw_value.month,
+                                raw_value.day,
+                                raw_value.hour,
+                                raw_value.minute,
+                                raw_value.second)
+                            setattr(target, field.name, fixed_value)
         except ValueError:
             messages.error(request, _('Please select exactly 2 records'))
             return
