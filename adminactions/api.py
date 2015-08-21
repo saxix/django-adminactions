@@ -12,10 +12,18 @@ from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 try:
-    # only supported in django >= 1.5
-    from django.http import StreamingHttpResponse
+    # actually supported in admin actions since django >= 1.6
+    # (see https://code.djangoproject.com/ticket/20331),
+    # django <= 1.5 can still HttpResponse
+    import django
+    if django.get_version() < '1.6':
+        StreamingHttpResponse = HttpResponse
+    else:
+        from django.http import StreamingHttpResponse
 except ImportError:
-    StreamingHttpResponse = None
+    # Before django 1.5 HttpResponse could implicitly stream response
+    StreamingHttpResponse = HttpResponse
+
 from django.utils import dateformat
 from django.utils.encoding import smart_str, force_text, smart_text
 from adminactions import compat
@@ -144,8 +152,9 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
 
     :return: HttpResponse instance
     """
-    streaming_enabled = getattr(settings, 'ADMINACTIONS_STREAM_CSV',
-                                False) and StreamingHttpResponse is not None
+    streaming_enabled = (
+        getattr(settings, 'ADMINACTIONS_STREAM_CSV', False)
+    )
     if out is None:
         if streaming_enabled:
             response_class = StreamingHttpResponse
@@ -212,9 +221,13 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
             yield writer.writerow(row)
 
     if streaming_enabled:
-        response.streaming_content = itertools.chain(yield_header(), yield_rows())
+        content_attr = 'content' if (
+            StreamingHttpResponse is HttpResponse) else 'streaming_content'
+        setattr(response, content_attr,
+                itertools.chain(yield_header(), yield_rows()))
     else:
-        collections.deque(itertools.chain(yield_header(), yield_rows()), maxlen=0)
+        collections.deque(itertools.chain(
+            yield_header(), yield_rows()), maxlen=0)
 
     return response
 
