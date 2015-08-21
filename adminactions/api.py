@@ -319,6 +319,8 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
 
     settingstime_zone = pytz.timezone(settings.TIME_ZONE)
 
+    _styles = {}
+
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
         for idx, fieldname in enumerate(fields):
@@ -328,11 +330,12 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
                                         fieldname,
                                         usedisplay=use_display,
                                         raw_callable=False)
-                if callable(fmt):
-                    value = xlwt.Formula(fmt(value))
-                    style = xlwt.easyxf(num_format_str='formula')
-                else:
-                    style = xlwt.easyxf(num_format_str=fmt)
+                if hash(fmt) not in _styles:
+                    if callable(fmt):
+                        value = xlwt.Formula(fmt(value))
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str='formula')
+                    else:
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
 
                 if isinstance(value, datetime.datetime):
                     try:
@@ -343,10 +346,10 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
                 if isinstance(value, (list, tuple)):
                     value = "".join(value)
 
-                sheet.write(rownum + 1, idx + 1, value, style)
+                sheet.write(rownum + 1, idx + 1, value, _styles[hash(fmt)])
             except Exception as e:
                 # logger.warning("TODO refine this exception: %s" % e)
-                sheet.write(rownum + 1, idx + 1, smart_str(e), style)
+                sheet.write(rownum + 1, idx + 1, smart_str(e), _styles[hash(fmt)])
 
     book.save(response)
     return response
