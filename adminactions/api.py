@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+import collections
+import itertools
 import six
 import pytz
 import xlwt
@@ -9,6 +11,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
+try:
+    # only supported in django >= 1.5
+    from django.http import StreamingHttpResponse
+except ImportError:
+    StreamingHttpResponse = None
 from django.utils import dateformat
 from django.utils.encoding import smart_str, force_text, smart_text
 from adminactions import compat
@@ -113,6 +120,15 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     return result
 
 
+class Echo(object):
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+
 def export_as_csv(queryset, fields=None, header=None,  # noqa
                   filename=None, options=None, out=None):
     """
@@ -127,10 +143,17 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
 
     :return: HttpResponse instance
     """
+    streaming_enabled = getattr(settings, 'ADMINACTIONS_STREAM_CSV',
+                                False) and StreamingHttpResponse is not None
     if out is None:
+        if streaming_enabled:
+            response_class = StreamingHttpResponse
+        else:
+            response_class = HttpResponse
+
         if filename is None:
             filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        response = HttpResponse(content_type='text/csv')
+        response = response_class(content_type='text/csv')
         response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
     else:
         response = out
@@ -144,40 +167,54 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields]
 
+    if streaming_enabled:
+        buffer_object = Echo()
+    else:
+        buffer_object = response
+
     dialect = config.get('dialect', None)
     if dialect is not None:
-        writer = csv.writer(response, dialect=dialect)
+        writer = csv.writer(buffer_object, dialect=dialect)
     else:
-        writer = csv.writer(response,
+        writer = csv.writer(buffer_object,
                             escapechar=str(config['escapechar']),
                             delimiter=str(config['delimiter']),
                             quotechar=str(config['quotechar']),
                             quoting=int(config['quoting']))
 
-    if bool(header):
-        if isinstance(header, (list, tuple)):
-            writer.writerow(header)
-        else:
-            writer.writerow([f for f in fields])
-
     settingstime_zone = pytz.timezone(settings.TIME_ZONE)
 
-    for obj in queryset:
-        row = []
-        for fieldname in fields:
-            value = get_field_value(obj, fieldname)
-            if isinstance(value, datetime.datetime):
-                try:
-                    value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
-                except ValueError:
-                    # astimezone() cannot be applied to a naive datetime
-                    value = dateformat.format(value, config['datetime_format'])
-            elif isinstance(value, datetime.date):
-                value = dateformat.format(value, config['date_format'])
-            elif isinstance(value, datetime.time):
-                value = dateformat.format(value, config['time_format'])
-            row.append(smart_str(value))
-        writer.writerow(row)
+    def yield_header():
+        if bool(header):
+            if isinstance(header, (list, tuple)):
+                yield writer.writerow(header)
+            else:
+                yield writer.writerow([f for f in fields])
+        yield ''
+
+    def yield_rows():
+        for obj in queryset:
+            row = []
+            for fieldname in fields:
+                value = get_field_value(obj, fieldname)
+                if isinstance(value, datetime.datetime):
+                    try:
+                        value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                    except ValueError:
+                        # astimezone() cannot be applied to a naive datetime
+                        value = dateformat.format(value, config['datetime_format'])
+                elif isinstance(value, datetime.date):
+                    value = dateformat.format(value, config['date_format'])
+                elif isinstance(value, datetime.time):
+                    value = dateformat.format(value, config['time_format'])
+                row.append(smart_str(value))
+            yield writer.writerow(row)
+
+    if streaming_enabled:
+        response.streaming_content = itertools.chain(yield_header(), yield_rows())
+    else:
+        collections.deque(itertools.chain(yield_header(), yield_rows()), maxlen=0)
+
     return response
 
 

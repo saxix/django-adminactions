@@ -14,6 +14,8 @@ from django.utils.encoding import smart_text
 from django_webtest import WebTest
 from django_dynamic_fixture import G
 from django.contrib.auth.models import User
+from django.test.utils import override_settings
+
 from demo.utils import (user_grant_permission, admin_register,
                         CheckSignalsMixin, SelectRowsMixin)
 
@@ -209,6 +211,17 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             if steps >= 2:
                 res = res.form.submit('apply')
         return res
+
+    @override_settings(ADMINACTIONS_STREAM_CSV=True)
+    def test_streaming_export(self):
+        res = self._run_action()
+        if six.PY2:
+            buff = io.BytesIO(res.body)
+        else:
+            buff = io.StringIO(smart_text(res.body))
+        csv_reader = csv.reader(buff)
+
+        self.assertEqual(len(list(csv_reader)), 2)
 
 
 class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
