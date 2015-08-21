@@ -4,6 +4,7 @@ import io
 import six
 import xlrd
 import mock
+import time
 
 if six.PY2:
     import unicodecsv as csv
@@ -341,3 +342,38 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             sheet = w.sheet_by_index(0)
             self.assertEquals(sheet.cell_value(0, 1), u'Chäř')
             self.assertEquals(sheet.cell_value(1, 1), u'Pizzä ïs Gööd')
+
+    def test_faster_export(self):
+        # generate 3k users
+        start = time.time()
+        user_count = User.objects.count()
+        User.objects.bulk_create([User(
+            username='bulk_user_%s' % i) for i in range(3000)])
+        # print('created 3k users in %.1f seconds' % (time.time() - start))
+        self.assertEqual(User.objects.count(), 3000 + user_count)
+
+        start = time.time()
+        with user_grant_permission(self.user, [
+                'auth.change_user', 'auth.adminactions_export_user']):
+            res = self.app.get('/', user='user')
+            res = res.click('Users')
+            form = res.forms['changelist-form']
+            form['action'] = self.action_name
+            form['select_across'] = 1
+            self._select_rows(form)
+            res = form.submit()
+            res.form['header'] = 1
+            res = res.form.submit('apply')
+
+        res_time = (time.time() - start)
+        # print('Response returned in %.1f seconds' % res_time)
+
+        io = six.BytesIO(res.body)
+
+        io.seek(0)
+        w = xlrd.open_workbook(file_contents=io.read())
+        sheet = w.sheet_by_index(0)
+
+        self.assertEqual(sheet.nrows, 3000 + user_count + 1)
+        self.assertLessEqual(res_time, 6.5, "Response should return under 6.5 "
+                             "seconds, was %.2f" % res_time)
