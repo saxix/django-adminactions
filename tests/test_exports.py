@@ -5,6 +5,7 @@ import six
 import xlrd
 import mock
 import time
+import unittest
 
 if six.PY2:
     import unicodecsv as csv
@@ -343,6 +344,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self.assertEquals(sheet.cell_value(0, 1), u'Chäř')
             self.assertEquals(sheet.cell_value(1, 1), u'Pizzä ïs Gööd')
 
+    @unittest.skip("Impossible to reliably time different machine runs")
     def test_faster_export(self):
         # generate 3k users
         start = time.time()
