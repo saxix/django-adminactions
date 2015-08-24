@@ -330,9 +330,10 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
                                         fieldname,
                                         usedisplay=use_display,
                                         raw_callable=False)
+                if callable(fmt):
+                    value = xlwt.Formula(fmt(value))
                 if hash(fmt) not in _styles:
                     if callable(fmt):
-                        value = xlwt.Formula(fmt(value))
                         _styles[hash(fmt)] = xlwt.easyxf(num_format_str='formula')
                     else:
                         _styles[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
