@@ -57,7 +57,8 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
                'action': get_action(request),
                'columns': [x for x, v in cols]}
     if initial["action"] == "export_as_csv":
-        initial.update(getattr(settings, "CSV_OPTIONS_DEFAULT", {}))
+        initial.update(getattr(
+            settings, "ADMINACTIONS_CSV_OPTIONS_DEFAULT", {}))
 
     if 'apply' in request.POST:
         form = form_class(request.POST)
