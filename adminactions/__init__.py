@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 NAME = 'django-adminactions'
-VERSION = __version__ = (0, 8, 5, 'final', 0)
+VERSION = __version__ = (0, 8, 5, 'final', 1)
 __author__ = 'sax'
 
 import subprocess
@@ -27,6 +27,8 @@ def get_version(version=None):
     elif version[3] != 'final':
         mapping = {'alpha': 'a', 'beta': 'b', 'rc': 'c'}
         sub = mapping[version[3]] + str(version[4])
+    elif version[3] == 'final' and version[4] != 0:
+        sub = '-%s' % version[4]
 
     return main + sub
 
