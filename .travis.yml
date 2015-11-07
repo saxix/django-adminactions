@@ -16,11 +16,6 @@ env:
   - TOXENV=py27-d19
   - TOXENV=py33-d17
   - TOXENV=py33-d18
-  - TOXENV=py33-d19
-  - TOXENV=py34-d17
-  - TOXENV=py34-d18
-  - TOXENV=py34-d19
-  - TOXENV=py34-d19
   - TOXENV=py35-d19
 
 install:
