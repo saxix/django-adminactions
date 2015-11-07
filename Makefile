@@ -8,31 +8,9 @@ mkbuilddir:
 	mkdir -p ${BUILDDIR} ${BINDIR}
 
 
-install-deps:
-	pip install -qe .
-	pip install -qr adminactions/requirements/testing.pip
-	@sh -c "if [ '${DJANGO}' = '1.4.x' ]; then pip install -q 'django>=1.4,<1.5'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.5.x' ]; then pip install -q 'django>=1.5,<1.6'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.6.x' ]; then pip install -q 'django>=1.6,<1.7'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.7.x' ]; then pip install -q 'django>=1.7,<1.8'; fi"
-	@sh -c "if [ '${DJANGO}' = '1.8.x' ]; then pip install -q 'django>=1.8,<1.9'; fi"
-	@sh -c "if [ '${DJANGO}' = 'dev' ]; then pip install -q git+git://github.com/django/django.git; fi"
-
-
-
 locale:
 	cd adminactions && django-admin.py makemessages -l en
 	export PYTHONPATH=${PYTHONPATH} && cd adminactions && django-admin.py compilemessages --settings=${DJANGO_SETTINGS_MODULE}
-
-
-init-db:
-	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then mysql -e 'DROP DATABASE IF EXISTS adminactions;'; fi"
-	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS adminactions CHARSET=utf-8 COLLATE=utf8_general_ci;'; fi"
-	@sh -c "if [ '${DBENGINE}' = 'mysql' ]; then pip install MySQL-python; fi"
-
-	@sh -c "if [ '${DBENGINE}' = 'pg' ]; then psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi"
-	@sh -c "if [ '${DBENGINE}' = 'pg' ]; then psql -c 'CREATE DATABASE adminactions;' -U postgres; fi"
-	@sh -c "if [ '${DBENGINE}' = 'pg' ]; then pip install -q psycopg2; fi"
 
 
 test:
@@ -48,9 +26,9 @@ coverage:
 
 
 demo:
-	django-admin.py syncdb --settings=tests.settings --noinput
-	django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
-	django-admin.py runserver --settings=demo.settings
+	PYTHONPATH=${PWD}:${PWD}/tests django-admin.py syncdb --settings=demo.settings --noinput
+	PYTHONPATH=${PWD}:${PWD}/tests  django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
+	PYTHONPATH=${PWD}:${PWD}/tests  django-admin.py runserver --settings=demo.settings
 
 
 clean:

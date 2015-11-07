@@ -89,6 +89,10 @@ TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
 DDF_DEFAULT_DATA_FIXTURE = 'demo.util.DataFixtureClass'
 
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',

@@ -1,35 +1,33 @@
 language: python
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
+sudo: false
 
 cache:
-  - pip
+  directories:
+    - $HOME/.cache/pip
 
 sudo: false
 
-services:
-  - MySQL
-  - PostgreSQL
-
 env:
-  - DJANGO=1.4.x
-  - DJANGO=1.5.x
-  - DJANGO=1.6.x
-  - DJANGO=1.7.x
-  - DJANGO=1.8.x
-  - DJANGO=dev
+  - TOXENV=py27-d14
+  - TOXENV=py27-d15
+  - TOXENV=py27-d16
+  - TOXENV=py27-d17
+  - TOXENV=py27-d18
+  - TOXENV=py27-d19
+  - TOXENV=py33-d17
+  - TOXENV=py33-d18
+  - TOXENV=py33-d19
+  - TOXENV=py34-d17
+  - TOXENV=py34-d18
+  - TOXENV=py34-d19
+  - TOXENV=py34-d19
+  - TOXENV=py35-d19
 
 install:
-  - pip install tox>=1.8
-  - pip install python-coveralls>=2.5 coveralls>=0.5
-  - make install-deps
-
+  - pip install tox coverage coveralls>=0.5
 
 script:
-  - make init-db
-  - make coverage
+  - tox -e $TOXENV --recreate -- -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase
@@ -38,21 +36,3 @@ after_success:
   - coverage combine
   - coveralls
 
-matrix:
-  allow_failures:
-    - env: DJANGO=dev
-
-  exclude:
-    - python: "3.3"
-      env: DJANGO=1.4.x
-    - python: "3.3"
-      env: DJANGO=1.5.x
-    - python: "3.3"
-      env: DJANGO=1.6.x
-
-    - python: "3.4"
-      env: DJANGO=1.4.x
-    - python: "3.4"
-      env: DJANGO=1.5.x
-    - python: "3.4"
-      env: DJANGO=1.6.x

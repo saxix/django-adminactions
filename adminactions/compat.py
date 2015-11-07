@@ -3,10 +3,9 @@ from contextlib import contextmanager
 import django
 import django.db.transaction as t
 
-
 version = django.VERSION[:2]
 
-if version in ((1, 5), (1, 4)):  # noqa
+if version <= (1, 5):  # noqa
 
     @contextmanager
     def nocommit(using=None):
@@ -15,6 +14,7 @@ if version in ((1, 5), (1, 4)):  # noqa
         yield
         t.rollback()
         t.leave_transaction_management(using=using)
+
 
     class atomic(object):
         def __init__(self, using=None):
@@ -40,12 +40,14 @@ if version in ((1, 5), (1, 4)):  # noqa
                 t.leave_transaction_management(using=self.using)
 
 
-elif version in [(1, 6), (1, 7), (1, 8)]:
+else:
     from django.db.transaction import atomic  # noqa
+
 
     class NoCommit(t.Atomic):
         def __exit__(self, exc_type, exc_value, traceback):
             super(NoCommit, self).__exit__(Exception, Exception(), None)
+
 
     def nocommit(using=None, savepoint=True):
         return NoCommit(using, savepoint)
