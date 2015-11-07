@@ -1,6 +1,10 @@
 from __future__ import absolute_import
 from django.forms import widgets
-from django.forms.util import flatatt
+try:
+    from django.forms.util import flatatt
+except ImportError:
+    from django.forms.utils import flatatt
+
 from django.template import Library
 from django.utils.encoding import smart_text
 from django.utils.html import escape, conditional_escape

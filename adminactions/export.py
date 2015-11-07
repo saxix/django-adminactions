@@ -18,7 +18,7 @@ from django.core import serializers as ser
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVOptions, XLSOptions
 from adminactions.models import get_permission_codename
-from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end, django
 from adminactions.api import export_as_csv as _export_as_csv, export_as_xls as _export_as_xls
 from six.moves import zip
 
@@ -202,8 +202,14 @@ def _dump_qs(form, queryset, data, filename):
     fmt = form.cleaned_data.get('serializer')
 
     json = ser.get_serializer(fmt)()
-    ret = json.serialize(data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
-                         indent=form.cleaned_data.get('indent'))
+    if django.VERSION[:2] >= (1, 9):
+        ret = json.serialize(data,
+                             # use_natural_primary_keys=form.cleaned_data.get('use_natural_key', False),
+                             use_natural_foreign_keys=form.cleaned_data.get('use_natural_key', False),
+                             indent=form.cleaned_data.get('indent'))
+    else:
+        ret = json.serialize(data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
+                             indent=form.cleaned_data.get('indent'))
 
     response = HttpResponse(content_type='application/json')
     if not form.cleaned_data.get('on_screen', False):

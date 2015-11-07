@@ -7,17 +7,22 @@ import adminactions as app
 NAME = app.NAME
 RELEASE = app.get_version()
 
+rel = lambda fname: os.path.join(os.path.dirname(__file__),
+                                 'adminactions',
+                                 'requirements', fname)
+
 if sys.version_info[0] == 2:
-    reqs = 'adminactions/requirements/install2.pip'
+    reqs = 'install.py2.pip'
 elif sys.version_info[0] == 3:
-    reqs = 'adminactions/requirements/install3.pip'
+    reqs = 'install.py3.pip'
 
 
 def fread(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    return open(rel('install.any.pip')).read() + open(rel(fname)).read()
 
 
-tests_require = fread('adminactions/requirements/testing.pip')
+tests_require = fread('testing.pip')
+dev_require = fread('develop.pip')
 
 setup(
     name=NAME,
@@ -33,7 +38,8 @@ setup(
     install_requires=fread(reqs),
     tests_require=tests_require,
     extras_require={
-        'tests': tests_require,
+        'test': tests_require,
+        'dev': dev_require + tests_require,
     },
     test_suite='conftest.runtests',
     zip_safe=False,

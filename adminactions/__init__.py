@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 NAME = 'django-adminactions'
-VERSION = __version__ = (0, 8, 5, 'final', 1)
+VERSION = __version__ = (1, 0, 0, 'alpha', 0)
 __author__ = 'sax'
 
 import subprocess
