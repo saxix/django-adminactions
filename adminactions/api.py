@@ -108,10 +108,11 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                     except ObjectDoesNotExist:
                         pass
                 else:
-                    accessor = getattr(other, name)
-                    rel_fieldname = list(accessor.core_filters.keys())[0].split('__')[0]
-                    for r in accessor.all():
-                        all_related[name].append((rel_fieldname, r))
+                    accessor = getattr(other, name, None)
+                    if accessor:
+                        rel_fieldname = list(accessor.core_filters.keys())[0].split('__')[0]
+                        for r in accessor.all():
+                            all_related[name].append((rel_fieldname, r))
 
         if commit:
             for name, elements in list(all_related.items()):
