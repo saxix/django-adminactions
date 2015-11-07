@@ -27,6 +27,8 @@ def get_version(version=None):
     elif version[3] != 'final':
         mapping = {'alpha': 'a', 'beta': 'b', 'rc': 'c'}
         sub = mapping[version[3]] + str(version[4])
+    elif version[3] == 'final' and version[4] != 0:
+        sub = '-%s' % version[4]
 
     return main + sub
 
