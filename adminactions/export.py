@@ -7,6 +7,7 @@ from django.db.models import ManyToManyField, ForeignKey
 from django.db.models.deletion import Collector
 from django.utils.translation import ugettext_lazy as _
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -55,7 +56,9 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
                'select_across': request.POST.get('select_across') == '1',
                'action': get_action(request),
                'columns': [x for x, v in cols]}
-    # initial.update(csv_options_default)
+    if initial["action"] == "export_as_csv":
+        initial.update(getattr(
+            settings, "ADMINACTIONS_CSV_OPTIONS_DEFAULT", {}))
 
     if 'apply' in request.POST:
         form = form_class(request.POST)
