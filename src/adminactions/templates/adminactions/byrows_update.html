@@ -1,0 +1,43 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify actions static %}
+{% block extrahead %}{{ block.super }}
+    <style type="text/css">
+        #col1 {
+            float: left;
+            width: 70%;
+        }
+
+        #col2 {
+            float: right;
+            width: 30%;
+        }
+
+        #col2 select {
+            width: 100%;
+        }
+    </style>
+    <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+    <div class="breadcrumbs">
+        <a href="../../">{% trans "Home" %}</a> &rsaquo;
+        <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+        <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+        Mass Update
+    </div>
+{% endif %}{% endblock %}
+
+{% block content %}
+    {% if form.subject.errors %}
+        <ol>
+            {% for error in form.subject.errors %}
+                <li><strong>{{ error|escape }}</strong></li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+    <div>
+        Lot of work todo!
+    </div>
+{% endblock %}
