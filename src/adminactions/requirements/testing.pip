@@ -1,0 +1,16 @@
+coverage
+django-dynamic-fixture
+django-webtest>=1.7.5
+mock>=1.0.1
+modernize
+pytest
+pytest-cache
+pytest-cov
+pytest-django
+pytest-pythonpath
+pytest-echo
+selenium>=2.42.0
+WebTest>=2.0.7
+setuptools>=15.0
+flake8
+

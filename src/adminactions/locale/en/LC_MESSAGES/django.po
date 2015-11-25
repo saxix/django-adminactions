@@ -1,0 +1,150 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-12-29 10:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: export.py:30 export.py:212 export.py:289 merge.py:67
+#, python-format
+msgid "Sorry you do not have rights to execute this action (%s)"
+msgstr ""
+
+#: export.py:111 export.py:116
+msgid "Export as CSV"
+msgstr ""
+
+#: export.py:123 export.py:128
+msgid "Export as XLS"
+msgstr ""
+
+#: export.py:265
+msgid "Export as Fixture"
+msgstr ""
+
+#: export.py:278
+msgid "Export as fixture"
+msgstr ""
+
+#: export.py:351
+msgid "Export Delete Tree"
+msgstr ""
+
+#: export.py:364
+msgid "Export delete tree"
+msgstr ""
+
+#: mass_update.py:209
+msgid "Sorry you do not have rights to execute this action"
+msgstr ""
+
+#: mass_update.py:276
+#, python-format
+msgid "Updated %s records"
+msgstr ""
+
+#: merge.py:26
+msgid "Dependencies"
+msgstr ""
+
+#: merge.py:27
+msgid "Move"
+msgstr ""
+
+#: merge.py:27
+msgid "Delete"
+msgstr ""
+
+#: merge.py:136
+msgid "Please select exactly 2 records"
+msgstr ""
+
+#: merge.py:159
+#, python-format
+msgid "Merge selected %(verbose_name_plural)s"
+msgstr ""
+
+#: templates/adminactions/any_model.html:26
+#: templates/adminactions/charts.html:18
+#: templates/adminactions/export_csv.html:46
+#: templates/adminactions/export_fixture.html:6
+#: templates/adminactions/export_xls.html:19
+#: templates/adminactions/mass_update.html:26
+#: templates/adminactions/merge.html:5
+#: templates/adminactions/merge_preview.html:5
+msgid "Home"
+msgstr ""
+
+#: templates/adminactions/export_csv.html:50
+msgid "CSV Export Options"
+msgstr ""
+
+#: templates/adminactions/export_csv.html:69
+msgid "Export"
+msgstr ""
+
+#: templates/adminactions/merge.html:8
+#: templates/adminactions/merge_preview.html:8
+msgid "Merge records"
+msgstr ""
+
+#: templates/adminactions/merge.html:34
+msgid "Field"
+msgstr ""
+
+#: templates/adminactions/merge.html:35
+msgid "Master"
+msgstr ""
+
+#: templates/adminactions/merge.html:35
+msgid "This will be preserved"
+msgstr ""
+
+#: templates/adminactions/merge.html:37
+msgid "swap"
+msgstr ""
+
+#: templates/adminactions/merge.html:38
+msgid "Result"
+msgstr ""
+
+#: templates/adminactions/merge.html:40
+msgid "Other"
+msgstr ""
+
+#: templates/adminactions/merge.html:40
+msgid "This will be removed"
+msgstr ""
+
+#: templates/adminactions/merge.html:69
+#: templates/adminactions/merge_preview.html:9
+msgid "Preview"
+msgstr ""
+
+#: templates/adminactions/merge_preview.html:18
+msgid "Key"
+msgstr ""
+
+#: templates/adminactions/merge_preview.html:23
+msgid "Original"
+msgstr ""
+
+#: templates/adminactions/merge_preview.html:24
+msgid "After Merging"
+msgstr ""
+
+#: templates/adminactions/merge_preview.html:39
+msgid "Merge"
+msgstr ""
