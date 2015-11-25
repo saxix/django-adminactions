@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import mock
-import django_webtest
 from django.db import IntegrityError
 from django.contrib.auth.models import Group, User
 from django_dynamic_fixture import G

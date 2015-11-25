@@ -19,7 +19,9 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
     def _run_action(self, steps=2):
-        with user_grant_permission(self.user, ['auth.change_user']):
+        # with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_massupdate_demomodel']):
+
+        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_chart_user']):
             res = self.app.get('/', user='user')
             res = res.click('Users')
             if steps >= 1:

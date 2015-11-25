@@ -32,9 +32,9 @@ Project links
 -------------
 
 +--------------------+----------------+--------------+-------------------------+
-| Stable             | |master-build| | |master-cov| | |master-req|            |
+| Stable             | |master-build| | |master-cov| |                         |
 +--------------------+----------------+--------------+-------------------------+
-| Development        | |dev-build|    | |dev-cov|    | |dev-req|               |
+| Development        | |dev-build|    | |dev-cov|    |                         |
 +--------------------+----------------+--------------+-------------------------+
 | Project home page: |https://github.com/saxix/django-adminactions             |
 +--------------------+---------------+-----------------------------------------+
