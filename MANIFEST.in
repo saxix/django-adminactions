@@ -4,7 +4,8 @@ include AUTHORS.rst
 include CHANGES
 include LICENSE
 include setup.py
-recursive-include src/adminactions *.*
-recursive-exclude src/adminactions *.pyc
-recursive-include src/requirements *.pip
-
+recursive-include src *
+recursive-include src/adminactions/templates *
+recursive-include src/adminactions/static *
+recursive-include src/adminactions/requirements *.pip
+global-exclude *~

@@ -1,0 +1,87 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify adminmedia static %}
+{% block extrahead %}{{ block.super }}
+    <style type="text/css">
+        #col1 {
+            float: left;
+            width: 70%;
+        }
+
+        #col2 {
+            float: right;
+            width: 30%;
+        }
+        #col2 select {
+            width: 100%;
+        }
+    </style>
+    <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'adminactions/js/massupdate.js' %}"></script>
+    <!--<script language="javascript" type="text/javascript" src="/media/js/admin/DateTimeShortcuts.js"></script>-->
+{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+    <div class="breadcrumbs">
+        <a href="../../../">{% trans "Home" %}</a> &rsaquo;
+        <a href="../../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+        <a href="../">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+        Mass Update
+    </div>
+{% endif %}{% endblock %}
+
+{% block content %}
+    {% if form.subject.errors %}
+        <ol>
+            {% for error in form.subject.errors %}
+                <li><strong>{{ error|escape }}</strong></li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+
+    <div id='col1'>
+        <form action="../" method="post">
+            {% csrf_token %}
+            <table>
+                {% for field in adminform.form.configured_fields %}
+                    <tr>
+                        <td>{% if field.field.required %}
+                            <b>{% endif %} {{ field.label_tag }}{% if field.field.required %}</b>{% endif %}  </td>
+                        <td colspan="3">
+                            {{ field.errors }}
+                            {{ field }}&nbsp;<span class="help">{{ field.help_text }}</span>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr><td colspan="4"><hr/></td></tr>
+                <tr><th>field name </th><th>update</th><th>new value</th><th>existing values <small><i>(some of the most used )</i></small></th></tr>
+                {% for field in adminform.form.model_fields %}
+                    <tr class="{{ field.name }}-row">
+                        <td>{% if field.field.required %}
+                            <b>{% endif %} {{ field.label_tag }}{% if field.field.required %}</b>{% endif %}  </td>
+                        <td class='col_enabler'><input type="checkbox" name="chk_id_{{ field.name }}" class="enabler"></td>
+                        <td class='col_field field-{{ field.name }}-value'>{{ field.errors }}
+                            {{ field }}&nbsp;</td>
+                        </td>
+
+                    </tr>
+                {% endfor %}
+            </table>
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+            <input type="hidden" name="action" value="{{ action }}"/>
+            <input type="submit" name="apply" value="Update records"/>
+        </form>
+    </div>
+    <div id='col2'>
+        Selected records:
+        <select size="30">
+            {% for el in selection %}
+                <option>{{ el }}</option>
+            {% endfor %}
+        </select>
+
+
+    </div>
+{% endblock %}
