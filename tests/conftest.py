@@ -3,6 +3,8 @@ from django_dynamic_fixture import G
 import django_webtest
 import pytest
 
+from demo.models import DemoModel
+
 
 def pytest_configure(config):
     try:
@@ -23,9 +25,16 @@ def app(request):
     return django_webtest.DjangoTestApp()
 
 
-
 @pytest.fixture(scope='function')
 def users():
     return G(User, n=2, is_staff=False, is_active=False)
 
 
+@pytest.fixture(scope='function')
+def demomodels():
+    return G(DemoModel, n=20)
+
+
+@pytest.fixture(scope='function')
+def admin():
+    return G(User, is_staff=True, is_active=True)

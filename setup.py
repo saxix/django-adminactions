@@ -1,13 +1,16 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 import os
 from setuptools import setup, find_packages
 import sys
+sys.path.append('src')
 import adminactions as app
 
 NAME = app.NAME
 RELEASE = app.get_version()
 
 rel = lambda fname: os.path.join(os.path.dirname(__file__),
+                                 'src',
                                  'adminactions',
                                  'requirements', fname)
 
@@ -33,7 +36,10 @@ setup(
     author_email='s.apostolico@gmail.com',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
     license='BSD',
-    packages=find_packages(),
+
+    package_dir={'': 'src'},
+    packages=find_packages('src'),
+
     include_package_data=True,
     install_requires=fread(reqs),
     tests_require=tests_require,

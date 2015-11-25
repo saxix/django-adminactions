@@ -24,6 +24,8 @@ Contributors
 * jht001 (`@jht001`_)
 * Cesar Abel (`@xangmuve`_)
 * Viator (`@viatoriche`_)
+* Serhiy Zahoriya (`@int-ua`_)
+* Pavel Savchenko (`@asfaltboy`_)
 
 .. _`@tdruez`: https://github.com/tdruez
 .. _`@jht001`: https://github.com/jht001
@@ -37,4 +39,6 @@ Contributors
 .. _`@ipmb`: https://github.com/ipmb
 .. _`@xangmuve`: https://github.com/xangmuve
 .. _`@viatoriche`: https://github.com/viatoriche
+.. _`@asfaltboy`: https://github.com/asfaltboy
+.. _`@int-ua`: https://github.com/int-ua
 

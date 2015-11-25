@@ -5,24 +5,10 @@ PYTHONPATH:=${PWD}/tests/:${PWD}
 DJANGO?='1.7.x'
 
 mkbuilddir:
-	mkdir -p ${BUILDDIR} ${BINDIR}
+	mkdir -p ${BUILDDIR}
 
-
-locale:
-	cd adminactions && django-admin.py makemessages -l en
-	export PYTHONPATH=${PYTHONPATH} && cd adminactions && django-admin.py compilemessages --settings=${DJANGO_SETTINGS_MODULE}
-
-
-test:
-	py.test
-
-
-ci: mkbuilddir install-deps init-db
-	$(MAKE) coverage
-
-
-coverage:
-	PYTHONPATH=${PWD}/tests/:${PWD} py.test tests -v --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc
+develop:
+	pip install -e .[dev]
 
 
 demo:
