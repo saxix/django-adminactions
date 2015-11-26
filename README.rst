@@ -2,12 +2,6 @@
 django-adminactions
 ===================
 
-.. image:: https://pypip.in/v/django-adminactions/badge.png
-   :target: https://crate.io/packages/django-adminactions/
-
-.. image:: https://pypip.in/d/django-adminactions/badge.png
-   :target: https://crate.io/packages/django-adminactions/
-
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/saxix/django-adminactions
    :target: https://gitter.im/saxix/django-adminactions?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
