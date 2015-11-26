@@ -1,11 +1,11 @@
 [run]
 branch = True
 source = adminactions
-include =
-    adminactions/**
+#include =
+#    adminactions/**
 
-omit = adminactions/__init__.py
-       adminactions/compat.py
+omit = src/adminactions/__init__.py
+       src/adminactions/compat.py
        tests/**
 
 [report]
@@ -27,4 +27,4 @@ exclude_lines =
 ignore_errors = True
 
 [html]
-directory = ~build/coverage
+directory = build/coverage

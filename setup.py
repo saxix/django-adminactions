@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 from __future__ import absolute_import
+
 import os
-from setuptools import setup, find_packages
 import sys
+from distutils import log
+from distutils.command.clean import clean as CleanCommand
+from distutils.dir_util import remove_tree
+
+from setuptools import find_packages, setup
+from setuptools.command.test import test as TestCommand
+
+# from adminactions import get_version, NAME
+
 ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__)))
-SOURCE=os.path.join(ROOT, 'src')
+SOURCE = os.path.join(ROOT, 'src')
 sys.path.append(SOURCE)
-from adminactions import NAME, VERSION, get_version
+app = __import__('adminactions')
 
 rel = lambda fname: os.path.join(os.path.dirname(__file__),
                                  'src',
@@ -19,6 +28,53 @@ elif sys.version_info[0] == 3:
     reqs = 'install.py3.pip'
 
 
+class Clean(CleanCommand):
+    user_options = CleanCommand.user_options + [
+        ('build-coverage=', 'c',
+         "build directory for coverage output (default: 'build.build-coverage')"),
+    ]
+
+    def initialize_options(self):
+        self.build_coverage = None
+        self.build_help = None
+        CleanCommand.initialize_options(self)
+
+    def run(self):
+        if self.all:
+            for directory in (os.path.join(self.build_base, 'coverage'),
+                              os.path.join(self.build_base, 'help')):
+                if os.path.exists(directory):
+                    remove_tree(directory, dry_run=self.dry_run)
+                else:
+                    log.warn("'%s' does not exist -- can't clean it",
+                             directory)
+        if self.build_coverage:
+            remove_tree(self.build_coverage, dry_run=self.dry_run)
+        if self.build_help:
+            remove_tree(self.build_help, dry_run=self.dry_run)
+        CleanCommand.run(self)
+
+
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = ['tests']
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # import here, cause outside the eggs aren't loaded
+        import pytest
+
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
+
+
 def fread(fname):
     return open(rel('install.any.pip')).read() + open(rel(fname)).read()
 
@@ -27,8 +83,8 @@ tests_require = fread('testing.pip')
 dev_require = fread('develop.pip')
 
 setup(
-    name=NAME,
-    version=get_version(),
+    name=app.NAME,
+    version=app.get_version(),
     url='https://github.com/saxix/django-adminactions',
     download_url='https://github.com/saxix/django-adminactions',
     author='sax',
@@ -38,6 +94,8 @@ setup(
 
     package_dir={'': 'src'},
     packages=find_packages('src'),
+    cmdclass={'test': PyTest,
+              'clean': Clean},
 
     include_package_data=True,
     install_requires=fread(reqs),
@@ -46,7 +104,6 @@ setup(
         'test': tests_require,
         'dev': dev_require + tests_require,
     },
-    test_suite='conftest.runtests',
     zip_safe=False,
     platforms=['any'],
     classifiers=[

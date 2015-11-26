@@ -18,7 +18,7 @@ class DemoModel(models.Model):
     #    filepath = models.FilePathField(path=__file__)
     float = models.FloatField()
     bigint = models.BigIntegerField()
-    ip = models.IPAddressField()
+    # ip = models.IPAddressField()
     generic_ip = models.GenericIPAddressField()
     url = models.URLField()
     text = models.TextField()

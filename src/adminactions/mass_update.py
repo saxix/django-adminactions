@@ -194,8 +194,8 @@ class MassUpdateForm(GenericActionForm):
     def clean__validate(self):
         return bool(self.data.get('_validate', 0))
 
-    def clean__unique_transaction(self):
-        return bool(self.data.get('_unique_transaction', 0))
+    # def clean__unique_transaction(self):
+    #     return bool(self.data.get('_unique_transaction', 0))
 
     def clean__clean(self):
         return bool(self.data.get('_clean', 0))
