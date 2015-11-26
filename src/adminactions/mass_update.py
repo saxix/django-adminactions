@@ -112,7 +112,10 @@ OPERATIONS = OperationManager({
                       ('add', (add, True, True, ""))],
     df.BooleanField: [('swap', (negate, False, True, ""))],
     df.NullBooleanField: [('swap', (negate, False, True, ""))],
-    df.EmailField: [('change domain', (change_domain, True, True, ""))],
+    df.EmailField: [('change domain', (change_domain, True, True, "")),
+                    ('upper', (string.upper, False, True, "convert to uppercase")),
+                    ('lower', (string.lower, False, True, "convert to lowercase")),
+                    ],
     df.URLField: [('change protocol', (change_protocol, True, True, ""))]
 })
 
