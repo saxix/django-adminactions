@@ -39,7 +39,7 @@ try:
     from django.db.models.signals import post_migrate
 
     post_migrate.connect(create_extra_permission)
-except:
+except ImportError:
     from django.db.models.signals import post_syncdb
 
     post_syncdb.connect(create_extra_permission)

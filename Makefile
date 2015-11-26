@@ -12,9 +12,9 @@ develop:
 
 
 demo:
-	PYTHONPATH=${PWD}:${PWD}/tests django-admin.py syncdb --settings=demo.settings --noinput
-	PYTHONPATH=${PWD}:${PWD}/tests  django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
-	PYTHONPATH=${PWD}:${PWD}/tests  django-admin.py runserver --settings=demo.settings
+	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src django-admin.py migrate --settings=demo.settings --noinput
+	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
+	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py runserver --settings=demo.settings
 
 
 clean:

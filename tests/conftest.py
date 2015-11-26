@@ -6,14 +6,14 @@ import pytest
 from demo.models import DemoModel
 
 
-def pytest_configure(config):
-    try:
-        from django.apps import AppConfig  # noqa
-        import django
-
-        django.setup()
-    except ImportError:
-        pass
+# def pytest_configure(config):
+#     try:
+#         from django.apps import AppConfig  # noqa
+#         import django
+#
+#         django.setup()
+#     except ImportError:
+#         pass
 
 
 @pytest.fixture(scope='function')
