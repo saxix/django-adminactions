@@ -2,18 +2,9 @@
 {% load i18n admin_modify actions static %}
 {% block extrahead %}{{ block.super }}
     <style type="text/css">
-        #col1 {
-            float: left;
-            width: 70%;
-        }
-
-        #col2 {
-            float: right;
-            width: 30%;
-        }
-
-        #col2 select {
-            width: 100%;
+        .formset {
+            overflow: auto;
+            margin: 1em auto
         }
     </style>
     <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.js' %}"></script>
@@ -40,22 +31,24 @@
     <div>
         <form action="" method="post">
             {% csrf_token %}
-            <table>
-                <tr>
-                    {% for field in adminform.form.model_fields %}
-                        <th>
-                            {{ field.label_tag }}
-                        </th>
-                    {% endfor %}
-                </tr>
-                {% for form in formset %}
+            <div class="formset">
+                <table>
                     <tr>
-                        {% for field in form %}
-                        <td>{{ field }}</td>
+                        {% for field in adminform.form.model_fields %}
+                            <th>
+                                {{ field.label_tag }}
+                            </th>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-            </table>
+                    {% for form in formset %}
+                        <tr>
+                            {% for field in form %}
+                            <td>{{ field }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
             {{ formset.management_form }}
             {% for hidden in actionform.hidden_fields %}
                 {{ hidden }}
