@@ -25,19 +25,42 @@
         <a href="../../">{% trans "Home" %}</a> &rsaquo;
         <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
         <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-        Mass Update
+        By row update
     </div>
 {% endif %}{% endblock %}
 
 {% block content %}
-    {% if form.subject.errors %}
+    {% if actionform.subject.errors %}
         <ol>
-            {% for error in form.subject.errors %}
+            {% for error in actionform.subject.errors %}
                 <li><strong>{{ error|escape }}</strong></li>
             {% endfor %}
         </ol>
     {% endif %}
     <div>
-        Lot of work todo!
+        <form action="" method="post">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    {% for field in adminform.form.model_fields %}
+                        <th>
+                            {{ field.label_tag }}
+                        </th>
+                    {% endfor %}
+                </tr>
+                {% for form in formset %}
+                    <tr>
+                        {% for field in form %}
+                        <td>{{ field }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            {{ formset.management_form }}
+            {% for hidden in actionform.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+            <input type="submit" name="apply" value="Update records"/>
+        </form>
     </div>
 {% endblock %}
