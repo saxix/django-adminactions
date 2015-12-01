@@ -22,9 +22,9 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     ActionForm = modelform_factory(modeladmin.model,
                     form = GenericActionForm,
-                    exclude = ('id_geo',))
+                    exclude = (modeladmin.model._meta.pk.name,))
 
-    MFormSet = modelformset_factory(modeladmin.model, exclude=('id_geo',), extra = 0)
+    MFormSet = modelformset_factory(modeladmin.model, exclude=(modeladmin.model._meta.pk.name,), extra = 0)
 
     if 'apply' in request.POST:
         actionform = ActionForm(request.POST)
