@@ -20,11 +20,22 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         :type queryset: QuerySet
     """
 
+    pk_name = modeladmin.model._meta.pk.name
+
+    class modelform(modeladmin.form):
+        def __init__(self, *args, **kwargs):
+            super(modeladmin.form, self).__init__(*args, **kwargs)
+            if self.instance:
+                readonly_fields = (pk_name,) + modeladmin.get_readonly_fields(request)
+                for fname in readonly_fields:
+                    self.fields[fname].widget.attrs['readonly'] = 'readonly'
+                    self.fields[fname].widget.attrs['class'] = 'readonly'
+
     ActionForm = modelform_factory(modeladmin.model,
                     form = GenericActionForm,
-                    exclude = (modeladmin.model._meta.pk.name,))
+                    exclude = ('pk',))
 
-    MFormSet = modelformset_factory(modeladmin.model, exclude=(modeladmin.model._meta.pk.name,), extra = 0)
+    MFormSet = modelformset_factory(modeladmin.model, form=modelform, exclude=('pk',), extra = 0)
 
     if 'apply' in request.POST:
         actionform = ActionForm(request.POST)
