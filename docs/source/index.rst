@@ -18,6 +18,7 @@ Table Of Contents
     :maxdepth: 1
 
     install
+    contributing
     actions
     signals
     exceptions
