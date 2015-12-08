@@ -4,6 +4,8 @@ import logging
 import pytest
 from django.core.urlresolvers import reverse
 from demo.utils import user_grant_permission
+from django.contrib.auth.models import Permission
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,3 +43,9 @@ def test_permission_needed(app, admin, demomodels, action):
                            user=admin.username,
                            expect_errors=True)
             assert res.status_code == 200
+
+@pytest.mark.django_db
+def test_permissions(admin):
+    assert Permission.objects.filter(codename__startswith='adminactions').count() == 32
+    with user_grant_permission(admin, ['demo.adminactions_export_demomodel']):
+        admin.get_all_permissions() == set([u'demo.adminactions_export_demomodel'])
