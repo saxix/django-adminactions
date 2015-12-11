@@ -3,14 +3,25 @@ from __future__ import absolute_import
 import pytest  # noqa
 import django  # noqa
 import datetime
+import mock
 from time import sleep
 from django.utils import dateformat
 from .base import *  # noqa
 from selenium.webdriver.support.select import Select
 
+FAKE_TIME = datetime.datetime(2020, 12, 25, 17, 5, 55)
 
 pytestmark = pytest.mark.selenium
 
+@pytest.fixture
+def now(monkeypatch):
+
+    class FixedDateTime:
+        @classmethod
+        def now(cls):
+            return FAKE_TIME
+
+    monkeypatch.setattr('adminactions.views.datetime', FixedDateTime)
 
 # @pytest.mark.skipif('django.VERSION[:2]==(1,8)')
 def test_export_as_csv(admin_site):
@@ -33,20 +44,19 @@ def export_csv_page(admin_site):
     return browser, administrator
 
 
-def _test(browser, target, format, sample_num):
+def _test(browser, target, format, sample_num, expected_value):
     fmt = browser.find_element_by_id(target)
     fmt.clear()
     fmt.send_keys(format)
     sleep(1)
     sample = browser.find_elements_by_css_selector("span.sample")[sample_num]
-    expected_value = dateformat.format(datetime.datetime.now(), format)
+    # expected_value = dateformat.format(datetime.datetime.now(), format)
     assert sample.text == expected_value, "Failed Ajax call on %s" % target
 
 
 # @pytest.mark.skipif('django.VERSION[:2]==(1,8)')
-def test_datetime_format_ajax(export_csv_page):
+def test_datetime_format_ajax(export_csv_page, now):
     browser, administrator = export_csv_page
-    _test(browser, "id_datetime_format", 'l, d F Y', 0)
-    _test(browser, "id_date_format", 'd F Y', 1)
-    _test(browser, "id_time_format", 'H:i', 2)
-
+    _test(browser, "id_datetime_format", 'l, d F Y', 0, 'Friday, 25 December 2020')
+    _test(browser, "id_date_format", 'd F Y', 1, '25 December 2020')
+    _test(browser, "id_time_format", 'H:i', 2, '17:05')
