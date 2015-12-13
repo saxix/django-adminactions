@@ -48,21 +48,12 @@ Project links
 .. |master-build| image:: https://secure.travis-ci.org/saxix/django-adminactions.png?branch=master
                     :target: http://travis-ci.org/saxix/django-adminactions/
 
-.. |master-cov| image:: https://coveralls.io/repos/saxix/django-adminactions/badge.png?branch=master
-                    :target: https://coveralls.io/r/saxix/django-adminactions
-
-.. |master-req| image:: https://requires.io/github/saxix/django-adminactions/requirements.png?branch=master
-                    :target: https://requires.io/github/saxix/django-adminactions/requirements/?branch=master
-                    :alt: Requirements Status
+.. |master-cov| image:: https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=master
+    :target: https://codecov.io/github/saxix/django-adminactions?branch=develop
 
 
 .. |dev-build| image:: https://secure.travis-ci.org/saxix/django-adminactions.png?branch=develop
                   :target: http://travis-ci.org/saxix/django-adminactions/
 
-.. |dev-cov| image:: https://coveralls.io/repos/saxix/django-adminactions/badge.png?branch=develop
-                :target: https://coveralls.io/r/saxix/django-adminactions
-
-.. |dev-req| image:: https://requires.io/github/saxix/django-adminactions/requirements.png?branch=develop
-                    :target: https://requires.io/github/saxix/django-adminactions/requirements/?branch=develop
-                    :alt: Requirements Status
-
+.. |dev-cov| image:: https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=develop
+    :target: https://codecov.io/github/saxix/django-adminactions?branch=develop
