@@ -4,7 +4,7 @@ BINDIR=${PWD}/~build/bin
 PYTHONPATH:=${PWD}/tests/:${PWD}
 DJANGO?='1.7.x'
 
-mkbuilddir:
+.mkbuilddir:
 	mkdir -p ${BUILDDIR}
 
 develop:
@@ -29,13 +29,9 @@ fullclean:
 	rm -fr *.sqlite
 	$(MAKE) clean
 	mysql -e 'DROP DATABASE IF EXISTS adminactions;';
-	psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres; fi
+	psql -c 'DROP DATABASE IF EXISTS adminactions;' -U postgres;
 	mysql -e 'DROP DATABASE IF EXISTS test_adminactions;';
-	psql -c 'DROP DATABASE IF EXISTS test_adminactions;' -U postgres; fi
-
-
-clonedigger: mkbuilddir
-	-clonedigger concurrency -l python -o ${BUILDDIR}/clonedigger.html --fast
+	psql -c 'DROP DATABASE IF EXISTS test_adminactions;' -U postgres;
 
 
 docs: mkbuilddir
@@ -44,4 +40,3 @@ docs: mkbuilddir
 ifdef BROWSE
 	firefox ${BUILDDIR}/docs/index.html
 endif
-
