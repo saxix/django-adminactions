@@ -5,8 +5,6 @@ cache:
   directories:
     - $HOME/.cache/pip
 
-sudo: false
-
 env:
   - TOXENV=py27-d14
   - TOXENV=py27-d15
@@ -19,7 +17,7 @@ env:
 #  - TOXENV=py35-d19
 
 install:
-  - pip install tox coverage coveralls>=0.5
+  - pip install tox coverage python-coveralls>=2.5 coveralls>=0.5 codecov
 
 script:
   - tox -e $TOXENV --recreate -- tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
@@ -30,6 +28,7 @@ before_success:
 after_success:
   - coverage combine
   - coveralls
+  - codecov
 
 notifications:
   webhooks:
