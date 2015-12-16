@@ -1,9 +1,8 @@
-from django.contrib.auth.models import User
-from django_dynamic_fixture import G
 import django_webtest
 import pytest
-
 from demo.models import DemoModel
+from django.contrib.auth.models import User
+from django_dynamic_fixture import G
 
 
 # def pytest_configure(config):

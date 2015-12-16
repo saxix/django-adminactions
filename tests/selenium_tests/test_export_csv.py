@@ -3,15 +3,14 @@ from __future__ import absolute_import
 import pytest  # noqa
 import django  # noqa
 import datetime
-import mock
 from time import sleep
-from django.utils import dateformat
 from .base import *  # noqa
 from selenium.webdriver.support.select import Select
 
 FAKE_TIME = datetime.datetime(2020, 12, 25, 17, 5, 55)
 
 pytestmark = pytest.mark.selenium
+
 
 @pytest.fixture
 def now(monkeypatch):
@@ -23,7 +22,7 @@ def now(monkeypatch):
 
     monkeypatch.setattr('adminactions.views.datetime', FixedDateTime)
 
-# @pytest.mark.skipif('django.VERSION[:2]==(1,8)')
+
 def test_export_as_csv(admin_site):
     browser, administrator = admin_site
     browser.find_element_by_link_text("Demo models").click()

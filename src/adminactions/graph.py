@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-'''
-Created on 28/ott/2009
-
-@author: sax
-'''
 from __future__ import absolute_import, unicode_literals
 
 import json
@@ -23,7 +18,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.models import get_permission_codename
-from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
+from adminactions.signals import (adminaction_end, adminaction_requested,
+                                  adminaction_start,)
 
 
 def graph_form_factory(model):

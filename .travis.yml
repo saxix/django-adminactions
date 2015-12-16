@@ -12,15 +12,17 @@ env:
   - TOXENV=py27-d17
   - TOXENV=py27-d18
   - TOXENV=py27-d19
+
   - TOXENV=py33-d17
   - TOXENV=py33-d18
-#  - TOXENV=py35-d19
+
+  - TOXENV=py34-d19
 
 install:
-  - pip install tox coverage python-coveralls>=2.5 coveralls>=0.5 codecov
+  - pip install tox "coverage<4.0" python-coveralls>=2.5 coveralls>=0.5 codecov
 
 script:
-  - tox -e $TOXENV --recreate -- tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
+  - tox -e $TOXENV -- tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase
