@@ -44,6 +44,7 @@ def test_permission_needed(app, admin, demomodels, action):
                            expect_errors=True)
             assert res.status_code == 200
 
+
 @pytest.mark.django_db
 def test_permissions(admin):
     assert Permission.objects.filter(codename__startswith='adminactions').count() == 32

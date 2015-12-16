@@ -10,7 +10,7 @@ import six
 # if VERSION[0] == 1 and VERSION[1] < 7:
 #     from django.utils.datastructures import SortedDict
 # else:
-from collections import defaultdict, OrderedDict as SortedDict
+from collections import OrderedDict as SortedDict, defaultdict
 
 from django import forms
 from django.contrib import messages
@@ -18,7 +18,9 @@ from django.contrib.admin import helpers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import fields as df
 from django.forms import fields as ff
-from django.forms.models import construct_instance, InlineForeignKeyField, modelform_factory, ModelMultipleChoiceField
+from django.forms.models import (InlineForeignKeyField,
+                                 ModelMultipleChoiceField, construct_instance,
+                                 modelform_factory,)
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -31,7 +33,8 @@ from adminactions import compat
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
-from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
+from adminactions.signals import (adminaction_end, adminaction_requested,
+                                  adminaction_start,)
 
 if six.PY2:
     import string

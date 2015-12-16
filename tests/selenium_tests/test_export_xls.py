@@ -2,10 +2,6 @@
 from __future__ import absolute_import
 import pytest  # noqa
 import django  # noqa
-import datetime
-import mock
-from time import sleep
-from django.utils import dateformat
 from .base import *  # noqa
 from selenium.webdriver.support.select import Select
 

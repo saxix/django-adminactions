@@ -4,8 +4,17 @@ include AUTHORS.rst
 include CHANGES
 include LICENSE
 include setup.py
-recursive-include src *
-recursive-include src/adminactions/templates *
-recursive-include src/adminactions/static *
-recursive-include src/adminactions/requirements *.pip
+include setup.cfg
+include tox.ini
+include *.py
+include Makefile
+recursive-include docs *
+recursive-include src *.css
+recursive-include src *.js
+recursive-include src *.pip
+recursive-include src *.po
+recursive-include src *.txt
+recursive-include src/adminactions *.py
+recursive-include src/adminactions *.html
+recursive-include tests *
 global-exclude *~
