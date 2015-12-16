@@ -1,18 +1,21 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+
 import six
-import xlrd
 import unittest
 from collections import namedtuple
-from django.http import HttpResponse
+
+import xlrd
+
+from adminactions.api import export_as_csv, export_as_xls
 from django.contrib.auth.models import Permission
+from django.http import HttpResponse
 from django.test import TestCase
 
 if six.PY3:
     import csv
 elif six.PY2:
     import unicodecsv as csv
-from adminactions.api import export_as_csv, export_as_xls
 
 
 class TestExportQuerySetAsCsv(TestCase):

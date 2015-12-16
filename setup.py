@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=W,I,C
 from __future__ import absolute_import
 
 import os
@@ -10,11 +11,8 @@ from distutils.dir_util import remove_tree
 from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
 
-# from adminactions import get_version, NAME
-
 ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__)))
-SOURCE = os.path.join(ROOT, 'src')
-sys.path.append(SOURCE)
+sys.path.insert(0, os.path.join(ROOT, 'src'))
 app = __import__('adminactions')
 
 rel = lambda fname: os.path.join(os.path.dirname(__file__),
@@ -31,17 +29,22 @@ elif sys.version_info[0] == 3:
 class Clean(CleanCommand):
     user_options = CleanCommand.user_options + [
         ('build-coverage=', 'c',
-         "build directory for coverage output (default: 'build.build-coverage')"),
+         "build directory for coverage output (default: 'build/coverage')"),
+        ('build-tox=', 't',
+         "build directory for tox (default: '.tox')"),
     ]
 
     def initialize_options(self):
         self.build_coverage = None
         self.build_help = None
+        self.build_tox = None
         CleanCommand.initialize_options(self)
 
     def run(self):
         if self.all:
             for directory in (os.path.join(self.build_base, 'coverage'),
+                              os.path.join('dist'),
+                              os.path.join('.tox'),
                               os.path.join(self.build_base, 'help')):
                 if os.path.exists(directory):
                     remove_tree(directory, dry_run=self.dry_run)
@@ -52,6 +55,8 @@ class Clean(CleanCommand):
             remove_tree(self.build_coverage, dry_run=self.dry_run)
         if self.build_help:
             remove_tree(self.build_help, dry_run=self.dry_run)
+        if self.build_tox:
+            remove_tree(self.build_tox, dry_run=self.dry_run)
         CleanCommand.run(self)
 
 
@@ -90,13 +95,11 @@ setup(
     author='sax',
     author_email='s.apostolico@gmail.com',
     description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
-    license='BSD',
-
+    license='MIT',
     package_dir={'': 'src'},
     packages=find_packages('src'),
     cmdclass={'test': PyTest,
               'clean': Clean},
-
     include_package_data=True,
     install_requires=fread(reqs),
     tests_require=tests_require,
@@ -115,6 +118,7 @@ setup(
         'Framework :: Django :: 1.6',
         'Framework :: Django :: 1.7',
         'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
