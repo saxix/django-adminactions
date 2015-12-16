@@ -22,7 +22,7 @@ install:
   - pip install tox "coverage<4.0" python-coveralls>=2.5 coveralls>=0.5 codecov
 
 script:
-  - tox -e $TOXENV -- tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
+  - tox -e $TOXENV -- py.test tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase
