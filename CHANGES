@@ -1,3 +1,17 @@
+Release 1.0 (dev)
+=================
+* minor refactoring
+* official support for django 1.4 to 1.9
+* official support for python 2.7, 3.3, 3.5
+* merge :ghissue:`77` - add initial form values for CSV export
+* merge :ghissue:`76` - reuse xls style while iterating over cells
+* merge :ghissue:`75` - allow streaming export to CSV response
+* merge :ghissue:`73` - Fixing merge on DateTimeField with null=True
+* support settings.ADMINACTIONS_CSV_OPTIONS_DEFAULT
+* support streaming CSV file response
+* new `upper` and `lower` modifiers available for EmailField in mass update.
+
+
 Release 0.8.5
 =============
 * repackage due broken version in 0.8.4

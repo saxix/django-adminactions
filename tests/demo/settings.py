@@ -89,6 +89,34 @@ TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
 DDF_DEFAULT_DATA_FIXTURE = 'demo.util.DataFixtureClass'
 
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
+
+TEMPLATES = [
+    {'BACKEND': 'django.template.backends.django.DjangoTemplates',
+     'DIRS': [
+         # insert your TEMPLATE_DIRS here
+     ],
+     'APP_DIRS': True,
+     'OPTIONS': {
+         'debug': DEBUG,
+         'context_processors': [
+             # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
+             # list if you haven't customized them:
+             'django.contrib.auth.context_processors.auth',
+             'django.template.context_processors.debug',
+             'django.template.context_processors.i18n',
+             'django.template.context_processors.media',
+             'django.template.context_processors.static',
+             'django.template.context_processors.tz',
+             'django.contrib.messages.context_processors.messages',
+         ],
+     },
+     }
+]
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
@@ -98,3 +126,11 @@ CACHES = {
 
 ENABLE_SELENIUM = True
 
+DATE_FORMAT = 'd-m-Y'
+TIME_FORMAT = 'H:i'
+DATETIME_FORMAT = 'd-m-Y H:i'
+YEAR_MONTH_FORMAT = 'F Y'
+MONTH_DAY_FORMAT = 'F j'
+SHORT_DATE_FORMAT = 'm/d/Y'
+SHORT_DATETIME_FORMAT = 'm/d/Y P'
+FIRST_DAY_OF_WEEK = 1

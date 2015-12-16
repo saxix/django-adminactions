@@ -2,11 +2,9 @@
 django-adminactions
 ===================
 
-.. image:: https://pypip.in/v/django-adminactions/badge.png
-   :target: https://crate.io/packages/django-adminactions/
-
-.. image:: https://pypip.in/d/django-adminactions/badge.png
-   :target: https://crate.io/packages/django-adminactions/
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/saxix/django-adminactions
+   :target: https://gitter.im/saxix/django-adminactions?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
 Collection of useful actions to use with
@@ -32,9 +30,9 @@ Project links
 -------------
 
 +--------------------+----------------+--------------+-------------------------+
-| Stable             | |master-build| | |master-cov| | |master-req|            |
+| Stable             | |master-build| | |master-cov| |                         |
 +--------------------+----------------+--------------+-------------------------+
-| Development        | |dev-build|    | |dev-cov|    | |dev-req|               |
+| Development        | |dev-build|    | |dev-cov|    |                         |
 +--------------------+----------------+--------------+-------------------------+
 | Project home page: |https://github.com/saxix/django-adminactions             |
 +--------------------+---------------+-----------------------------------------+
@@ -46,23 +44,16 @@ Project links
 +--------------------+---------------+--------------+--------------------------+
 
 
+
 .. |master-build| image:: https://secure.travis-ci.org/saxix/django-adminactions.png?branch=master
                     :target: http://travis-ci.org/saxix/django-adminactions/
 
-.. |master-cov| image:: https://coveralls.io/repos/saxix/django-adminactions/badge.png?branch=master
-                    :target: https://coveralls.io/r/saxix/django-adminactions
-
-.. |master-req| image:: https://requires.io/github/saxix/django-adminactions/requirements.png?branch=master
-                    :target: https://requires.io/github/saxix/django-adminactions/requirements/?branch=master
-                    :alt: Requirements Status
+.. |master-cov| image:: https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=master
+    :target: https://codecov.io/github/saxix/django-adminactions?branch=develop
 
 
 .. |dev-build| image:: https://secure.travis-ci.org/saxix/django-adminactions.png?branch=develop
                   :target: http://travis-ci.org/saxix/django-adminactions/
 
-.. |dev-cov| image:: https://coveralls.io/repos/saxix/django-adminactions/badge.png?branch=develop
-                :target: https://coveralls.io/r/saxix/django-adminactions
-
-.. |dev-req| image:: https://requires.io/github/saxix/django-adminactions/requirements.png?branch=develop
-                    :target: https://requires.io/github/saxix/django-adminactions/requirements/?branch=develop
-                    :alt: Requirements Status
+.. |dev-cov| image:: https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=develop
+    :target: https://codecov.io/github/saxix/django-adminactions?branch=develop

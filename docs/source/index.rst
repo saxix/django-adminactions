@@ -8,6 +8,10 @@ django-adminactions
 .. image:: https://secure.travis-ci.org/saxix/django-adminactions.png?branch=master
    :target: http://travis-ci.org/saxix/django-adminactions/
 
+.. image:: https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=master
+       :target: https://codecov.io/github/saxix/django-adminactions?branch=develop
+
+
 Collection of useful actions to use with django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
 
 
@@ -18,6 +22,7 @@ Table Of Contents
     :maxdepth: 1
 
     install
+    contributing
     actions
     signals
     exceptions
@@ -52,4 +57,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`search`
-

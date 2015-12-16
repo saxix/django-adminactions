@@ -1,3 +1,4 @@
+.DS_Store
 ~*
 *.log
 *.pot
@@ -12,4 +13,4 @@
 /build
 /docs/build
 /MANIFEST
-
+coverage.xml

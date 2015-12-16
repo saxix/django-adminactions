@@ -146,6 +146,17 @@ Available options: (see :ref:`python:csv-fmt-params`).
 
 .. figure:: _static/export_as_csv.png
 
+Streaming CSV Response
+----------------------
+
+When a very large/complex dataset is exported, it may take be useful to stream the response row by row instead of the whole file.
+
+To enable this functionality by default, set the django ``settings.ADMINACTIONS_STREAM_CSV`` to ``True`` (default: ``False``).
+
+Behind the scenes, this attaches an iterator as the response content (using a :class:`StreamingHttpResponse <django:django.http.StreamingHttpResponse>` *if django >= 1.6* and :class:`HttpResponse <django:django.http.HttpResponse>` otherwise); the iterator simply yields a new csv row for each queryset iteration.
+
+The benefit of this approach is a shorter initial response which unblocks the customer from request/response and he is free to do other things while waiting for the download to finish.
+
 
 .. seealso:: `csv_defaults`_
 
