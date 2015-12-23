@@ -20,22 +20,25 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         :type queryset: QuerySet
     """
 
-    pk_name = modeladmin.model._meta.pk.name
-
     class modelform(modeladmin.form):
         def __init__(self, *args, **kwargs):
             super(modeladmin.form, self).__init__(*args, **kwargs)
             if self.instance:
-                readonly_fields = (pk_name,) + modeladmin.get_readonly_fields(request)
+                readonly_fields = (modeladmin.model._meta.pk.name,) + modeladmin.get_readonly_fields(request)
                 for fname in readonly_fields:
-                    self.fields[fname].widget.attrs['readonly'] = 'readonly'
-                    self.fields[fname].widget.attrs['class'] = 'readonly'
+                    if fname in self.fields:
+                        self.fields[fname].widget.attrs['readonly'] = 'readonly'
+                        self.fields[fname].widget.attrs['class'] = 'readonly'
+
+    fields = getattr(modeladmin, 'adminactions_byrows_update_fields', [f.name for f in modeladmin.model._meta.get_fields() if f.editable])
+    if hasattr(modeladmin, 'adminactions_byrows_update_exclude'):
+        fields = [fname for fname in fields if fname not in modeladmin.adminactions_byrows_update_exclude]
 
     ActionForm = modelform_factory(modeladmin.model,
                     form = GenericActionForm,
-                    exclude = ('pk',))
+                    fields = fields)
 
-    MFormSet = modelformset_factory(modeladmin.model, form=modelform, exclude=('pk',), extra = 0)
+    MFormSet = modelformset_factory(modeladmin.model, form=modelform, fields = fields, extra = 0)
 
     if 'apply' in request.POST:
         actionform = ActionForm(request.POST)
