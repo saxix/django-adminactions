@@ -6,6 +6,7 @@ from django.contrib.admin import helpers, ModelAdmin
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from adminactions.forms import GenericActionForm
+from adminactions.models import get_permission_codename
 from django.forms import modelformset_factory
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext as _
@@ -19,6 +20,12 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         :type request: HttpRequest
         :type queryset: QuerySet
     """
+
+    opts = modeladmin.model._meta
+    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_byrowsupdate', opts))
+    if not request.user.has_perm(perm):
+        messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
 
     class modelform(modeladmin.form):
         def __init__(self, *args, **kwargs):
