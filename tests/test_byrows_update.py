@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
 from django.contrib.admin.sites import AdminSite
 from django.contrib.admin.options import ModelAdmin
+from adminactions.byrows_update import byrows_update_get_fields
 
 class MockRequest(object):
     pass
@@ -69,8 +70,9 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
             form = res.forms['changelist-form']
             self._select_rows(form, selected_rows=self._selected_rows)
             res = self._get_action_form_response(change_list_response=res)
+            fields = byrows_update_get_fields(ModelAdmin(DemoModel, self.site))
             for r, value in enumerate(self._selected_values):
-                for fname in ModelAdmin(DemoModel, self.site).get_fields(self.mockRequest):
+                for fname in byrows_update_get_fields(ModelAdmin(DemoModel, self.site)):
                     assert res.form["form-%d-%s" % (r, fname)]
 
     def test_form_rows_edit(self):

@@ -1,3 +1,5 @@
+from distutils.version import StrictVersion
+import django
 from django.http import HttpRequest, HttpResponseRedirect
 from django.db.models.query import QuerySet
 from django.forms.models import modelform_factory
@@ -7,7 +9,10 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
-from django.forms import modelformset_factory
+if (StrictVersion(django.get_version()) >= StrictVersion('1.7.0')):
+    from django.forms import modelformset_factory
+else:
+    from django.forms.models import modelformset_factory
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext as _
 
@@ -37,9 +42,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
                         self.fields[fname].widget.attrs['readonly'] = 'readonly'
                         self.fields[fname].widget.attrs['class'] = 'readonly'
 
-    fields = getattr(modeladmin, 'adminactions_byrows_update_fields', [f.name for f in modeladmin.model._meta.get_fields() if f.editable])
-    if hasattr(modeladmin, 'adminactions_byrows_update_exclude'):
-        fields = [fname for fname in fields if fname not in modeladmin.adminactions_byrows_update_exclude]
+    fields = byrows_update_get_fields(modeladmin)
 
     ActionForm = modelform_factory(modeladmin.model,
                     form = GenericActionForm,
@@ -81,3 +84,15 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     return render_to_response(tpl, RequestContext(request, ctx))
 
 byrows_update.short_description = "By rows update"
+
+def byrows_update_get_fields(modeladmin):
+    """
+        Get fields names to be shown of the model rows formset considering the
+        admin option:
+        - adminactions_byrows_update_fields
+        - adminactions_byrows_update_exclude
+    """
+    out = getattr(modeladmin, 'adminactions_byrows_update_fields', [f.name for f in modeladmin.model._meta.fields if f.editable])
+    if hasattr(modeladmin, 'adminactions_byrows_update_exclude'):
+        out = [fname for fname in fields if fname not in modeladmin.adminactions_byrows_update_exclude]
+    return out
