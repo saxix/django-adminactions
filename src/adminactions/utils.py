@@ -5,7 +5,6 @@ import six
 from django.db import connections, models, router
 # from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
-from django.http import HttpResponse
 from django.utils.encoding import smart_text
 
 
@@ -78,8 +77,7 @@ def getattr_or_item(obj, name):
         try:
             ret = obj[name]
         except KeyError:
-            raise AttributeError(
-                "%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
+            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
     return ret
 
 
@@ -103,8 +101,7 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     elif isinstance(field, models.Field):
         fieldname = field.name
     else:
-        raise ValueError(
-            'Invalid value for parameter `field`: Should be a field name or a Field instance ')
+        raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance ')
 
     if usedisplay and hasattr(obj, 'get_%s_display' % fieldname):
         value = getattr(obj, 'get_%s_display' % fieldname)()
@@ -152,8 +149,7 @@ def get_field_by_path(model, field_path):
     parts = field_path.split('.')
     target = parts[0]
     if target in model._meta.get_all_field_names():
-        field_object, model, direct, m2m = model._meta.get_field_by_name(
-            target)
+        field_object, model, direct, m2m = model._meta.get_field_by_name(target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
                 return get_field_by_path(field_object.rel.to, '.'.join(parts[1:]))
@@ -219,8 +215,7 @@ def get_verbose_name(model_or_queryset, field):
     elif isinstance(field, models.Field):
         field = field
     else:
-        raise ValueError(
-            '`get_verbose_name` field_path must be string or Field class')
+        raise ValueError('`get_verbose_name` field_path must be string or Field class')
 
     return field.verbose_name
 
@@ -257,16 +252,3 @@ def flatten(iterable):
 def model_supports_transactions(instance):
     alias = router.db_for_write(instance)
     return connections[alias].features.supports_transactions
-
-
-def get_filename_from_qs(queryset, extension=""):
-    base = queryset.model._meta.verbose_name_plural.lower().encode('us-ascii', 'replace')
-
-    return six.b("%s.%s" % (base.replace(" ", "_"), extension))
-
-
-def get_response(content_type='text/plain', filename='', content='',
-                 response_class=HttpResponse):
-    response = response_class(content, content_type=content_type)
-    response['Content-Disposition'] = six.b('attachment;filename="%s"' % filename)
-    return response
