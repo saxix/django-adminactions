@@ -18,4 +18,3 @@ recursive-include src/adminactions *.py
 recursive-include src/adminactions *.html
 recursive-include tests *
 global-exclude *~
-exclude .editorconfig
