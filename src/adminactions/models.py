@@ -26,7 +26,7 @@ def create_extra_permission(sender, **kwargs):
     app_config = kwargs.get('app_config', sender)
 
     for model in get_models(app_config):
-        for action in ('adminactions_export', 'adminactions_massupdate', 'adminactions_merge', 'adminactions_chart'):
+        for action in ('adminactions_export', 'adminactions_massupdate', 'adminactions_merge', 'adminactions_chart', 'adminactions_byrowsupdate'):
             opts = model._meta
             codename = get_permission_codename(action, opts)
             label = 'Can {} {} (adminactions)'.format(action.replace('adminactions_', ""), opts.verbose_name_raw)
