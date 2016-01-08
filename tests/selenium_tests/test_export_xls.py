@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import pytest  # noqa
-import django  # noqa
-from .base import *  # noqa
+
+import pytest
 from selenium.webdriver.support.select import Select
 
 pytestmark = pytest.mark.selenium
 
 
-def test_datetime_format_ajax(admin_site):
+def test_export_xls(admin_site):
     browser, administrator = admin_site
     browser.go('/admin/')
     browser.find_element_by_link_text("Demo models").click()

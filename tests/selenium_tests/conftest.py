@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
 import os
 import types
-from django_dynamic_fixture import G
-import pytest
-from selenium import webdriver
-from demo.models import DemoModel, UserDetail
-from demo.common import *  # noqa
 
+import pytest
+from django_dynamic_fixture import G
+from selenium import webdriver
+
+# from demo.common import *  # noqa
 
 browsers = {
-    # 'firefox': webdriver.Firefox,
-    'chrome': webdriver.Chrome,
+    'firefox': webdriver.Firefox,
+    # 'chrome': webdriver.Chrome,
 }
+
 
 
 @pytest.fixture(scope='session',
@@ -52,7 +54,10 @@ def browser(live_server, driver):
 
 
 def login(browser):
+    from utils import ADMIN, PWD
+
     browser.go('/admin/')
+
     username = browser.find_element_by_id('id_username')
     password = browser.find_element_by_id('id_password')
 
@@ -66,6 +71,8 @@ def login(browser):
 
 @pytest.fixture(scope='function')
 def admin_site(browser, administrator):
+    from demo.models import DemoModel, UserDetail
+
     G(DemoModel, n=5)
     G(UserDetail, n=5)
     login(browser)

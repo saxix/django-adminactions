@@ -6,6 +6,7 @@ from django.db import connections, models, router
 # from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_text
+from adminactions.compat import get_all_field_names, get_field_by_name
 
 
 def clone_instance(instance, fieldnames=None):
@@ -148,8 +149,8 @@ def get_field_by_path(model, field_path):
     """
     parts = field_path.split('.')
     target = parts[0]
-    if target in model._meta.get_all_field_names():
-        field_object, model, direct, m2m = model._meta.get_field_by_name(target)
+    if target in get_all_field_names(model):
+        field_object, model, direct, m2m = get_field_by_name(model, target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
                 return get_field_by_path(field_object.rel.to, '.'.join(parts[1:]))

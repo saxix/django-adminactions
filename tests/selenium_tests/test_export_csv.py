@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import pytest  # noqa
-import django  # noqa
+
 import datetime
 from time import sleep
-from .base import *  # noqa
+
+import pytest
 from selenium.webdriver.support.select import Select
 
 FAKE_TIME = datetime.datetime(2020, 12, 25, 17, 5, 55)

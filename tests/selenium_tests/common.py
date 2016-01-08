@@ -1,4 +1,10 @@
 from __future__ import absolute_import
+
+import os
+
+import pytest
+from selenium import webdriver
+
 # import os
 # from django.utils.unittest.case import skip
 # from django.conf import settings
@@ -116,9 +122,6 @@ from __future__ import absolute_import
 # #        super(FireFoxLiveTest, self).setUp()
 
 
-import pytest
-import os
-from selenium import webdriver
 
 browsers = {
     # 'firefox': webdriver.Firefox,

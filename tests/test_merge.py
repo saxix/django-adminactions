@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
+import six
+from six.moves import range
+
+import pytest
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Group, Permission, User
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
-import six
-from adminactions.api import merge, ALL_FIELDS
+from utils import BaseTestCaseMixin, SelectRowsMixin, user_grant_permission
 
-from demo.common import BaseTestCaseMixin
-from demo.utils import SelectRowsMixin
-from demo.utils import user_grant_permission
+from adminactions.api import ALL_FIELDS, merge
 from demo.models import UserDetail
-from six.moves import range
 
 PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'tests.UserProfile')
 
@@ -320,5 +321,3 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 1)
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
-
-

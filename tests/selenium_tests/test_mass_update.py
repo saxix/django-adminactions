@@ -1,7 +1,7 @@
 from __future__ import absolute_import
-import django  # noqa
+
+import pytest
 from django.contrib.auth.models import User
-from .base import *  # noqa
 from selenium.webdriver.support.select import Select
 
 pytestmark = pytest.mark.selenium

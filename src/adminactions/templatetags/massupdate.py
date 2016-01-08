@@ -8,6 +8,7 @@ from django.utils.encoding import smart_text
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 
+from adminactions.compat import get_field_by_name
 from adminactions.mass_update import OPERATIONS
 
 try:
@@ -80,7 +81,7 @@ class SelectOptionsAttribute(widgets.Select):
 
 @register.simple_tag
 def field_function(model, form_field):
-    model_object, model, direct, m2m = model._meta.get_field_by_name(form_field.name)
+    model_object, model, direct, m2m = get_field_by_name(model, form_field.name)
     attrs = {'class': 'func_select'}
     options_attrs = {}
     choices = []

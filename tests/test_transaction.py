@@ -1,12 +1,14 @@
 from __future__ import absolute_import
+
 import mock
-from django.db import IntegrityError
+import pytest
 from django.contrib.auth.models import Group, User
+from django.db import IntegrityError
 from django_dynamic_fixture import G
-from demo.common import *  # noqa
-from adminactions.exceptions import ActionInterrupted
-from adminactions.api import merge
+
 from adminactions import compat
+from adminactions.api import merge
+from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_end
 
 

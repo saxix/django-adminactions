@@ -55,7 +55,9 @@ else:
 # Model._meta compatibility
 if version >= (1, 10):  # noqa
     def get_field_by_name(model, name):
-        return model._meta.get_field(name)
+        field = model._meta.get_field(name)
+        direct = not field.auto_created or field.concrete
+        return field, field.model, direct, field.many_to_many
 
     def model_has_field(model, field_name):
         return field_name in [f.name for f in model._meta.get_fields()]
@@ -90,7 +92,7 @@ elif version >= (1, 4):  # noqa
         return model._meta.get_all_field_names()
 
     def get_field_by_name(model, name):
-        return model._meta.get_field_by_name(name)[0]
+        return model._meta.get_field_by_name(name)
 
     def model_has_field(model, field_name):
         return field_name in model._meta.get_all_field_names()
