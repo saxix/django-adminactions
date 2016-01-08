@@ -1,12 +1,12 @@
 # pylint: disable-msg= W0611
 from __future__ import absolute_import, unicode_literals
 
+from .byrows_update import byrows_update
 from .export import (export_as_csv, export_as_fixture, export_as_xls,
                      export_delete_tree,)
 from .graph import graph_queryset
 from .mass_update import mass_update
 from .merge import merge
-from .byrows_update import byrows_update
 
 actions = [export_as_fixture,
            export_as_csv,

@@ -3,9 +3,9 @@ from __future__ import absolute_import, unicode_literals
 import six
 
 from django.db import connections, models, router
-# from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_text
+
 from adminactions.compat import get_all_field_names, get_field_by_name
 
 

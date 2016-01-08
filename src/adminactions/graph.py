@@ -2,6 +2,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
+
+from django.views.decorators.csrf import csrf_exempt
 from six.moves import zip
 
 from django.contrib import messages
@@ -16,6 +18,7 @@ from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
+from adminactions.compat import get_field_by_name
 from adminactions.exceptions import ActionInterrupted
 from adminactions.models import get_permission_codename
 from adminactions.signals import (adminaction_end, adminaction_requested,
@@ -80,7 +83,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                 # y = form.cleaned_data['axes_y']
                 graph_type = form.cleaned_data['graph_type']
 
-                field, model, direct, m2m = modeladmin.model._meta.get_field_by_name(x)
+                field, model, direct, m2m = get_field_by_name(modeladmin.model, x)
                 cc = queryset.values_list(x).annotate(Count(x)).order_by()
                 if isinstance(field, ForeignKey):
                     data_labels = []

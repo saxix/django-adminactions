@@ -111,6 +111,7 @@ class user_grant_permission(object):
 class SelectRowsMixin(object):
     _selected_rows = []
     _selected_values = []
+    csrf_checks = False
 
     def _select_rows(self, form, selected_rows=None):
         if selected_rows is None:

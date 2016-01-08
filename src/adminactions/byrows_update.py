@@ -1,5 +1,3 @@
-from distutils.version import StrictVersion
-
 import django
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -13,7 +11,7 @@ from django.utils.translation import ugettext as _
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
 
-if StrictVersion(django.get_version()) >= StrictVersion('1.7.0'):
+if django.VERSION[:2] == (1, 7):
     from django.forms import modelformset_factory
 else:
     from django.forms.models import modelformset_factory

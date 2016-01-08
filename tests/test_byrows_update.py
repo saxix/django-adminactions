@@ -23,6 +23,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
     action_name = 'byrows_update'
     sender_model = DemoModel
     _selected_rows = [0, 1]
+    csrf_checks = False
 
     def setUp(self):
         super(TestByRowsUpdateAction, self).setUp()
@@ -94,9 +95,9 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
             new_values = {
                 'char': 'Bob Marley'
             }
-            for k, v in new_values.iteritems():
+            for k, v in new_values.items():
                 res.form["form-%d-%s" % (row_to_modify, k)] = v
             res.form.submit('apply')
             obj = DemoModel.objects.get(id=self._selected_values[row_to_modify])
-            for k, v in new_values.iteritems():
+            for k, v in new_values.items():
                 self.assertEquals(v, getattr(obj, k))

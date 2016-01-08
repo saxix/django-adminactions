@@ -30,6 +30,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 from adminactions import compat
+from adminactions.compat import get_field_by_name
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
@@ -176,7 +177,8 @@ class MassUpdateForm(GenericActionForm):
                     enabler = 'chk_id_%s' % name
                     function = self.data.get('func_id_%s' % name, False)
                     if self.data.get(enabler, False):
-                        field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
+                        # field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
+                        field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
                         value = field.clean(raw_value)
                         if function:
                             func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]

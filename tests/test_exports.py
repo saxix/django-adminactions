@@ -28,6 +28,7 @@ __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest',
 class ExportMixin(object):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
+    csrf_checks = False
 
     def setUp(self):
         super(ExportMixin, self).setUp()
