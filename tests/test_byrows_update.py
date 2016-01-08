@@ -1,14 +1,17 @@
-from django.contrib.auth.models import User, Group, Permission
 import six
-from demo.models import DemoModel
-from demo.utils import user_grant_permission, SelectRowsMixin
-from django.test import TransactionTestCase
-from django_webtest import WebTestMixin
-from django.core.urlresolvers import reverse
-from django_dynamic_fixture import G
-from django.contrib.admin.sites import AdminSite
+
 from django.contrib.admin.options import ModelAdmin
+from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Group, Permission, User
+from django.core.urlresolvers import reverse
+from django.test import TransactionTestCase
+from django_dynamic_fixture import G
+from django_webtest import WebTestMixin
+from utils import SelectRowsMixin, user_grant_permission
+
 from adminactions.byrows_update import byrows_update_get_fields
+from demo.models import DemoModel
+
 
 class MockRequest(object):
     pass
