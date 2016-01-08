@@ -1,20 +1,22 @@
 from distutils.version import StrictVersion
+
 import django
-from django.http import HttpRequest, HttpResponseRedirect
-from django.db.models.query import QuerySet
-from django.forms.models import modelform_factory
 from django.contrib import messages
-from django.contrib.admin import helpers, ModelAdmin
+from django.contrib.admin import helpers
+from django.forms.models import modelform_factory
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
+from django.utils.encoding import smart_text
+from django.utils.translation import ugettext as _
+
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
-if (StrictVersion(django.get_version()) >= StrictVersion('1.7.0')):
+
+if StrictVersion(django.get_version()) >= StrictVersion('1.7.0'):
     from django.forms import modelformset_factory
 else:
     from django.forms.models import modelformset_factory
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext as _
 
 
 def byrows_update(modeladmin, request, queryset):  # noqa
@@ -45,10 +47,10 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     fields = byrows_update_get_fields(modeladmin)
 
     ActionForm = modelform_factory(modeladmin.model,
-                    form = GenericActionForm,
-                    fields = fields)
+                                   form=GenericActionForm,
+                                   fields=fields)
 
-    MFormSet = modelformset_factory(modeladmin.model, form=modelform, fields = fields, extra = 0)
+    MFormSet = modelformset_factory(modeladmin.model, form=modelform, fields=fields, extra=0)
 
     if 'apply' in request.POST:
         actionform = ActionForm(request.POST)
@@ -59,10 +61,10 @@ def byrows_update(modeladmin, request, queryset):  # noqa
             return HttpResponseRedirect(request.get_full_path())
     else:
         action_form_initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
-                   'select_across': request.POST.get('select_across') == '1',
-                   'action': 'byrows_update'}
-        actionform = ActionForm(initial = action_form_initial, instance = None)
-        formset = MFormSet(queryset = queryset)
+                               'select_across': request.POST.get('select_across') == '1',
+                               'action': 'byrows_update'}
+        actionform = ActionForm(initial=action_form_initial, instance=None)
+        formset = MFormSet(queryset=queryset)
 
     adminform = helpers.AdminForm(
         actionform,
@@ -83,7 +85,9 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     return render_to_response(tpl, RequestContext(request, ctx))
 
+
 byrows_update.short_description = "By rows update"
+
 
 def byrows_update_get_fields(modeladmin):
     """
@@ -92,7 +96,9 @@ def byrows_update_get_fields(modeladmin):
         - adminactions_byrows_update_fields
         - adminactions_byrows_update_exclude
     """
-    out = getattr(modeladmin, 'adminactions_byrows_update_fields', [f.name for f in modeladmin.model._meta.fields if f.editable])
+    out = getattr(modeladmin, 'adminactions_byrows_update_fields',
+                  [f.name for f in modeladmin.model._meta.fields if f.editable])
     if hasattr(modeladmin, 'adminactions_byrows_update_exclude'):
+        fields = modeladmin.adminactions_byrows_update_exclude
         out = [fname for fname in fields if fname not in modeladmin.adminactions_byrows_update_exclude]
     return out

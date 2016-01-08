@@ -16,7 +16,6 @@ browsers = {
 }
 
 
-
 @pytest.fixture(scope='session',
                 params=list(browsers.keys()))
 def driver(request):

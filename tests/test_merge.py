@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import six
 from six.moves import range
 
-import pytest
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group, Permission, User

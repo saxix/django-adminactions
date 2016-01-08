@@ -2,7 +2,7 @@ import six
 
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
-from django.contrib.auth.models import Group, Permission, User
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TransactionTestCase
 from django_dynamic_fixture import G
@@ -15,6 +15,7 @@ from demo.models import DemoModel
 
 class MockRequest(object):
     pass
+
 
 class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase):
     fixtures = ['adminactions', 'demoproject']
@@ -35,7 +36,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
         res = res.click('Demo models')
         return res
 
-    def _get_action_form_response(self, change_list_response = None, ):
+    def _get_action_form_response(self, change_list_response=None):
         form = change_list_response.forms['changelist-form']
         form['action'] = 'byrows_update'
         res = form.submit()
@@ -73,7 +74,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
             form = res.forms['changelist-form']
             self._select_rows(form, selected_rows=self._selected_rows)
             res = self._get_action_form_response(change_list_response=res)
-            fields = byrows_update_get_fields(ModelAdmin(DemoModel, self.site))
+            byrows_update_get_fields(ModelAdmin(DemoModel, self.site))
             for r, value in enumerate(self._selected_values):
                 for fname in byrows_update_get_fields(ModelAdmin(DemoModel, self.site)):
                     assert res.form["form-%d-%s" % (r, fname)]
@@ -98,4 +99,4 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
             res.form.submit('apply')
             obj = DemoModel.objects.get(id=self._selected_values[row_to_modify])
             for k, v in new_values.iteritems():
-               self.assertEquals(v, getattr(obj, k))
+                self.assertEquals(v, getattr(obj, k))

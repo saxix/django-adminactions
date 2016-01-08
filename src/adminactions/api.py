@@ -78,7 +78,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     if related == ALL_FIELDS:
         related = [rel.get_accessor_name()
                    for rel in compat.get_all_related_objects(master)]
-                #    for rel in master._meta.get_all_related_objects(False, False, False)]
+# for rel in master._meta.get_all_related_objects(False, False, False)]
 
     if m2m == ALL_FIELDS:
         m2m = [field.name for field in master._meta.many_to_many]

@@ -27,7 +27,6 @@ def pytest_addoption(parser):
     )
 
 
-
 def pytest_configure(config):
     # import warnings
     # enable this to removee deprecations
@@ -35,7 +34,7 @@ def pytest_configure(config):
 
     if config.option.markexpr.find("selenium") < 0 and \
         not config.option.keyword and \
-        config.option.keyword.find('selenium') <0:
+            config.option.keyword.find('selenium') < 0:
         if not config.option.selenium_enable:
             setattr(config.option, 'markexpr', 'not selenium')
 
@@ -77,6 +76,7 @@ def admin():
 def administrator():
     from django.contrib.auth.models import User
     from utils import ADMIN, PWD
+
     superuser = User._default_manager.create_superuser(username=ADMIN,
                                                        password=PWD,
                                                        email="sax@noreply.org")
