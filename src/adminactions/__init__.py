@@ -1,11 +1,9 @@
-from __future__ import absolute_import
-
+import subprocess
 import datetime
 import os
-import subprocess
 
+VERSION = __version__ = (1, 1, 0, 'alpha', 0)
 NAME = 'django-adminactions'
-VERSION = __version__ = (1, 0, 0, 'final', 0)
 
 
 def get_version(version=None):
