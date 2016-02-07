@@ -20,7 +20,7 @@ msgstr ""
 #: export.py:30 export.py:212 export.py:289 merge.py:67
 #, python-format
 msgid "Sorry you do not have rights to execute this action (%s)"
-msgstr "Lo siento tu no tienes permisos para ejecutar esta accion"
+msgstr "Lo siento tu no tienes permisos para ejecutar esta accion (%s)"
 
 #: export.py:111 export.py:116
 msgid "Export as CSV"
