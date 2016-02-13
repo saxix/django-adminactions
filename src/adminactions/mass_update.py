@@ -361,6 +361,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
            # 'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
+    ctx.update(modeladmin.admin_site.each_context(request))
 
     return render_to_response(tpl, RequestContext(request, ctx))
 

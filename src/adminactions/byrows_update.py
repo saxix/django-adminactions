@@ -80,6 +80,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         'opts': modeladmin.model._meta,
         'app_label': modeladmin.model._meta.app_label,
     }
+    ctx.update(modeladmin.admin_site.each_context(request))
 
     return render_to_response(tpl, RequestContext(request, ctx))
 
