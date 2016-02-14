@@ -6,7 +6,7 @@
         <a href="../../">{% trans "Home" %}</a> &rsaquo;
         <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
         <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-        Fixture Export Options
+	{{ action_short_description|capfirst }}
     </div>
 {% endif %}{% endblock %}
 

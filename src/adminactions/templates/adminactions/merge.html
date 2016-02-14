@@ -5,7 +5,7 @@
         <a href="../../">{% trans "Home" %}</a> &rsaquo;
         <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
         <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-        {% trans "Merge records" %}
+	{{ action_short_description|capfirst }}
     </div>
 {% endif %}{% endblock %}
 {% block content %}

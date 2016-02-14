@@ -346,7 +346,11 @@ def mass_update(modeladmin, request, queryset):  # noqa
     tpl = 'adminactions/mass_update.html'
     ctx = {'adminform': adminForm,
            'form': form,
-           'title': u"Mass update %s" % smart_text(modeladmin.opts.verbose_name_plural),
+           'action_short_description': mass_update.short_description,
+           'title': u"%s (%s)" % (
+               mass_update.short_description.capitalize(),
+               smart_text(modeladmin.opts.verbose_name_plural),
+            ),
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),
            'change': True,
@@ -370,4 +374,4 @@ def mass_update(modeladmin, request, queryset):  # noqa
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
-mass_update.short_description = "Mass update"
+mass_update.short_description = _("Mass update")

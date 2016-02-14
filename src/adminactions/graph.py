@@ -148,7 +148,11 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
     ctx = {'adminform': adminForm,
            'action': 'graph_queryset',
            'opts': modeladmin.model._meta,
-           'title': u"Graph %s" % smart_text(modeladmin.opts.verbose_name_plural),
+           'action_short_description': graph_queryset.short_description,
+           'title': u"%s (%s)" % (
+                graph_queryset.short_description.capitalize(),
+                smart_text(modeladmin.opts.verbose_name_plural),
+            ),
            'app_label': queryset.model._meta.app_label,
            'media': media,
            'extra': extra,
@@ -161,4 +165,4 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
     return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
 
 
-graph_queryset.short_description = "Graph selected records"
+graph_queryset.short_description = _("Graph selected records")

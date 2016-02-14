@@ -75,7 +75,11 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     ctx = {
         'adminform': adminform,
         'actionform': actionform,
-        'title': u"By rows update %s" % smart_text(modeladmin.opts.verbose_name_plural),
+        'action_short_description': byrows_update.short_description,
+        'title': u"%s (%s)" % (
+            byrows_update.short_description.capitalize(),
+            smart_text(modeladmin.opts.verbose_name_plural),
+        ),
         'formset': formset,
         'opts': modeladmin.model._meta,
         'app_label': modeladmin.model._meta.app_label,
@@ -88,7 +92,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
-byrows_update.short_description = "By rows update"
+byrows_update.short_description = _("By rows update")
 
 
 def byrows_update_get_fields(modeladmin):
