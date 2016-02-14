@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 
+import django
 from django.views.decorators.csrf import csrf_exempt
 from six.moves import zip
 
@@ -153,7 +154,10 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
            'extra': extra,
            'as_json': json.dumps(table),
            'graph_type': graph_type}
-    ctx.update(modeladmin.admin_site.each_context(request))
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
 
 

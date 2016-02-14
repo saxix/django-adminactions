@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 from itertools import chain
 from six.moves import zip
 
+import django
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -119,7 +120,10 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
-    ctx.update(modeladmin.admin_site.each_context(request))
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(template, RequestContext(request, ctx))
 
 
@@ -298,7 +302,10 @@ def export_as_fixture(modeladmin, request, queryset):
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
-    ctx.update(modeladmin.admin_site.each_context(request))
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
@@ -386,7 +393,10 @@ def export_delete_tree(modeladmin, request, queryset):
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
-    ctx.update(modeladmin.admin_site.each_context(request))
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
