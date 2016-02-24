@@ -35,7 +35,7 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
         export a queryset to csv file
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action (%s)' % perm))
         return
@@ -218,7 +218,7 @@ def export_as_fixture(modeladmin, request, queryset):
                'serializer': 'json',
                'indent': 4}
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action (%s)' % perm))
         return
@@ -295,7 +295,7 @@ def export_delete_tree(modeladmin, request, queryset):
     That mean that dump what will be deleted if the queryset was deleted
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action (%s)' % perm))
         return
