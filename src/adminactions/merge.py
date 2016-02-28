@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 from datetime import datetime
 
+import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -179,9 +180,17 @@ def merge(modeladmin, request, queryset):  # noqa
     ctx.update({'adminform': adminForm,
                 'formset': formset,
                 'media': mark_safe(media),
-                'title': u"Merge %s" % smart_text(modeladmin.opts.verbose_name_plural),
+                'action_short_description': merge.short_description,
+                'title': u"%s (%s)" % (
+                    merge.short_description.capitalize(),
+                    smart_text(modeladmin.opts.verbose_name_plural),
+                ),
                 'master': master,
                 'other': other})
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
