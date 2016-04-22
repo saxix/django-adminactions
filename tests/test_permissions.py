@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals, print_function
-import logging
-import pytest
-from django.core.urlresolvers import reverse
-from demo.utils import user_grant_permission
-from django.contrib.auth.models import Permission
+from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
+
+import pytest
+from django.contrib.auth.models import Permission
+from django.core.urlresolvers import reverse
+from utils import user_grant_permission
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,6 @@ def test_permission_needed(app, admin, demomodels, action):
 
 @pytest.mark.django_db
 def test_permissions(admin):
-    assert Permission.objects.filter(codename__startswith='adminactions').count() == 32
+    assert Permission.objects.filter(codename__startswith='adminactions').count() == 40
     with user_grant_permission(admin, ['demo.adminactions_export_demomodel']):
         admin.get_all_permissions() == set([u'demo.adminactions_export_demomodel'])

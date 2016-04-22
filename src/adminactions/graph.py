@@ -2,6 +2,9 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
+
+import django
+from django.views.decorators.csrf import csrf_exempt
 from six.moves import zip
 
 from django.contrib import messages
@@ -16,6 +19,7 @@ from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
+from adminactions.compat import get_field_by_name
 from adminactions.exceptions import ActionInterrupted
 from adminactions.models import get_permission_codename
 from adminactions.signals import (adminaction_end, adminaction_requested,
@@ -80,7 +84,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                 # y = form.cleaned_data['axes_y']
                 graph_type = form.cleaned_data['graph_type']
 
-                field, model, direct, m2m = modeladmin.model._meta.get_field_by_name(x)
+                field, model, direct, m2m = get_field_by_name(modeladmin.model, x)
                 cc = queryset.values_list(x).annotate(Count(x)).order_by()
                 if isinstance(field, ForeignKey):
                     data_labels = []
@@ -144,13 +148,21 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
     ctx = {'adminform': adminForm,
            'action': 'graph_queryset',
            'opts': modeladmin.model._meta,
-           'title': u"Graph %s" % smart_text(modeladmin.opts.verbose_name_plural),
+           'action_short_description': graph_queryset.short_description,
+           'title': u"%s (%s)" % (
+                graph_queryset.short_description.capitalize(),
+                smart_text(modeladmin.opts.verbose_name_plural),
+            ),
            'app_label': queryset.model._meta.app_label,
            'media': media,
            'extra': extra,
            'as_json': json.dumps(table),
            'graph_type': graph_type}
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
 
 
-graph_queryset.short_description = "Graph selected records"
+graph_queryset.short_description = _("Graph selected records")

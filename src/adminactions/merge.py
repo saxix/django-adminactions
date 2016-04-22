@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 from datetime import datetime
 
+import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -76,7 +77,7 @@ def merge(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_merge', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_merge', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -179,9 +180,17 @@ def merge(modeladmin, request, queryset):  # noqa
     ctx.update({'adminform': adminForm,
                 'formset': formset,
                 'media': mark_safe(media),
-                'title': u"Merge %s" % smart_text(modeladmin.opts.verbose_name_plural),
+                'action_short_description': merge.short_description,
+                'title': u"%s (%s)" % (
+                    merge.short_description.capitalize(),
+                    smart_text(modeladmin.opts.verbose_name_plural),
+                ),
                 'master': master,
                 'other': other})
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(tpl, RequestContext(request, ctx))
 
 

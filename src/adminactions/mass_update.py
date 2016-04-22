@@ -12,6 +12,7 @@ import six
 # else:
 from collections import OrderedDict as SortedDict, defaultdict
 
+import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -30,6 +31,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 from adminactions import compat
+from adminactions.compat import get_field_by_name
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
@@ -176,7 +178,8 @@ class MassUpdateForm(GenericActionForm):
                     enabler = 'chk_id_%s' % name
                     function = self.data.get('func_id_%s' % name, False)
                     if self.data.get(enabler, False):
-                        field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
+                        # field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
+                        field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
                         value = field.clean(raw_value)
                         if function:
                             func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
@@ -245,7 +248,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                              updated=updated)
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_massupdate', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_massupdate', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -343,7 +346,11 @@ def mass_update(modeladmin, request, queryset):  # noqa
     tpl = 'adminactions/mass_update.html'
     ctx = {'adminform': adminForm,
            'form': form,
-           'title': u"Mass update %s" % smart_text(modeladmin.opts.verbose_name_plural),
+           'action_short_description': mass_update.short_description,
+           'title': u"%s (%s)" % (
+               mass_update.short_description.capitalize(),
+               smart_text(modeladmin.opts.verbose_name_plural),
+            ),
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),
            'change': True,
@@ -359,8 +366,12 @@ def mass_update(modeladmin, request, queryset):  # noqa
            # 'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
 
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
-mass_update.short_description = "Mass update"
+mass_update.short_description = _("Mass update")

@@ -1,14 +1,13 @@
 language: python
 sudo: false
+python:
+  - 3.5
 
 cache:
   directories:
     - $HOME/.cache/pip
 
 env:
-  - TOXENV=py27-d14
-  - TOXENV=py27-d15
-  - TOXENV=py27-d16
   - TOXENV=py27-d17
   - TOXENV=py27-d18
   - TOXENV=py27-d19
@@ -16,13 +15,24 @@ env:
   - TOXENV=py33-d17
   - TOXENV=py33-d18
 
+  - TOXENV=py34-d17
+  - TOXENV=py34-d18
   - TOXENV=py34-d19
+
+  - TOXENV=py35-d18
+  - TOXENV=py35-d19
+
+  - TOXENV=pypy-d17
+  - TOXENV=pypy-d18
+  - TOXENV=pypy-d19
+
+
 
 install:
   - pip install tox "coverage<4.0" python-coveralls>=2.5 coveralls>=0.5 codecov
 
 script:
-  - tox -e $TOXENV -- tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
+  - tox -e $TOXENV -- py.test tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase

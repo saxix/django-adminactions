@@ -8,6 +8,9 @@ include setup.cfg
 include tox.ini
 include *.py
 include Makefile
+
+exclude .editorconfig
+
 recursive-include docs *
 recursive-include src *.css
 recursive-include src *.js

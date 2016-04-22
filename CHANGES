@@ -1,5 +1,16 @@
-Release 1.0 (dev)
-=================
+Release 1.1
+===========
+* merge :ghissue:`91` - add french translation
+* merge :ghissue:`88` - Display required columns in byrows_update formset
+* merge :ghissue:`87` - Add AdminSite.each_context() to templates context.
+* merge :ghissue:`86` - Compilemessages failed for Spanish translation
+* merge :ghissue:`83` - byrows_update action: adapt test_permissions to take into byrows update action.
+* merge :ghissue:`79` - Permissions don't work
+
+
+
+Release 1.0
+===========
 * minor refactoring
 * official support for django 1.4 to 1.9
 * official support for python 2.7, 3.3, 3.5
@@ -10,7 +21,6 @@ Release 1.0 (dev)
 * support settings.ADMINACTIONS_CSV_OPTIONS_DEFAULT
 * support streaming CSV file response
 * new `upper` and `lower` modifiers available for EmailField in mass update.
-
 
 
 Release 0.8.5

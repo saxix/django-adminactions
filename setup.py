@@ -2,6 +2,7 @@
 # pylint: disable=W,I,C
 from __future__ import absolute_import
 
+import imp
 import os
 import sys
 from distutils import log
@@ -12,18 +13,25 @@ from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
 
 ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__)))
-sys.path.insert(0, os.path.join(ROOT, 'src'))
-app = __import__('adminactions')
-
-rel = lambda fname: os.path.join(os.path.dirname(__file__),
-                                 'src',
-                                 'adminactions',
-                                 'requirements', fname)
+init = os.path.join(ROOT, 'src', 'adminactions', '__init__.py')
 
 if sys.version_info[0] == 2:
     reqs = 'install.py2.pip'
+    app = imp.load_source('adminactions', init)
 elif sys.version_info[0] == 3:
     reqs = 'install.py3.pip'
+    if sys.version_info[1] in [3,4]:
+        from importlib.machinery import SourceFileLoader
+        app = SourceFileLoader("adminactions", init).load_module()
+    elif sys.version_info[1] in [5]:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("adminactions", init)
+        app = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(app)
+
+rel = lambda fname: os.path.join(os.path.dirname(__file__),
+                                 'src',
+                                 'requirements', fname)
 
 
 class Clean(CleanCommand):

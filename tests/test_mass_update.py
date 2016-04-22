@@ -1,13 +1,15 @@
 from __future__ import absolute_import
+
 import six
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.test import TransactionTestCase
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
-from django.test import TransactionTestCase
-from demo.models import DemoModel
-from demo.utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
+from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
+from demo.models import DemoModel
 
 __all__ = ['MassUpdateTest', ]
 
@@ -15,6 +17,7 @@ __all__ = ['MassUpdateTest', ]
 class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
+    csrf_checks = False
 
     _selected_rows = [0, 1]
 

@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 from itertools import chain
 from six.moves import zip
 
+import django
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -36,12 +37,12 @@ def get_action(request):
     return request.POST.getlist('action')[action_index]
 
 
-def base_export(modeladmin, request, queryset, title, impl, name, template, form_class, ):
+def base_export(modeladmin, request, queryset, title, impl, name, action_short_description, template, form_class, ):
     """
         export a queryset to csv file
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -109,6 +110,7 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
     # tpl = 'adminactions/export_csv.html'
     ctx = {'adminform': adminForm,
            'change': True,
+           'action_short_description': action_short_description,
            'title': title,
            'is_popup': False,
            'save_as': False,
@@ -119,6 +121,10 @@ def base_export(modeladmin, request, queryset, title, impl, name, template, form
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(template, RequestContext(request, ctx))
 
 
@@ -126,7 +132,11 @@ def export_as_csv(modeladmin, request, queryset):
     return base_export(modeladmin, request, queryset,
                        impl=_export_as_csv,
                        name='export_as_csv',
-                       title=_('Export as CSV'),
+                       action_short_description=export_as_csv.short_description,
+                       title=u"%s (%s)" % (
+                           export_as_csv.short_description.capitalize(),
+                           modeladmin.opts.verbose_name_plural,
+                       ),
                        template='adminactions/export_csv.html',
                        form_class=CSVOptions)
 
@@ -138,7 +148,11 @@ def export_as_xls(modeladmin, request, queryset):
     return base_export(modeladmin, request, queryset,
                        impl=_export_as_xls,
                        name='export_as_xls',
-                       title=_('Export as XLS'),
+                       action_short_description=export_as_xls.short_description,
+                       title=u"%s (%s)" % (
+                           export_as_xls.short_description.capitalize(),
+                           modeladmin.opts.verbose_name_plural,
+                       ),
                        template='adminactions/export_xls.html',
                        form_class=XLSOptions)
 
@@ -232,7 +246,7 @@ def export_as_fixture(modeladmin, request, queryset):
                'serializer': 'json',
                'indent': 4}
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -287,7 +301,11 @@ def export_as_fixture(modeladmin, request, queryset):
     tpl = 'adminactions/export_fixture.html'
     ctx = {'adminform': adminForm,
            'change': True,
-           'title': _('Export as Fixture'),
+           'action_short_description': export_as_fixture.short_description,
+           'title': "%s (%s)" % (
+               export_as_fixture.short_description.capitalize(),
+               modeladmin.opts.verbose_name_plural,
+            ),
            'is_popup': False,
            'save_as': False,
            'has_delete_permission': False,
@@ -297,6 +315,10 @@ def export_as_fixture(modeladmin, request, queryset):
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
@@ -309,7 +331,7 @@ def export_delete_tree(modeladmin, request, queryset):
     That mean that dump what will be deleted if the queryset was deleted
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -374,7 +396,11 @@ def export_delete_tree(modeladmin, request, queryset):
     tpl = 'adminactions/export_fixture.html'
     ctx = {'adminform': adminForm,
            'change': True,
-           'title': _('Export Delete Tree'),
+           'action_short_description': export_delete_tree.short_description,
+           'title': u"%s (%s)" % (
+                export_delete_tree.short_description.capitalize(),
+                modeladmin.opts.verbose_name_plural,
+            ),
            'is_popup': False,
            'save_as': False,
            'has_delete_permission': False,
@@ -384,6 +410,10 @@ def export_delete_tree(modeladmin, request, queryset):
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
+    if django.VERSION[:2] > (1, 7):
+        ctx.update(modeladmin.admin_site.each_context(request))
+    else:
+        ctx.update(modeladmin.admin_site.each_context())
     return render_to_response(tpl, RequestContext(request, ctx))
 
 

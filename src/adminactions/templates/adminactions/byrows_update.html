@@ -1,0 +1,72 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify actions static %}
+{% block extrahead %}{{ block.super }}
+    <style type="text/css">
+        .formset-container {
+            overflow: auto;
+            margin: 1em auto
+        }
+	input.readonly, select.readonly {
+	    border: 0;
+	    background: transparent;
+	}
+    </style>
+    <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+    <div class="breadcrumbs">
+        <a href="../../">{% trans "Home" %}</a> &rsaquo;
+        <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+        <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+        {{ action_short_description|capfirst }}
+    </div>
+{% endif %}{% endblock %}
+
+{% block content %}
+    {% if formset.errors %}
+        <p class="errornote">
+            {% if formset.errors|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+        </p>
+        {{ adminform.form.non_field_errors }}
+    {% endif %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ formset.non_form_errors.as_ul }}
+        <div class="formset-container">
+            <table id="formset" class="form">
+                {% for form in formset.forms %}
+                {% if forloop.first %}
+                <thead>
+                    <tr>
+                        {% for field in form.visible_fields %}
+                        <th><label class="{% if field.field.required %}required{% endif %}">{{ field.label|capfirst }}</label></th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                {% endif %}
+                <tr class="row {% cycle 'row1' 'row2' %}">
+                    {% for field in form.visible_fields %}
+                    <td>
+                        {# Include the hidden fields in the form #}
+                        {% if forloop.first %}
+                        {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+                        {% endif %}
+                        {{ field.errors.as_ul }}
+                        {{ field }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {{ formset.management_form }}
+        {% for hidden in actionform.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+        <input type="submit" name="apply" value="Update records"/>
+    </form>
+{% endblock %}

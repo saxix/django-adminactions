@@ -1,12 +1,17 @@
 from __future__ import absolute_import
+
+import django
+import pytest
+from six.moves import range
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTest
-from demo.utils import CheckSignalsMixin, user_grant_permission, SelectRowsMixin
-from six.moves import range
+from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
 
+@pytest.mark.skipif(django.VERSION[:2]>(1,9), reason="skip if django > 1.9")
 class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'

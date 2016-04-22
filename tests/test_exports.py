@@ -8,14 +8,13 @@ import unittest
 
 import mock
 import xlrd
-from demo.utils import (admin_register, CheckSignalsMixin, SelectRowsMixin,
-                        user_grant_permission)
-from django_dynamic_fixture import G
-from django_webtest import WebTest
-
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 from django.utils.encoding import smart_text
+from django_dynamic_fixture import G
+from django_webtest import WebTest
+from utils import (CheckSignalsMixin, SelectRowsMixin, admin_register,
+                   user_grant_permission,)
 
 if six.PY2:
     import unicodecsv as csv
@@ -29,6 +28,7 @@ __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest',
 class ExportMixin(object):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
+    csrf_checks = False
 
     def setUp(self):
         super(ExportMixin, self).setUp()

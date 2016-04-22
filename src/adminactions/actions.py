@@ -1,6 +1,7 @@
 # pylint: disable-msg= W0611
 from __future__ import absolute_import, unicode_literals
 
+from .byrows_update import byrows_update
 from .export import (export_as_csv, export_as_fixture, export_as_xls,
                      export_delete_tree,)
 from .graph import graph_queryset
@@ -12,7 +13,8 @@ actions = [export_as_fixture,
            export_as_xls,
            export_delete_tree,
            merge, mass_update,
-           graph_queryset]
+           graph_queryset,
+           byrows_update]
 
 
 def add_to_site(site, exclude=None):

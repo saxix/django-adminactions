@@ -1,8 +1,10 @@
 from __future__ import absolute_import
-from django.contrib import admin
+
 from django.conf.urls import include, url
-from adminactions import actions
+from django.contrib import admin
+
 import adminactions.urls
+from adminactions import actions
 
 admin.autodiscover()
 actions.add_to_site(admin.site)
