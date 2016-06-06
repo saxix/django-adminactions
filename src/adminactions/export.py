@@ -26,7 +26,7 @@ from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVOptions, XLSOptions
 from adminactions.models import get_permission_codename
 from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start, django,)
+                                  adminaction_start,)
 
 
 def get_action(request):
@@ -37,7 +37,8 @@ def get_action(request):
     return request.POST.getlist('action')[action_index]
 
 
-def base_export(modeladmin, request, queryset, title, impl, name, action_short_description, template, form_class, ):
+def base_export(modeladmin, request, queryset, title, impl,  # noqa
+                name, action_short_description, template, form_class, ):
     """
         export a queryset to csv file
     """
@@ -305,7 +306,7 @@ def export_as_fixture(modeladmin, request, queryset):
            'title': "%s (%s)" % (
                export_as_fixture.short_description.capitalize(),
                modeladmin.opts.verbose_name_plural,
-            ),
+           ),
            'is_popup': False,
            'save_as': False,
            'has_delete_permission': False,
@@ -325,7 +326,7 @@ def export_as_fixture(modeladmin, request, queryset):
 export_as_fixture.short_description = _("Export as fixture")
 
 
-def export_delete_tree(modeladmin, request, queryset):
+def export_delete_tree(modeladmin, request, queryset):  # noqa
     """
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted
@@ -398,9 +399,9 @@ def export_delete_tree(modeladmin, request, queryset):
            'change': True,
            'action_short_description': export_delete_tree.short_description,
            'title': u"%s (%s)" % (
-                export_delete_tree.short_description.capitalize(),
-                modeladmin.opts.verbose_name_plural,
-            ),
+               export_delete_tree.short_description.capitalize(),
+               modeladmin.opts.verbose_name_plural,
+           ),
            'is_popup': False,
            'save_as': False,
            'has_delete_permission': False,

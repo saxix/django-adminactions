@@ -2,11 +2,9 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
-
-import django
-from django.views.decorators.csrf import csrf_exempt
 from six.moves import zip
 
+import django
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.db.models.aggregates import Count
@@ -150,9 +148,9 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
            'opts': modeladmin.model._meta,
            'action_short_description': graph_queryset.short_description,
            'title': u"%s (%s)" % (
-                graph_queryset.short_description.capitalize(),
-                smart_text(modeladmin.opts.verbose_name_plural),
-            ),
+               graph_queryset.short_description.capitalize(),
+               smart_text(modeladmin.opts.verbose_name_plural),
+           ),
            'app_label': queryset.model._meta.app_label,
            'media': media,
            'extra': extra,
