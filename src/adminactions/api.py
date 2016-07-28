@@ -15,7 +15,7 @@ from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_text, smart_str, smart_text
-
+from django.utils.timezone import get_default_timezone
 from adminactions import compat
 from adminactions.templatetags.actions import get_field_value
 from adminactions.utils import clone_instance, get_field_by_path
@@ -197,7 +197,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
                             quotechar=str(config['quotechar']),
                             quoting=int(config['quoting']))
 
-    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+    settingstime_zone = get_default_timezone()
 
     def yield_header():
         if bool(header):
