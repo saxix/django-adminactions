@@ -322,7 +322,7 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.row(row).height = 500
     formats = _get_qs_formats(queryset)
 
-    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+    settingstime_zone = get_default_timezone()
 
     _styles = {}
 
@@ -452,7 +452,7 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, force_text(fieldname), formats['_general_'])
 
-    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+    settingstime_zone = get_default_timezone()
 
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
