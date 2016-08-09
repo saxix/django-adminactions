@@ -17,7 +17,7 @@ __all__ = ['MassUpdateTest', ]
 class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TransactionTestCase):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
-    csrf_checks = False
+    csrf_checks = True
 
     _selected_rows = [0, 1]
 
