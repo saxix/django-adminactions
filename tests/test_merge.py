@@ -139,6 +139,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
 
 
 class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
+    csrf_checks = True
     fixtures = ['adminactions.json', 'demoproject.json']
     urls = 'demo.urls'
     sender_model = User

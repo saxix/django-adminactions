@@ -17,7 +17,7 @@ from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
                                  modelform_factory,)
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.functional import curry
@@ -365,7 +365,10 @@ def mass_update(modeladmin, request, queryset):  # noqa
     else:
         ctx.update(modeladmin.admin_site.each_context())
 
-    return render_to_response(tpl, RequestContext(request, ctx))
+    if django.VERSION[:2] > (1, 8):
+        return render(request, tpl, context=ctx)
+    else:
+        return render_to_response(tpl, RequestContext(request, ctx))
 
 
 mass_update.short_description = _("Mass update")

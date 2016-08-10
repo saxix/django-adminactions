@@ -10,7 +10,7 @@ from django.conf import global_settings
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group, Permission, User
 from django.forms import BaseForm
 from django.test.testcases import TestCase
 from django_dynamic_fixture import G
@@ -269,8 +269,12 @@ class BaseTestCaseMixin(object):
         self.sett.disable()
 
     def login(self, username='user_00', password='123'):
-        logged = self.client.login(username=username, password=password)
-        assert logged, 'Unable login with credentials'
+        user = User.objects.get(username=username)
+        try:
+            self.client.force_login(user)
+        except AttributeError:  # for Django<1.8
+            logged = self.client.login(username=username, password=password)
+            assert logged, 'Unable login with credentials'
         self._user = authenticate(username=username, password=password)
 
     def add_permission(self, *perms, **kwargs):
