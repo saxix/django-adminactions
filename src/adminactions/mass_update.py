@@ -342,11 +342,11 @@ def mass_update(modeladmin, request, queryset):  # noqa
     configured_fields = adminForm.form.configured_fields()
     model_fields = adminForm.form.model_fields()
 
-    for cf in configured_fields:
-        print(vars(cf))
-
-    for mf in model_fields:
-        print(vars(mf))
+    # for cf in configured_fields:
+    #     print(vars(cf))
+    #
+    # for mf in model_fields:
+    #     print(vars(mf))
 
     adminactions_filters = getattr(settings, 'ADMINACTIONS_FILTERS', None)
     if adminactions_filters:
