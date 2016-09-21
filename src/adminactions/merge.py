@@ -5,6 +5,7 @@ from datetime import datetime
 
 import django
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.db import models
@@ -98,12 +99,20 @@ def merge(modeladmin, request, queryset):  # noqa
 
     tpl = 'adminactions/merge.html'
     # transaction_supported = model_supports_transactions(modeladmin.model)
+
+    ctx_fields = [f for f in queryset.model._meta.fields if not f.primary_key and f.editable]
+
+    adminactions_filters = getattr(settings, 'ADMINACTIONS_FILTERS', None)
+    if adminactions_filters:
+        for aaf in adminactions_filters:
+            ctx_fields = filter(aaf, ctx_fields)
+
     ctx = {
         '_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
         'transaction_supported': 'Un',
         'select_across': request.POST.get('select_across') == '1',
         'action': request.POST.get('action'),
-        'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable],
+        'fields': ctx_fields,
         'app_label': queryset.model._meta.app_label,
         'result': '',
         'opts': queryset.model._meta}
