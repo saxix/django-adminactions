@@ -52,6 +52,18 @@ change_protocol = lambda arg, value: re.sub('^[a-z]*://', "%s://" % arg, value)
 disable_if_not_nullable = lambda field: field.null
 disable_if_unique = lambda field: not field.unique
 
+def add_items(items, m2m):
+    for i in items:
+        if i not in m2m.all():
+            m2m.add(i)
+    return m2m.all()
+
+def remove_items(items, m2m):
+    for i in items:
+        if i in m2m.all():
+            m2m.remove(i)
+    return m2m.all()
+
 
 class OperationManager(object):
     """
@@ -113,7 +125,9 @@ OPERATIONS = OperationManager({
     df.EmailField: [('change domain', (change_domain, True, True, "")),
                     ('upper', (string.upper, False, True, "convert to uppercase")),
                     ('lower', (string.lower, False, True, "convert to lowercase"))],
-    df.URLField: [('change protocol', (change_protocol, True, True, ""))]
+    df.URLField: [('change protocol', (change_protocol, True, True, ""))],
+    df.related.ManyToManyField: [('add items', (add_items, True, True, "")),
+                                 ('remove items', (remove_items, True, True, ""))]
 })
 
 
