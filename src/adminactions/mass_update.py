@@ -8,6 +8,7 @@ from collections import OrderedDict as SortedDict, defaultdict
 
 import django
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -351,9 +352,27 @@ def mass_update(modeladmin, request, queryset):  # noqa
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else str(obj)
+
+    configured_fields = adminForm.form.configured_fields()
+    model_fields = adminForm.form.model_fields()
+
+    for cf in configured_fields:
+        print(vars(cf))
+
+    for mf in model_fields:
+        print(vars(mf))
+
+    adminactions_filters = getattr(settings, 'ADMINACTIONS_FILTERS', None)
+    if adminactions_filters:
+        for aaf in adminactions_filters:
+            configured_fields = filter(aaf, configured_fields)
+            model_fields = filter(aaf, model_fields)
+
     tpl = 'adminactions/mass_update.html'
     ctx = {'adminform': adminForm,
            'form': form,
+           'configured_fields': configured_fields,
+           'model_fields': model_fields,
            'action_short_description': mass_update.short_description,
            'title': u"%s (%s)" % (
                mass_update.short_description.capitalize(),
