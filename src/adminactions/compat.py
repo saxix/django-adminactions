@@ -111,6 +111,6 @@ if version < (1, 9):
         only request, template and context are handled, others are accepted
         but will be discarded.
         """
-        return render_to_response(template, context=RequestContext(request, context))
+        return render_to_response(template, RequestContext(request, context))
 else:
     from django.shortcuts import render
