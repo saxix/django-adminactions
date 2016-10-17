@@ -22,6 +22,7 @@ from django.utils.functional import curry
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
+from adminactions import compat
 from adminactions.compat import get_field_by_name, render
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import GenericActionForm
