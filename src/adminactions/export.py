@@ -15,11 +15,10 @@ from django.db import router
 from django.db.models import ForeignKey, ManyToManyField
 from django.db.models.deletion import Collector
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+from adminactions.compat import render
 from adminactions.api import (export_as_csv as _export_as_csv,
                               export_as_xls as _export_as_xls,)
 from adminactions.exceptions import ActionInterrupted
@@ -126,7 +125,7 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
         ctx.update(modeladmin.admin_site.each_context(request))
     else:
         ctx.update(modeladmin.admin_site.each_context())
-    return render_to_response(template, RequestContext(request, ctx))
+    return render(request, template, ctx)
 
 
 def export_as_csv(modeladmin, request, queryset):
@@ -320,7 +319,7 @@ def export_as_fixture(modeladmin, request, queryset):
         ctx.update(modeladmin.admin_site.each_context(request))
     else:
         ctx.update(modeladmin.admin_site.each_context())
-    return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, ctx)
 
 
 export_as_fixture.short_description = _("Export as fixture")
@@ -415,7 +414,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
         ctx.update(modeladmin.admin_site.each_context(request))
     else:
         ctx.update(modeladmin.admin_site.each_context())
-    return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, ctx)
 
 
 export_delete_tree.short_description = _("Export delete tree")

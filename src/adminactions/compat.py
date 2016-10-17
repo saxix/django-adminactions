@@ -4,6 +4,8 @@ from contextlib import contextmanager
 
 import django
 import django.db.transaction as t
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
 
 version = django.VERSION[:2]
 
@@ -96,3 +98,14 @@ elif version >= (1, 4):  # noqa
 
     def model_has_field(model, field_name):
         return field_name in model._meta.get_all_field_names()
+
+# Django 1.10 render() vs Django < 1.10 render_to_response()
+if version < (1, 9):
+    def render(request, template_name, context=None, content_type=None,
+               status=None, using=None):
+        """A render() wrapper around render_to_response() for Django < 1.9."""
+        return render_to_response(
+            template_name, context=RequestContext(request, context),
+            content_type=content_type, status=status, using=using)
+else:
+    from django.shortcuts import render # noqa

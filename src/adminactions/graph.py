@@ -12,12 +12,10 @@ from django.db.models.fields.related import ForeignKey
 from django.forms.fields import BooleanField, CharField, ChoiceField
 from django.forms.forms import DeclarativeFieldsMetaclass, Form
 from django.forms.widgets import HiddenInput, MultipleHiddenInput
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
-from adminactions.compat import get_field_by_name
+from adminactions.compat import get_field_by_name, render
 from adminactions.exceptions import ActionInterrupted
 from adminactions.models import get_permission_codename
 from adminactions.signals import (adminaction_end, adminaction_requested,
@@ -160,7 +158,8 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
         ctx.update(modeladmin.admin_site.each_context(request))
     else:
         ctx.update(modeladmin.admin_site.each_context())
-    return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
+    tpl = 'adminactions/charts.html'
+    return render(request, tpl, ctx)
 
 
 graph_queryset.short_description = _("Graph selected records")
