@@ -17,7 +17,6 @@ from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
                                  modelform_factory,)
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from django.utils.encoding import smart_text
 from django.utils.functional import curry
 from django.utils.safestring import mark_safe

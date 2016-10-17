@@ -16,8 +16,9 @@ from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-import adminactions.compat as transaction, render
 from adminactions import api
+import adminactions.compat as transaction
+from adminactions.compat import render
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
 from adminactions.utils import clone_instance
