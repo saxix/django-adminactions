@@ -101,11 +101,16 @@ elif version >= (1, 4):  # noqa
 
 # Django 1.10 render() vs Django < 1.10 render_to_response()
 if version < (1, 9):
-    def render(request, template_name, context=None, content_type=None,
-               status=None, using=None):
-        """A render() wrapper around render_to_response() for Django < 1.9."""
-        return render_to_response(
-            template_name, context=RequestContext(request, context),
-            content_type=content_type, status=status, using=using)
+    def render(request, template, context=None, **kwargs):
+        """A render() wrapper around render_to_response() for Django < 1.9.
+
+        There are more arguments to render() and render_to_response(),
+        and they are different across django versions.
+
+        As this wrapper is only ever used from within this package,
+        only request, template and context are handled, others are accepted
+        but will be discarded.
+        """
+        return render_to_response(template, context=RequestContext(request, context))
 else:
     from django.shortcuts import render
