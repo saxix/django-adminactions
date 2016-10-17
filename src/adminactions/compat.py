@@ -108,4 +108,4 @@ if version < (1, 9):
             template_name, context=RequestContext(request, context),
             content_type=content_type, status=status, using=using)
 else:
-    from django.shortcuts import render # noqa
+    from django.shortcuts import render
