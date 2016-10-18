@@ -3,11 +3,10 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext as _
 
+from adminactions.compat import render
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
 
@@ -89,7 +88,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     else:
         ctx.update(modeladmin.admin_site.each_context())
 
-    return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, ctx)
 
 
 byrows_update.short_description = _("By rows update")

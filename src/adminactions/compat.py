@@ -4,6 +4,8 @@ from contextlib import contextmanager
 
 import django
 import django.db.transaction as t
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
 
 version = django.VERSION[:2]
 
@@ -96,3 +98,21 @@ elif version >= (1, 4):  # noqa
 
     def model_has_field(model, field_name):
         return field_name in model._meta.get_all_field_names()
+
+# Django 1.10 render() vs Django < 1.10 render_to_response()
+if version < (1, 9):
+    def render(request, template, context=None):
+        """A render() wrapper around render_to_response() for Django < 1.9.
+
+        There are more arguments to render() and render_to_response(),
+        and they are different across django versions.
+
+        As this wrapper is only ever used from within this package,
+        only request, template and context are handled.
+        Other args and kwargs are not accepted and will raise an Exception,
+        which will fail louder and earlier than accepting and silently
+        discarding them.
+        """
+        return render_to_response(template, RequestContext(request, context))
+else:
+    from django.shortcuts import render
