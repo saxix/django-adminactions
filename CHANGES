@@ -1,3 +1,8 @@
+Release 1.2
+===========
+* merge :ghissue:`98` - Django 1.10 support (thanks PetrDlouhy, florianm)
+
+
 Release 1.1
 ===========
 * merge :ghissue:`91` - add french translation
