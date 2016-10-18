@@ -46,7 +46,7 @@ elif db == 'myisam':
             'USER': 'root',
             'PASSWORD': '',
             'CHARSET': 'utf8',
-            'OPTIONS': {'init_command': 'SET storage_engine=MyISAM',},
+            'OPTIONS': {'init_command': 'SET storage_engine=MyISAM'},
             'COLLATION': 'utf8_general_ci',
             'TEST': {
                 'CHARSET': 'utf8',

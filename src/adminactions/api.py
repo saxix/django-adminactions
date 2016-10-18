@@ -15,7 +15,7 @@ from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_text, smart_str, smart_text
-
+from django.utils.timezone import get_default_timezone
 from adminactions import compat
 from adminactions.templatetags.actions import get_field_value
 from adminactions.utils import clone_instance, get_field_by_path
@@ -197,7 +197,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
                             quotechar=str(config['quotechar']),
                             quoting=int(config['quoting']))
 
-    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+    settingstime_zone = get_default_timezone()
 
     def yield_header():
         if bool(header):
@@ -322,7 +322,7 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.row(row).height = 500
     formats = _get_qs_formats(queryset)
 
-    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+    settingstime_zone = get_default_timezone()
 
     _styles = {}
 
@@ -452,7 +452,7 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, force_text(fieldname), formats['_general_'])
 
-    settingstime_zone = pytz.timezone(settings.TIME_ZONE)
+    settingstime_zone = get_default_timezone()
 
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)

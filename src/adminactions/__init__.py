@@ -1,8 +1,8 @@
-import subprocess
 import datetime
 import os
+import subprocess
 
-VERSION = __version__ = (1, 1, 0, 'final', 0)
+VERSION = __version__ = (1, 2, 0, 'final', 0)
 NAME = 'django-adminactions'
 
 

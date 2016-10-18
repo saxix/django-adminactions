@@ -4,12 +4,6 @@ import datetime
 import json
 import re
 import six
-# Django's SortedDict has been deprecated since 1.7
-# Use collections.OrderedDict instead.
-# from django import VERSION
-# if VERSION[0] == 1 and VERSION[1] < 7:
-#     from django.utils.datastructures import SortedDict
-# else:
 from collections import OrderedDict as SortedDict, defaultdict
 
 import django
@@ -23,7 +17,7 @@ from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
                                  modelform_factory,)
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.functional import curry
@@ -42,7 +36,6 @@ if six.PY2:
     import string
 elif six.PY3:
     string = str
-
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
 
@@ -132,6 +125,7 @@ class MassUpdateForm(GenericActionForm):
 
     _validate = forms.BooleanField(label='Validate',
                                    help_text="if checked use obj.save() instead of manager.update()")
+
     # _unique_transaction = forms.BooleanField(label='Unique transaction',
     # required=False,
     # help_text="If checked create one transaction for the whole update. "
@@ -350,7 +344,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
            'title': u"%s (%s)" % (
                mass_update.short_description.capitalize(),
                smart_text(modeladmin.opts.verbose_name_plural),
-            ),
+           ),
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),
            'change': True,
@@ -371,7 +365,10 @@ def mass_update(modeladmin, request, queryset):  # noqa
     else:
         ctx.update(modeladmin.admin_site.each_context())
 
-    return render_to_response(tpl, RequestContext(request, ctx))
+    if django.VERSION[:2] > (1, 8):
+        return render(request, tpl, context=ctx)
+    else:
+        return render_to_response(tpl, RequestContext(request, ctx))
 
 
 mass_update.short_description = _("Mass update")
