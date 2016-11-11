@@ -23,6 +23,8 @@ from adminactions import api
 from adminactions.forms import GenericActionForm
 from adminactions.models import get_permission_codename
 from adminactions.utils import clone_instance
+from adminactions.exceptions import ActionInterrupted
+from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 
 
 class MergeForm(GenericActionForm):
@@ -135,12 +137,29 @@ def merge(modeladmin, request, queryset):  # noqa
             ok = form.is_valid()
             other.pk = stored_pk
         if ok:
+            try:
+                adminaction_start.send(sender=modeladmin.model,
+                                       action='merge',
+                                       request=request,
+                                       queryset=master,
+                                       modeladmin=modeladmin,
+                                       form=form,
+                                       queryset_other=other)
+            except ActionInterrupted as e:
+                messages.error(request, str(e))
+                return
             if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
                 related = api.ALL_FIELDS
             else:
                 related = None
             fields = form.cleaned_data['field_names']
             api.merge(master, other, fields=fields, commit=True, related=related)
+            adminaction_end.send(sender=modeladmin.model,
+                                 action='merge',
+                                 request=request,
+                                 queryset=master,
+                                 modeladmin=modeladmin,
+                                 form=form)
             return HttpResponseRedirect(request.path)
         else:
             messages.error(request, form.errors)
@@ -174,6 +193,18 @@ def merge(modeladmin, request, queryset):  # noqa
                    'other_pk': other.pk}
         formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
         form = MForm(initial=initial, instance=master)
+
+        try:
+            adminaction_requested.send(sender=modeladmin.model,
+                                       action='merge',
+                                       request=request,
+                                       queryset=master,
+                                       modeladmin=modeladmin,
+                                       form=form,
+                                       queryset_other=other)
+        except ActionInterrupted as e:
+            messages.error(request, str(e))
+            return
 
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
