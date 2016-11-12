@@ -9,6 +9,7 @@ include tox.ini
 include *.py
 include Makefile
 
+exclude .bumpversion.cfg
 exclude .editorconfig
 
 recursive-include docs *
