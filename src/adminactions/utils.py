@@ -109,6 +109,8 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     else:
         value = getattr_or_item(obj, fieldname)
 
+    if hasattr(value, 'all'):
+        value = ';'.join(smart_text(obj) for obj in value.all())
     if not raw_callable and callable(value):
         value = value()
 
