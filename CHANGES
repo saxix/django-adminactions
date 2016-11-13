@@ -1,3 +1,8 @@
+Release 1.3
+===========
+* fixes :ghissue:`92` translations are not compiled in package
+
+
 Release 1.2
 ===========
 * merge :ghissue:`98` - Django 1.10 support (thanks PetrDlouhy, florianm)

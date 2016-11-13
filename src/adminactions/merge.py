@@ -12,17 +12,17 @@ from django.forms import HiddenInput, TextInput
 from django.forms.formsets import formset_factory
 from django.forms.models import model_to_dict, modelform_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-import adminactions.compat as transaction
-from adminactions import api
-from adminactions.forms import GenericActionForm
-from adminactions.models import get_permission_codename
-from adminactions.utils import clone_instance
+from . import compat as transaction
+from . import api
+from .forms import GenericActionForm
+from .models import get_permission_codename
+from .utils import clone_instance
 
 
 class MergeForm(GenericActionForm):

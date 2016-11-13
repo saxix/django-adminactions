@@ -1,6 +1,5 @@
 coverage
 check-manifest
-docutils
 django-dynamic-fixture
 django-webtest>=1.7.5
 flake8

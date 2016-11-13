@@ -6,7 +6,6 @@ import datetime
 import itertools
 import six
 
-import pytz
 import xlwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,9 +15,10 @@ from django.http import HttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_text, smart_str, smart_text
 from django.utils.timezone import get_default_timezone
-from adminactions import compat
-from adminactions.templatetags.actions import get_field_value
-from adminactions.utils import clone_instance, get_field_by_path
+
+from . import compat
+from .templatetags.actions import get_field_value
+from .utils import clone_instance, get_field_by_path
 
 try:
     # actually supported in admin actions since django >= 1.6

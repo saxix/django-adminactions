@@ -5,9 +5,9 @@
 
 .. _howto:
 
-======
+=====
 HowTo
-======
+=====
 
 .. contents::
     :local:

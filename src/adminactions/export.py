@@ -20,13 +20,12 @@ from django.template.context import RequestContext
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from adminactions.api import (export_as_csv as _export_as_csv,
-                              export_as_xls as _export_as_xls,)
-from adminactions.exceptions import ActionInterrupted
-from adminactions.forms import CSVOptions, XLSOptions
-from adminactions.models import get_permission_codename
-from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+from .api import (export_as_csv as _export_as_csv,
+                  export_as_xls as _export_as_xls,)
+from .exceptions import ActionInterrupted
+from .forms import CSVOptions, XLSOptions
+from .models import get_permission_codename
+from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 
 def get_action(request):

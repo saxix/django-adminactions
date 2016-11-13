@@ -6,7 +6,7 @@ from django.db import connections, models, router
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_text
 
-from adminactions.compat import get_all_field_names, get_field_by_name
+from .compat import get_all_field_names, get_field_by_name
 
 
 def clone_instance(instance, fieldnames=None):
