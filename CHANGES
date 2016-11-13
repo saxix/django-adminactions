@@ -1,6 +1,7 @@
-Release 1.3
-===========
+Release 1.3 (dev)
+=================
 * fixes :ghissue:`92` translations are not compiled in package
+* fixes :ghissue:`105` Support exporting many to many fields
 
 
 Release 1.2
