@@ -37,17 +37,16 @@ matrix:
 
 
 install:
-  - pip install tox "coverage<4.0" python-coveralls>=2.5 coveralls>=0.5 codecov
+  - pip install -e ".[test]" codecov
 
 script:
-  - tox -e $TOXENV -- py.test tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
+  - tox -e $TOXENV -- py.test tests -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase
 
 after_success:
   - coverage combine
-  - coveralls
   - codecov
 
 notifications:
