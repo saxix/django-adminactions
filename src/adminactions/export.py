@@ -122,10 +122,7 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
     return render_to_response(template, RequestContext(request, ctx))
 
 
@@ -316,10 +313,7 @@ def export_as_fixture(modeladmin, request, queryset):
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
     return render_to_response(tpl, RequestContext(request, ctx))
 
 
@@ -411,10 +405,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
            'opts': queryset.model._meta,
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
     return render_to_response(tpl, RequestContext(request, ctx))
 
 

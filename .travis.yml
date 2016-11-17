@@ -8,25 +8,22 @@ cache:
     - $HOME/.cache/pip
 
 env:
-  - TOXENV=py27-d17
   - TOXENV=py27-d18
   - TOXENV=py27-d19
   - TOXENV=py27-d110
   - TOXENV=py27-ddev
 
-  - TOXENV=py33-d17
   - TOXENV=py33-d18
+  - TOXENV=py33-ddev
 
-  - TOXENV=py34-d17
   - TOXENV=py34-d18
-  - TOXENV=py34-d19
+  - TOXENV=py34-ddev
 
   - TOXENV=py35-d18
   - TOXENV=py35-d19
   - TOXENV=py35-d110
   - TOXENV=py35-ddev
 
-  - TOXENV=pypy-d17
   - TOXENV=pypy-d18
   - TOXENV=pypy-d19
   - TOXENV=pypy-d110
