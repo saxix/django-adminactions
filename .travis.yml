@@ -37,7 +37,7 @@ matrix:
 
 
 install:
-  - pip install -e ".[test]" codecov
+  - pip install -e ".[test]"
 
 script:
   - tox -e $TOXENV -- py.test tests -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
@@ -47,7 +47,7 @@ before_success:
 
 after_success:
   - coverage combine
-  - codecov
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   webhooks:
