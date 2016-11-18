@@ -1,4 +1,3 @@
-coverage
 check-manifest
 django-dynamic-fixture
 django-webtest>=1.7.5

@@ -100,4 +100,4 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
             res.form.submit('apply')
             obj = DemoModel.objects.get(id=self._selected_values[row_to_modify])
             for k, v in new_values.items():
-                self.assertEquals(v, getattr(obj, k))
+                self.assertEqual(v, getattr(obj, k))

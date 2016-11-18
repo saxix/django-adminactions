@@ -7,49 +7,14 @@ import django.db.transaction as t
 
 version = django.VERSION[:2]
 
-if version <= (1, 5):  # noqa
+from django.db.transaction import atomic  # noqa
 
-    @contextmanager
-    def nocommit(using=None):
-        t.enter_transaction_management(using=using)
-        t.managed(True, using=using)
-        yield
-        t.rollback()
-        t.leave_transaction_management(using=using)
+class NoCommit(t.Atomic):
+    def __exit__(self, exc_type, exc_value, traceback):
+        super(NoCommit, self).__exit__(Exception, Exception(), None)
 
-    class atomic(object):
-        def __init__(self, using=None):
-            self.using = using
-
-        def __enter__(self):
-            t.enter_transaction_management(using=self.using)
-            t.managed(True, using=self.using)
-
-        def __exit__(self, exc_type, exc_value, traceback):
-            try:
-                if exc_type is not None:
-                    if t.is_dirty(using=self.using):
-                        t.rollback(using=self.using)
-                else:
-                    if t.is_dirty(using=self.using):
-                        try:
-                            t.commit(using=self.using)
-                        except:
-                            t.rollback(using=self.using)
-                            raise
-            finally:
-                t.leave_transaction_management(using=self.using)
-
-
-else:
-    from django.db.transaction import atomic  # noqa
-
-    class NoCommit(t.Atomic):
-        def __exit__(self, exc_type, exc_value, traceback):
-            super(NoCommit, self).__exit__(Exception, Exception(), None)
-
-    def nocommit(using=None, savepoint=True):
-        return NoCommit(using, savepoint)
+def nocommit(using=None, savepoint=True):
+    return NoCommit(using, savepoint)
 
 
 # Model._meta compatibility
@@ -74,17 +39,7 @@ if version >= (1, 10):  # noqa
                     # For complete backwards compatibility, you may want to exclude
                     # GenericForeignKey from the results.
                     if not (field.many_to_one and field.related_model is None))))
-# elif version >= (1, 9):  # noqa
-    # pass
-# elif version >= (1, 8):  # noqa
-    # pass
-# elif version >= (1, 7):  # noqa
-    # pass
-# elif version >= (1, 6):  # noqa
-    # pass
-# elif version >= (1, 5):  # noqa
-    # pass
-elif version >= (1, 4):  # noqa
+else:
     def get_all_related_objects(model):
         return model._meta.get_all_related_objects()
 
