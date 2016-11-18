@@ -155,10 +155,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
            'extra': extra,
            'as_json': json.dumps(table),
            'graph_type': graph_type}
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
     return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
 
 

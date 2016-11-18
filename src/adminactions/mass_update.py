@@ -360,10 +360,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
            # 'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
 
     if django.VERSION[:2] > (1, 8):
         return render(request, tpl, context=ctx)

@@ -187,10 +187,7 @@ def merge(modeladmin, request, queryset):  # noqa
                 ),
                 'master': master,
                 'other': other})
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
     if django.VERSION[:2] > (1, 8):
         return render(request, tpl, context=ctx)
     else:
