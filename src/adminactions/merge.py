@@ -137,10 +137,12 @@ def merge(modeladmin, request, queryset):  # noqa
         if ok:
             if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
                 related = api.ALL_FIELDS
+                m2m = api.ALL_FIELDS
             else:
                 related = None
+                m2m = None
             fields = form.cleaned_data['field_names']
-            api.merge(master, other, fields=fields, commit=True, related=related)
+            api.merge(master, other, fields=fields, commit=True, m2m=m2m, related=related)
             return HttpResponseRedirect(request.path)
         else:
             messages.error(request, form.errors)
