@@ -6,7 +6,7 @@ from django import forms
 from django.forms.models import ModelForm
 from django.forms.widgets import SelectMultiple
 from django.utils import formats
-from django.utils.translate import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 
 from .api import csv, delimiters, quotes
 
