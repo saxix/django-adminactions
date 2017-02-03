@@ -52,59 +52,59 @@ msgstr "Eksportuj drzewo usunięć"
 
 #: src/adminactions/forms.py:37 src/adminactions/forms.py:60
 msgid "Header"
-msgstr ""
+msgstr "Nagłówek"
 
 #: src/adminactions/forms.py:38
 msgid "Delimiter"
-msgstr ""
+msgstr "Separator"
 
 #: src/adminactions/forms.py:39
 msgid "Quotechar"
-msgstr ""
+msgstr "Separator tekstu"
 
 #: src/adminactions/forms.py:41
 msgid "Quoting"
-msgstr ""
+msgstr "Oznaczanie separatorem tekstu"
 
 #: src/adminactions/forms.py:42
 msgid "All"
-msgstr ""
+msgstr "Pełne"
 
 #: src/adminactions/forms.py:43
 msgid "Minimal"
-msgstr ""
+msgstr "Minimalne"
 
 #: src/adminactions/forms.py:44
 msgid "None"
-msgstr ""
+msgstr "Brak"
 
 #: src/adminactions/forms.py:45
 msgid "Non Numeric"
-msgstr ""
+msgstr "Nienumeryczne"
 
 #: src/adminactions/forms.py:47
 msgid "Escapechar"
-msgstr ""
+msgstr "Znak modyfikacji"
 
 #: src/adminactions/forms.py:48
 msgid "Datetime format"
-msgstr ""
+msgstr "Format daty i czasu"
 
 #: src/adminactions/forms.py:49
 msgid "Date format"
-msgstr ""
+msgstr "Format daty"
 
 #: src/adminactions/forms.py:50
 msgid "Time format"
-msgstr ""
+msgstr "Format czasu"
 
 #: src/adminactions/forms.py:51 src/adminactions/forms.py:74
 msgid "Columns"
-msgstr ""
+msgstr "Kolumny"
 
 #: src/adminactions/forms.py:61
 msgid "Use display"
-msgstr ""
+msgstr "Użyj wyświetlanej nazwy pola"
 
 #: src/adminactions/graph.py:162
 msgid "Graph selected records"
