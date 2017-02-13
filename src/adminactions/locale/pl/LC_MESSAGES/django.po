@@ -1,0 +1,161 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-02-01 23:34+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+#: src/adminactions/byrows_update.py:29 src/adminactions/export.py:47
+#: src/adminactions/export.py:249 src/adminactions/export.py:331
+#: src/adminactions/graph.py:49 src/adminactions/mass_update.py:247
+#: src/adminactions/merge.py:82
+msgid "Sorry you do not have rights to execute this action"
+msgstr ""
+
+#: src/adminactions/byrows_update.py:55
+msgid "Updated record(s)"
+msgstr "Zaktualizowano rekord(y)"
+
+#: src/adminactions/byrows_update.py:89
+msgid "By rows update"
+msgstr "Aktualizuj wiersze"
+
+#: src/adminactions/export.py:142
+msgid "Export as CSV"
+msgstr "Eksportuj jako CSV"
+
+#: src/adminactions/export.py:158
+msgid "Export as XLS"
+msgstr "Eksportuj jako XLS"
+
+#: src/adminactions/export.py:320
+msgid "Export as fixture"
+msgstr "Exportuj jako fixture"
+
+#: src/adminactions/export.py:412
+msgid "Export delete tree"
+msgstr "Eksportuj drzewo usunięć"
+
+#: src/adminactions/graph.py:162
+msgid "Graph selected records"
+msgstr "Wygeneruj graf zaznaczonych rekordów"
+
+#: src/adminactions/mass_update.py:231
+#, python-format
+msgid "Updated %s records"
+msgstr "Zaktualizowano %s rekordów"
+
+#: src/adminactions/mass_update.py:371
+msgid "Mass update"
+msgstr "Masowa aktualizacja"
+
+#: src/adminactions/merge.py:35
+msgid "Dependencies"
+msgstr "Zależności"
+
+#: src/adminactions/merge.py:36
+msgid "Move"
+msgstr "Przenieś"
+
+#: src/adminactions/merge.py:36
+msgid "Delete"
+msgstr "Usuń"
+
+#: src/adminactions/merge.py:167
+msgid "Please select exactly 2 records"
+msgstr "Wybierz dokładnie 2 wiersze"
+
+#: src/adminactions/merge.py:199
+#, python-format
+msgid "Merge selected %(verbose_name_plural)s"
+msgstr "Scalono wybrane %(verbose_name_plural)s"
+
+#: src/adminactions/templates/adminactions/any_model.html:26
+#: src/adminactions/templates/adminactions/byrows_update.html:20
+#: src/adminactions/templates/adminactions/charts.html:18
+#: src/adminactions/templates/adminactions/export_csv.html:46
+#: src/adminactions/templates/adminactions/export_fixture.html:6
+#: src/adminactions/templates/adminactions/export_xls.html:19
+#: src/adminactions/templates/adminactions/mass_update.html:26
+#: src/adminactions/templates/adminactions/merge.html:5
+#: src/adminactions/templates/adminactions/merge_preview.html:5
+msgid "Home"
+msgstr "Strona główna"
+
+#: src/adminactions/templates/adminactions/byrows_update.html:30
+msgid "Please correct the error below."
+msgstr "Proszę popraw poniższy błąd"
+
+#: src/adminactions/templates/adminactions/byrows_update.html:30
+msgid "Please correct the errors below."
+msgstr "Proszę popraw poniższe błędy"
+
+#: src/adminactions/templates/adminactions/export_csv.html:69
+msgid "Export"
+msgstr "Eksport"
+
+#: src/adminactions/templates/adminactions/merge.html:35
+msgid "Field"
+msgstr "Pole"
+
+#: src/adminactions/templates/adminactions/merge.html:36
+msgid "Master"
+msgstr ""
+
+#: src/adminactions/templates/adminactions/merge.html:36
+msgid "This will be preserved"
+msgstr "Ten obiekt zostanie zachowany"
+
+#: src/adminactions/templates/adminactions/merge.html:38
+msgid "swap"
+msgstr ""
+
+#: src/adminactions/templates/adminactions/merge.html:39
+msgid "Result"
+msgstr "Rezultat"
+
+#: src/adminactions/templates/adminactions/merge.html:41
+msgid "Other"
+msgstr ""
+
+#: src/adminactions/templates/adminactions/merge.html:41
+msgid "This will be removed"
+msgstr "Ten obiekt zostanie usunięty"
+
+#: src/adminactions/templates/adminactions/merge.html:70
+#: src/adminactions/templates/adminactions/merge_preview.html:9
+msgid "Preview"
+msgstr "Podgląd"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:8
+msgid "Merge records"
+msgstr "Scal rekordy"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:18
+msgid "Key"
+msgstr "Klucz"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:23
+msgid "Original"
+msgstr "Oryginał"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:24
+msgid "After Merging"
+msgstr "Po Scaleniu"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:39
+msgid "Merge"
+msgstr "Scalenie"
