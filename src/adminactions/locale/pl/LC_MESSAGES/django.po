@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-01 23:34+0700\n"
+"POT-Creation-Date: 2017-02-03 17:57+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,6 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2);\n"
+
 #: src/adminactions/byrows_update.py:29 src/adminactions/export.py:47
 #: src/adminactions/export.py:249 src/adminactions/export.py:331
 #: src/adminactions/graph.py:49 src/adminactions/mass_update.py:247
@@ -48,6 +49,62 @@ msgstr "Exportuj jako fixture"
 #: src/adminactions/export.py:412
 msgid "Export delete tree"
 msgstr "Eksportuj drzewo usunięć"
+
+#: src/adminactions/forms.py:37 src/adminactions/forms.py:60
+msgid "Header"
+msgstr "Nagłówek"
+
+#: src/adminactions/forms.py:38
+msgid "Delimiter"
+msgstr "Separator"
+
+#: src/adminactions/forms.py:39
+msgid "Quotechar"
+msgstr "Separator tekstu"
+
+#: src/adminactions/forms.py:41
+msgid "Quoting"
+msgstr "Oznaczanie separatorem tekstu"
+
+#: src/adminactions/forms.py:42
+msgid "All"
+msgstr "Pełne"
+
+#: src/adminactions/forms.py:43
+msgid "Minimal"
+msgstr "Minimalne"
+
+#: src/adminactions/forms.py:44
+msgid "None"
+msgstr "Brak"
+
+#: src/adminactions/forms.py:45
+msgid "Non Numeric"
+msgstr "Nienumeryczne"
+
+#: src/adminactions/forms.py:47
+msgid "Escapechar"
+msgstr "Znak modyfikacji"
+
+#: src/adminactions/forms.py:48
+msgid "Datetime format"
+msgstr "Format daty i czasu"
+
+#: src/adminactions/forms.py:49
+msgid "Date format"
+msgstr "Format daty"
+
+#: src/adminactions/forms.py:50
+msgid "Time format"
+msgstr "Format czasu"
+
+#: src/adminactions/forms.py:51 src/adminactions/forms.py:74
+msgid "Columns"
+msgstr "Kolumny"
+
+#: src/adminactions/forms.py:61
+msgid "Use display"
+msgstr "Użyj wyświetlanej nazwy pola"
 
 #: src/adminactions/graph.py:162
 msgid "Graph selected records"

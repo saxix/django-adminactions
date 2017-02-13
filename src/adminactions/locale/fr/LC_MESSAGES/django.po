@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-25 11:51+0100\n"
+"POT-Creation-Date: 2017-02-03 17:57+0700\n"
 "PO-Revision-Date: 2016-02-25\n"
 "Last-Translator: Simon Maillard <simon@ogesta.fr>\n"
 "Language: fr\n"
@@ -14,63 +14,126 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: src/adminactions/byrows_update.py:32 src/adminactions/export.py:46
-#: src/adminactions/export.py:237 src/adminactions/export.py:314
-#: src/adminactions/graph.py:51 src/adminactions/mass_update.py:252
-#: src/adminactions/merge.py:81
+#: src/adminactions/byrows_update.py:29 src/adminactions/export.py:47
+#: src/adminactions/export.py:249 src/adminactions/export.py:331
+#: src/adminactions/graph.py:49 src/adminactions/mass_update.py:247
+#: src/adminactions/merge.py:82
 msgid "Sorry you do not have rights to execute this action"
-msgstr "Désolé vous n'avez pas les droits nécessaires pour effectuer cette action"
+msgstr ""
+"Désolé vous n'avez pas les droits nécessaires pour effectuer cette action"
 
-#: src/adminactions/byrows_update.py:58
+#: src/adminactions/byrows_update.py:55
 msgid "Updated record(s)"
 msgstr "Enregistrement(s) mis à jour"
 
-#: src/adminactions/export.py:129 src/adminactions/export.py:134
+#: src/adminactions/byrows_update.py:89
+msgid "By rows update"
+msgstr ""
+
+#: src/adminactions/export.py:142
 msgid "Export as CSV"
 msgstr "Exporter au format CSV"
 
-#: src/adminactions/export.py:141 src/adminactions/export.py:146
+#: src/adminactions/export.py:158
 msgid "Export as XLS"
 msgstr "Exporter au format XLS"
 
-#: src/adminactions/export.py:290
-msgid "Export as Fixture"
-msgstr "Exporter comme données initiales (fixtures)"
-
-#: src/adminactions/export.py:303
+#: src/adminactions/export.py:320
 msgid "Export as fixture"
 msgstr "Exporter comme données initiales (fixtures)"
 
-#: src/adminactions/export.py:377
-msgid "Export Delete Tree"
-msgstr "Exporter l'arbre des dépendances"
-
-#: src/adminactions/export.py:390
+#: src/adminactions/export.py:412
 msgid "Export delete tree"
 msgstr "Exporter l'arbre des suppressions"
 
-#: src/adminactions/mass_update.py:236
+#: src/adminactions/forms.py:37 src/adminactions/forms.py:60
+msgid "Header"
+msgstr ""
+
+#: src/adminactions/forms.py:38
+msgid "Delimiter"
+msgstr ""
+
+#: src/adminactions/forms.py:39
+msgid "Quotechar"
+msgstr ""
+
+#: src/adminactions/forms.py:41
+msgid "Quoting"
+msgstr ""
+
+#: src/adminactions/forms.py:42
+msgid "All"
+msgstr ""
+
+#: src/adminactions/forms.py:43
+msgid "Minimal"
+msgstr ""
+
+#: src/adminactions/forms.py:44
+msgid "None"
+msgstr ""
+
+#: src/adminactions/forms.py:45
+msgid "Non Numeric"
+msgstr ""
+
+#: src/adminactions/forms.py:47
+msgid "Escapechar"
+msgstr ""
+
+#: src/adminactions/forms.py:48
+msgid "Datetime format"
+msgstr ""
+
+#: src/adminactions/forms.py:49
+msgid "Date format"
+msgstr ""
+
+#: src/adminactions/forms.py:50
+msgid "Time format"
+msgstr ""
+
+#: src/adminactions/forms.py:51 src/adminactions/forms.py:74
+msgid "Columns"
+msgstr ""
+
+#: src/adminactions/forms.py:61
+msgid "Use display"
+msgstr ""
+
+#: src/adminactions/graph.py:162
+#, fuzzy
+#| msgid "Please select exactly 2 records"
+msgid "Graph selected records"
+msgstr "Veuillez sélectionner seulement 2 enregistrements"
+
+#: src/adminactions/mass_update.py:231
 #, python-format
 msgid "Updated %s records"
 msgstr "%s enregistrements ont été mis à jour"
 
-#: src/adminactions/merge.py:34
+#: src/adminactions/mass_update.py:371
+msgid "Mass update"
+msgstr ""
+
+#: src/adminactions/merge.py:35
 msgid "Dependencies"
 msgstr "Dépendances"
 
-#: src/adminactions/merge.py:35
+#: src/adminactions/merge.py:36
 msgid "Move"
 msgstr "Déplacer"
 
-#: src/adminactions/merge.py:35
+#: src/adminactions/merge.py:36
 msgid "Delete"
 msgstr "Supprimer"
 
-#: src/adminactions/merge.py:164
+#: src/adminactions/merge.py:167
 msgid "Please select exactly 2 records"
 msgstr "Veuillez sélectionner seulement 2 enregistrements"
 
-#: src/adminactions/merge.py:188
+#: src/adminactions/merge.py:199
 #, python-format
 msgid "Merge selected %(verbose_name_plural)s"
 msgstr "Fusionner les %(verbose_name_plural)s sélectionnés"
@@ -95,22 +158,9 @@ msgstr "Veuillez corriger l'erreur ci-dessous"
 msgid "Please correct the errors below."
 msgstr "Veuillez corriger l'erreur ci-dessous"
 
-#: src/adminactions/templates/adminactions/export_csv.html:50
-msgid "CSV Export Options"
-msgstr "Options de l'export CSV"
-
 #: src/adminactions/templates/adminactions/export_csv.html:69
 msgid "Export"
 msgstr "Exporter"
-
-#: src/adminactions/templates/adminactions/export_xls.html:23
-msgid "XLS Export Options"
-msgstr "Option de l'export XLS"
-
-#: src/adminactions/templates/adminactions/merge.html:8
-#: src/adminactions/templates/adminactions/merge_preview.html:8
-msgid "Merge records"
-msgstr "Fusionner les enregistrements"
 
 #: src/adminactions/templates/adminactions/merge.html:35
 msgid "Field"
@@ -145,6 +195,10 @@ msgstr "Celui-ci sera supprimé"
 msgid "Preview"
 msgstr "Aperçu"
 
+#: src/adminactions/templates/adminactions/merge_preview.html:8
+msgid "Merge records"
+msgstr "Fusionner les enregistrements"
+
 #: src/adminactions/templates/adminactions/merge_preview.html:18
 msgid "Key"
 msgstr "Clef"
@@ -160,3 +214,15 @@ msgstr "Après fusion"
 #: src/adminactions/templates/adminactions/merge_preview.html:39
 msgid "Merge"
 msgstr "Fusionner"
+
+#~ msgid "Export as Fixture"
+#~ msgstr "Exporter comme données initiales (fixtures)"
+
+#~ msgid "Export Delete Tree"
+#~ msgstr "Exporter l'arbre des dépendances"
+
+#~ msgid "CSV Export Options"
+#~ msgstr "Options de l'export CSV"
+
+#~ msgid "XLS Export Options"
+#~ msgstr "Option de l'export XLS"
