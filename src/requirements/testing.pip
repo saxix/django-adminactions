@@ -15,3 +15,4 @@ selenium>=2.42.0
 setuptools>=15.0
 tox
 WebTest>=2.0.7
+
