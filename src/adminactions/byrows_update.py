@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import (render_to_response, render)
 from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext as _
@@ -83,7 +83,10 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     }
     ctx.update(modeladmin.admin_site.each_context(request))
 
-    return render_to_response(tpl, RequestContext(request, ctx))
+    if django.VERSION[:2] > (1, 8):
+        return render(request, tpl, context=ctx)
+    else:
+        return render_to_response(tpl, RequestContext(request, ctx))
 
 
 byrows_update.short_description = _("By rows update")

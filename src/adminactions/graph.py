@@ -12,7 +12,7 @@ from django.db.models.fields.related import ForeignKey
 from django.forms.fields import BooleanField, CharField, ChoiceField
 from django.forms.forms import DeclarativeFieldsMetaclass, Form
 from django.forms.widgets import HiddenInput, MultipleHiddenInput
-from django.shortcuts import render_to_response
+from django.shortcuts import (render_to_response, render)
 from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -156,7 +156,10 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
            'as_json': json.dumps(table),
            'graph_type': graph_type}
     ctx.update(modeladmin.admin_site.each_context(request))
-    return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
+    if django.VERSION[:2] > (1, 8):
+        return render(request, 'adminactions/charts.html', context=ctx)
+    else:
+        return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
 
 
 graph_queryset.short_description = _("Graph selected records")
