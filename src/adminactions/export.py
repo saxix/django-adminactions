@@ -15,7 +15,7 @@ from django.db import router
 from django.db.models import ForeignKey, ManyToManyField
 from django.db.models.deletion import Collector
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import (render_to_response, render)
+from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
@@ -26,6 +26,12 @@ from .exceptions import ActionInterrupted
 from .forms import CSVOptions, XLSOptions
 from .models import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
+
+if django.VERSION[:2] > (1, 8):
+    from django.shortcuts import render
+
+    def render_to_response(template_name, context):  # noqa
+        return render(context.request, template_name, context=context.flatten())
 
 
 def get_action(request):
@@ -123,10 +129,7 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
     ctx.update(modeladmin.admin_site.each_context(request))
-    if django.VERSION[:2] > (1, 8):
-        return render(request, template, context=ctx)
-    else:
-        return render_to_response(template, RequestContext(request, ctx))
+    return render_to_response(template, RequestContext(request, ctx))
 
 
 def export_as_csv(modeladmin, request, queryset):
@@ -317,10 +320,7 @@ def export_as_fixture(modeladmin, request, queryset):
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
     ctx.update(modeladmin.admin_site.each_context(request))
-    if django.VERSION[:2] > (1, 8):
-        return render(request, tpl, context=ctx)
-    else:
-        return render_to_response(tpl, RequestContext(request, ctx))
+    return render_to_response(tpl, RequestContext(request, ctx))
 
 
 export_as_fixture.short_description = _("Export as fixture")
@@ -412,10 +412,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
     ctx.update(modeladmin.admin_site.each_context(request))
-    if django.VERSION[:2] > (1, 8):
-        return render(request, tpl, context=ctx)
-    else:
-        return render_to_response(tpl, RequestContext(request, ctx))
+    return render_to_response(tpl, RequestContext(request, ctx))
 
 
 export_delete_tree.short_description = _("Export delete tree")
