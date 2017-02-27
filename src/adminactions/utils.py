@@ -6,7 +6,7 @@ from django.db import connections, models, router
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_text
 
-from adminactions.compat import get_all_field_names, get_field_by_name
+from .compat import get_all_field_names, get_field_by_name
 
 
 def clone_instance(instance, fieldnames=None):
@@ -109,6 +109,8 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     else:
         value = getattr_or_item(obj, fieldname)
 
+    if hasattr(value, 'all'):
+        value = ';'.join(smart_text(obj) for obj in value.all())
     if not raw_callable and callable(value):
         value = value()
 

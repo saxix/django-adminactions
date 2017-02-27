@@ -24,7 +24,7 @@ class TestExportQuerySetAsCsv(TestCase):
             qs = Permission.objects.select_related().filter(codename='add_user')
             ret = export_as_csv(queryset=qs)
         self.assertIsInstance(ret, HttpResponse)
-        self.assertEquals(ret.content.decode('utf8'), u'"%s";"Can add user";"user";"add_user"\r\n' % qs[0].pk)
+        self.assertEqual(ret.content.decode('utf8'), u'"%s";"Can add user";"user";"add_user"\r\n' % qs[0].pk)
 
     def test_header_is_true(self):
         mem = six.StringIO()
@@ -45,9 +45,9 @@ class TestExportQuerySetAsCsv(TestCase):
         mem.seek(0)
         csv_dump = mem.read()
         if six.PY2:
-            self.assertEquals(csv_dump.decode('utf8'), u'"Name";"Application"\r\n"add_user";"auth"\r\n')
+            self.assertEqual(csv_dump.decode('utf8'), u'"Name";"Application"\r\n"add_user";"auth"\r\n')
         else:
-            self.assertEquals(csv_dump, '"Name";"Application"\r\n"add_user";"auth"\r\n')
+            self.assertEqual(csv_dump, '"Name";"Application"\r\n"add_user";"auth"\r\n')
 
     def test_callable_method(self):
         fields = ['codename', 'natural_key']
@@ -58,9 +58,9 @@ class TestExportQuerySetAsCsv(TestCase):
         mem.seek(0)
         csv_dump = mem.read()
         if six.PY2:
-            self.assertEquals(csv_dump.decode('utf8'), u'"add_user";"(u\'add_user\', u\'auth\', u\'user\')"\r\n')
+            self.assertEqual(csv_dump.decode('utf8'), u'"add_user";"(u\'add_user\', u\'auth\', u\'user\')"\r\n')
         else:
-            self.assertEquals(csv_dump, '"add_user";"(\'add_user\', \'auth\', \'user\')"\r\n')
+            self.assertEqual(csv_dump, '"add_user";"(\'add_user\', \'auth\', \'user\')"\r\n')
 
     def test_deep_attr(self):
         fields = ['codename', 'content_type.app_label']
@@ -71,9 +71,9 @@ class TestExportQuerySetAsCsv(TestCase):
         mem.seek(0)
         csv_dump = mem.read()
         if six.PY2:
-            self.assertEquals(csv_dump.decode('utf8'), u'"add_user";"auth"\r\n')
+            self.assertEqual(csv_dump.decode('utf8'), u'"add_user";"auth"\r\n')
         else:
-            self.assertEquals(csv_dump, '"add_user";"auth"\r\n')
+            self.assertEqual(csv_dump, '"add_user";"auth"\r\n')
 
 
 class TestExportAsCsv(unittest.TestCase):
@@ -89,9 +89,9 @@ class TestExportAsCsv(unittest.TestCase):
         mem.seek(0)
         csv_dump = mem.read()
         if six.PY2:
-            self.assertEquals(csv_dump.decode('utf8'), u'"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n')
+            self.assertEqual(csv_dump.decode('utf8'), u'"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n')
         else:
-            self.assertEquals(csv_dump, '"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n')
+            self.assertEqual(csv_dump, '"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n')
 
     def test_dialect(self):
         fields = ['field1', 'field2']
@@ -106,9 +106,9 @@ class TestExportAsCsv(unittest.TestCase):
         mem.seek(0)
         csv_dump = mem.read()
         if six.PY2:
-            self.assertEquals(csv_dump.decode('utf8'), u'Field 1,Field 2\r\n1,4\r\n2,5\r\n3,ӼӳӬԖԊ\r\n')
+            self.assertEqual(csv_dump.decode('utf8'), u'Field 1,Field 2\r\n1,4\r\n2,5\r\n3,ӼӳӬԖԊ\r\n')
         else:
-            self.assertEquals(csv_dump, 'Field 1,Field 2\r\n1,4\r\n2,5\r\n3,ӼӳӬԖԊ\r\n')
+            self.assertEqual(csv_dump, 'Field 1,Field 2\r\n1,4\r\n2,5\r\n3,ӼӳӬԖԊ\r\n')
 
 
 class TestExportAsExcel(TestCase):
@@ -163,8 +163,8 @@ class TestExportQuerySetAsExcel(TestCase):
         mem.seek(0)
         w = xlrd.open_workbook(file_contents=mem.read())
         sheet = w.sheet_by_index(0)
-        self.assertEquals(sheet.cell_value(1, 1), u'add_user')
-        self.assertEquals(sheet.cell_value(1, 2), u'auth')
+        self.assertEqual(sheet.cell_value(1, 1), u'add_user')
+        self.assertEqual(sheet.cell_value(1, 2), u'auth')
 
     def test_callable_method(self):
         fields = ['codename', 'natural_key']
@@ -175,5 +175,5 @@ class TestExportQuerySetAsExcel(TestCase):
         content = mem.read()
         w = xlrd.open_workbook(file_contents=content)
         sheet = w.sheet_by_index(0)
-        self.assertEquals(sheet.cell_value(1, 1), u'add_user')
-        self.assertEquals(sheet.cell_value(1, 2), u'add_userauthuser')
+        self.assertEqual(sheet.cell_value(1, 1), u'add_user')
+        self.assertEqual(sheet.cell_value(1, 2), u'add_userauthuser')

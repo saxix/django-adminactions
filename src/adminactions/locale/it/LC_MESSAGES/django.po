@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-20 16:02+0200\n"
+"POT-Creation-Date: 2017-02-03 17:57+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,122 +18,211 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: export.py:32 export.py:226 export.py:300 mass_update.py:175
+#: src/adminactions/byrows_update.py:29 src/adminactions/export.py:47
+#: src/adminactions/export.py:249 src/adminactions/export.py:331
+#: src/adminactions/graph.py:49 src/adminactions/mass_update.py:247
+#: src/adminactions/merge.py:82
 msgid "Sorry you do not have rights to execute this action"
 msgstr "Scusa ma non hai i permessi necessari per eseguire questa operazione"
 
-#: export.py:113
+#: src/adminactions/byrows_update.py:55
+#, fuzzy
+#| msgid "Updated %s records"
+msgid "Updated record(s)"
+msgstr "Aggiorna %s elementi"
+
+#: src/adminactions/byrows_update.py:89
+msgid "By rows update"
+msgstr ""
+
+#: src/adminactions/export.py:142
 msgid "Export as CSV"
 msgstr "Esporta come CSV"
 
-#: export.py:125
+#: src/adminactions/export.py:158
 msgid "Export as XLS"
 msgstr "Esporta come XLS"
 
-#: export.py:278
-msgid "Export as Fixture"
+#: src/adminactions/export.py:320
+#, fuzzy
+#| msgid "Export as Fixture"
+msgid "Export as fixture"
 msgstr "Esporta come Fixtures"
 
-#: export.py:362
-msgid "Export Delete Tree"
+#: src/adminactions/export.py:412
+#, fuzzy
+#| msgid "Export Delete Tree"
+msgid "Export delete tree"
 msgstr "Esporta albero di cancellazione"
 
-#: mass_update.py:237
+#: src/adminactions/forms.py:37 src/adminactions/forms.py:60
+msgid "Header"
+msgstr ""
+
+#: src/adminactions/forms.py:38
+msgid "Delimiter"
+msgstr ""
+
+#: src/adminactions/forms.py:39
+msgid "Quotechar"
+msgstr ""
+
+#: src/adminactions/forms.py:41
+msgid "Quoting"
+msgstr ""
+
+#: src/adminactions/forms.py:42
+msgid "All"
+msgstr ""
+
+#: src/adminactions/forms.py:43
+msgid "Minimal"
+msgstr ""
+
+#: src/adminactions/forms.py:44
+msgid "None"
+msgstr ""
+
+#: src/adminactions/forms.py:45
+msgid "Non Numeric"
+msgstr ""
+
+#: src/adminactions/forms.py:47
+msgid "Escapechar"
+msgstr ""
+
+#: src/adminactions/forms.py:48
+msgid "Datetime format"
+msgstr ""
+
+#: src/adminactions/forms.py:49
+msgid "Date format"
+msgstr ""
+
+#: src/adminactions/forms.py:50
+msgid "Time format"
+msgstr ""
+
+#: src/adminactions/forms.py:51 src/adminactions/forms.py:74
+msgid "Columns"
+msgstr ""
+
+#: src/adminactions/forms.py:61
+msgid "Use display"
+msgstr ""
+
+#: src/adminactions/graph.py:162
+#, fuzzy
+#| msgid "Merge selected records"
+msgid "Graph selected records"
+msgstr "Unisci gli oggetti selezionati"
+
+#: src/adminactions/mass_update.py:231
 #, python-format
 msgid "Updated %s records"
 msgstr "Aggiorna %s elementi"
 
-#: merge.py:25
+#: src/adminactions/mass_update.py:371
+msgid "Mass update"
+msgstr ""
+
+#: src/adminactions/merge.py:35
 msgid "Dependencies"
 msgstr "Dipendenze"
 
-#: merge.py:26
+#: src/adminactions/merge.py:36
 msgid "Move"
 msgstr "Sposta"
 
-#: merge.py:26
+#: src/adminactions/merge.py:36
 msgid "Delete"
 msgstr "Cancella"
 
-#: merge.py:107
+#: src/adminactions/merge.py:167
 msgid "Please select exactly 2 records"
 msgstr "Per piacere seleziona esattamente 2 elementi"
 
-#: templates/adminactions/any_model.html:26
-#: templates/adminactions/charts.html:34
-#: templates/adminactions/export_csv.html:46
-#: templates/adminactions/export_fixture.html:6
-#: templates/adminactions/export_xls.html:19
-#: templates/adminactions/mass_update.html:26
-#: templates/adminactions/merge.html:5
-#: templates/adminactions/merge_preview.html:5
-msgid "Home"
-msgstr ""
-
-#: templates/adminactions/merge.html:70
-msgid "Preview"
-msgstr "Anteprima"
-
-#: templates/adminactions/merge.html:34
-msgid "Field"
-msgstr "Campo"
-
-#: templates/adminactions/merge.html:34
-msgid "Master"
-msgstr "Originale"
-
-#: templates/adminactions/merge.html:34
-msgid "This will be preserved"
-msgstr "Questo verra conservato"
-
-#: templates/adminactions/merge.html:39
-msgid "swap"
-msgstr "inverti"
-
-#: templates/adminactions/merge.html:40
-msgid "Result"
-msgstr "Risultato"
-
-#: templates/adminactions/merge.html:42
-msgid "Other"
-msgstr "Altro"
-
-#: templates/adminactions/merge.html:42
-msgid "This will be removed"
-msgstr "Questo verra rimosso"
-
-#: templates/adminactions/merge.html:42
-msgid "Merge records"
-msgstr "Unione"
-
-#: templates/adminactions/merge_preview.html:40
-msgid "Merge"
-msgstr "Unisci"
-
-#: templates/adminactions/merge_preview.html:19
-msgid "Key"
-msgstr "Chiave"
-
-#: templates/adminactions/merge_preview.html:24
-msgid "Original"
-msgstr "Originale"
-
-#: templates/adminactions/merge_preview.html:40
-msgid "After Merging"
-msgstr "Dopo l'unione"
-
-#: merge.py:141
-msgid "Merge selected records"
-msgstr "Unisci gli oggetti selezionati"
-
-#: merge.py:141
+#: src/adminactions/merge.py:199
+#, python-format
 msgid "Merge selected %(verbose_name_plural)s"
 msgstr "Unisci %(verbose_name_plural)s selezionati/e"
 
-#: templates/adminactions/export_csv.html:50
-msgid "CSV Export Options"
-msgstr "Opzioni esportazione CSV"
+#: src/adminactions/templates/adminactions/any_model.html:26
+#: src/adminactions/templates/adminactions/byrows_update.html:20
+#: src/adminactions/templates/adminactions/charts.html:18
+#: src/adminactions/templates/adminactions/export_csv.html:46
+#: src/adminactions/templates/adminactions/export_fixture.html:6
+#: src/adminactions/templates/adminactions/export_xls.html:19
+#: src/adminactions/templates/adminactions/mass_update.html:26
+#: src/adminactions/templates/adminactions/merge.html:5
+#: src/adminactions/templates/adminactions/merge_preview.html:5
+msgid "Home"
+msgstr ""
 
-#: templates/adminactions/export_csv.html:69
+#: src/adminactions/templates/adminactions/byrows_update.html:30
+msgid "Please correct the error below."
+msgstr ""
+
+#: src/adminactions/templates/adminactions/byrows_update.html:30
+msgid "Please correct the errors below."
+msgstr ""
+
+#: src/adminactions/templates/adminactions/export_csv.html:69
 msgid "Export"
 msgstr "Esporta"
+
+#: src/adminactions/templates/adminactions/merge.html:35
+msgid "Field"
+msgstr "Campo"
+
+#: src/adminactions/templates/adminactions/merge.html:36
+msgid "Master"
+msgstr "Originale"
+
+#: src/adminactions/templates/adminactions/merge.html:36
+msgid "This will be preserved"
+msgstr "Questo verra conservato"
+
+#: src/adminactions/templates/adminactions/merge.html:38
+msgid "swap"
+msgstr "inverti"
+
+#: src/adminactions/templates/adminactions/merge.html:39
+msgid "Result"
+msgstr "Risultato"
+
+#: src/adminactions/templates/adminactions/merge.html:41
+msgid "Other"
+msgstr "Altro"
+
+#: src/adminactions/templates/adminactions/merge.html:41
+msgid "This will be removed"
+msgstr "Questo verra rimosso"
+
+#: src/adminactions/templates/adminactions/merge.html:70
+#: src/adminactions/templates/adminactions/merge_preview.html:9
+msgid "Preview"
+msgstr "Anteprima"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:8
+msgid "Merge records"
+msgstr "Unione"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:18
+msgid "Key"
+msgstr "Chiave"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:23
+msgid "Original"
+msgstr "Originale"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:24
+msgid "After Merging"
+msgstr "Dopo l'unione"
+
+#: src/adminactions/templates/adminactions/merge_preview.html:39
+msgid "Merge"
+msgstr "Unisci"
+
+#~ msgid "CSV Export Options"
+#~ msgstr "Opzioni esportazione CSV"

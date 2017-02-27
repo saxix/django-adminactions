@@ -12,17 +12,17 @@ from django.forms import HiddenInput, TextInput
 from django.forms.formsets import formset_factory
 from django.forms.models import model_to_dict, modelform_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-import adminactions.compat as transaction
-from adminactions import api
-from adminactions.forms import GenericActionForm
-from adminactions.models import get_permission_codename
-from adminactions.utils import clone_instance
+from . import compat as transaction
+from . import api
+from .forms import GenericActionForm
+from .models import get_permission_codename
+from .utils import clone_instance
 
 
 class MergeForm(GenericActionForm):
@@ -137,10 +137,12 @@ def merge(modeladmin, request, queryset):  # noqa
         if ok:
             if form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
                 related = api.ALL_FIELDS
+                m2m = api.ALL_FIELDS
             else:
                 related = None
+                m2m = None
             fields = form.cleaned_data['field_names']
-            api.merge(master, other, fields=fields, commit=True, related=related)
+            api.merge(master, other, fields=fields, commit=True, m2m=m2m, related=related)
             return HttpResponseRedirect(request.path)
         else:
             messages.error(request, form.errors)
@@ -187,10 +189,7 @@ def merge(modeladmin, request, queryset):  # noqa
                 ),
                 'master': master,
                 'other': other})
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
     if django.VERSION[:2] > (1, 8):
         return render(request, tpl, context=ctx)
     else:

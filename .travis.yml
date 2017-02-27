@@ -8,25 +8,22 @@ cache:
     - $HOME/.cache/pip
 
 env:
-  - TOXENV=py27-d17
   - TOXENV=py27-d18
   - TOXENV=py27-d19
   - TOXENV=py27-d110
   - TOXENV=py27-ddev
 
-  - TOXENV=py33-d17
   - TOXENV=py33-d18
+  - TOXENV=py33-ddev
 
-  - TOXENV=py34-d17
   - TOXENV=py34-d18
-  - TOXENV=py34-d19
+  - TOXENV=py34-ddev
 
   - TOXENV=py35-d18
   - TOXENV=py35-d19
   - TOXENV=py35-d110
   - TOXENV=py35-ddev
 
-  - TOXENV=pypy-d17
   - TOXENV=pypy-d18
   - TOXENV=pypy-d19
   - TOXENV=pypy-d110
@@ -40,18 +37,17 @@ matrix:
 
 
 install:
-  - pip install tox "coverage<4.0" python-coveralls>=2.5 coveralls>=0.5 codecov
+  - pip install -e ".[test]"
 
 script:
-  - tox -e $TOXENV -- py.test tests -vv --capture=no --cov=adminactions --cov-report=xml --cov-config=tests/.coveragerc
+  - tox -e $TOXENV -- py.test tests -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase
 
 after_success:
   - coverage combine
-  - coveralls
-  - codecov
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   webhooks:

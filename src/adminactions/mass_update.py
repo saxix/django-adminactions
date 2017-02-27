@@ -7,6 +7,7 @@ import six
 from collections import OrderedDict as SortedDict, defaultdict
 
 import django
+from adminactions.compat import atomic
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -17,20 +18,19 @@ from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
                                  modelform_factory,)
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render, render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.functional import curry
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from adminactions import compat
-from adminactions.compat import get_field_by_name
-from adminactions.exceptions import ActionInterrupted
-from adminactions.forms import GenericActionForm
-from adminactions.models import get_permission_codename
-from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+# from adminactions import compat
+from .compat import get_field_by_name
+from .exceptions import ActionInterrupted
+from .forms import GenericActionForm
+from .models import get_permission_codename
+from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 if six.PY2:
     import string
@@ -288,7 +288,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
             clean = form.cleaned_data.get('_clean', False)
 
             if validate:
-                with compat.atomic():
+                with atomic():
                     _doit()
 
             else:
@@ -360,10 +360,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
            # 'select_across': request.POST.get('select_across')=='1',
            'media': mark_safe(media),
            'selection': queryset}
-    if django.VERSION[:2] > (1, 7):
-        ctx.update(modeladmin.admin_site.each_context(request))
-    else:
-        ctx.update(modeladmin.admin_site.each_context())
+    ctx.update(modeladmin.admin_site.each_context(request))
 
     if django.VERSION[:2] > (1, 8):
         return render(request, tpl, context=ctx)

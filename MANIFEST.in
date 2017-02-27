@@ -9,13 +9,16 @@ include tox.ini
 include *.py
 include Makefile
 
+exclude .bumpversion.cfg
 exclude .editorconfig
+exclude manage.py
 
 recursive-include docs *
 recursive-include src *.css
 recursive-include src *.js
 recursive-include src *.pip
 recursive-include src *.po
+recursive-include src *.mo
 recursive-include src *.txt
 recursive-include src/adminactions *.py
 recursive-include src/adminactions *.html
