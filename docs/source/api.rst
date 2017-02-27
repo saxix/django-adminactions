@@ -110,6 +110,9 @@ Exports a queryset as csv from a queryset with the given fields.
 merge
 -----
 
+.. seealso:: See :ref:`merge` action for addtional notes.
+
+
 Merge 'other' into master.
 
         `fields` is a list of fieldnames that must be readed from ``other`` to put into master.
@@ -119,20 +122,48 @@ Merge 'other' into master.
 
 
 
+Custom validation
+~~~~~~~~~~~~~~~~~
+
+If you need to disable validation for some fields, it is possible to set parameter ``merge_form``
+to a subclass of `:class:adminactions.merge.MergeForm` and change the validation there.
+
+.. code-block:: python
+
+    class CompanyMergeForm(merge.MergeForm):
+        class Meta:
+            model = models.Company
+            fields = "__all__"
+
+        def full_clean(self):
+            super().full_clean()
+            if 'address_psc' in self._errors:
+                del self._errors['address_psc']
+
+    class CompanyAdmin(city_admin_mixin_generator(admin.ModelAdmin):
+        form = CompanyForm
+        merge_form = CompanyMergeForm
+
+
+
 .. _get_export_as_csv_filename:
 .. _get_export_as_fixture_filename:
 .. _get_export_delete_tree_filename:
 .. _filename_callbacks:
 
 
--------------------
+------------------
 Filename callbacks
--------------------
+------------------
 To use custom names for yours exports simply implements ``get_export_<TYPE>_filename``
 in your ``Modeladmin`` class, these must return a string that will be used as filename
 in the SaveAs dialog box of the browser
 
-example::
+example:
+
+.. code-block:: python
+
+
     class UserAdmin(ModelAdmin):
         def get_export_as_csv_filename(request, queryset):
             if 'isadmin' in request.GET

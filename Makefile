@@ -38,9 +38,9 @@ fullclean:
 	psql -c 'DROP DATABASE IF EXISTS test_adminactions;' -U postgres;
 
 
-docs: mkbuilddir
+docs: .mkbuilddir
 	mkdir -p ${BUILDDIR}/docs
 	sphinx-build -aE docs/source ${BUILDDIR}/docs
 ifdef BROWSE
-	firefox ${BUILDDIR}/docs/index.html
+	open ${BUILDDIR}/docs/index.html
 endif

@@ -279,6 +279,7 @@ but were create double by mistake.
 This action allow you to selectively merge two records and move dependencies
 from one record to the other one.
 
+
 **Screenshots**
 
 Step 1
@@ -291,3 +292,10 @@ Step 2
 
 .. figure:: _static/merge_2.png
 
+
+
+**Limitations/TODO**
+
+- merge doesn't work for models related with ``on_delete=Protect`` (see :ghissue:`85`)
+- ImageField is not supported (see :ghissue:`95`)
+- ManyToManyField is not supported (see :ghissue:`108`)
