@@ -1,5 +1,5 @@
-Release 1.3 (dev)
-=================
+Release 1.3
+===========
 * fixes :ghissue:`92` translations are not compiled in package
 * fixes :ghissue:`105` Support exporting many to many fields
 * fixes :ghissue:`109` AttributeError: module 'adminactions.compat' has no attribute 'nocommit'
