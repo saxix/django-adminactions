@@ -10,7 +10,8 @@ import xlwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields import FieldDoesNotExist
-from django.db.models.fields.related import ManyToManyField, OneToOneField
+from django.db.models.fields.related import ManyToManyField, ManyToManyRel,\
+    OneToOneField
 from django.http import HttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_text, smart_str, smart_text
@@ -81,7 +82,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
 # for rel in master._meta.get_all_related_objects(False, False, False)]
 
     if m2m == ALL_FIELDS:
-        m2m = [field.name for field in master._meta.many_to_many]
+        m2m = [field.name
+               for field in master._meta.get_fields()
+               if field.many_to_many]
 
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
@@ -97,7 +100,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
             for fieldname in set(m2m):
                 all_m2m[fieldname] = []
                 field_object = get_field_by_path(master, fieldname)
-                if not isinstance(field_object, ManyToManyField):
+                if not isinstance(field_object, (ManyToManyField, ManyToManyRel)):
                     raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
                 source_m2m = getattr(other, field_object.name)
                 for r in source_m2m.all():
