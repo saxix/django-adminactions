@@ -27,6 +27,12 @@ from .forms import CSVOptions, XLSOptions
 from .models import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
+if django.VERSION[:2] > (1, 8):
+    from django.shortcuts import render
+
+    def render_to_response(template_name, context):  # noqa
+        return render(context.request, template_name, context=context.flatten())
+
 
 def get_action(request):
     try:
