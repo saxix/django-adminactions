@@ -84,7 +84,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     if m2m == ALL_FIELDS:
         m2m = [field.name
                for field in master._meta.get_fields()
-               if field.many_to_many and field.rel.through._meta.auto_created]
+               if field.many_to_many]
 
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
@@ -102,6 +102,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                 field_object = get_field_by_path(master, fieldname)
                 if not isinstance(field_object, (ManyToManyField, ManyToManyRel)):
                     raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
+                if isinstance(field_object, ManyToManyField) \
+                        and not field_object.rel.through._meta.auto_created:
+                    continue
                 source_m2m = getattr(other, field_object.name)
                 for r in source_m2m.all():
                     all_m2m[fieldname].append(r)
