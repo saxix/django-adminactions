@@ -84,7 +84,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     if m2m == ALL_FIELDS:
         m2m = [field.name
                for field in master._meta.get_fields()
-               if field.many_to_many]
+               if field.many_to_many and field.rel.through._meta.auto_created]
 
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
