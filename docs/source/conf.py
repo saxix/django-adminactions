@@ -56,7 +56,7 @@ extensions = ['sphinx.ext.autodoc',
 # issuetracker = 'github'
 # issuetracker_project = 'saxix/django-adminactions'
 # issuetracker_plaintext_issues = True
-next_version = '0.9'
+next_version = '1.5'
 github_project_url = 'https://github.com/saxix/django-adminactions/'
 github_project_url_basesource = 'https://github.com/saxix/django-adminactions/'
 
