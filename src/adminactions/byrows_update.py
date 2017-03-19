@@ -13,6 +13,12 @@ from .models import get_permission_codename
 
 from django.forms.models import modelformset_factory
 
+if django.VERSION[:2] > (1, 8):
+    from django.shortcuts import render
+
+    def render_to_response(template_name, context):  # noqa
+        return render(context.request, template_name, context=context.flatten())
+
 
 def byrows_update(modeladmin, request, queryset):  # noqa
     """
