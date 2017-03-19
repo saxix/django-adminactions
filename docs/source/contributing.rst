@@ -81,8 +81,7 @@ Now you can make your changes locally.
 6. When you're done making changes, check that your changes pass flake8 and the
 tests, including testing other Python versions with tox::
 
-    $ flake8 adminactions tests
-    $ py.test tests/
+    $ make qa
     $ tox
 
 7. Commit your changes and push your branch to GitHub::

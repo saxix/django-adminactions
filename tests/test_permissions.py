@@ -28,7 +28,7 @@ def test_permission_needed(app, admin, demomodels, action):
     url = reverse('admin:demo_demomodel_changelist')
     pks = [demomodels[0].pk, demomodels[1].pk]
     with user_grant_permission(admin, ['demo.change_demomodel']):
-        res = app.post(url, [('action', action),
+        res = app.post(url, params=[('action', action),
                              ('_selected_action', pks)],
                        extra_environ={'wsgi.url_scheme': 'https'},
                        user=admin.username,
@@ -38,7 +38,7 @@ def test_permission_needed(app, admin, demomodels, action):
         assert 'Sorry you do not have rights to execute this action' in [str(m) for m in res.context['messages']]
 
         with user_grant_permission(admin, [perm]):
-            res = app.post(url, [('action', action),
+            res = app.post(url, params=[('action', action),
                                  ('_selected_action', pks)],
                            extra_environ={'wsgi.url_scheme': 'https'},
                            user=admin.username,

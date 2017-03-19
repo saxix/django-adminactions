@@ -18,8 +18,7 @@ from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-from . import compat as transaction
-from . import api
+from . import api, compat as transaction
 from .forms import GenericActionForm
 from .models import get_permission_codename
 from .utils import clone_instance

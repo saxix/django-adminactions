@@ -7,7 +7,6 @@ import six
 from collections import OrderedDict as SortedDict, defaultdict
 
 import django
-from adminactions.compat import atomic
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -24,6 +23,8 @@ from django.utils.encoding import smart_text
 from django.utils.functional import curry
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+
+from adminactions.compat import atomic
 
 # from adminactions import compat
 from .compat import get_field_by_name

@@ -234,7 +234,9 @@ class DataFixtureClass(RandomDataFixture):  # it can inherit of SequentialDataFi
     def genericipaddressfield_config(self, field, key):  # method name must have the format: FIELDNAME_config
         return ipaddress()
 
-TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), os.pardir, 'tests', 'templates')
+
+TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__),
+                                  os.pardir, 'tests', 'templates')
 SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
             'TEMPLATE_DIRS': [TEST_TEMPLATES_DIR],
             'AUTHENTICATION_BACKENDS': ('django.contrib.auth.backends.ModelBackend',),

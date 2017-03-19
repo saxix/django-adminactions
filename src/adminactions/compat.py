@@ -1,17 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
-from contextlib import contextmanager
-
 import django
 import django.db.transaction as t
+from django.db.transaction import atomic  # noqa
 
 version = django.VERSION[:2]
 
-from django.db.transaction import atomic  # noqa
 
 class NoCommit(t.Atomic):
     def __exit__(self, exc_type, exc_value, traceback):
         super(NoCommit, self).__exit__(Exception, Exception(), None)
+
 
 def nocommit(using=None, savepoint=True):
     return NoCommit(using, savepoint)

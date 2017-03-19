@@ -25,6 +25,7 @@ try:
     # (see https://code.djangoproject.com/ticket/20331),
     # django <= 1.5 can still HttpResponse
     import django
+
     if django.get_version() < '1.6':
         StreamingHttpResponse = HttpResponse
     else:
@@ -32,7 +33,6 @@ try:
 except ImportError:
     # Before django 1.5 HttpResponse could implicitly stream response
     StreamingHttpResponse = HttpResponse
-
 
 if six.PY2:
     import unicodecsv as csv
@@ -78,7 +78,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     if related == ALL_FIELDS:
         related = [rel.get_accessor_name()
                    for rel in compat.get_all_related_objects(master)]
-# for rel in master._meta.get_all_related_objects(False, False, False)]
+    # for rel in master._meta.get_all_related_objects(False, False, False)]
 
     if m2m == ALL_FIELDS:
         m2m = [field.name for field in master._meta.many_to_many]
@@ -138,6 +138,7 @@ class Echo(object):
     """An object that implements just the write method of the file-like
     interface.
     """
+
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
@@ -180,8 +181,8 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields
-                  + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields +
+                  queryset.model._meta.many_to_many]
 
     if streaming_enabled:
         buffer_object = Echo()
@@ -301,8 +302,8 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields
-                  + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields +
+                  queryset.model._meta.many_to_many]
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=2)
     sheet_name = config.pop('sheet_name')
@@ -315,7 +316,8 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.write(row, 0, u'#', style)
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
+            header = [force_text(f.verbose_name) for f in
+                      queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, fieldname, heading_xf)
@@ -436,8 +438,8 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields
-                  + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields +
+                  queryset.model._meta.many_to_many]
 
     book = xlsxwriter.Workbook(out, {'in_memory': True})
     sheet_name = config.pop('sheet_name')
@@ -450,7 +452,8 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
     sheet.write(row, 0, force_text('#'), formats['_general_'])
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name)for f in queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
+            header = [force_text(f.verbose_name) for f in
+                      queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, force_text(fieldname), formats['_general_'])

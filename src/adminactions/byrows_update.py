@@ -1,7 +1,7 @@
 import django
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.forms.models import modelform_factory
+from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -10,8 +10,6 @@ from django.utils.translation import ugettext as _
 
 from .forms import GenericActionForm
 from .models import get_permission_codename
-
-from django.forms.models import modelformset_factory
 
 if django.VERSION[:2] > (1, 8):
     from django.shortcuts import render

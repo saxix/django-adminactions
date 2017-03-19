@@ -1,6 +1,6 @@
 check-manifest
 django-dynamic-fixture
-django-webtest>=1.7.5
+django-webtest==1.9.1
 flake8
 mock>=1.0.1
 modernize
@@ -14,5 +14,5 @@ readme
 selenium>=2.42.0
 setuptools>=15.0
 tox
-WebTest>=2.0.7
+#WebTest==2.0.7
 
