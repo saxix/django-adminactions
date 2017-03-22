@@ -10,8 +10,7 @@ import xlwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields import FieldDoesNotExist
-from django.db.models.fields.related import ManyToManyField, ManyToManyRel,\
-    OneToOneField
+from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_text, smart_str, smart_text
