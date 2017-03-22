@@ -102,10 +102,13 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                 field_object = get_field_by_path(master, fieldname)
                 if not isinstance(field_object, (ManyToManyField, ManyToManyRel)):
                     raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
-                if isinstance(field_object, ManyToManyField) \
-                        and not field_object.rel.through._meta.auto_created:
-                    continue
-                source_m2m = getattr(other, field_object.get_accessor_name())
+                if isinstance(field_object, ManyToManyField):
+                    if not field_object.rel.through._meta.auto_created:
+                        continue
+                    source_m2m = getattr(other, field_object.name)
+                else:
+                    source_m2m = getattr(other, field_object.get_accessor_name())
+
                 for r in source_m2m.all():
                     all_m2m[fieldname].append(r)
         if related:
