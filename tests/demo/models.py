@@ -42,6 +42,13 @@ class UserDetail(models.Model):
         app_label = 'demo'
 
 
+class DemoOneToOne(models.Model):
+    demo = models.OneToOneField(DemoModel, related_name='onetoone')
+
+    class Meta:
+        app_label = 'demo'
+
+
 class UserDetailModelAdmin(ModelAdmin):
     list_display = [f.name for f in UserDetail._meta.fields]
 

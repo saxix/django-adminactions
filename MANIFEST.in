@@ -18,9 +18,11 @@ recursive-include src *.css
 recursive-include src *.js
 recursive-include src *.pip
 recursive-include src *.po
-recursive-include src *.mo
 recursive-include src *.txt
 recursive-include src/adminactions *.py
 recursive-include src/adminactions *.html
 recursive-include tests *
+
+global-exclude *.pyc
+global-exclude __pycache__
 global-exclude *~

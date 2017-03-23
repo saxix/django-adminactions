@@ -49,4 +49,11 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
+        migrations.CreateModel(
+            name='DemoOneToOne',
+            fields=[
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('demo', models.OneToOneField(to='demo.DemoModel', related_name='onetoone')),
+            ],
+        ),
     ]

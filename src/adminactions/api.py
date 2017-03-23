@@ -10,8 +10,7 @@ import xlwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields import FieldDoesNotExist
-from django.db.models.fields.related import ManyToManyField, ManyToManyRel,\
-    OneToOneField
+from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_text, smart_str, smart_text
@@ -82,9 +81,17 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     # for rel in master._meta.get_all_related_objects(False, False, False)]
 
     if m2m == ALL_FIELDS:
-        m2m = [field.name
-               for field in master._meta.get_fields()
-               if field.many_to_many]
+        m2m = set()
+        for field in master._meta.get_fields():
+            if field.many_to_many:
+                if isinstance(field, ManyToManyField):
+                    # direct relation
+                    if not field.rel.through._meta.auto_created:
+                        continue
+                    m2m.add(field.name)
+                else:
+                    # reverse relation
+                    m2m.add(field.get_accessor_name())
 
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
@@ -97,17 +104,11 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                 setattr(result, fieldname, getattr(other, fieldname))
 
         if m2m:
-            for fieldname in set(m2m):
-                all_m2m[fieldname] = []
-                field_object = get_field_by_path(master, fieldname)
-                if not isinstance(field_object, (ManyToManyField, ManyToManyRel)):
-                    raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
-                if isinstance(field_object, ManyToManyField) \
-                        and not field_object.rel.through._meta.auto_created:
-                    continue
-                source_m2m = getattr(other, field_object.name)
+            for accessor in set(m2m):
+                all_m2m[accessor] = []
+                source_m2m = getattr(other, accessor)
                 for r in source_m2m.all():
-                    all_m2m[fieldname].append(r)
+                    all_m2m[accessor].append(r)
         if related:
             for name in set(related):
                 related_object = get_field_by_path(master, name)
