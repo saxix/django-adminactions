@@ -14,7 +14,7 @@ from django_webtest import WebTestMixin
 from utils import BaseTestCaseMixin, SelectRowsMixin, user_grant_permission
 
 from adminactions.api import ALL_FIELDS, merge
-from demo.models import UserDetail
+from demo.models import DemoModel, DemoOneToOne, UserDetail
 
 PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'tests.UserProfile')
 
@@ -24,6 +24,8 @@ def get_profile(user):
 
 
 class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
+    fixtures = ['adminactions.json', 'demoproject.json']
+
     def setUp(self):
         super(MergeTestApi, self).setUp()
         self.master_pk = 2
@@ -109,6 +111,18 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         master = User.objects.get(pk=result.pk)  # reload
         self.assertSequenceEqual(master.logentry_set.all(), [entry])
         self.assertTrue(LogEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_merge_one_to_one_move_single(self):
+        master = DemoModel.objects.get(pk=1)
+        other = DemoModel.objects.get(pk=2)
+        related_one = DemoOneToOne(demo=other)
+        related_one.save()
+
+        result = merge(master, other, commit=True, related=ALL_FIELDS)
+
+        master = DemoModel.objects.get(pk=result.pk)  # reload
+        self.assertEqual(master.onetoone, related_one)
+        self.assertTrue(DemoOneToOne.objects.filter(pk=related_one.pk).exists())
 
     # @skipIf(not hasattr(settings, 'AUTH_PROFILE_MODULE'), "")
     def test_merge_one_to_one_field(self):
