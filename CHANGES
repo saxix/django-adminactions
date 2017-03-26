@@ -1,7 +1,6 @@
 Release 1.5 (dev)
 =================
-*
-
+* fixes :ghissue:`116` Fixing ManyToMany merging with intermediary models. (thanks int-ua)
 
 
 Release 1.4
