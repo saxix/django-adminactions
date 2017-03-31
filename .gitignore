@@ -14,3 +14,5 @@
 /docs/build
 /MANIFEST
 coverage.xml
+sonar-project.properties
+.scannerwork
