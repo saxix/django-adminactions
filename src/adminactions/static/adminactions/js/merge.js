@@ -21,10 +21,10 @@
 
                 $('td', this).removeClass("selected");
 
-                if ($('input.raw-value', $result).val() == $('input.raw-value', $left).val()) {
+                if ($('input.raw-value', $result).val() === $('input.raw-value', $left).val()) {
                     $(this).find('td.origin').addClass("selected");
                     $('p.display', $result).text($('p.display', $left).text());
-                } else if ($('input.raw-value', $result).val() == $('input.raw-value', $right).val()) {
+                } else if ($('input.raw-value', $result).val() === $('input.raw-value', $right).val()) {
                     $(this).find('td.other').addClass("selected");
                     $('p.display', $result).text($('p.display', $right).text());
                     RIGHT.push(field_name);
