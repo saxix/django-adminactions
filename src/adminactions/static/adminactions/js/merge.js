@@ -1,7 +1,8 @@
 (function ($) {
     $(function () {
         var select = function (from) {
-            return function () {
+            return function ( event ) {
+                event.preventDefault();
                 var $row = $(this).parent().parent();
                 var $sel = $row.find(from);
                 $('.result input', $row).val($('input.raw-value', $sel).val());
@@ -37,7 +38,8 @@
         $('a.origin').click(select("td.origin"));
         $('a.other').click(select("td.other"));
 
-        $('a.swap').click(function () {
+        $('a.swap').click(function ( event ) {
+            event.preventDefault();
             var left = [];
             var right = [];
             var $master = $('input[name="master_pk"]');
