@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
+import demo.models
 
 
 class Migration(migrations.Migration):
@@ -39,6 +40,8 @@ class Migration(migrations.Migration):
                 ('blank', models.CharField(blank=True, max_length=255, null=True)),
                 ('not_editable', models.CharField(blank=True, editable=False, max_length=255, null=True)),
                 ('choices', models.IntegerField(choices=[(1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')])),
+                ('image', models.ImageField(upload_to='', null=True, blank=True)),
+                ('subclassed_image', demo.models.SubclassedImageField(upload_to='', null=True, blank=True)),
             ],
         ),
         migrations.CreateModel(

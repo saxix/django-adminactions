@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
+import os
 import six
 from six.moves import range
 
@@ -123,6 +124,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         master = DemoModel.objects.get(pk=result.pk)  # reload
         self.assertEqual(master.onetoone, related_one)
         self.assertTrue(DemoOneToOne.objects.filter(pk=related_one.pk).exists())
+        self.assertEqual(os.path.basename(master.image.file.name), "first.png")
 
     # @skipIf(not hasattr(settings, 'AUTH_PROFILE_MODULE'), "")
     def test_merge_one_to_one_field(self):
@@ -150,6 +152,24 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertSequenceEqual(master.logentry_set.all(), [])
         self.assertFalse(User.objects.filter(pk=other.pk).exists())
         self.assertFalse(LogEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_merge_image(self):
+        master = DemoModel.objects.get(pk=3)
+        other = DemoModel.objects.get(pk=1)
+        img1 = other.image
+        img2 = other.subclassed_image
+
+        assert master.image != other.image
+        assert master.subclassed_image != other.subclassed_image
+
+        result = merge(master, other,
+                       fields=['image', 'subclassed_image'],
+                       commit=True, related=None)
+
+        master = DemoModel.objects.get(pk=result.pk)  # reload
+        self.assertFalse(DemoModel.objects.filter(pk=other.pk).exists())
+        self.assertEqual(master.image, img1)
+        self.assertEqual(master.subclassed_image, img2)
 
 
 class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
@@ -335,3 +355,67 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 1)
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
+
+
+class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
+    csrf_checks = True
+    fixtures = ['adminactions.json', 'demoproject.json']
+    urls = 'demo.urls'
+    sender_model = User
+    action_name = 'merge'
+    _selected_rows = [0, 2]
+
+    def setUp(self):
+        super(TestMergeImageAction, self).setUp()
+        self.url = reverse('admin:demo_demomodel_changelist')
+        self.user = G(User, username='user', is_staff=True, is_active=True)
+
+    def _run_action(self, steps=3, page_start=None):
+        with user_grant_permission(self.user,
+                                   ['demo.change_demomodel',
+                                    'demo.adminactions_merge_demomodel']):
+            if isinstance(steps, int):
+                steps = list(range(1, steps + 1))
+                res = self.app.get('/', user='user')
+                res = res.click('Demo models')
+            else:
+                res = page_start
+
+            if 1 in steps:
+                form = res.forms['changelist-form']
+                form['action'] = 'merge'
+                self._select_rows(form)
+                res = form.submit()
+                assert not hasattr(res.form, 'errors')
+
+            if 2 in steps:
+                res.form['image'] = res.form['form-1-image'].value
+                res = res.form.submit('preview')
+                assert not hasattr(res.form, 'errors')
+
+            if 3 in steps:
+                res = res.form.submit('apply')
+            return res
+
+    def test_success(self):
+        res = self._run_action(1)
+        preserved = DemoModel.objects.get(pk=self._selected_values[0])
+        removed = DemoModel.objects.get(pk=self._selected_values[1])
+
+        img1 = removed.image
+        img2 = removed.subclassed_image
+
+        assert preserved.image != removed.image  # sanity check
+        assert preserved.subclassed_image != removed.subclassed_image  # sanity check
+        assert preserved.pk == 3  # sanity check
+        assert removed.pk == 1  # sanity check
+
+        self._run_action([2, 3], res)
+
+        self.assertFalse(DemoModel.objects.filter(pk=removed.pk).exists())
+        self.assertTrue(DemoModel.objects.filter(pk=preserved.pk).exists())
+
+        preserved_after = DemoModel.objects.get(pk=preserved.pk)
+
+        assert preserved_after.image == img1
+        assert preserved_after.subclassed_image == img2

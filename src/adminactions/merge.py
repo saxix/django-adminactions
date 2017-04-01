@@ -53,7 +53,10 @@ class MergeForm(GenericActionForm):
         return int(self.cleaned_data['dependencies'])
 
     def clean_field_names(self):
-        return self.cleaned_data['field_names'].split(',')
+        if self.cleaned_data['field_names']:
+            return self.cleaned_data['field_names'].split(',')
+        else:
+            return None
 
     def full_clean(self):
         super(MergeForm, self).full_clean()
@@ -84,15 +87,18 @@ def merge(modeladmin, request, queryset):  # noqa
     def raw_widget(field, **kwargs):
         """ force all fields as not required"""
         kwargs['widget'] = TextInput({'class': 'raw-value'})
+        if isinstance(field, models.FileField):
+            kwargs["form_class"] = forms.CharField
+
         return field.formfield(**kwargs)
 
     merge_form = getattr(modeladmin, 'merge_form', MergeForm)
     MForm = modelform_factory(modeladmin.model,
                               form=merge_form,
-                              exclude=('pk', ),
+                              exclude=('pk',),
                               formfield_callback=raw_widget)
     OForm = modelform_factory(modeladmin.model,
-                              exclude=('pk', ),
+                              exclude=('pk',),
                               formfield_callback=raw_widget)
 
     tpl = 'adminactions/merge.html'
@@ -162,7 +168,7 @@ def merge(modeladmin, request, queryset):  # noqa
                                 raw_value.minute,
                                 raw_value.second)
                             setattr(target, field.name, fixed_value)
-        except ValueError:
+        except ValueError as e:
             messages.error(request, _('Please select exactly 2 records'))
             return
 

@@ -62,8 +62,8 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
 
     def test_validate_on(self):
         self._run_action(**{'_validate': 1})
-        assert DemoModel.objects.filter(char='BBB').exists()
-        assert not DemoModel.objects.filter(char='bbb').exists()
+        assert DemoModel.objects.filter(char='CCCCC').exists()
+        assert not DemoModel.objects.filter(char='ccccc').exists()
 
     def test_validate_off(self):
         self._run_action(**{'_validate': 0})
@@ -71,8 +71,9 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
 
     def test_clean_on(self):
         self._run_action(**{'_clean': 1})
-        assert DemoModel.objects.filter(char='BBB').exists()
-        assert not DemoModel.objects.filter(char='bbb').exists()
+
+        assert DemoModel.objects.filter(char='CCCCC').exists()
+        assert not DemoModel.objects.filter(char='ccccc').exists()
 
     def test_messages(self):
         with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_massupdate_demomodel']):
