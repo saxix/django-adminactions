@@ -9,6 +9,7 @@ import six
 import xlwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import FileField
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
@@ -100,7 +101,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
 
         for fieldname in fields:
             f = get_field_by_path(master, fieldname)
-            if f and not f.primary_key:
+            if isinstance(f, FileField):
+                setattr(result, fieldname, getattr(other, fieldname))
+            elif f and not f.primary_key:
                 setattr(result, fieldname, getattr(other, fieldname))
 
         if m2m:
@@ -131,7 +134,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                 for rel_fieldname, element in elements:
                     setattr(element, rel_fieldname, master)
                     element.save()
-
             other.delete()
             result.save()
             for fieldname, elements in list(all_m2m.items()):

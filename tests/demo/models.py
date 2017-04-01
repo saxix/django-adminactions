@@ -39,6 +39,7 @@ class DemoModel(models.Model):
 
     class Meta:
         app_label = 'demo'
+        ordering = ('-id',)
 
 
 class UserDetail(models.Model):

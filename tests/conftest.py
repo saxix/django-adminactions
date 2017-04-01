@@ -1,15 +1,25 @@
 import django_webtest
+import logging
 import pytest
 
+logger = logging.getLogger("test")
 
-# def pytest_configure(config):
-#     try:
-#         from django.apps import AppConfig  # noqa
-#         import django
-#
-#         django.setup()
-#     except ImportError:
-#         pass
+levelNames = {
+    logging.CRITICAL: "CRITICAL",
+    logging.ERROR: "ERROR",
+    logging.WARNING: "WARNING",
+    logging.INFO: "INFO",
+    logging.DEBUG: "DEBUG",
+    logging.NOTSET: "NOTSET",
+    "CRITICAL": logging.CRITICAL,
+    "ERROR": logging.ERROR,
+    "WARN": logging.WARNING,
+    "WARNING": logging.WARNING,
+    "INFO": logging.INFO,
+    "DEBUG": logging.DEBUG,
+    "NOTSET": logging.NOTSET,
+}
+
 
 def pytest_addoption(parser):
     group = parser.getgroup("selenium", "Selenium Web Browser Automation")
@@ -26,6 +36,14 @@ def pytest_addoption(parser):
              "py.test --selenium-enable --chrome-driver=/home/chromedriver. -k test_name."
     )
 
+    parser.addoption("--log", default=None, action="store",
+                     dest="log_level",
+                     help="enable console log")
+
+    parser.addoption("--log-add", default="", action="store",
+                     dest="log_add",
+                     help="add package to log")
+
 
 def pytest_configure(config):
     # import warnings
@@ -37,6 +55,28 @@ def pytest_configure(config):
             config.option.keyword.find('selenium') < 0:
         if not config.option.selenium_enable:
             setattr(config.option, 'markexpr', 'not selenium')
+
+    if config.option.log_level:
+        import logging
+        level = config.option.log_level.upper()
+        assert level in levelNames.keys()
+        format = "%(levelname)-7s %(name)-30s %(funcName)-20s:%(lineno)3s %(message)s"
+        formatter = logging.Formatter(format)
+
+        handler = logging.StreamHandler()
+        handler.setLevel(levelNames[level])
+        handler.setFormatter(formatter)
+
+        for app in ["test", "demo", "adminactions"]:
+            l = logging.getLogger(app)
+            l.setLevel(levelNames[level])
+            l.addHandler(handler)
+
+        if config.option.log_add:
+            for pkg in config.option.log_add.split(","):
+                l = logging.getLogger(pkg)
+                l.setLevel(levelNames[level])
+                l.addHandler(handler)
 
 
 @pytest.fixture(scope='function')

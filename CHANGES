@@ -1,6 +1,7 @@
 Release 1.5 (dev)
 =================
 * fixes :ghissue:`116` Fixing ManyToMany merging with intermediary models. (thanks int-ua)
+* fixes :ghissue:`95` Cannot merge models with subclassed ImageField or FileField: "file not sent". (thanks int-ua)
 
 
 Release 1.4

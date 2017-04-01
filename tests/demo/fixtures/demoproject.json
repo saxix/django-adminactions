@@ -22,7 +22,7 @@
             "unique": "unique 1",
             "email": "s.apostolico@gmail.com",
             "choices": 2,
-            "image": false,
+            "image": "second.png",
             "subclassed_image": false
         }
     },
@@ -57,7 +57,7 @@
         "pk": 3,
         "model": "demo.demomodel",
         "fields": {
-            "nullable": "bbbb",
+            "nullable": "dddd",
             "float": 10.1,
             "generic_ip": "192.168.10.2",
             "url": "https://github.com/saxix/django-adminactions",
@@ -76,7 +76,8 @@
             "unique": "unique 3",
             "email": "s.apostolico@gmail.com",
             "choices": 2,
-            "image": "second.png",
+          "image": false,
+
             "subclassed_image": "subclassed_second.png"
         }
     }
