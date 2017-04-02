@@ -341,8 +341,8 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
 
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
-        for idx, fieldname in enumerate(fields):
-            fmt = formats.get(idx, 'general')
+        for col_idx, fieldname in enumerate(fields):
+            fmt = formats.get(col_idx, 'general')
             try:
                 value = get_field_value(row,
                                         fieldname,
@@ -353,22 +353,22 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
                 if hash(fmt) not in _styles:
                     if callable(fmt):
                         _styles[hash(fmt)] = xlwt.easyxf(num_format_str='formula')
+                    elif isinstance(value, datetime.datetime):
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['datetime_format'])
+                    elif isinstance(value, datetime.date):
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['date_format'])
+                    elif isinstance(value, datetime.datetime):
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['time_format'])
                     else:
                         _styles[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
 
-                if isinstance(value, datetime.datetime):
-                    try:
-                        value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
-                    except ValueError:
-                        # astimezone() cannot be applied to a naive datetime
-                        value = dateformat.format(value, config['datetime_format'])
                 if isinstance(value, (list, tuple)):
                     value = "".join(value)
 
-                sheet.write(rownum + 1, idx + 1, value, _styles[hash(fmt)])
+                sheet.write(rownum + 1, col_idx + 1, value, _styles[hash(fmt)])
             except Exception as e:
                 # logger.warning("TODO refine this exception: %s" % e)
-                sheet.write(rownum + 1, idx + 1, smart_str(e), _styles[hash(fmt)])
+                sheet.write(rownum + 1, col_idx + 1, smart_str(e), _styles[hash(fmt)])
 
     book.save(response)
     return response
