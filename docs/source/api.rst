@@ -110,14 +110,13 @@ Exports a queryset as csv from a queryset with the given fields.
 merge
 -----
 
-.. seealso:: See :ref:`merge` action for addtional notes.
+.. seealso:: See :ref:`merge` action for additional notes.
 
 
 Merge 'other' into master.
 
-        `fields` is a list of fieldnames that must be readed from ``other`` to put into master.
-        If ``fields`` is None ``master`` will get all the ``other`` values except primary_key.
-        Finally ``other`` will be deleted and master will be preserved
+        `fields` is a list of fieldnames that must be read from ``other`` to put into master.
+        ``other`` will be deleted and master will be preserved
 
 
 
