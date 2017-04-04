@@ -148,7 +148,7 @@ def merge(modeladmin, request, queryset):  # noqa
                 m2m = None
             fields = form.cleaned_data['field_names']
             api.merge(master, other, fields=fields, commit=True, m2m=m2m, related=related)
-            return HttpResponseRedirect(request.path)
+            return HttpResponseRedirect(request.get_full_path())
         else:
             messages.error(request, form.errors)
     else:
