@@ -406,7 +406,6 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self.assertEqual(cell.ctype, 3)
             self.assertEqual(format.format_str, u'd/m/Y')
 
-
     @unittest.skip("Impossible to reliably time different machine runs")
     def test_faster_export(self):
         # generate 3k users

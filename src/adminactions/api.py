@@ -333,8 +333,6 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.row(row).height = 500
     formats = _get_qs_formats(queryset)
 
-    settingstime_zone = get_default_timezone()
-
     _styles = {}
 
     for rownum, row in enumerate(queryset):
