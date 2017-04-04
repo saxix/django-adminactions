@@ -84,7 +84,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     if m2m == ALL_FIELDS:
         m2m = set()
         for field in master._meta.get_fields():
-            if field.many_to_many:
+            if getattr(field, 'many_to_many', None):
                 if isinstance(field, ManyToManyField):
                     # direct relation
                     if not field.rel.through._meta.auto_created:
