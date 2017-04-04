@@ -297,5 +297,3 @@ Step 2
 **Limitations/TODO**
 
 - merge doesn't work for models related with ``on_delete=Protect`` (see :ghissue:`85`)
-- ImageField is not supported (see :ghissue:`95`)
-- ManyToManyField is not supported (see :ghissue:`108`)
