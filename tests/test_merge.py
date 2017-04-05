@@ -44,9 +44,9 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertTrue(User.objects.filter(pk=other.pk).exists())
 
         self.assertEqual(result.pk, master.pk)
-        self.assertNotEqual(result.first_name, other.first_name)
-        self.assertNotEqual(result.last_name, other.last_name)
-        self.assertEqual(result.password, master.password)
+        self.assertEqual(result.first_name, other.first_name)
+        self.assertEqual(result.last_name, other.last_name)
+        self.assertEqual(result.password, other.password)
 
     def test_merge_success_fields_no_commit(self):
         master = User.objects.get(pk=self.master_pk)
@@ -58,9 +58,9 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertTrue(User.objects.filter(pk=master.pk).exists())
         self.assertTrue(User.objects.filter(pk=other.pk).exists())
 
-        self.assertEqual(result.last_login, master.last_login)
-        self.assertNotEqual(result.last_login, other.last_login)
-        self.assertEqual(result.password, master.password)
+        self.assertNotEqual(result.last_login, master.last_login)
+        self.assertEqual(result.last_login, other.last_login)
+        self.assertEqual(result.password, other.password)
 
         self.assertNotEqual(result.last_name, other.last_name)
 
@@ -74,9 +74,9 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertFalse(User.objects.filter(pk=other.pk).exists())
 
         self.assertEqual(result.pk, master.pk)
-        self.assertNotEqual(master.first_name, other.first_name)
-        self.assertNotEqual(master.last_name, other.last_name)
-        self.assertEqual(result.password, master.password)
+        self.assertEqual(master.first_name, other.first_name)
+        self.assertEqual(master.last_name, other.last_name)
+        self.assertEqual(master.password, other.password)
 
     def test_merge_success_m2m(self):
         master = User.objects.get(pk=self.master_pk)
@@ -124,7 +124,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         master = DemoModel.objects.get(pk=result.pk)  # reload
         self.assertEqual(master.onetoone, related_one)
         self.assertTrue(DemoOneToOne.objects.filter(pk=related_one.pk).exists())
-        self.assertEqual(os.path.basename(master.image.file.name), "second.png")
+        self.assertEqual(os.path.basename(master.image.file.name), "first.png")
 
     # @skipIf(not hasattr(settings, 'AUTH_PROFILE_MODULE'), "")
     def test_merge_one_to_one_field(self):
@@ -156,8 +156,8 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
     def test_merge_image(self):
         master = DemoModel.objects.get(pk=3)
         other = DemoModel.objects.get(pk=1)
-        selected_image = master.image
-        selected_subclassed_image = master.subclassed_image
+        img1 = other.image
+        img2 = other.subclassed_image
 
         assert master.image != other.image
         assert master.subclassed_image != other.subclassed_image
@@ -168,8 +168,8 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
 
         master = DemoModel.objects.get(pk=result.pk)  # reload
         self.assertFalse(DemoModel.objects.filter(pk=other.pk).exists())
-        self.assertEqual(master.image, selected_image)
-        self.assertEqual(master.subclassed_image, selected_subclassed_image)
+        self.assertEqual(master.image, img1)
+        self.assertEqual(master.subclassed_image, img2)
 
 
 class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
@@ -390,7 +390,6 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
 
             if 2 in steps:
                 res.form['image'] = res.form['form-1-image'].value
-                # res.form['subclassed_image'] = res.form['form-1-subclassed_image'].value
                 res = res.form.submit('preview')
                 assert not hasattr(res.form, 'errors')
 
@@ -403,8 +402,8 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
         preserved = DemoModel.objects.get(pk=self._selected_values[0])
         removed = DemoModel.objects.get(pk=self._selected_values[1])
 
-        selected_image = removed.image
-        selected_subclassed_image = preserved.subclassed_image
+        img1 = removed.image
+        img2 = removed.subclassed_image
 
         assert preserved.image != removed.image  # sanity check
         assert preserved.subclassed_image != removed.subclassed_image  # sanity check
@@ -418,5 +417,5 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
 
         preserved_after = DemoModel.objects.get(pk=preserved.pk)
 
-        assert preserved_after.image == selected_image
-        assert preserved_after.subclassed_image == selected_subclassed_image
+        assert preserved_after.image == img1
+        assert preserved_after.subclassed_image == img2
