@@ -23,7 +23,7 @@ elif sys.version_info[0] == 3:
     if sys.version_info[1] in [3,4]:
         from importlib.machinery import SourceFileLoader
         app = SourceFileLoader("adminactions", init).load_module()
-    elif sys.version_info[1] in [5]:
+    elif sys.version_info[1] in [5,6]:
         import importlib.util
         spec = importlib.util.spec_from_file_location("adminactions", init)
         app = importlib.util.module_from_spec(spec)
