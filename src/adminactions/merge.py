@@ -168,7 +168,7 @@ def merge(modeladmin, request, queryset):  # noqa
                                 raw_value.minute,
                                 raw_value.second)
                             setattr(target, field.name, fixed_value)
-        except ValueError as e:
+        except ValueError:
             messages.error(request, _('Please select exactly 2 records'))
             return
 
