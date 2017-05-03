@@ -43,7 +43,7 @@ class DemoModel(models.Model):
 
 
 class UserDetail(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     note = models.CharField(max_length=10, blank=True)
 
     class Meta:
@@ -51,7 +51,8 @@ class UserDetail(models.Model):
 
 
 class DemoOneToOne(models.Model):
-    demo = models.OneToOneField(DemoModel, related_name='onetoone')
+    demo = models.OneToOneField(DemoModel, on_delete=models.CASCADE,
+                                related_name='onetoone')
 
     class Meta:
         app_label = 'demo'
