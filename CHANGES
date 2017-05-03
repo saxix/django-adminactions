@@ -1,10 +1,10 @@
 Release 1.5 (dev)
 =================
+* add official support to Django 1.11 and Python 3.6
 * fixes :ghissue:`116` Fixing ManyToMany merging with intermediary models. (thanks int-ua)
 * fixes :ghissue:`95` Cannot merge models with subclassed ImageField or FileField: "file not sent". (thanks int-ua)
 * fixes :ghissue:`108` merge doesn't account for many-to-many relationships
 * fixes :ghissue:`93` Do not export dates as strings in Excel
-
 
 Release 1.4
 ===========

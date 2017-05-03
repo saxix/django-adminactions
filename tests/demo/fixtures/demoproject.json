@@ -76,8 +76,7 @@
             "unique": "unique 3",
             "email": "s.apostolico@gmail.com",
             "choices": 2,
-          "image": false,
-
+            "image": null,
             "subclassed_image": "subclassed_second.png"
         }
     }
