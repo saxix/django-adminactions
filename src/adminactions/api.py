@@ -101,9 +101,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
 
         for fieldname in fields:
             f = get_field_by_path(master, fieldname)
-            if isinstance(f, FileField):
-                setattr(result, fieldname, getattr(other, fieldname))
-            elif f and not f.primary_key:
+            if isinstance(f, FileField) or f and not f.primary_key:
                 setattr(result, fieldname, getattr(other, fieldname))
 
         if m2m:
@@ -334,8 +332,6 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
 
     sheet.row(row).height = 500
     formats = _get_qs_formats(queryset)
-
-    settingstime_zone = get_default_timezone()
 
     _styles = {}
 
