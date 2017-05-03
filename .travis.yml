@@ -15,16 +15,20 @@ env:
   - TOXENV=py27-dev
 
   - TOXENV=py33-d18
-  - TOXENV=py33-dev
 
   - TOXENV=py34-d18
-  - TOXENV=py34-dev
 
   - TOXENV=py35-d18
   - TOXENV=py35-d19
   - TOXENV=py35-d110
   - TOXENV=py35-d111
   - TOXENV=py35-dev
+
+  - TOXENV=py36-d18
+  - TOXENV=py36-d19
+  - TOXENV=py36-d110
+  - TOXENV=py36-d111
+  - TOXENV=py36-dev
 
   - TOXENV=pypy-d18
   - TOXENV=pypy-d19
