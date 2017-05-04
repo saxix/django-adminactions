@@ -8,40 +8,35 @@ cache:
     - $HOME/.cache/pip
 
 env:
-  - TOXENV=py27-d18
-  - TOXENV=py27-d19
-  - TOXENV=py27-d110
-  - TOXENV=py27-d111
-  - TOXENV=py27-dev
+    - TOXENV=d18-py27
+    - TOXENV=d18-py34
+#    - TOXENV=d18-py35
+    - TOXENV=d18-py36
+    - TOXENV=d18-pypy
 
-  - TOXENV=py33-d18
+    - TOXENV=d19-py27
+    - TOXENV=d19-py34
+#    - TOXENV=d19-py35
+    - TOXENV=d19-py36
+    - TOXENV=d19-pypy
 
-  - TOXENV=py34-d18
+    - TOXENV=d110-py27
+    - TOXENV=d110-py34
+#    - TOXENV=d110-py35
+    - TOXENV=d110-py36
+    - TOXENV=d110-pypy
 
-  - TOXENV=py35-d18
-  - TOXENV=py35-d19
-  - TOXENV=py35-d110
-  - TOXENV=py35-d111
-  - TOXENV=py35-dev
+    - TOXENV=d111-py27
+    - TOXENV=d111-py34
+#    - TOXENV=d111-py35
+    - TOXENV=d111-py36
+    - TOXENV=d111-pypy
 
-  - TOXENV=py36-d18
-  - TOXENV=py36-d19
-  - TOXENV=py36-d110
-  - TOXENV=py36-d111
-  - TOXENV=py36-dev
-
-  - TOXENV=pypy-d18
-  - TOXENV=pypy-d19
-  - TOXENV=pypy-d110
-  - TOXENV=pypy-d111
-  - TOXENV=pypy-dev
+    - TOXENV=dev-py36
 
 matrix:
   allow_failures:
-    - env: TOXENV=py35-dev
-    - env: TOXENV=py36-dev
-    - env: TOXENV=py27-dev
-    - env: TOXENV=pypy-dev
+    - env: TOXENV=dev-py36
 
 
 install:
