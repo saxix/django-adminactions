@@ -38,6 +38,8 @@ fullclean:
 	mysql -e 'DROP DATABASE IF EXISTS test_adminactions;';
 	psql -c 'DROP DATABASE IF EXISTS test_adminactions;' -U postgres;
 
+coverage:
+	 py.test src tests -vv --capture=no --doctest-modules --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc
 
 docs: .mkbuilddir
 	mkdir -p ${BUILDDIR}/docs

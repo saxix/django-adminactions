@@ -58,6 +58,12 @@ def checkbox_enabler(context, field):
 class SelectOptionsAttribute(widgets.Select):
     """
         Select widget with the capability to render option's attributes
+        
+    >>> opt = SelectOptionsAttribute()
+    >>> opt.render_option(["1"], 1,"a")
+    u'<option value="1" selected="selected">a</option>'
+    >>> opt.render_option([], 1,"a")
+    u'<option value="1">a</option>'
     """
     def __init__(self, attrs=None, choices=(), options_attributes=None):
         self.options_attributes = options_attributes or {}

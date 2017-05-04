@@ -27,4 +27,4 @@ exclude_lines =
 ignore_errors = True
 
 [html]
-directory = build/coverage
+directory = ~build/coverage

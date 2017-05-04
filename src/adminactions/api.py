@@ -21,19 +21,21 @@ from . import compat
 from .templatetags.actions import get_field_value
 from .utils import clone_instance, get_field_by_path
 
-try:
-    # actually supported in admin actions since django >= 1.6
-    # (see https://code.djangoproject.com/ticket/20331),
-    # django <= 1.5 can still HttpResponse
-    import django
+# try:
+#     # actually supported in admin actions since django >= 1.6
+#     # (see https://code.djangoproject.com/ticket/20331),
+#     # django <= 1.5 can still HttpResponse
+#     import django
+#
+#     if django.get_version() < '1.6':
+#         StreamingHttpResponse = HttpResponse
+#     else:
+#         from django.http import StreamingHttpResponse
+# except ImportError:
+#     # Before django 1.5 HttpResponse could implicitly stream response
+#     StreamingHttpResponse = HttpResponse
 
-    if django.get_version() < '1.6':
-        StreamingHttpResponse = HttpResponse
-    else:
-        from django.http import StreamingHttpResponse
-except ImportError:
-    # Before django 1.5 HttpResponse could implicitly stream response
-    StreamingHttpResponse = HttpResponse
+from django.http import StreamingHttpResponse
 
 if six.PY2:
     import unicodecsv as csv
