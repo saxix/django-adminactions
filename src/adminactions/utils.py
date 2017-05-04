@@ -97,7 +97,7 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
 
     >>> from django.contrib.auth.models import Permission
     >>> p = Permission(name='perm')
-    >>> print get_field_value(p, 'name')
+    >>> get_field_value(p, 'name')
     perm
     >>> get_field_value(p, None) 
     Traceback (most recent call last):
@@ -146,13 +146,11 @@ def get_field_by_path(model, field_path):
     >>> from django.contrib.auth.models import Permission
 
     >>> p = Permission(name='perm')
-    >>> f = get_field_by_path(Permission, 'content_type')
-    >>> print f
+    >>> get_field_by_path(Permission, 'content_type')
     auth.Permission.content_type
 
     >>> p = Permission(name='perm')
-    >>> f = get_field_by_path(p, 'content_type.app_label')
-    >>> print f
+    >>> get_field_by_path(p, 'content_type.app_label')
     contenttypes.ContentType.app_label
 
     """
@@ -190,17 +188,17 @@ def get_verbose_name(model_or_queryset, field):
     >>> from django.contrib.auth.models import User, Permission
     >>> user = User()
     >>> p = Permission()
-    >>> print unicode(get_verbose_name(user, 'username'))
+    >>> get_verbose_name(user, 'username'))
     username
-    >>> print unicode(get_verbose_name(User, 'username'))
+    >>> get_verbose_name(User, 'username')
     username
-    >>> print unicode(get_verbose_name(User.objects.all(), 'username'))
+    >>> get_verbose_name(User.objects.all(), 'username')
     username
-    >>> print unicode(get_verbose_name(User.objects, 'username'))
+    >>> get_verbose_name(User.objects, 'username')
     username
-    >>> print unicode(get_verbose_name(User.objects, user._meta.fields[0]))
+    >>> get_verbose_name(User.objects, user._meta.fields[0])
     ID
-    >>> print unicode(get_verbose_name(p, 'content_type.model'))
+    >>> get_verbose_name(p, 'content_type.model'))
     python model class name
     >>> get_verbose_name(object, 'aaa')
     Traceback (most recent call last):
