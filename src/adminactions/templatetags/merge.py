@@ -11,8 +11,8 @@ def form_widget(form, fieldname):
     >>> from django.forms import ModelForm, modelform_factory
     >>> from django.contrib.auth.models import User
     >>> f = modelform_factory(User, fields=["username"])
-    >>> form_widget(f(instance=User(username="uname")), "username")  # doctest: +ELLIPSIS
-    <django.forms.boundfield.BoundField ...
+    >>> form_widget(f(instance=User(username="uname")), "username").name
+    'username'
     """
     return form[fieldname]
 
