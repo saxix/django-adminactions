@@ -97,8 +97,8 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
 
     >>> from django.contrib.auth.models import Permission
     >>> p = Permission(name='perm')
-    >>> get_field_value(p, 'name')
-    perm
+    >>> get_field_value(p, 'name') == 'perm'
+    True
     >>> get_field_value(p, None) 
     Traceback (most recent call last):
         ...
@@ -146,13 +146,11 @@ def get_field_by_path(model, field_path):
     >>> from django.contrib.auth.models import Permission
 
     >>> p = Permission(name='perm')
-    >>> get_field_by_path(Permission, 'content_type')
-    auth.Permission.content_type
-
+    >>> get_field_by_path(Permission, 'content_type').name
+    'content_type'
     >>> p = Permission(name='perm')
-    >>> get_field_by_path(p, 'content_type.app_label')
-    contenttypes.ContentType.app_label
-
+    >>> get_field_by_path(p, 'content_type.app_label').name
+    'app_label'
     """
     parts = field_path.split('.')
     target = parts[0]
@@ -188,18 +186,18 @@ def get_verbose_name(model_or_queryset, field):
     >>> from django.contrib.auth.models import User, Permission
     >>> user = User()
     >>> p = Permission()
-    >>> get_verbose_name(user, 'username'))
-    username
-    >>> get_verbose_name(User, 'username')
-    username
-    >>> get_verbose_name(User.objects.all(), 'username')
-    username
-    >>> get_verbose_name(User.objects, 'username')
-    username
-    >>> get_verbose_name(User.objects, user._meta.fields[0])
-    ID
-    >>> get_verbose_name(p, 'content_type.model'))
-    python model class name
+    >>> get_verbose_name(user, 'username') == 'username'
+    True
+    >>> get_verbose_name(User, 'username') == 'username'
+    True
+    >>> get_verbose_name(User.objects.all(), 'username') == 'username'
+    True
+    >>> get_verbose_name(User.objects, 'username') == 'username'
+    True
+    >>> get_verbose_name(User.objects, user._meta.fields[0]) == 'ID'
+    True
+    >>> get_verbose_name(p, 'content_type.model') == 'python model class name' 
+    True
     >>> get_verbose_name(object, 'aaa')
     Traceback (most recent call last):
     ...
