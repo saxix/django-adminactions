@@ -7,43 +7,39 @@ cache:
   directories:
     - $HOME/.cache/pip
 
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+
 env:
-    - TOXENV=d18-py27
-    - TOXENV=d18-py34
-#    - TOXENV=d18-py35
-    - TOXENV=d18-py36
-    - TOXENV=d18-pypy
+  - DJANGO=1.8
+  - DJANGO=1.9
+  - DJANGO=1.10
+  - DJANGO=1.11
 
-    - TOXENV=d19-py27
-    - TOXENV=d19-py34
-#    - TOXENV=d19-py35
-    - TOXENV=d19-py36
-    - TOXENV=d19-pypy
-
-    - TOXENV=d110-py27
-    - TOXENV=d110-py34
-#    - TOXENV=d110-py35
-    - TOXENV=d110-py36
-    - TOXENV=d110-pypy
-
-    - TOXENV=d111-py27
-    - TOXENV=d111-py34
-#    - TOXENV=d111-py35
-    - TOXENV=d111-py36
-    - TOXENV=d111-pypy
-
-    - TOXENV=dev-py36
 
 matrix:
-  allow_failures:
-    - env: TOXENV=dev-py36
+  exclude:
+    - python: 2.7
+      env: DJANGO=2.0
 
+    - python: 3.4
+      env: DJANGO=2.0
+
+    - python: 3.6
+      env: DJANGO=1.8
+    - python: 3.6
+      env: DJANGO=1.9
+    - python: 3.6
+      env: DJANGO=1.10
 
 install:
   - pip install -e ".[test]"
 
 script:
-  - tox -e $TOXENV -- py.test src tests --doctest-modules -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
+  - tox -e "d${DJANGO//.}-py${TRAVIS_PYTHON_VERSION//.}" -- py.test src tests --doctest-modules -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase
