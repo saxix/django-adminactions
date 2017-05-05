@@ -9,6 +9,7 @@ from collections import OrderedDict as SortedDict, defaultdict
 
 import django
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -53,6 +54,18 @@ change_protocol = lambda arg, value: re.sub('^[a-z]*://', "%s://" % arg, value)
 
 disable_if_not_nullable = lambda field: field.null
 disable_if_unique = lambda field: not field.unique
+
+def add_items(items, m2m):
+    for i in items:
+        if i not in m2m.all():
+            m2m.add(i)
+    return m2m.all()
+
+def remove_items(items, m2m):
+    for i in items:
+        if i in m2m.all():
+            m2m.remove(i)
+    return m2m.all()
 
 
 class OperationManager(object):
@@ -115,7 +128,9 @@ OPERATIONS = OperationManager({
     df.EmailField: [('change domain', (change_domain, True, True, "")),
                     ('upper', (string.upper, False, True, "convert to uppercase")),
                     ('lower', (string.lower, False, True, "convert to lowercase"))],
-    df.URLField: [('change protocol', (change_protocol, True, True, ""))]
+    df.URLField: [('change protocol', (change_protocol, True, True, ""))],
+    df.related.ManyToManyField: [('add items', (add_items, True, True, "")),
+                                 ('remove items', (remove_items, True, True, ""))]
 })
 
 
@@ -339,9 +354,27 @@ def mass_update(modeladmin, request, queryset):  # noqa
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else str(obj)
+
+    configured_fields = adminForm.form.configured_fields()
+    model_fields = adminForm.form.model_fields()
+
+    for cf in configured_fields:
+        print(vars(cf))
+
+    for mf in model_fields:
+        print(vars(mf))
+
+    adminactions_filters = getattr(settings, 'ADMINACTIONS_FILTERS', None)
+    if adminactions_filters:
+        for aaf in adminactions_filters:
+            configured_fields = filter(aaf, configured_fields)
+            model_fields = filter(aaf, model_fields)
+
     tpl = 'adminactions/mass_update.html'
     ctx = {'adminform': adminForm,
            'form': form,
+           'configured_fields': configured_fields,
+           'model_fields': model_fields,
            'action_short_description': mass_update.short_description,
            'title': u"%s (%s)" % (
                mass_update.short_description.capitalize(),
