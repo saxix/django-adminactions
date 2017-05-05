@@ -35,8 +35,6 @@ matrix:
     - python: 3.6
       env: DJANGO=1.10
 
-install:
-  - pip install -e ".[test]"
 
 script:
   - tox -e "d${DJANGO//.}-py${TRAVIS_PYTHON_VERSION//.}" -- py.test src tests --doctest-modules -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
