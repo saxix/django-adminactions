@@ -28,6 +28,9 @@ def test_get_verbose_name():
     with pytest.raises(ValueError):
         get_verbose_name(object, 'aaa')
 
+    with pytest.raises(ValueError):
+        get_verbose_name(p, None)
+
 
 def test_flatten():
     from adminactions.utils import flatten

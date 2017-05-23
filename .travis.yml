@@ -39,7 +39,7 @@ install:
   - pip install tox
 
 script:
-  - tox -e "d${DJANGO//.}-py${TRAVIS_PYTHON_VERSION//.}" -- py.test src tests --doctest-modules -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
+  - tox -e "d${DJANGO//.}-py${TRAVIS_PYTHON_VERSION//.}" -- py.test src tests -W ignore --doctest-modules -vv --capture=no --cov=adminactions --cov-report= --cov-config=tests/.coveragerc
 
 before_success:
   - coverage erase

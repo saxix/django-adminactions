@@ -198,14 +198,6 @@ def get_verbose_name(model_or_queryset, field):
     True
     >>> get_verbose_name(p, 'content_type.model') == 'python model class name' 
     True
-    >>> get_verbose_name(object, 'aaa')
-    Traceback (most recent call last):
-    ...
-    ValueError: `get_verbose_name` expects Manager, Queryset or Model as first parameter (got <type 'type'>)
-    >>> get_verbose_name(p, None)
-    Traceback (most recent call last):
-    ...
-    ValueError: `get_verbose_name` field_path must be string or Field class
     """
 
     if isinstance(model_or_queryset, models.Manager):

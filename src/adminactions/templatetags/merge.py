@@ -23,8 +23,8 @@ def form_widget_error(form, fieldname):
     >>> from django.forms import ModelForm, modelform_factory
     >>> from django.contrib.auth.models import User
     >>> f = modelform_factory(User, fields=["username"])({}, instance=User())
-    >>> form_widget_error(f, "username")
-    [u'This field is required.']
+    >>> form_widget_error(f, "username") == ['This field is required.']
+    True
     """
     return form[fieldname].errors
 
