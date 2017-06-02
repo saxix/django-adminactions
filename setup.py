@@ -10,7 +10,7 @@ from setuptools import find_packages, setup
 
 ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 init = os.path.join(ROOT, 'src', 'adminactions', '__init__.py')
-# app = imp.load_source('concurrency', init)
+app = imp.load_source('adminactions', init)
 
 
 reqs = "install.py{}.pip".format(sys.version_info[0])
@@ -29,7 +29,7 @@ dev_require = fread('develop.pip')
 
 setup(
     name='django-adminactions',
-    version="1.5",
+    version=app.get_version(),
     url='https://github.com/saxix/django-adminactions',
     download_url='https://github.com/saxix/django-adminactions',
     author='sax',
