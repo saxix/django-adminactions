@@ -6,7 +6,7 @@ from django.db import connections, models, router
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_text
 
-from .compat import get_all_field_names, get_field_by_name
+from adminactions.compat import get_all_field_names, get_field_by_name
 
 
 def clone_instance(instance, fieldnames=None):
@@ -71,13 +71,17 @@ def getattr_or_item(obj, name):
     1
     >>> print(getattr_or_item(p, 'name'))
     perm
+    >>> getattr_or_item(dict, "!!!")
+    Traceback (most recent call last):
+        ...
+    AttributeError: type object has no attribute/item '!!!'
     """
     try:
         ret = get_attr(obj, name, AttributeError())
     except AttributeError:
         try:
             ret = obj[name]
-        except KeyError:
+        except (KeyError, TypeError):
             raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
     return ret
 
@@ -93,16 +97,19 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
 
     >>> from django.contrib.auth.models import Permission
     >>> p = Permission(name='perm')
-    >>> print get_field_value(p, 'name')
-    perm
-
+    >>> get_field_value(p, 'name') == 'perm'
+    True
+    >>> get_field_value(p, None) 
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid value for parameter `field`: Should be a field name or a Field instance
     """
     if isinstance(field, six.string_types):
         fieldname = field
     elif isinstance(field, models.Field):
         fieldname = field.name
     else:
-        raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance ')
+        raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance')
 
     if usedisplay and hasattr(obj, 'get_%s_display' % fieldname):
         value = getattr(obj, 'get_%s_display' % fieldname)()
@@ -139,15 +146,11 @@ def get_field_by_path(model, field_path):
     >>> from django.contrib.auth.models import Permission
 
     >>> p = Permission(name='perm')
-    >>> f = get_field_by_path(Permission, 'content_type')
-    >>> print f
-    auth.Permission.content_type
-
+    >>> get_field_by_path(Permission, 'content_type').name
+    'content_type'
     >>> p = Permission(name='perm')
-    >>> f = get_field_by_path(p, 'content_type.app_label')
-    >>> print f
-    contenttypes.ContentType.app_label
-
+    >>> get_field_by_path(p, 'content_type.app_label').name
+    'app_label'
     """
     parts = field_path.split('.')
     target = parts[0]
@@ -183,22 +186,18 @@ def get_verbose_name(model_or_queryset, field):
     >>> from django.contrib.auth.models import User, Permission
     >>> user = User()
     >>> p = Permission()
-    >>> print unicode(get_verbose_name(user, 'username'))
-    username
-    >>> print unicode(get_verbose_name(User, 'username'))
-    username
-    >>> print unicode(get_verbose_name(User.objects.all(), 'username'))
-    username
-    >>> print unicode(get_verbose_name(User.objects, 'username'))
-    username
-    >>> print unicode(get_verbose_name(User.objects, user._meta.get_field_by_name('username')[0]))
-    username
-    >>> print unicode(get_verbose_name(p, 'content_type.model'))
-    python model class name
-    >>> get_verbose_name(object, 'aaa')
-    Traceback (most recent call last):
-    ...
-    ValueError: `get_verbose_name` expects Manager, Queryset or Model as first parameter (got <type 'type'>)
+    >>> get_verbose_name(user, 'username') == 'username'
+    True
+    >>> get_verbose_name(User, 'username') == 'username'
+    True
+    >>> get_verbose_name(User.objects.all(), 'username') == 'username'
+    True
+    >>> get_verbose_name(User.objects, 'username') == 'username'
+    True
+    >>> get_verbose_name(User.objects, user._meta.fields[0]) == 'ID'
+    True
+    >>> get_verbose_name(p, 'content_type.model') == 'python model class name' 
+    True
     """
 
     if isinstance(model_or_queryset, models.Manager):
@@ -250,8 +249,3 @@ def flatten(iterable):
         else:
             result.append(el)
     return list(result)
-
-
-def model_supports_transactions(instance):
-    alias = router.db_for_write(instance)
-    return connections[alias].features.supports_transactions

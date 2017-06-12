@@ -9,6 +9,7 @@ import six
 import xlwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import FileField
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.http import HttpResponse
@@ -20,19 +21,21 @@ from . import compat
 from .templatetags.actions import get_field_value
 from .utils import clone_instance, get_field_by_path
 
-try:
-    # actually supported in admin actions since django >= 1.6
-    # (see https://code.djangoproject.com/ticket/20331),
-    # django <= 1.5 can still HttpResponse
-    import django
-    if django.get_version() < '1.6':
-        StreamingHttpResponse = HttpResponse
-    else:
-        from django.http import StreamingHttpResponse
-except ImportError:
-    # Before django 1.5 HttpResponse could implicitly stream response
-    StreamingHttpResponse = HttpResponse
+# try:
+#     # actually supported in admin actions since django >= 1.6
+#     # (see https://code.djangoproject.com/ticket/20331),
+#     # django <= 1.5 can still HttpResponse
+#     import django
+#
+#     if django.get_version() < '1.6':
+#         StreamingHttpResponse = HttpResponse
+#     else:
+#         from django.http import StreamingHttpResponse
+# except ImportError:
+#     # Before django 1.5 HttpResponse could implicitly stream response
+#     StreamingHttpResponse = HttpResponse
 
+from django.http import StreamingHttpResponse
 
 if six.PY2:
     import unicodecsv as csv
@@ -78,10 +81,20 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     if related == ALL_FIELDS:
         related = [rel.get_accessor_name()
                    for rel in compat.get_all_related_objects(master)]
-# for rel in master._meta.get_all_related_objects(False, False, False)]
+    # for rel in master._meta.get_all_related_objects(False, False, False)]
 
     if m2m == ALL_FIELDS:
-        m2m = [field.name for field in master._meta.many_to_many]
+        m2m = set()
+        for field in master._meta.get_fields():
+            if getattr(field, 'many_to_many', None):
+                if isinstance(field, ManyToManyField):
+                    # direct relation
+                    if not field.rel.through._meta.auto_created:
+                        continue
+                    m2m.add(field.name)
+                else:
+                    # reverse relation
+                    m2m.add(field.get_accessor_name())
 
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
@@ -90,18 +103,15 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
 
         for fieldname in fields:
             f = get_field_by_path(master, fieldname)
-            if f and not f.primary_key:
+            if isinstance(f, FileField) or f and not f.primary_key:
                 setattr(result, fieldname, getattr(other, fieldname))
 
         if m2m:
-            for fieldname in set(m2m):
-                all_m2m[fieldname] = []
-                field_object = get_field_by_path(master, fieldname)
-                if not isinstance(field_object, ManyToManyField):
-                    raise ValueError('{0} is not a ManyToManyField field'.format(fieldname))
-                source_m2m = getattr(other, field_object.name)
+            for accessor in set(m2m):
+                all_m2m[accessor] = []
+                source_m2m = getattr(other, accessor)
                 for r in source_m2m.all():
-                    all_m2m[fieldname].append(r)
+                    all_m2m[accessor].append(r)
         if related:
             for name in set(related):
                 related_object = get_field_by_path(master, name)
@@ -124,7 +134,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                 for rel_fieldname, element in elements:
                     setattr(element, rel_fieldname, master)
                     element.save()
-
             other.delete()
             result.save()
             for fieldname, elements in list(all_m2m.items()):
@@ -138,6 +147,7 @@ class Echo(object):
     """An object that implements just the write method of the file-like
     interface.
     """
+
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
@@ -180,8 +190,8 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields
-                  + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields +
+                  queryset.model._meta.many_to_many]
 
     if streaming_enabled:
         buffer_object = Echo()
@@ -301,8 +311,8 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields
-                  + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields +
+                  queryset.model._meta.many_to_many]
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=2)
     sheet_name = config.pop('sheet_name')
@@ -315,7 +325,8 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.write(row, 0, u'#', style)
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
+            header = [force_text(f.verbose_name) for f in
+                      queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, fieldname, heading_xf)
@@ -324,14 +335,12 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.row(row).height = 500
     formats = _get_qs_formats(queryset)
 
-    settingstime_zone = get_default_timezone()
-
     _styles = {}
 
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
-        for idx, fieldname in enumerate(fields):
-            fmt = formats.get(idx, 'general')
+        for col_idx, fieldname in enumerate(fields):
+            fmt = formats.get(col_idx, 'general')
             try:
                 value = get_field_value(row,
                                         fieldname,
@@ -342,22 +351,22 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
                 if hash(fmt) not in _styles:
                     if callable(fmt):
                         _styles[hash(fmt)] = xlwt.easyxf(num_format_str='formula')
+                    elif isinstance(value, datetime.datetime):
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['datetime_format'])
+                    elif isinstance(value, datetime.date):
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['date_format'])
+                    elif isinstance(value, datetime.datetime):
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['time_format'])
                     else:
                         _styles[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
 
-                if isinstance(value, datetime.datetime):
-                    try:
-                        value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
-                    except ValueError:
-                        # astimezone() cannot be applied to a naive datetime
-                        value = dateformat.format(value, config['datetime_format'])
                 if isinstance(value, (list, tuple)):
                     value = "".join(value)
 
-                sheet.write(rownum + 1, idx + 1, value, _styles[hash(fmt)])
+                sheet.write(rownum + 1, col_idx + 1, value, _styles[hash(fmt)])
             except Exception as e:
                 # logger.warning("TODO refine this exception: %s" % e)
-                sheet.write(rownum + 1, idx + 1, smart_str(e), _styles[hash(fmt)])
+                sheet.write(rownum + 1, col_idx + 1, smart_str(e), _styles[hash(fmt)])
 
     book.save(response)
     return response
@@ -436,8 +445,8 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields
-                  + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields +
+                  queryset.model._meta.many_to_many]
 
     book = xlsxwriter.Workbook(out, {'in_memory': True})
     sheet_name = config.pop('sheet_name')
@@ -450,7 +459,8 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
     sheet.write(row, 0, force_text('#'), formats['_general_'])
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name)for f in queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
+            header = [force_text(f.verbose_name) for f in
+                      queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, force_text(fieldname), formats['_general_'])

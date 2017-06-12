@@ -18,8 +18,7 @@ from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-from . import compat as transaction
-from . import api
+from . import api, compat as transaction
 from .forms import GenericActionForm
 from .models import get_permission_codename
 from .utils import clone_instance
@@ -54,7 +53,10 @@ class MergeForm(GenericActionForm):
         return int(self.cleaned_data['dependencies'])
 
     def clean_field_names(self):
-        return self.cleaned_data['field_names'].split(',')
+        if self.cleaned_data['field_names']:
+            return self.cleaned_data['field_names'].split(',')
+        else:
+            return None
 
     def full_clean(self):
         super(MergeForm, self).full_clean()
@@ -85,15 +87,18 @@ def merge(modeladmin, request, queryset):  # noqa
     def raw_widget(field, **kwargs):
         """ force all fields as not required"""
         kwargs['widget'] = TextInput({'class': 'raw-value'})
+        if isinstance(field, models.FileField):
+            kwargs["form_class"] = forms.CharField
+
         return field.formfield(**kwargs)
 
     merge_form = getattr(modeladmin, 'merge_form', MergeForm)
     MForm = modelform_factory(modeladmin.model,
                               form=merge_form,
-                              exclude=('pk', ),
+                              exclude=('pk',),
                               formfield_callback=raw_widget)
     OForm = modelform_factory(modeladmin.model,
-                              exclude=('pk', ),
+                              exclude=('pk',),
                               formfield_callback=raw_widget)
 
     tpl = 'adminactions/merge.html'
@@ -143,7 +148,7 @@ def merge(modeladmin, request, queryset):  # noqa
                 m2m = None
             fields = form.cleaned_data['field_names']
             api.merge(master, other, fields=fields, commit=True, m2m=m2m, related=related)
-            return HttpResponseRedirect(request.path)
+            return HttpResponseRedirect(request.get_full_path())
         else:
             messages.error(request, form.errors)
     else:

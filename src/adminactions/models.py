@@ -35,6 +35,8 @@ def create_extra_permission(sender, **kwargs):
 
 # post_migrate = Signal(providing_args=["app_config", "verbosity", "interactive", "using"])
 # post_syncdb = Signal(providing_args=["class", "app", "created_models", "verbosity", "interactive", "db"])
+
+
 try:
     from django.db.models.signals import post_migrate
 

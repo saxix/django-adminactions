@@ -23,7 +23,6 @@
         {{ adminform.form.non_field_errors }}
         <form method="post">{% csrf_token %}
             {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
-            {{ adminform.form.field_names }}
             <table>
                 <tr>
                     <td>{{ adminform.form.dependencies.label }}</td>

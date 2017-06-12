@@ -6,6 +6,10 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+class SubclassedImageField(models.ImageField):
+    pass
+
+
 class DemoModel(models.Model):
     char = models.CharField('Chäř', max_length=255)
     integer = models.IntegerField()
@@ -30,13 +34,25 @@ class DemoModel(models.Model):
     not_editable = models.CharField(max_length=255, editable=False, blank=True, null=True)
     choices = models.IntegerField(choices=((1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')))
 
+    image = models.ImageField(blank=True, null=True)
+    subclassed_image = SubclassedImageField(blank=True, null=True)
+
+    class Meta:
+        app_label = 'demo'
+        ordering = ('-id',)
+
+
+class UserDetail(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    note = models.CharField(max_length=10, blank=True)
+
     class Meta:
         app_label = 'demo'
 
 
-class UserDetail(models.Model):
-    user = models.ForeignKey(User)
-    note = models.CharField(max_length=10, blank=True)
+class DemoOneToOne(models.Model):
+    demo = models.OneToOneField(DemoModel, on_delete=models.CASCADE,
+                                related_name='onetoone')
 
     class Meta:
         app_label = 'demo'

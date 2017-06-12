@@ -28,7 +28,7 @@ __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest',
 class ExportMixin(object):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
-    csrf_checks = False
+    csrf_checks = True
 
     def setUp(self):
         super(ExportMixin, self).setUp()
@@ -377,6 +377,34 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             sheet = w.sheet_by_index(0)
             self.assertEqual(sheet.cell_value(0, 1), u'Chäř')
             self.assertEqual(sheet.cell_value(1, 1), u'Pizzä ïs Gööd')
+
+    def test_issue_93(self):
+        # default date(time) format in XLS export doesn't import well on excel
+        with user_grant_permission(self.user, ['demo.change_demomodel',
+                                               'demo.adminactions_export_demomodel']):
+            res = self.app.get('/', user='user')
+            res = res.click('Demo models')
+            form = res.forms['changelist-form']
+            form['action'] = self.action_name
+            self._select_rows(form)
+            res = form.submit()
+            res.form['header'] = 1
+            res.form['columns'] = ['date', ]
+            res = res.form.submit('apply')
+            io = six.BytesIO(res.body)
+
+            io.seek(0)
+            w = xlrd.open_workbook(file_contents=io.read(), formatting_info=True)
+            sheet = w.sheet_by_index(0)
+
+            cell = sheet.cell(1, 1)
+            fmt = w.xf_list[cell.xf_index]
+            format_key = fmt.format_key
+            format = w.format_map[format_key]  # gets a Format object
+
+            self.assertEqual(cell.value, 41303.0)
+            self.assertEqual(cell.ctype, 3)
+            self.assertEqual(format.format_str, u'd/m/Y')
 
     @unittest.skip("Impossible to reliably time different machine runs")
     def test_faster_export(self):

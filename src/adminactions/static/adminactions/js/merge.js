@@ -1,7 +1,8 @@
 (function ($) {
     $(function () {
         var select = function (from) {
-            return function () {
+            return function ( event ) {
+                event.preventDefault();
                 var $row = $(this).parent().parent();
                 var $sel = $row.find(from);
                 $('.result input', $row).val($('input.raw-value', $sel).val());
@@ -20,10 +21,10 @@
 
                 $('td', this).removeClass("selected");
 
-                if ($('input.raw-value', $result).val() == $('input.raw-value', $left).val()) {
+                if ($('input.raw-value', $result).val() === $('input.raw-value', $left).val()) {
                     $(this).find('td.origin').addClass("selected");
                     $('p.display', $result).text($('p.display', $left).text());
-                } else if ($('input.raw-value', $result).val() == $('input.raw-value', $right).val()) {
+                } else if ($('input.raw-value', $result).val() === $('input.raw-value', $right).val()) {
                     $(this).find('td.other').addClass("selected");
                     $('p.display', $result).text($('p.display', $right).text());
                     RIGHT.push(field_name);
@@ -37,7 +38,8 @@
         $('a.origin').click(select("td.origin"));
         $('a.other').click(select("td.other"));
 
-        $('a.swap').click(function () {
+        $('a.swap').click(function ( event ) {
+            event.preventDefault();
             var left = [];
             var right = [];
             var $master = $('input[name="master_pk"]');

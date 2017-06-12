@@ -21,7 +21,9 @@
             "integer": 90000,
             "unique": "unique 1",
             "email": "s.apostolico@gmail.com",
-            "choices": 2
+            "choices": 2,
+            "image": "second.png",
+            "subclassed_image": false
         }
     },
     {
@@ -46,14 +48,16 @@
             "integer": 888888,
             "unique": "unique 2",
             "email": "s.apostolico@gmail.com",
-            "choices": 2
+            "choices": 2,
+            "image": "first.png",
+            "subclassed_image": "subclassed_first.png"
         }
     },
     {
-        "pk": 2,
+        "pk": 3,
         "model": "demo.demomodel",
         "fields": {
-            "nullable": "bbbb",
+            "nullable": "dddd",
             "float": 10.1,
             "generic_ip": "192.168.10.2",
             "url": "https://github.com/saxix/django-adminactions",
@@ -69,9 +73,11 @@
             "logic": false,
             "date": "2013-01-29",
             "integer": 888888,
-            "unique": "unique 2",
+            "unique": "unique 3",
             "email": "s.apostolico@gmail.com",
-            "choices": 2
+            "choices": 2,
+            "image": null,
+            "subclassed_image": "subclassed_second.png"
         }
     }
 ]

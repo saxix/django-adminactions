@@ -3,11 +3,11 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 import json
 import re
+
 import six
 from collections import OrderedDict as SortedDict, defaultdict
 
 import django
-from adminactions.compat import atomic
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -16,7 +16,7 @@ from django.db.models import fields as df
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory,)
+                                 modelform_factory, )
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.template.context import RequestContext
@@ -24,6 +24,8 @@ from django.utils.encoding import smart_text
 from django.utils.functional import curry
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+
+from adminactions.compat import atomic
 
 # from adminactions import compat
 from .compat import get_field_by_name

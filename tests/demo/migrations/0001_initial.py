@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
+import demo.models
 
 
 class Migration(migrations.Migration):
@@ -39,6 +40,8 @@ class Migration(migrations.Migration):
                 ('blank', models.CharField(blank=True, max_length=255, null=True)),
                 ('not_editable', models.CharField(blank=True, editable=False, max_length=255, null=True)),
                 ('choices', models.IntegerField(choices=[(1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')])),
+                ('image', models.ImageField(upload_to='', null=True, blank=True)),
+                ('subclassed_image', demo.models.SubclassedImageField(upload_to='', null=True, blank=True)),
             ],
         ),
         migrations.CreateModel(
@@ -47,6 +50,13 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('note', models.CharField(blank=True, max_length=10)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='DemoOneToOne',
+            fields=[
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('demo', models.OneToOneField(to='demo.DemoModel', related_name='onetoone')),
             ],
         ),
     ]

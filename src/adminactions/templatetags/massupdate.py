@@ -35,8 +35,8 @@ def fields_values(d, k):
 def link_fields_values(d, k):
     """
     >>> data = {'name1': ['value1.1', 'value1.2'], 'name2': ['value2.1', 'value2.2'], }
-    >>> link_fields_values(data, 'name1')
-    u'<a href="#" class="fastfieldvalue name1 value">value1.1</a>, <a href="#" class="fastfieldvalue name1 value">value1.2</a>'
+    >>> print(link_fields_values(data, 'name1'))
+    <a href="#" class="fastfieldvalue name1 value">value1.1</a>, <a href="#" class="fastfieldvalue name1 value">value1.2</a>
     """
     ret = []
     for v in d.get(k, []):
@@ -58,6 +58,12 @@ def checkbox_enabler(context, field):
 class SelectOptionsAttribute(widgets.Select):
     """
         Select widget with the capability to render option's attributes
+        
+    >>> opt = SelectOptionsAttribute()
+    >>> opt.render_option(["1"], 1, "a") == '<option value="1" selected="selected">a</option>'
+    True
+    >>> opt.render_option([], 1, "a") == '<option value="1">a</option>'
+    True
     """
     def __init__(self, attrs=None, choices=(), options_attributes=None):
         self.options_attributes = options_attributes or {}

@@ -56,7 +56,7 @@ extensions = ['sphinx.ext.autodoc',
 # issuetracker = 'github'
 # issuetracker_project = 'saxix/django-adminactions'
 # issuetracker_plaintext_issues = True
-next_version = '0.9'
+next_version = '1.5'
 github_project_url = 'https://github.com/saxix/django-adminactions/'
 github_project_url_basesource = 'https://github.com/saxix/django-adminactions/'
 
@@ -81,7 +81,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Django Admin Actions'
-copyright = u'2012, Stefano Apostolico'
+copyright = u'2012-2016, Stefano Apostolico'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
