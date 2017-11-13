@@ -12,9 +12,11 @@ from adminactions.compat import get_field_by_name
 from adminactions.mass_update import OPERATIONS
 
 try:
-    from django.forms.util import flatatt
-except ImportError:
+    # Import module from new Django 1.9 place first
+    # to avoid RemovedInDjango19Warning to be raised
     from django.forms.utils import flatatt
+except ImportError:
+    from django.forms.util import flatatt
 
 
 register = Library()
