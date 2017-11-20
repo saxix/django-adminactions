@@ -21,7 +21,9 @@
 
                 $('td', this).removeClass("selected");
 
-                if ($('input.raw-value', $result).val() === $('input.raw-value', $left).val()) {
+                if ($('input.raw-value', $right).val() === $('input.raw-value', $left).val()) {
+                    $('p.display', $result).text($('p.display', $left).text());
+                } else if ($('input.raw-value', $result).val() === $('input.raw-value', $left).val()) {
                     $(this).find('td.origin').addClass("selected");
                     $('p.display', $result).text($('p.display', $left).text());
                 } else if ($('input.raw-value', $result).val() === $('input.raw-value', $right).val()) {
