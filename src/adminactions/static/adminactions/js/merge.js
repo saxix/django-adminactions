@@ -32,7 +32,7 @@
                     $(this).addClass("changed");
                 }
             });
-            $('input[name=field_names]').val(RIGHT);
+            $('.merge-form input[name=field_names]').val(RIGHT);
         };
 
         $('a.origin').click(select("td.origin"));
