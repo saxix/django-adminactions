@@ -25,6 +25,8 @@ from .utils import clone_instance
 
 
 class MergeForm(GenericActionForm):
+    use_required_attribute = False
+
     DEP_MOVE = 1
     DEP_DELETE = 2
     GEN_IGNORE = 1
