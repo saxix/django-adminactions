@@ -30,11 +30,23 @@
                     $(this).find('td.other').addClass("selected");
                     $('p.display', $result).text($('p.display', $right).text());
                     RIGHT.push(field_name);
-                }else if ($('.original .display', this).text() !== $('.result .display', this).text()){
+                }
+                $('input[name=field_names]').val(RIGHT);
+            });
+            $('.mergetable tr.preview-row').each(function () {
+
+                var $result = $(this).find('td.result');
+                var $left = $(this).find('td.origin');
+                var $right = $(this).find('td.other');
+                var field_name = $(this).find('td:first').attr('data-content');
+
+
+                $('td', this).removeClass("selected");
+
+                if ($('.original .display', this).text() !== $('.result .display', this).text()){
                     $(this).addClass("changed");
                 }
             });
-            $('input[name=field_names]').val(RIGHT);
         };
 
         $('a.origin').click(select("td.origin"));
