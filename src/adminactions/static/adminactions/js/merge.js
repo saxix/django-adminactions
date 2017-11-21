@@ -28,11 +28,12 @@
                     $(this).find('td.other').addClass("selected");
                     $('p.display', $result).text($('p.display', $right).text());
                     RIGHT.push(field_name);
-                }else if ($('.original .display', this).text() !== $('.result .display', this).text()){
+                };
+                if ($('.original .display', this).text() !== $('.result .display', this).text()){
                     $(this).addClass("changed");
                 }
             });
-            $('input[name=field_names]').val(RIGHT);
+            $('.merge-form input[name=field_names]').val(RIGHT);
         };
 
         $('a.origin').click(select("td.origin"));
