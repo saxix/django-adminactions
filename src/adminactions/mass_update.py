@@ -1,43 +1,33 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
 import re
-
-import six
 from collections import OrderedDict as SortedDict, defaultdict
 
-import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import fields as df
+from django.db.models import ForeignKey, fields as df
+from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
                                  modelform_factory, )
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from django.utils.encoding import smart_text
 from django.utils.functional import curry
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from adminactions.compat import atomic
-
-# from adminactions import compat
 from .compat import get_field_by_name
 from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
 from .models import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
-
-if six.PY2:
-    import string
-elif six.PY3:
-    string = str
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
 
@@ -100,12 +90,12 @@ class OperationManager(object):
 
 
 OPERATIONS = OperationManager({
-    df.CharField: [('upper', (string.upper, False, True, "convert to uppercase")),
-                   ('lower', (string.lower, False, True, "convert to lowercase")),
-                   ('capitalize', (string.capitalize, False, True, "capitalize first character")),
+    df.CharField: [('upper', (str.upper, False, True, "convert to uppercase")),
+                   ('lower', (str.lower, False, True, "convert to lowercase")),
+                   ('capitalize', (str.capitalize, False, True, "capitalize first character")),
                    # ('capwords', (string.capwords, False, True, "capitalize each word")),
                    # ('swapcase', (string.swapcase, False, True, "")),
-                   ('trim', (string.strip, False, True, "leading and trailing whitespace"))],
+                   ('trim', (str.strip, False, True, "leading and trailing whitespace"))],
     df.IntegerField: [('add percent', (add_percent, True, True, "add <arg> percent to existing value")),
                       ('sub percent', (sub_percent, True, True, "")),
                       ('sub', (sub_percent, True, True, "")),
@@ -113,8 +103,8 @@ OPERATIONS = OperationManager({
     df.BooleanField: [('swap', (negate, False, True, ""))],
     df.NullBooleanField: [('swap', (negate, False, True, ""))],
     df.EmailField: [('change domain', (change_domain, True, True, "")),
-                    ('upper', (string.upper, False, True, "convert to uppercase")),
-                    ('lower', (string.lower, False, True, "convert to lowercase"))],
+                    ('upper', (str.upper, False, True, "convert to uppercase")),
+                    ('lower', (str.lower, False, True, "convert to lowercase"))],
     df.URLField: [('change protocol', (change_protocol, True, True, ""))]
 })
 
@@ -203,6 +193,12 @@ class MassUpdateForm(GenericActionForm):
 
     def clean__clean(self):
         return bool(self.data.get('_clean', 0))
+
+    class Media:
+        css = {
+            # 'all': ('pretty.css',)
+        }
+        js = ('adminactions/js/massupdate.js',)
 
 
 def mass_update(modeladmin, request, queryset):  # noqa
@@ -324,18 +320,23 @@ def mass_update(modeladmin, request, queryset):  # noqa
     for el in queryset.all()[:10]:
         for f in modeladmin.model._meta.fields:
             if f.name not in form._no_sample_for:
-                if hasattr(f, 'flatchoices') and f.flatchoices:
-                    grouped[f.name] = list(dict(getattr(f, 'flatchoices')).values())
+                if isinstance(f, ForeignKey):
+                    filters = {"%s__isnull" % f.remote_field.name: False}
+                    grouped[f.name] = [(a.pk, str(a)) for a in
+                                       f.related_model.objects.filter(**filters).distinct()]
+                elif hasattr(f, 'flatchoices') and f.flatchoices:
+                    grouped[f.name] = dict(getattr(f, 'flatchoices')).keys()
                 elif hasattr(f, 'choices') and f.choices:
-                    grouped[f.name] = list(dict(getattr(f, 'choices')).values())
+                    grouped[f.name] = dict(getattr(f, 'choices')).keys()
                 elif isinstance(f, df.BooleanField):
-                    grouped[f.name] = [True, False]
+                    grouped[f.name] = [("True", True), ("False", False)]
                 else:
                     value = getattr(el, f.name)
-                    if value is not None and value not in grouped[f.name]:
-                        grouped[f.name].append(value)
-                    initial[f.name] = initial.get(f.name, value)
+                    target = [str(value), value]
+                    if value is not None and target not in grouped[f.name]:
+                        grouped[f.name].append(target)
 
+                    initial[f.name] = initial.get(f.name, value)
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else str(obj)
@@ -364,10 +365,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
            'selection': queryset}
     ctx.update(modeladmin.admin_site.each_context(request))
 
-    if django.VERSION[:2] > (1, 8):
-        return render(request, tpl, context=ctx)
-    else:
-        return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, context=ctx)
 
 
 mass_update.short_description = _("Mass update")

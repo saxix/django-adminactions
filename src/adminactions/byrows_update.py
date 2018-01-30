@@ -1,22 +1,14 @@
-import django
+# -*- coding: utf-8 -*-
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext as _
 
 from .forms import GenericActionForm
 from .models import get_permission_codename
-
-if django.VERSION[:2] > (1, 8):
-    from django.shortcuts import render
-
-    def render_to_response(template_name, context):  # noqa
-        return render(context.request, template_name, context=context.flatten())
-
+from django.shortcuts import render
 
 def byrows_update(modeladmin, request, queryset):  # noqa
     """
@@ -86,8 +78,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         'app_label': modeladmin.model._meta.app_label,
     }
     ctx.update(modeladmin.admin_site.each_context(request))
-
-    return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, ctx)
 
 
 byrows_update.short_description = _("By rows update")

@@ -4,12 +4,12 @@ from __future__ import unicode_literals
 import datetime
 
 import pytest
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import dateformat
 from django.utils.encoding import smart_text
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db()
 def test_format_date(app):
     d = datetime.datetime.now()
 

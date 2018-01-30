@@ -1,8 +1,4 @@
-from __future__ import absolute_import, unicode_literals
-
-import six
-
-from django.db import connections, models, router
+from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_text
 
@@ -99,12 +95,12 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     >>> p = Permission(name='perm')
     >>> get_field_value(p, 'name') == 'perm'
     True
-    >>> get_field_value(p, None) 
+    >>> get_field_value(p, None)
     Traceback (most recent call last):
         ...
     ValueError: Invalid value for parameter `field`: Should be a field name or a Field instance
     """
-    if isinstance(field, six.string_types):
+    if isinstance(field, str):
         fieldname = field
     elif isinstance(field, models.Field):
         fieldname = field.name
@@ -128,7 +124,7 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     #     field = get_field_by_path(obj, fieldname)
     #     if isinstance(field, ForeignKey):
     #         return unicode(value)
-    if isinstance(value, six.string_types):
+    if isinstance(value, str):
         value = smart_text(value)
 
     return value
@@ -158,7 +154,7 @@ def get_field_by_path(model, field_path):
         field_object, model, direct, m2m = get_field_by_name(model, target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
-                return get_field_by_path(field_object.rel.to, '.'.join(parts[1:]))
+                return get_field_by_path(field_object.related_model, '.'.join(parts[1:]))
             else:
                 return field_object
         else:
@@ -196,7 +192,7 @@ def get_verbose_name(model_or_queryset, field):
     True
     >>> get_verbose_name(User.objects, user._meta.fields[0]) == 'ID'
     True
-    >>> get_verbose_name(p, 'content_type.model') == 'python model class name' 
+    >>> get_verbose_name(p, 'content_type.model') == 'python model class name'
     True
     """
 
@@ -212,7 +208,7 @@ def get_verbose_name(model_or_queryset, field):
         raise ValueError('`get_verbose_name` expects Manager, Queryset or Model as first parameter (got %s)' % type(
             model_or_queryset))
 
-    if isinstance(field, six.string_types):
+    if isinstance(field, str):
         field = get_field_by_path(model, field)
     elif isinstance(field, models.Field):
         field = field
@@ -244,7 +240,7 @@ def flatten(iterable):
 
     result = list()
     for el in iterable:
-        if hasattr(el, "__iter__") and not isinstance(el, six.string_types):
+        if hasattr(el, "__iter__") and not isinstance(el, str):
             result.extend(flatten(el))
         else:
             result.append(el)

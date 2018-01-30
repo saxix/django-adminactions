@@ -4,6 +4,9 @@ from __future__ import absolute_import
 import os
 import string
 from random import choice, randrange, shuffle
+
+import django
+from django.contrib.contenttypes.models import ContentType
 from six.moves import range
 
 from django.conf import global_settings
@@ -19,7 +22,7 @@ from django_dynamic_fixture.fixture_algorithms.random_fixture import \
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+                                  adminaction_start, )
 
 
 class admin_register(object):
@@ -70,11 +73,11 @@ def get_group(name=None, permissions=None):
             app_label, codename = permission_name.split('.')
         except ValueError:
             raise ValueError("Invalid permission name `{0}`".format(permission_name))
-        try:
-            permission = Permission.objects.get(content_type__app_label=app_label, codename=codename)
-        except Permission.DoesNotExist:
-            raise Permission.DoesNotExist('Permission `{0}` does not exist'.format(permission_name))
-
+        __, model_name = codename.rsplit('_', 1)
+        ct = ContentType.objects.get(app_label__iexact=app_label,
+                                     model__iexact=model_name)
+        permission = Permission.objects.get(content_type=ct,
+                                            codename=codename)
         group.permissions.add(permission)
     return group
 
@@ -237,8 +240,8 @@ class DataFixtureClass(RandomDataFixture):  # it can inherit of SequentialDataFi
 
 TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__),
                                   os.pardir, 'tests', 'templates')
-SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
-            'TEMPLATE_DIRS': [TEST_TEMPLATES_DIR],
+
+SETTINGS = {'TEMPLATE_DIRS': [TEST_TEMPLATES_DIR],
             'AUTHENTICATION_BACKENDS': ('django.contrib.auth.backends.ModelBackend',),
             'TEMPLATE_LOADERS': ('django.template.loaders.filesystem.Loader',
                                  'django.template.loaders.app_directories.Loader'),
@@ -251,6 +254,11 @@ SETTINGS = {'MIDDLEWARE_CLASSES': global_settings.MIDDLEWARE_CLASSES,
                                             "django.core.context_processors.request",
                                             "django.core.context_processors.tz",
                                             "django.contrib.messages.context_processors.messages")}
+
+if django.VERSION[0] == 2:
+    SETTINGS['MIDDLEWARE'] = global_settings.MIDDLEWARE
+else:
+    SETTINGS['MIDDLEWARE_CLASSES'] = global_settings.MIDDLEWARE_CLASSES
 
 ADMIN = 'sax'
 USER = 'user'

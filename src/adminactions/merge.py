@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 from datetime import datetime
 
-import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -12,8 +11,7 @@ from django.forms import HiddenInput, TextInput
 from django.forms.formsets import formset_factory
 from django.forms.models import model_to_dict, modelform_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
@@ -195,10 +193,7 @@ def merge(modeladmin, request, queryset):  # noqa
                 'master': master,
                 'other': other})
     ctx.update(modeladmin.admin_site.each_context(request))
-    if django.VERSION[:2] > (1, 8):
-        return render(request, tpl, context=ctx)
-    else:
-        return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, context=ctx)
 
 
 merge.short_description = _("Merge selected %(verbose_name_plural)s")

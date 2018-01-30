@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
 
 import json
-from six.moves import zip
-
-import django
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.db.models.aggregates import Count
@@ -12,8 +7,7 @@ from django.db.models.fields.related import ForeignKey
 from django.forms.fields import BooleanField, CharField, ChoiceField
 from django.forms.forms import DeclarativeFieldsMetaclass, Form
 from django.forms.widgets import HiddenInput, MultipleHiddenInput
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
@@ -21,12 +15,6 @@ from .compat import get_field_by_name
 from .exceptions import ActionInterrupted
 from .models import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
-
-if django.VERSION[:2] > (1, 8):
-    from django.shortcuts import render
-
-    def render_to_response(template_name, context):  # noqa
-        return render(context.request, template_name, context=context.flatten())
 
 
 def graph_form_factory(model):
@@ -162,7 +150,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
            'as_json': json.dumps(table),
            'graph_type': graph_type}
     ctx.update(modeladmin.admin_site.each_context(request))
-    return render_to_response('adminactions/charts.html', RequestContext(request, ctx))
+    return render(request, 'adminactions/charts.html', ctx)
 
 
 graph_queryset.short_description = _("Graph selected records")

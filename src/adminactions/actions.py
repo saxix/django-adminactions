@@ -1,6 +1,3 @@
-# pylint: disable-msg= W0611
-from __future__ import absolute_import, unicode_literals
-
 from .byrows_update import byrows_update
 from .export import (export_as_csv, export_as_fixture, export_as_xls,
                      export_delete_tree,)
@@ -12,12 +9,13 @@ actions = [export_as_fixture,
            export_as_csv,
            export_as_xls,
            export_delete_tree,
-           merge, mass_update,
+           merge,
+           mass_update,
            graph_queryset,
            byrows_update]
 
 
-def add_to_site(site, exclude=None):
+def add_to_site(site, exclude=None, include=None):
     """
     Register all the adminactions into passed site
 
@@ -38,6 +36,7 @@ def add_to_site(site, exclude=None):
 
     """
     exclude = exclude or []
-    for action in actions:
+    selection = include or actions
+    for action in selection:
         if action.__name__ not in exclude:
             site.add_action(action)

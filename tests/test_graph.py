@@ -1,17 +1,10 @@
-from __future__ import absolute_import
-
-from six.moves import range
-
-import django
-import pytest
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
 
-@pytest.mark.skipif(django.VERSION[:2] > (1, 9), reason="skip if django > 1.9")
 class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
@@ -24,9 +17,9 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
     def _run_action(self, steps=2):
-        # with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_massupdate_demomodel']):
 
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_chart_user']):
+        with user_grant_permission(self.user, ['auth.change_user',
+                                               'auth.adminactions_chart_user']):
             res = self.app.get('/', user='user')
             res = res.click('Users')
             if steps >= 1:

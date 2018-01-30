@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
-
 import logging
 
 import pytest
 from django.contrib.auth.models import Permission
-from django.core.urlresolvers import reverse
+from django.urls import reverse
+
 from utils import user_grant_permission
 
 logger = logging.getLogger(__name__)
@@ -14,7 +12,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.parametrize("action", ['export_as_csv', 'export_as_xls', 'merge',
                                     'export_as_fixture', 'export_delete_tree',
                                     'graph_queryset', 'mass_update'])
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_permission_needed(app, admin, demomodels, action):
     permission_mapping = {'export_as_csv': 'adminactions_export',
                           'export_as_fixture': 'adminactions_export',
@@ -46,8 +44,9 @@ def test_permission_needed(app, admin, demomodels, action):
             assert res.status_code == 200
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_permissions(admin):
     assert Permission.objects.filter(codename__startswith='adminactions').count() == 45
+
     with user_grant_permission(admin, ['demo.adminactions_export_demomodel']):
-        admin.get_all_permissions() == set([u'demo.adminactions_export_demomodel'])
+        assert admin.get_all_permissions() == set([u'demo.adminactions_export_demomodel'])

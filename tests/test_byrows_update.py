@@ -1,10 +1,8 @@
-import six
-
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase
+from django.test import TestCase
+from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import SelectRowsMixin, user_grant_permission
@@ -17,7 +15,7 @@ class MockRequest(object):
     pass
 
 
-class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase):
+class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
     action_name = 'byrows_update'
@@ -51,13 +49,15 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TransactionTestCase)
             form['action'] = 'byrows_update'
             self._select_rows(form, selected_rows=self._selected_rows)
             res = form.submit().follow()
-            assert six.b('Sorry you do not have rights to execute this action') in res.body
+            assert 'Sorry you do not have rights to execute this action' in str(res.body)
 
     def test_form_rows_count(self):
         """
             Count the selected items appear in the action form
         """
-        with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_byrowsupdate_demomodel']):
+        self.renew_app()
+        with user_grant_permission(self.user, ['demo.change_demomodel',
+                                               'demo.adminactions_byrowsupdate_demomodel']):
             res = self._get_changelist_form_response()
 
             form = res.forms['changelist-form']

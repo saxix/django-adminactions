@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
 import os
@@ -78,12 +79,20 @@ MEDIA_URL = ''
 STATIC_ROOT = os.path.join(here, 'static')
 STATIC_URL = '/static/'
 SECRET_KEY = 'c73*n!y=)tziu^2)y*@5i2^)$8z$tx#b9*_r3i6o1ohxo%*2^a'
-MIDDLEWARE_CLASSES = (
+# MIDDLEWARE_CLASSES = (
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',)
+
+MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',)
+
 
 # MIDDLEWARE_CLASSES = [
 #     'django.middleware.security.SecurityMiddleware',
@@ -104,17 +113,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'adminactions',
+    'adminactions.apps.Config',
     'demo']
 
-TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
+# TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
 # DDF_DEFAULT_DATA_FIXTURE = 'utils.DataFixtureClass'
 
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
+# TEMPLATE_LOADERS = (
+#     'django.template.loaders.filesystem.Loader',
+#     'django.template.loaders.app_directories.Loader',
+# )
 
 CACHES = {
     'default': {
@@ -164,7 +173,7 @@ TEMPLATES = [
 ]
 AUTH_PASSWORD_VALIDATORS = [
     # {
-        # 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    # 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     # },
     # {
     #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',

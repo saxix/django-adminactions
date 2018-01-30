@@ -1,10 +1,6 @@
-from __future__ import absolute_import
-
-import six
-
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase
+from django.test import TestCase
+from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
@@ -14,7 +10,7 @@ from demo.models import DemoModel
 __all__ = ['MassUpdateTest', ]
 
 
-class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TransactionTestCase):
+class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase):
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
     csrf_checks = True
@@ -31,7 +27,8 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
 
     def _run_action(self, steps=2, **kwargs):
         selected_rows = kwargs.pop('selected_rows', self._selected_rows)
-        with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_massupdate_demomodel']):
+        with user_grant_permission(self.user, ['demo.change_demomodel',
+                                               'demo.adminactions_massupdate_demomodel']):
             res = self.app.get('/', user='user')
             res = res.click('Demo models')
             if steps >= 1:
@@ -58,7 +55,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, Transacti
             form['action'] = 'mass_update'
             form.set('_selected_action', True, 0)
             res = form.submit().follow()
-            assert six.b('Sorry you do not have rights to execute this action') in res.body
+            assert 'Sorry you do not have rights to execute this action' in str(res.body)
 
     def test_validate_on(self):
         self._run_action(**{'_validate': 1})

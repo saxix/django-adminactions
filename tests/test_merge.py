@@ -1,15 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-
 import os
-import six
-from six.moves import range
+from django.urls import reverse
 
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group, Permission, User
-from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import BaseTestCaseMixin, SelectRowsMixin, user_grant_permission
@@ -24,7 +19,7 @@ def get_profile(user):
     return UserDetail.objects.get_or_create(user=user, note="")[0]
 
 
-class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
+class MergeTestApi(BaseTestCaseMixin, TestCase):
     fixtures = ['adminactions.json', 'demoproject.json']
 
     def setUp(self):
@@ -99,6 +94,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         other.save()
 
         merge(master, other, commit=True, m2m=ALL_FIELDS)
+
         self.assertSequenceEqual(master.groups.all(), [group])
         self.assertSequenceEqual(master.user_permissions.all(), [perm])
 
@@ -172,7 +168,7 @@ class MergeTestApi(BaseTestCaseMixin, TransactionTestCase):
         self.assertEqual(master.subclassed_image, img2)
 
 
-class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
+class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
     csrf_checks = True
     fixtures = ['adminactions.json', 'demoproject.json']
     urls = 'demo.urls'
@@ -220,7 +216,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             form['action'] = 'merge'
             self._select_rows(form)
             res = form.submit().follow()
-            assert six.b('Sorry you do not have rights to execute this action') in res.body
+            assert 'Sorry you do not have rights to execute this action' in str(res.body)
 
     def test_success(self):
         res = self._run_action(1)
@@ -357,7 +353,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
 
 
-class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TransactionTestCase):
+class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
     csrf_checks = True
     fixtures = ['adminactions.json', 'demoproject.json']
     urls = 'demo.urls'

@@ -1,10 +1,5 @@
-# -*- encoding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-
 from itertools import chain
-from six.moves import zip
 
-import django
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -15,23 +10,16 @@ from django.db import router
 from django.db.models import ForeignKey, ManyToManyField
 from django.db.models.deletion import Collector
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from .api import (export_as_csv as _export_as_csv,
-                  export_as_xls as _export_as_xls,)
+                  export_as_xls as _export_as_xls, )
 from .exceptions import ActionInterrupted
 from .forms import CSVOptions, XLSOptions
 from .models import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
-
-if django.VERSION[:2] > (1, 8):
-    from django.shortcuts import render
-
-    def render_to_response(template_name, context):  # noqa
-        return render(context.request, template_name, context=context.flatten())
 
 
 def get_action(request):
@@ -129,7 +117,7 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
     ctx.update(modeladmin.admin_site.each_context(request))
-    return render_to_response(template, RequestContext(request, ctx))
+    return render(request, template, ctx)
 
 
 def export_as_csv(modeladmin, request, queryset):
@@ -225,14 +213,9 @@ def _dump_qs(form, queryset, data, filename):
     fmt = form.cleaned_data.get('serializer')
 
     json = ser.get_serializer(fmt)()
-    if django.VERSION[:2] >= (1, 9):
-        ret = json.serialize(data,
-                             # use_natural_primary_keys=form.cleaned_data.get('use_natural_key', False),
-                             use_natural_foreign_keys=form.cleaned_data.get('use_natural_key', False),
-                             indent=form.cleaned_data.get('indent'))
-    else:
-        ret = json.serialize(data, use_natural_keys=form.cleaned_data.get('use_natural_key', False),
-                             indent=form.cleaned_data.get('indent'))
+    ret = json.serialize(data,
+                         use_natural_foreign_keys=form.cleaned_data.get('use_natural_key', False),
+                         indent=form.cleaned_data.get('indent'))
 
     response = HttpResponse(content_type='application/json')
     if not form.cleaned_data.get('on_screen', False):
@@ -320,7 +303,7 @@ def export_as_fixture(modeladmin, request, queryset):
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
     ctx.update(modeladmin.admin_site.each_context(request))
-    return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, ctx)
 
 
 export_as_fixture.short_description = _("Export as fixture")
@@ -412,7 +395,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
            'app_label': queryset.model._meta.app_label,
            'media': mark_safe(media)}
     ctx.update(modeladmin.admin_site.each_context(request))
-    return render_to_response(tpl, RequestContext(request, ctx))
+    return render(request, tpl, ctx)
 
 
 export_delete_tree.short_description = _("Export delete tree")

@@ -1,10 +1,8 @@
-# -*- encoding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-
 import collections
+import csv
 import datetime
 import itertools
-import six
+from io import BytesIO
 
 import xlwt
 from django.conf import settings
@@ -12,7 +10,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import FileField
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
-from django.http import HttpResponse
+from django.db.transaction import atomic
+from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_text, smart_str, smart_text
 from django.utils.timezone import get_default_timezone
@@ -20,27 +19,6 @@ from django.utils.timezone import get_default_timezone
 from . import compat
 from .templatetags.actions import get_field_value
 from .utils import clone_instance, get_field_by_path
-
-# try:
-#     # actually supported in admin actions since django >= 1.6
-#     # (see https://code.djangoproject.com/ticket/20331),
-#     # django <= 1.5 can still HttpResponse
-#     import django
-#
-#     if django.get_version() < '1.6':
-#         StreamingHttpResponse = HttpResponse
-#     else:
-#         from django.http import StreamingHttpResponse
-# except ImportError:
-#     # Before django 1.5 HttpResponse could implicitly stream response
-#     StreamingHttpResponse = HttpResponse
-
-from django.http import StreamingHttpResponse
-
-if six.PY2:
-    import unicodecsv as csv
-else:
-    import csv
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -88,17 +66,15 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
         for field in master._meta.get_fields():
             if getattr(field, 'many_to_many', None):
                 if isinstance(field, ManyToManyField):
-                    # direct relation
-                    if not field.rel.through._meta.auto_created:
+                    if not field.remote_field.through._meta.auto_created:
                         continue
                     m2m.add(field.name)
                 else:
                     # reverse relation
                     m2m.add(field.get_accessor_name())
-
     if m2m and not commit:
         raise ValueError('Cannot save related with `commit=False`')
-    with compat.atomic():
+    with atomic():
         result = clone_instance(master)
 
         for fieldname in fields:
@@ -365,7 +341,6 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
 
                 sheet.write(rownum + 1, col_idx + 1, value, _styles[hash(fmt)])
             except Exception as e:
-                # logger.warning("TODO refine this exception: %s" % e)
                 sheet.write(rownum + 1, col_idx + 1, smart_str(e), _styles[hash(fmt)])
 
     book.save(response)
@@ -430,15 +405,9 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         # filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         # response = HttpResponse(content_type='application/vnd.ms-excel')
         # response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
-        # out = io.BytesIO()
-
-        if six.PY2:
-            out = six.StringIO()
-        elif six.PY3:
-            out = six.StringIO()
-            # out = io.BytesIO()
-        else:
-            raise EnvironmentError('Python version not supported')
+        out = BytesIO()
+        #
+        # out = StringIO()
 
     config = xlsxwriter_options.copy()
     if options:
@@ -487,10 +456,10 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                     except ValueError:
                         value = dateformat.format(value, config['datetime_format'])
 
-                if isinstance(value, six.binary_type):
-                    value = smart_text(value)
+                # if isinstance(value, six.binary_type):
+                value = str(value)
 
-                    sheet.write(rownum + 1, idx + 1, smart_text(value), fmt)
+                sheet.write(rownum + 1, idx + 1, smart_text(value), fmt)
             except Exception as e:
                 raise
                 sheet.write(rownum + 1, idx + 1, smart_text(e), fmt)
@@ -504,7 +473,7 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         # content_type='application/vnd.ms-excel')
         # response['Content-Disposition'] = six.b('attachment;filename="%s"') % six.b(filename.encode('us-ascii', 'replace'))
-        response['Content-Disposition'] = six.b('attachment;filename="%s"' % filename)
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
         return response
     return out
 

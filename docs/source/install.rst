@@ -53,7 +53,7 @@ Add service url to your urls.py ::
 
     urlpatterns = patterns('',
         ...
-        (r'^adminactions/', include('adminactions.urls')),
+        url(r'^adminactions/', include('adminactions.urls')),
     )
 
 

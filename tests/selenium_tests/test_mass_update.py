@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
 import pytest
@@ -22,7 +23,7 @@ def test_mass_update_1(admin_site):
     Select(browser.find_element_by_name("action")).select_by_visible_text("Mass update")
     browser.find_element_by_name("index").click()  # execute
 
-    assert "Mass update users" in browser.title
+    assert "Mass update (users)" in browser.title
     browser.find_element_by_name("chk_id_is_active").click()
     browser.find_element_by_id("id_is_active").click()
     browser.find_element_by_name("apply").click()

@@ -1,3 +1,4 @@
+"use strict";
 (function ($) {
     $(function () {
         $('.func_select').change(function () {
@@ -16,19 +17,21 @@
         });
         $('.fastfieldvalue').click(function () {
             var check = $(this).parent().parent().find('.enabler');
-            var selection = $(this).text();
+            // var selection = $(this).text();
+            var selection = $(this).data('value');
+            console.log( selection );
             $(check).attr('checked', true);
             var target = $(this).parent().parent().find('.col_field input, .col_field select, .col_field textarea').not('.enabler');
             $(this).parent().parent().find('.col_func select').removeAttr('disabled');
             $(target).removeAttr('disabled');
             if ($(target).is('select')) {
                 $('option', target).each(function (i, selected) {
-                    if ($(this).text() == selection) {
+                    if ($(this).val() === selection) {
                         $(this).attr('selected', true);
                     }
                 });
             } else if ($(target).is('input[type=checkbox]')) {
-                $(target).attr('checked', selection == 'True');
+                $(target).attr('checked', selection === 'True');
             } else {
                 $(target).val(selection);
             }

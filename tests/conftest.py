@@ -69,15 +69,15 @@ def pytest_configure(config):
         handler.setFormatter(formatter)
 
         for app in ["test", "demo", "adminactions"]:
-            l = logging.getLogger(app)
-            l.setLevel(levelNames[level])
-            l.addHandler(handler)
+            logger = logging.getLogger(app)
+            logger.setLevel(levelNames[level])
+            logger.addHandler(handler)
 
         if config.option.log_add:
             for pkg in config.option.log_add.split(","):
-                l = logging.getLogger(pkg)
-                l.setLevel(levelNames[level])
-                l.addHandler(handler)
+                logger = logging.getLogger(pkg)
+                logger.setLevel(levelNames[level])
+                logger.addHandler(handler)
 
 
 @pytest.fixture(scope='function')
@@ -122,3 +122,4 @@ def administrator():
                                                        password=PWD,
                                                        email="sax@noreply.org")
     return superuser
+
