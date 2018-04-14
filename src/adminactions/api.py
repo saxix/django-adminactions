@@ -21,6 +21,14 @@ from . import compat
 from .templatetags.actions import get_field_value
 from .utils import clone_instance, get_field_by_path
 
+def remote_field(field_object):
+    """ Backwards compatibility of remote_field with Django <= 1.8 """
+    if hasattr(field_object, 'remote_field'):
+        return  field_object.remote_field
+    else:  # Django <= 1.8
+        return field_object.rel
+
+
 # try:
 #     # actually supported in admin actions since django >= 1.6
 #     # (see https://code.djangoproject.com/ticket/20331),
@@ -89,7 +97,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
             if getattr(field, 'many_to_many', None):
                 if isinstance(field, ManyToManyField):
                     # direct relation
-                    if not field.rel.through._meta.auto_created:
+                    if not remote_field(field).through._meta.auto_created:
                         continue
                     m2m.add(field.name)
                 else:
