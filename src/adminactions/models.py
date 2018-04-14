@@ -22,15 +22,16 @@ def get_models(app_config):
 def create_extra_permission(sender, **kwargs):
     from django.contrib.auth.models import Permission
     from django.contrib.contenttypes.models import ContentType
+    ContentType.objects.clear_cache()
 
     app_config = kwargs.get('app_config', sender)
 
     for model in get_models(app_config):
+        ct = ContentType.objects.get_for_model(model)
         for action in ('adminactions_export', 'adminactions_massupdate', 'adminactions_merge', 'adminactions_chart', 'adminactions_byrowsupdate'):
             opts = model._meta
             codename = get_permission_codename(action, opts)
             label = 'Can {} {} (adminactions)'.format(action.replace('adminactions_', ""), opts.verbose_name_raw)
-            ct = ContentType.objects.get_for_model(model)
             Permission.objects.get_or_create(codename=codename, content_type=ct, defaults={'name': label[:50]})
 
 # post_migrate = Signal(providing_args=["app_config", "verbosity", "interactive", "using"])

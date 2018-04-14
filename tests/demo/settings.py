@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 import os
 
+import django
+
 here = os.path.dirname(__file__)
 # sys.path.append(os.path.abspath(os.path.join(here, os.pardir)))
 # sys.path.append(os.path.abspath(os.path.join(here, os.pardir, 'demo')))
@@ -78,12 +80,17 @@ MEDIA_URL = ''
 STATIC_ROOT = os.path.join(here, 'static')
 STATIC_URL = '/static/'
 SECRET_KEY = 'c73*n!y=)tziu^2)y*@5i2^)$8z$tx#b9*_r3i6o1ohxo%*2^a'
-MIDDLEWARE_CLASSES = (
+MIDDLEWARES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',)
+print(django.VERSION)
+if django.VERSION >= (1, 10):
+    MIDDLEWARE =  MIDDLEWARES
+else:
+    MIDDLEWARE_CLASSES = MIDDLEWARES
 
 # MIDDLEWARE_CLASSES = [
 #     'django.middleware.security.SecurityMiddleware',

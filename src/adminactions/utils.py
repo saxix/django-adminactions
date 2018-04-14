@@ -9,6 +9,14 @@ from django.utils.encoding import smart_text
 from adminactions.compat import get_all_field_names, get_field_by_name
 
 
+def remote_field_model(field_object):
+    """ Backwards compatibility of remote_field.model with Django <= 1.8 """
+    if hasattr(field_object, 'remote_field'):
+        return  field_object.remote_field.model
+    else:  # Django <= 1.8
+        return field_object.rel.to
+
+
 def clone_instance(instance, fieldnames=None):
     """
         returns a copy of the passed instance.
@@ -158,7 +166,7 @@ def get_field_by_path(model, field_path):
         field_object, model, direct, m2m = get_field_by_name(model, target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
-                return get_field_by_path(field_object.rel.to, '.'.join(parts[1:]))
+                return get_field_by_path(remote_field_model(field_object), '.'.join(parts[1:]))
             else:
                 return field_object
         else:

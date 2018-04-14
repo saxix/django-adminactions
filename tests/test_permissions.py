@@ -5,7 +5,10 @@ import logging
 
 import pytest
 from django.contrib.auth.models import Permission
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:  # Django < 2.0
+    from django.core.urlresolvers import reverse
 from utils import user_grant_permission
 
 logger = logging.getLogger(__name__)

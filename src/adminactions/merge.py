@@ -70,7 +70,11 @@ class MergeForm(GenericActionForm):
         return super(MergeForm, self).is_valid()
 
     class Media:
-        js = ['adminactions/js/merge.min.js']
+        js = [
+            'admin/js/vendor/jquery/jquery.js',
+            'admin/js/jquery.init.js',
+            'adminactions/js/merge.min.js',
+        ]
         css = {'all': ['adminactions/css/adminactions.min.css']}
 
 
