@@ -4,7 +4,10 @@ from __future__ import unicode_literals
 import datetime
 
 import pytest
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:  # Django < 2.0
+    from django.core.urlresolvers import reverse
 from django.utils import dateformat
 from django.utils.encoding import smart_text
 

@@ -10,7 +10,7 @@ admin.autodiscover()
 actions.add_to_site(admin.site)
 
 urlpatterns = (
-    url(r'admin/', include(admin.site.urls)),
+    url(r'admin/', admin.site.urls),
     url(r'as/', include(adminactions.urls)),
-    url(r'', include(admin.site.urls)),
+    url(r'', admin.site.urls),
 )

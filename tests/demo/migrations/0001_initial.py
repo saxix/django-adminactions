@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
             name='DemoOneToOne',
             fields=[
                 ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('demo', models.OneToOneField(to='demo.DemoModel', related_name='onetoone')),
+                ('demo', models.OneToOneField(to='demo.DemoModel', related_name='onetoone', on_delete=models.CASCADE)),
             ],
         ),
     ]
