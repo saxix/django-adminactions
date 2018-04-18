@@ -1,5 +1,7 @@
-Release 1.6
-===========
+Release 1.6 (dev)
+=================
+* fixes :ghissue:`142` Updates README.rst with svg badges
+* fixes :ghissue:`136` RemovedInDjango19Warning
 * add official support to Django 2.0 and Python 3.6
 * `add_to_site` now accept `include` argument
 
