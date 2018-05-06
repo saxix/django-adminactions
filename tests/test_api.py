@@ -8,7 +8,7 @@ from collections import namedtuple
 import xlrd
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 from adminactions.api import export_as_csv, export_as_xls
 
@@ -16,6 +16,11 @@ if six.PY3:
     import csv
 elif six.PY2:
     import unicodecsv as csv
+
+
+class TestIsLibero(TransactionTestCase):
+    def test_true(self):
+        self.assertTrue(True)
 
 
 class TestExportQuerySetAsCsv(TestCase):
