@@ -1,0 +1,6 @@
+autopep8
+ipython
+isort
+pdbpp
+virtualenv==12.0.2 # do not upgrade. unable to create py3
+wheel

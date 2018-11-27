@@ -23,6 +23,8 @@ from .utils import clone_instance
 
 
 class MergeForm(GenericActionForm):
+    use_required_attribute = False
+
     DEP_MOVE = 1
     DEP_DELETE = 2
     GEN_IGNORE = 1
@@ -66,7 +68,11 @@ class MergeForm(GenericActionForm):
         return super(MergeForm, self).is_valid()
 
     class Media:
-        js = ['adminactions/js/merge.min.js']
+        js = [
+            'admin/js/vendor/jquery/jquery.js',
+            'admin/js/jquery.init.js',
+            'adminactions/js/merge.min.js',
+        ]
         css = {'all': ['adminactions/css/adminactions.min.css']}
 
 
