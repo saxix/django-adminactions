@@ -28,6 +28,7 @@ from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
 from .models import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
+from django.core.exceptions import FieldDoesNotExist
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
 
@@ -165,16 +166,20 @@ class MassUpdateForm(GenericActionForm):
                     function = self.data.get('func_id_%s' % name, False)
                     if self.data.get(enabler, False):
                         # field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
-                        field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
                         value = field.clean(raw_value)
-                        if function:
-                            func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
-                            if func is None:
-                                pass
-                            elif hasparm:
-                                value = curry(func, value)
-                            else:
-                                value = func
+                        validator = getattr(self, 'validate_%s' % name)
+                        if validator:
+                            value = validator(value)
+                        else:
+                            field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
+                            if function:
+                                func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
+                                if func is None:
+                                    pass
+                                elif hasparm:
+                                    value = curry(func, value)
+                                else:
+                                    value = func
 
                         self.cleaned_data[name] = value
                     if hasattr(self, 'clean_%s' % name):
@@ -193,6 +198,9 @@ class MassUpdateForm(GenericActionForm):
 
     def clean__clean(self):
         return bool(self.data.get('_clean', 0))
+
+    def mass_update(self, queryset, values):
+        queryset.update(**values)
 
     class Media:
         css = {
@@ -301,7 +309,8 @@ def mass_update(modeladmin, request, queryset):  # noqa
                     elif field_name not in ['_selected_action', '_validate', 'select_across', 'action',
                                             '_unique_transaction', '_clean']:
                         values[field_name] = value
-                queryset.update(**values)
+                # queryset.update(**values)
+                form.mass_update(queryset, values)
 
             return HttpResponseRedirect(request.get_full_path())
     else:
@@ -316,8 +325,8 @@ def mass_update(modeladmin, request, queryset):  # noqa
             pass
 
         form = MForm(initial=initial, instance=prefill_instance)
-
-    for el in queryset.all()[:10]:
+    max_samples = getattr(modeladmin, 'mass_update_max_samples', 10)
+    for el in queryset.all()[:max_samples]:
         for f in modeladmin.model._meta.fields:
             if f.name not in form._no_sample_for:
                 if isinstance(f, ForeignKey):

@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from adminactions.compat import get_field_by_name
 from adminactions.mass_update import OPERATIONS
 from django.forms.utils import flatatt
+from django.core.exceptions import FieldDoesNotExist
 
 register = Library()
 
@@ -96,12 +97,16 @@ class SelectOptionsAttribute(widgets.Select):
 
 @register.simple_tag
 def field_function(model, form_field):
-    model_object, model, direct, m2m = get_field_by_name(model, form_field.name)
     attrs = {'class': 'func_select'}
     options_attrs = {}
     choices = []
     classes = {True: 'param', False: 'noparam'}
-    for label, (__, param, enabler, __) in list(OPERATIONS.get_for_field(model_object).items()):
-        options_attrs[label] = {'class': classes[param], 'label': label}
-        choices.append((label, label))
+    try:
+        model_object, model, direct, m2m = get_field_by_name(model, form_field.name)
+        for label, (__, param, enabler, __) in list(OPERATIONS.get_for_field(model_object).items()):
+            options_attrs[label] = {'class': classes[param], 'label': label}
+            choices.append((label, label))
+    except FieldDoesNotExist:
+        options_attrs['set'] = {'class': classes[True], 'label': 'set'}
+        choices.append(('set', 'set'))
     return SelectOptionsAttribute(attrs, choices, options_attrs).render("func_id_%s" % form_field.name, "")
