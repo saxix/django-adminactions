@@ -1,4 +1,4 @@
-Release 1.6 (dev)
+Release 1.6
 =================
 * fixes :ghissue:`142` Updates README.rst with svg badges
 * fixes :ghissue:`136` RemovedInDjango19Warning
