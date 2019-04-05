@@ -33,6 +33,7 @@ def create_extra_permission(sender, **kwargs):
                           content_type=ct,
                           defaults={'name': label[:50]})
             p, __ = Permission.objects.get_or_create(**params)
+    post_migrate.disconnect(dispatch_uid='adminactions.create_extra_permission')
 
 
-post_migrate.connect(create_extra_permission)
+post_migrate.connect(create_extra_permission, dispatch_uid='adminactions.create_extra_permission')
