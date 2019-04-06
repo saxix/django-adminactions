@@ -36,10 +36,11 @@ def link_fields_values(d, field_name):
     """
     ret = []
     name = "{0}_fastfieldvalue".format(field_name)
+
     for el in d.get(field_name, []):
         try:
             value, label = el
-        except TypeError:
+        except (ValueError, TypeError):
             value, label = el, el
 
         if label == '':  # ignore empty
