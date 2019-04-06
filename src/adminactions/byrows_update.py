@@ -29,7 +29,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         def __init__(self, *args, **kwargs):
             super(modeladmin.form, self).__init__(*args, **kwargs)
             if self.instance:
-                readonly_fields = (modeladmin.model._meta.pk.name,) + modeladmin.get_readonly_fields(request)
+                readonly_fields = (modeladmin.model._meta.pk.name,) + tuple(modeladmin.get_readonly_fields(request))
                 for fname in readonly_fields:
                     if fname in self.fields:
                         self.fields[fname].widget.attrs['readonly'] = 'readonly'
