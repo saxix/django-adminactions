@@ -37,11 +37,17 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     fields = byrows_update_get_fields(modeladmin)
 
-    ActionForm = modelform_factory(modeladmin.model,
-                                   form=GenericActionForm,
-                                   fields=fields)
+    def formfield_callback(field, **kwargs):
+        return modeladmin.formfield_for_dbfield(field, request=request, **kwargs)
+    ActionForm = modelform_factory(
+        modeladmin.model,
+        form=GenericActionForm,
+        fields=fields,
+        formfield_callback=formfield_callback)
 
-    MFormSet = modelformset_factory(modeladmin.model, form=modelform, fields=fields, extra=0)
+    MFormSet = modelformset_factory(modeladmin.model, form=modelform,
+                                    fields=fields, extra=0,
+                                    formfield_callback=formfield_callback)
 
     if 'apply' in request.POST:
         actionform = ActionForm(request.POST)
