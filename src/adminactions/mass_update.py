@@ -207,9 +207,10 @@ def mass_update(modeladmin, request, queryset):  # noqa
     """
 
     def not_required(field, **kwargs):
-        """ force all fields as not required"""
+        """force all fields as not required and return modeladmin field"""
         kwargs['required'] = False
-        return field.formfield(**kwargs)
+        kwargs['request'] = request
+        return modeladmin.formfield_for_dbfield(field, **kwargs)
 
     def _doit():
         errors = {}
@@ -257,6 +258,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
 
     # Allows to specified a custom mass update Form in the ModelAdmin
     mass_update_form = getattr(modeladmin, 'mass_update_form', MassUpdateForm)
+
 
     MForm = modelform_factory(modeladmin.model, form=mass_update_form,
                               exclude=('pk',),
