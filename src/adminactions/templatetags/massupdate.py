@@ -39,7 +39,7 @@ def link_fields_values(d, field_name):
     for el in d.get(field_name, []):
         try:
             value, label = el
-        except TypeError:
+        except (TypeError, ValueError):
             value, label = el, el
 
         if label == '':  # ignore empty
