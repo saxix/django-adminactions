@@ -207,9 +207,10 @@ def mass_update(modeladmin, request, queryset):  # noqa
     """
 
     def not_required(field, **kwargs):
-        """ force all fields as not required"""
+        """force all fields as not required and return modeladmin field"""
         kwargs['required'] = False
-        return field.formfield(**kwargs)
+        kwargs['request'] = request
+        return modeladmin.formfield_for_dbfield(field, **kwargs)
 
     def _doit():
         errors = {}
@@ -257,6 +258,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
 
     # Allows to specified a custom mass update Form in the ModelAdmin
     mass_update_form = getattr(modeladmin, 'mass_update_form', MassUpdateForm)
+
 
     MForm = modelform_factory(modeladmin.model, form=mass_update_form,
                               exclude=('pk',),
@@ -317,26 +319,35 @@ def mass_update(modeladmin, request, queryset):  # noqa
 
         form = MForm(initial=initial, instance=prefill_instance)
 
+    for f in modeladmin.model._meta.fields:
+        if f.name not in form._no_sample_for:
+            if isinstance(f, ForeignKey):
+                # Filter by queryset so we only get results without our
+                # current resultset
+                filters = {"%s__in" % f.remote_field.name: queryset}
+                # Order by random to get a nice sample
+                query = f.related_model.objects.filter(**filters).distinct().order_by('?')
+                # Limit the amount of results so we don't accidently query
+                # many thousands of items and kill the database.
+                grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
+            elif hasattr(f, 'flatchoices') and f.flatchoices:
+                grouped[f.name] = dict(getattr(f, 'flatchoices')).keys()
+            elif hasattr(f, 'choices') and f.choices:
+                grouped[f.name] = dict(getattr(f, 'choices')).keys()
+            elif isinstance(f, df.BooleanField):
+                grouped[f.name] = [("True", True), ("False", False)]
+
+    already_grouped = set(grouped)
     for el in queryset.all()[:10]:
         for f in modeladmin.model._meta.fields:
-            if f.name not in form._no_sample_for:
-                if isinstance(f, ForeignKey):
-                    filters = {"%s__isnull" % f.remote_field.name: False}
-                    grouped[f.name] = [(a.pk, str(a)) for a in
-                                       f.related_model.objects.filter(**filters).distinct()]
-                elif hasattr(f, 'flatchoices') and f.flatchoices:
-                    grouped[f.name] = dict(getattr(f, 'flatchoices')).keys()
-                elif hasattr(f, 'choices') and f.choices:
-                    grouped[f.name] = dict(getattr(f, 'choices')).keys()
-                elif isinstance(f, df.BooleanField):
-                    grouped[f.name] = [("True", True), ("False", False)]
-                else:
-                    value = getattr(el, f.name)
-                    target = [str(value), value]
-                    if value is not None and target not in grouped[f.name]:
-                        grouped[f.name].append(target)
+            if f.name not in form._no_sample_for and f.name not in already_grouped:
+                value = getattr(el, f.name)
+                target = [str(value), value]
+                if value is not None and target not in grouped[f.name]:
+                    grouped[f.name].append(target)
 
-                    initial[f.name] = initial.get(f.name, value)
+                initial[f.name] = initial.get(f.name, value)
+
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else str(obj)
