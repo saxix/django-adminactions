@@ -1,3 +1,13 @@
+Release 1.7
+===========
+* Improves performace
+* Fixes #152 - Allow protected merges
+* Fixes #153 - Adminactions slow down running whole test suite
+* Fixes #154 - fix a crash with Django model choices
+* Fixes #157 - Mass update should really respect raw_id_fields
+* Fixes #158 - Huge mass update performance fixes for large tables
+
+
 Release 1.6
 =================
 * fixes :ghissue:`142` Updates README.rst with svg badges
