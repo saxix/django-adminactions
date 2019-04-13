@@ -78,7 +78,15 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
             byrows_update_get_fields(ModelAdmin(DemoModel, self.site))
             for r, value in enumerate(self._selected_values):
                 for fname in byrows_update_get_fields(ModelAdmin(DemoModel, self.site)):
-                    assert res.form["form-%d-%s" % (r, fname)]
+                    fname = 'form-%d-%s' % (r, fname)
+
+                    try:
+                        # Attempt split (admin datetime widget) fields first
+                        assert res.form[fname + '_0']
+                    except AssertionError:
+                        # assert for non-split fields to return the regular
+                        # field name upon errors
+                        assert res.form[fname]
 
     def test_form_rows_edit(self):
         """
