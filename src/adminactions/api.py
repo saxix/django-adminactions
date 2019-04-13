@@ -40,7 +40,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
         Merge 'other' into master.
 
         `fields` is a list of fieldnames that must be readed from ``other`` to put into master.
-        If ``fields`` is None ``master`` will get all the ``other`` values except primary_key.
+        If ``fields`` is None ``master`` will not get any of the ``other`` values.
         Finally ``other`` will be deleted and master will be preserved
 
     @param master:  Model instance
@@ -51,7 +51,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     @return:
     """
 
-    fields = fields or [f.name for f in master._meta.fields]
+    fields = fields or []
 
     all_m2m = {}
     all_related = {}

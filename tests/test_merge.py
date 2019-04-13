@@ -1,10 +1,10 @@
 import os
-from django.urls import reverse
 
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group, Permission, User
 from django.test import TestCase
+from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import BaseTestCaseMixin, SelectRowsMixin, user_grant_permission
@@ -39,9 +39,9 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
         self.assertTrue(User.objects.filter(pk=other.pk).exists())
 
         self.assertEqual(result.pk, master.pk)
-        self.assertEqual(result.first_name, other.first_name)
-        self.assertEqual(result.last_name, other.last_name)
-        self.assertEqual(result.password, other.password)
+        self.assertEqual(result.first_name, master.first_name)
+        self.assertEqual(result.last_name, master.last_name)
+        self.assertEqual(result.password, master.password)
 
     def test_merge_success_fields_no_commit(self):
         master = User.objects.get(pk=self.master_pk)
@@ -60,18 +60,18 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
         self.assertNotEqual(result.last_name, other.last_name)
 
     def test_merge_success_commit(self):
-        master = User.objects.get(pk=self.master_pk)
+        old_master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
-        result = merge(master, other, commit=True)
+        result = merge(old_master, other, commit=True)
 
         master = User.objects.get(pk=result.pk)  # reload
         self.assertTrue(User.objects.filter(pk=master.pk).exists())
         self.assertFalse(User.objects.filter(pk=other.pk).exists())
 
         self.assertEqual(result.pk, master.pk)
-        self.assertEqual(master.first_name, other.first_name)
-        self.assertEqual(master.last_name, other.last_name)
-        self.assertEqual(master.password, other.password)
+        self.assertEqual(master.first_name, old_master.first_name)
+        self.assertEqual(master.last_name, old_master.last_name)
+        self.assertEqual(master.password, old_master.password)
 
     def test_merge_success_m2m(self):
         master = User.objects.get(pk=self.master_pk)
@@ -120,7 +120,7 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
         master = DemoModel.objects.get(pk=result.pk)  # reload
         self.assertEqual(master.onetoone, related_one)
         self.assertTrue(DemoOneToOne.objects.filter(pk=related_one.pk).exists())
-        self.assertEqual(os.path.basename(master.image.file.name), "first.png")
+        self.assertEqual(os.path.basename(master.image.file.name), "second.png")
 
     # @skipIf(not hasattr(settings, 'AUTH_PROFILE_MODULE'), "")
     def test_merge_one_to_one_field(self):
@@ -386,6 +386,7 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
 
             if 2 in steps:
                 res.form['image'] = res.form['form-1-image'].value
+                res.form['field_names'] = 'image,subclassed_image'
                 res = res.form.submit('preview')
                 assert not hasattr(res.form, 'errors')
 
