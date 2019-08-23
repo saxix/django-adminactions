@@ -36,4 +36,5 @@ def create_extra_permission(sender, **kwargs):
     post_migrate.disconnect(dispatch_uid='adminactions.create_extra_permission')
 
 
-post_migrate.connect(create_extra_permission, dispatch_uid='adminactions.create_extra_permission')
+post_migrate.connect(create_extra_permission,
+                     dispatch_uid='adminactions.create_extra_permission')
