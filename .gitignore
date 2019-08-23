@@ -16,3 +16,5 @@
 coverage.xml
 sonar-project.properties
 .scannerwork
+Pipfile
+Pipfile.lock

@@ -1,9 +1,27 @@
-Release 1.6 (dev)
+Release 1.7.1
+=============
+* Fixes #160 - Mass update error. Too many values to unpack
+
+
+Release 1.7
+===========
+* Add Django 2.2 support
+* Improves performace
+* Fixes #152 - Allow protected merges
+* Fixes #153 - Adminactions slow down running whole test suite
+* Fixes #154 - fix a crash with Django model choices
+* Fixes #157 - Mass update should really respect raw_id_fields
+* Fixes #158 - Huge mass update performance fixes for large tables
+
+
+Release 1.6
 =================
 * fixes :ghissue:`142` Updates README.rst with svg badges
 * fixes :ghissue:`136` RemovedInDjango19Warning
-* add official support to Django 2.0 and Python 3.6
+* add official support for Django up to 2.0 and Python 3.6
 * `add_to_site` now accept `include` argument
+* cleaner merge interface
+
 
 Release 1.5
 ===========
@@ -12,6 +30,7 @@ Release 1.5
 * fixes :ghissue:`95` Cannot merge models with subclassed ImageField or FileField: "file not sent". (thanks int-ua)
 * fixes :ghissue:`108` merge doesn't account for many-to-many relationships
 * fixes :ghissue:`93` Do not export dates as strings in Excel
+
 
 Release 1.4
 ===========
@@ -22,7 +41,7 @@ Release 1.4
 
 
 Release 1.3
-===========fir 
+===========fir
 * fixes :ghissue:`92` translations are not compiled in package
 * fixes :ghissue:`105` Support exporting many to many fields
 * fixes :ghissue:`109` AttributeError: module 'adminactions.compat' has no attribute 'nocommit'
@@ -41,7 +60,6 @@ Release 1.1
 * merge :ghissue:`86` - Compilemessages failed for Spanish translation
 * merge :ghissue:`83` - byrows_update action: adapt test_permissions to take into byrows update action.
 * merge :ghissue:`79` - Permissions don't work
-
 
 
 Release 1.0
