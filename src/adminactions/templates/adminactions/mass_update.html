@@ -60,9 +60,11 @@
                     <th>update</th>
                     <th>function</th>
                     <th>new value</th>
+                    {% if grouped %}
                     <th>existing values
                         <small><i>(sample)</i></small>
                     </th>
+                  {% endif %}
                 </tr>
                 {% for field in adminform.form.model_fields %}
                     <tr class="{{ field.name }}-row">
@@ -73,10 +75,11 @@
                             {% field_function adminform.model_admin.model field %}&nbsp;</td>
                         <td class='col_field field-{{ field.name }}-value'>{{ field.errors }}
                         {{ field }}&nbsp;</td>
-
+                        {% if grouped %}
                         <td class='field-{{ field.name }}-commonvalues'>
                             {% link_fields_values grouped field.name %}
                         </td>
+                        {% endif %}
 
                     </tr>
                 {% endfor %}

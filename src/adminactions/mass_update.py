@@ -110,7 +110,6 @@ OPERATIONS = OperationManager({
 
 
 class MassUpdateForm(GenericActionForm):
-    _no_sample_for = []
     _clean = forms.BooleanField(label='clean()',
                                 required=False,
                                 help_text="if checked calls obj.clean()")
@@ -207,10 +206,28 @@ def mass_update(modeladmin, request, queryset):  # noqa
     """
 
     def not_required(field, **kwargs):
-        """force all fields as not required and return modeladmin field"""
+        """ force all fields as not required"""
         kwargs['required'] = False
         kwargs['request'] = request
         return modeladmin.formfield_for_dbfield(field, **kwargs)
+
+    def _get_sample():
+        for f in mass_update_hints:
+            if isinstance(f, ForeignKey):
+                # Filter by queryset so we only get results without our
+                # current resultset
+                filters = {"%s__in" % f.remote_field.name: queryset}
+                # Order by random to get a nice sample
+                query = f.related_model.objects.filter(**filters).distinct().order_by('?')
+                # Limit the amount of results so we don't accidently query
+                # many thousands of items and kill the database.
+                grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
+            elif hasattr(f, 'flatchoices') and f.flatchoices:
+                grouped[f.name] = dict(getattr(f, 'flatchoices')).keys()
+            elif hasattr(f, 'choices') and f.choices:
+                grouped[f.name] = dict(getattr(f, 'choices')).keys()
+            elif isinstance(f, df.BooleanField):
+                grouped[f.name] = [("True", True), ("False", False)]
 
     def _doit():
         errors = {}
@@ -257,11 +274,20 @@ def mass_update(modeladmin, request, queryset):  # noqa
         return
 
     # Allows to specified a custom mass update Form in the ModelAdmin
+
     mass_update_form = getattr(modeladmin, 'mass_update_form', MassUpdateForm)
+    mass_update_fields = getattr(modeladmin, 'mass_update_fields', None)
+    mass_update_exclude = getattr(modeladmin, 'mass_update_exclude', ['pk']) or []
+    if 'pk' not in mass_update_exclude:
+        mass_update_exclude.append('pk')
+    mass_update_hints = getattr(modeladmin, 'mass_update_hints',
+                                  [f.name for f in modeladmin.model._meta.fields])
 
-
+    if mass_update_fields and mass_update_exclude:
+        raise Exception("Cannot set both 'mass_update_exclude' and 'mass_update_fields'")
     MForm = modelform_factory(modeladmin.model, form=mass_update_form,
-                              exclude=('pk',),
+                              exclude=mass_update_exclude,
+                              fields=mass_update_fields,
                               formfield_callback=not_required)
     grouped = defaultdict(lambda: [])
     selected_fields = []
@@ -319,28 +345,12 @@ def mass_update(modeladmin, request, queryset):  # noqa
 
         form = MForm(initial=initial, instance=prefill_instance)
 
-    for f in modeladmin.model._meta.fields:
-        if f.name not in form._no_sample_for:
-            if isinstance(f, ForeignKey):
-                # Filter by queryset so we only get results without our
-                # current resultset
-                filters = {"%s__in" % f.remote_field.name: queryset}
-                # Order by random to get a nice sample
-                query = f.related_model.objects.filter(**filters).distinct().order_by('?')
-                # Limit the amount of results so we don't accidently query
-                # many thousands of items and kill the database.
-                grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
-            elif hasattr(f, 'flatchoices') and f.flatchoices:
-                grouped[f.name] = dict(getattr(f, 'flatchoices')).keys()
-            elif hasattr(f, 'choices') and f.choices:
-                grouped[f.name] = dict(getattr(f, 'choices')).keys()
-            elif isinstance(f, df.BooleanField):
-                grouped[f.name] = [("True", True), ("False", False)]
-
+    if mass_update_hints:
+        _get_sample()
     already_grouped = set(grouped)
     for el in queryset.all()[:10]:
         for f in modeladmin.model._meta.fields:
-            if f.name not in form._no_sample_for and f.name not in already_grouped:
+            if f.name in mass_update_hints and f.name not in already_grouped:
                 value = getattr(el, f.name)
                 target = [str(value), value]
                 if value is not None and target not in grouped[f.name]:

@@ -24,11 +24,10 @@ Transform function are function that accept one or two parameter.
 
 
 
-.. _customize_mass_update_form:
+.. _use_custom_mass_update_form:
 
-
-Customize Massupdate Form
-=========================
+Use custom Massupdate Form
+==========================
 
 .. versionadded:: 0.0.4
 
@@ -47,6 +46,8 @@ of the ``mass_update_form`` attribute to your ``ModelAdmin``. ie::
     admin.register(MyModel, MyModelAdmin)
 
 
+.. _selectively_register_actions:
+
 Selectively Register Actions
 ============================
 
@@ -58,3 +59,34 @@ To register only some selected action simply use the ``site.add_action`` method:
 
         site.add_action(actions.mass_update)
         site.add_action(actions.export_as_csv)
+
+.. _limit_massupdate_to_certain_fields:
+
+Limit Massupdate to certain fields
+==================================
+
+.. versionadded:: 1.8
+
+    class MyModelAdmin(admin.ModelAdmin):
+        mass_update_fields = ['name']
+
+    OR
+
+    class MyModelAdmin(admin.ModelAdmin):
+        mass_update_exclude = ['pk', 'date']
+
+    admin.register(MyModel, MyModelAdmin)
+
+
+.. _limit_massupdate_hints_to_certain_fields:
+
+Limit Massupdate hints to certain fields
+========================================
+
+.. versionadded:: 1.8
+
+    class MyModelAdmin(admin.ModelAdmin):
+        mass_update_hints = ['name']
+
+    admin.register(MyModel, MyModelAdmin)
+
