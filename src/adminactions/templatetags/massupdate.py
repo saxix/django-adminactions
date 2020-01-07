@@ -1,16 +1,12 @@
-from __future__ import absolute_import, unicode_literals
-
-from six.moves import map
-
 from django.forms import widgets
+from django.forms.utils import flatatt
 from django.template import Library
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 
 from adminactions.compat import get_field_by_name
 from adminactions.mass_update import OPERATIONS
-from django.forms.utils import flatatt
 
 register = Library()
 
@@ -80,7 +76,7 @@ class SelectOptionsAttribute(widgets.Select):
         super(SelectOptionsAttribute, self).__init__(attrs, choices)
 
     def render_option(self, selected_choices, option_value, option_label):
-        option_value = smart_text(option_value)
+        option_value = smart_str(option_value)
         attrs = flatatt(self.options_attributes.get(option_value, {}))
         if option_value in selected_choices:
             selected_html = u' selected="selected"'
@@ -92,7 +88,7 @@ class SelectOptionsAttribute(widgets.Select):
         return u'<option%s value="%s"%s>%s</option>' % (
             attrs,
             escape(option_value), selected_html,
-            conditional_escape(smart_text(option_label)))
+            conditional_escape(smart_str(option_label)))
 
 
 @register.simple_tag

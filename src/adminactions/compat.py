@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
+from functools import partial
 
 import django.db.transaction as t
 
@@ -34,3 +34,7 @@ def get_all_field_names(model):
                                         if hasattr(field, 'attname') else (field.name,)
                                         for field in model._meta.get_fields()
                                         if not (field.many_to_one and field.related_model is None))))
+
+
+def curry(func, *a, **kw):
+    return partial(func, *a, **kw)

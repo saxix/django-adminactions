@@ -13,7 +13,7 @@ from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.db.transaction import atomic
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import dateformat
-from django.utils.encoding import force_text, smart_str, smart_text
+from django.utils.encoding import force_text, smart_str
 from django.utils.timezone import get_default_timezone
 
 from . import compat
@@ -166,8 +166,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields +
-                  queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
 
     if streaming_enabled:
         buffer_object = Echo()
@@ -287,8 +286,7 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields +
-                  queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=2)
     sheet_name = config.pop('sheet_name')
@@ -414,8 +412,7 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields +
-                  queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
 
     book = xlsxwriter.Workbook(out, {'in_memory': True})
     sheet_name = config.pop('sheet_name')
@@ -448,7 +445,7 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                 if callable(fmt):
                     value = fmt(value)
                 if isinstance(value, (list, tuple)):
-                    value = smart_text(u"".join(value))
+                    value = smart_str(u"".join(value))
 
                 if isinstance(value, datetime.datetime):
                     try:
@@ -459,10 +456,10 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                 # if isinstance(value, six.binary_type):
                 value = str(value)
 
-                sheet.write(rownum + 1, idx + 1, smart_text(value), fmt)
+                sheet.write(rownum + 1, idx + 1, smart_str(value), fmt)
             except Exception as e:
                 raise
-                sheet.write(rownum + 1, idx + 1, smart_text(e), fmt)
+                sheet.write(rownum + 1, idx + 1, smart_str(e), fmt)
 
     book.close()
     out.seek(0)

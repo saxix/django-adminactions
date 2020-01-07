@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models.query import QuerySet
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from adminactions.compat import get_all_field_names, get_field_by_name
 
@@ -113,19 +113,19 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
         value = getattr_or_item(obj, fieldname)
 
     if hasattr(value, 'all'):
-        value = ';'.join(smart_text(obj) for obj in value.all())
+        value = ';'.join(smart_str(obj) for obj in value.all())
     if not raw_callable and callable(value):
         value = value()
 
     if isinstance(value, models.Model):
-        return smart_text(value)
+        return smart_str(value)
 
     # if isinstance(obj, Model):
     #     field = get_field_by_path(obj, fieldname)
     #     if isinstance(field, ForeignKey):
     #         return unicode(value)
     if isinstance(value, str):
-        value = smart_text(value)
+        value = smart_str(value)
 
     return value
 

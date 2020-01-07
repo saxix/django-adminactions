@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-
 import os
 import string
 from random import choice, randrange, shuffle
 
-import django
 from django.contrib.contenttypes.models import ContentType
-from six.moves import range
 
 from django.conf import global_settings
 from django.contrib import admin
@@ -17,8 +13,7 @@ from django.contrib.auth.models import Group, Permission, User
 from django.forms import BaseForm
 from django.test.testcases import TestCase
 from django_dynamic_fixture import G
-from django_dynamic_fixture.fixture_algorithms.random_fixture import \
-    RandomDataFixture
+from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import (adminaction_end, adminaction_requested,
@@ -255,10 +250,7 @@ SETTINGS = {'TEMPLATE_DIRS': [TEST_TEMPLATES_DIR],
                                             "django.core.context_processors.tz",
                                             "django.contrib.messages.context_processors.messages")}
 
-if django.VERSION[0] == 2:
-    SETTINGS['MIDDLEWARE'] = global_settings.MIDDLEWARE
-else:
-    SETTINGS['MIDDLEWARE_CLASSES'] = global_settings.MIDDLEWARE_CLASSES
+SETTINGS['MIDDLEWARE'] = global_settings.MIDDLEWARE
 
 ADMIN = 'sax'
 USER = 'user'

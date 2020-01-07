@@ -3,12 +3,13 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
-from django.utils.encoding import smart_text
+from django.shortcuts import render
+from django.utils.encoding import smart_str
 from django.utils.translation import ugettext as _
 
 from .forms import GenericActionForm
 from .models import get_permission_codename
-from django.shortcuts import render
+
 
 def byrows_update(modeladmin, request, queryset):  # noqa
     """
@@ -77,7 +78,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         'action_short_description': byrows_update.short_description,
         'title': u"%s (%s)" % (
             byrows_update.short_description.capitalize(),
-            smart_text(modeladmin.opts.verbose_name_plural),
+            smart_str(modeladmin.opts.verbose_name_plural),
         ),
         'formset': formset,
         'opts': modeladmin.model._meta,

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 import json
 import re
@@ -18,12 +16,11 @@ from django.forms.models import (InlineForeignKeyField,
                                  modelform_factory, )
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.encoding import smart_text
-from django.utils.functional import curry
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from .compat import get_field_by_name
+from .compat import curry, get_field_by_name
 from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
 from .models import get_permission_codename
@@ -281,7 +278,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
     if 'pk' not in mass_update_exclude:
         mass_update_exclude.append('pk')
     mass_update_hints = getattr(modeladmin, 'mass_update_hints',
-                                  [f.name for f in modeladmin.model._meta.fields])
+                                [f.name for f in modeladmin.model._meta.fields])
 
     if mass_update_fields and mass_update_exclude:
         raise Exception("Cannot set both 'mass_update_exclude' and 'mass_update_fields'")
@@ -367,7 +364,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
            'action_short_description': mass_update.short_description,
            'title': u"%s (%s)" % (
                mass_update.short_description.capitalize(),
-               smart_text(modeladmin.opts.verbose_name_plural),
+               smart_str(modeladmin.opts.verbose_name_plural),
            ),
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),

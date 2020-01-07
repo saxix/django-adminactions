@@ -12,7 +12,7 @@ from django.db.models.deletion import Collector
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .api import (export_as_csv as _export_as_csv,
                   export_as_xls as _export_as_xls, )
@@ -51,8 +51,7 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
         messages.error(request, str(e))
         return
 
-    cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields +
-            queryset.model._meta.many_to_many]
+    cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
                'action': get_action(request),
