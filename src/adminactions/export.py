@@ -12,7 +12,7 @@ from django.db.models.deletion import Collector
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .api import (export_as_csv as _export_as_csv,
                   export_as_xls as _export_as_xls, )

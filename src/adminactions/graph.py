@@ -8,8 +8,8 @@ from django.forms.fields import BooleanField, CharField, ChoiceField
 from django.forms.forms import DeclarativeFieldsMetaclass, Form
 from django.forms.widgets import HiddenInput, MultipleHiddenInput
 from django.shortcuts import render
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 
 from .compat import get_field_by_name
 from .exceptions import ActionInterrupted
@@ -86,7 +86,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                 elif hasattr(modeladmin.model, 'get_%s_display' % field.name):
                     data_labels = []
                     for value, cnt in cc:
-                        data_labels.append(smart_text(dict(field.flatchoices).get(value, value), strings_only=True))
+                        data_labels.append(smart_str(dict(field.flatchoices).get(value, value), strings_only=True))
                 else:
                     data_labels = [str(l) for l, v in cc]
                 data = [v for l, v in cc]
@@ -142,7 +142,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
            'action_short_description': graph_queryset.short_description,
            'title': u"%s (%s)" % (
                graph_queryset.short_description.capitalize(),
-               smart_text(modeladmin.opts.verbose_name_plural),
+               smart_str(modeladmin.opts.verbose_name_plural),
            ),
            'app_label': queryset.model._meta.app_label,
            'media': media,

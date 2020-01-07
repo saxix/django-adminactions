@@ -12,7 +12,7 @@ from django.forms.formsets import formset_factory
 from django.forms.models import model_to_dict, modelform_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
@@ -206,7 +206,7 @@ def merge(modeladmin, request, queryset):  # noqa
                 'action_short_description': merge.short_description,
                 'title': u"%s (%s)" % (
                     merge.short_description.capitalize(),
-                    smart_text(modeladmin.opts.verbose_name_plural),
+                    smart_str(modeladmin.opts.verbose_name_plural),
                 ),
                 'master': master,
                 'other': other})

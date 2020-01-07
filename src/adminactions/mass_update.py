@@ -15,15 +15,14 @@ from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory, )
+                                 modelform_factory,)
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.encoding import smart_text
-from django.utils.functional import curry
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from .compat import get_field_by_name
+from .compat import curry, get_field_by_name
 from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
 from .models import get_permission_codename
@@ -367,7 +366,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
            'action_short_description': mass_update.short_description,
            'title': u"%s (%s)" % (
                mass_update.short_description.capitalize(),
-               smart_text(modeladmin.opts.verbose_name_plural),
+               smart_str(modeladmin.opts.verbose_name_plural),
            ),
            'grouped': grouped,
            'fieldvalues': json.dumps(grouped, default=dthandler),

@@ -24,7 +24,10 @@ class TestExportQuerySetAsCsv(TestCase):
             qs = Permission.objects.select_related().filter(codename='add_user')
             ret = export_as_csv(queryset=qs)
         self.assertIsInstance(ret, HttpResponse)
-        self.assertEqual(ret.content.decode('utf8'), u'"%s";"Can add user";"user";"add_user"\r\n' % qs[0].pk)
+        if django.VERSION[0] == 2:
+            self.assertEqual(ret.content.decode('utf8'), u'"%s";"Can add user";"user";"add_user"\r\n' % qs[0].pk)
+        elif django.VERSION[0] == 3:
+            self.assertEqual(ret.content.decode('utf8'), u'"%s";"Can add user";"auth | user";"add_user"\r\n' % qs[0].pk)
 
     def test_header_is_true(self):
         mem = six.StringIO()

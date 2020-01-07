@@ -1,6 +1,6 @@
 check-manifest
 django-dynamic-fixture
-django-webtest==1.9.2
+django-webtest
 flake8
 mock>=1.0.1
 modernize

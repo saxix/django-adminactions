@@ -255,10 +255,7 @@ SETTINGS = {'TEMPLATE_DIRS': [TEST_TEMPLATES_DIR],
                                             "django.core.context_processors.tz",
                                             "django.contrib.messages.context_processors.messages")}
 
-if django.VERSION[0] == 2:
-    SETTINGS['MIDDLEWARE'] = global_settings.MIDDLEWARE
-else:
-    SETTINGS['MIDDLEWARE_CLASSES'] = global_settings.MIDDLEWARE_CLASSES
+SETTINGS['MIDDLEWARE'] = global_settings.MIDDLEWARE
 
 ADMIN = 'sax'
 USER = 'user'
