@@ -1,8 +1,5 @@
-from __future__ import absolute_import, unicode_literals
-
-from six.moves import map
-
 from django.forms import widgets
+from django.forms.utils import flatatt
 from django.template import Library
 from django.utils.encoding import smart_str
 from django.utils.html import conditional_escape, escape
@@ -10,7 +7,6 @@ from django.utils.safestring import mark_safe
 
 from adminactions.compat import get_field_by_name
 from adminactions.mass_update import OPERATIONS
-from django.forms.utils import flatatt
 
 register = Library()
 

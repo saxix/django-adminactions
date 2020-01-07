@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-
-import six
-
 import pytest
 
 from adminactions.compat import get_field_by_name
@@ -13,17 +9,17 @@ def test_get_verbose_name():
 
     user = User()
     p = Permission()
-    assert six.text_type(get_verbose_name(user, 'username')) == 'username'
+    assert get_verbose_name(user, 'username') == 'username'
 
-    assert six.text_type(get_verbose_name(User, 'username')) == 'username'
+    assert get_verbose_name(User, 'username') == 'username'
 
-    assert six.text_type(get_verbose_name(User.objects.all(), 'username')) == 'username'
+    assert get_verbose_name(User.objects.all(), 'username') == 'username'
 
-    assert six.text_type(get_verbose_name(User.objects, 'username')) == 'username'
+    assert get_verbose_name(User.objects, 'username') == 'username'
 
-    assert six.text_type(get_verbose_name(User.objects, get_field_by_name(user, 'username')[0])) == 'username'
+    assert get_verbose_name(User.objects, get_field_by_name(user, 'username')[0]) == 'username'
 
-    assert six.text_type(get_verbose_name(p, 'content_type.model')) == 'python model class name'
+    assert get_verbose_name(p, 'content_type.model') == 'python model class name'
 
     with pytest.raises(ValueError):
         get_verbose_name(object, 'aaa')

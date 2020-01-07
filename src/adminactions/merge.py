@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-
 from datetime import datetime
 
 from django import forms
@@ -129,7 +127,6 @@ def merge(modeladmin, request, queryset):  # noqa
                 return (form.is_valid(), form, merge_kwargs)
             else:
                 return (False, merge_form, merge_kwargs)
-
 
     tpl = 'adminactions/merge.html'
     # transaction_supported = model_supports_transactions(modeladmin.model)

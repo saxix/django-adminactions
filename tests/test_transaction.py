@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import mock
 import pytest
 from django.contrib.auth.models import Group, User

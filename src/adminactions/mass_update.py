@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 import json
 import re
@@ -15,7 +13,7 @@ from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory,)
+                                 modelform_factory, )
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
@@ -280,7 +278,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
     if 'pk' not in mass_update_exclude:
         mass_update_exclude.append('pk')
     mass_update_hints = getattr(modeladmin, 'mass_update_hints',
-                                  [f.name for f in modeladmin.model._meta.fields])
+                                [f.name for f in modeladmin.model._meta.fields])
 
     if mass_update_fields and mass_update_exclude:
         raise Exception("Cannot set both 'mass_update_exclude' and 'mass_update_fields'")

@@ -1,11 +1,9 @@
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
 
-import io
-import six
+import csv
 import time
 import unittest
-
+import io
 import mock
 import xlrd
 from django.contrib.auth.models import User
@@ -15,11 +13,6 @@ from django_dynamic_fixture import G
 from django_webtest import WebTest
 from utils import (CheckSignalsMixin, SelectRowsMixin, admin_register,
                    user_grant_permission,)
-
-if six.PY2:
-    import unicodecsv as csv
-else:
-    import csv
 
 __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest',
            'ExportDeleteTreeTest', 'ExportAsXlsTest']
@@ -48,8 +41,7 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             form['action'] = self.action_name
             form.set('_selected_action', True, 0)
             res = form.submit().follow()
-            assert six.b(
-                'Sorry you do not have rights to execute this action') in res.body
+            assert b'Sorry you do not have rights to execute this action' in res.body
 
     def test_success(self):
         with user_grant_permission(self.user, ['auth.change_user',
@@ -108,8 +100,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
             form['action'] = self.action_name
             form.set('_selected_action', True, 0)
             res = form.submit().follow()
-            assert six.b(
-                'Sorry you do not have rights to execute this action') in res.body
+            assert b'Sorry you do not have rights to execute this action' in res.body
 
     def test_success(self):
         with user_grant_permission(self.user, ['auth.change_user',
@@ -173,8 +164,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             form['action'] = 'export_as_csv'
             form.set('_selected_action', True, 0)
             res = form.submit().follow()
-            assert six.b(
-                'Sorry you do not have rights to execute this action') in res.body
+            assert b'Sorry you do not have rights to execute this action' in res.body
 
     def test_success(self):
         with user_grant_permission(self.user, ['demo.change_demomodel',
@@ -187,10 +177,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self._select_rows(form)
             res = form.submit()
             res = res.form.submit('apply')
-            if six.PY2:
-                buff = io.BytesIO(res.body)
-            else:
-                buff = io.StringIO(smart_text(res.body))
+            buff = io.StringIO(smart_text(res.body))
             csv_reader = csv.reader(buff)
 
             self.assertEqual(len(list(csv_reader)), 2)
@@ -233,10 +220,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
     @override_settings(ADMINACTIONS_STREAM_CSV=True)
     def test_streaming_export(self):
         res = self._run_action()
-        if six.PY2:
-            buff = io.BytesIO(res.body)
-        else:
-            buff = io.StringIO(smart_text(res.body))
+        buff = io.StringIO(smart_text(res.body))
         csv_reader = csv.reader(buff)
 
         self.assertEqual(len(list(csv_reader)), 2)
@@ -270,8 +254,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             form['action'] = 'export_as_xls'
             form.set('_selected_action', True, 0)
             res = form.submit().follow()
-            assert six.b(
-                'Sorry you do not have rights to execute this action') in res.body
+            assert b'Sorry you do not have rights to execute this action' in res.body
 
     def test_success(self):
         with user_grant_permission(self.user, ['auth.change_user',
@@ -289,10 +272,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             res.form['columns'] = ['id', 'username', 'first_name'
                                                      '']
             res = res.form.submit('apply')
-            io = six.BytesIO(res.body)
+            buff = io.BytesIO(res.body)
 
-            io.seek(0)
-            w = xlrd.open_workbook(file_contents=io.read())
+            buff.seek(0)
+            w = xlrd.open_workbook(file_contents=buff.read())
             sheet = w.sheet_by_index(0)
             self.assertEqual(sheet.cell_value(0, 0), u'#')
             self.assertEqual(sheet.cell_value(0, 1), u'ID')
@@ -317,10 +300,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             res.form['columns'] = ['char', 'text', 'bigint', 'choices'
                                                              '']
             res = res.form.submit('apply')
-            io = six.BytesIO(res.body)
+            buff = io.BytesIO(res.body)
 
-            io.seek(0)
-            w = xlrd.open_workbook(file_contents=io.read())
+            buff.seek(0)
+            w = xlrd.open_workbook(file_contents=buff.read())
             sheet = w.sheet_by_index(0)
             self.assertEqual(sheet.cell_value(0, 1), u'Chäř')
             self.assertEqual(sheet.cell_value(0, 2), u'bigint')
@@ -344,10 +327,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             res.form['columns'] = ['char', 'text', 'bigint', 'choices'
                                                              '']
             res = res.form.submit('apply')
-            io = six.BytesIO(res.body)
+            buff = io.BytesIO(res.body)
 
-            io.seek(0)
-            w = xlrd.open_workbook(file_contents=io.read())
+            buff.seek(0)
+            w = xlrd.open_workbook(file_contents=buff.read())
             sheet = w.sheet_by_index(0)
             self.assertEqual(sheet.cell_value(0, 1), u'Chäř')
             self.assertEqual(sheet.cell_value(0, 2), u'bigint')
@@ -370,10 +353,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             res.form['header'] = 1
             res.form['columns'] = ['char', ]
             res = res.form.submit('apply')
-            io = six.BytesIO(res.body)
+            buff = io.BytesIO(res.body)
 
-            io.seek(0)
-            w = xlrd.open_workbook(file_contents=io.read())
+            buff.seek(0)
+            w = xlrd.open_workbook(file_contents=buff.read())
             sheet = w.sheet_by_index(0)
             self.assertEqual(sheet.cell_value(0, 1), u'Chäř')
             self.assertEqual(sheet.cell_value(1, 1), u'Pizzä ïs Gööd')
@@ -391,10 +374,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             res.form['header'] = 1
             res.form['columns'] = ['date', ]
             res = res.form.submit('apply')
-            io = six.BytesIO(res.body)
+            buff = io.BytesIO(res.body)
 
-            io.seek(0)
-            w = xlrd.open_workbook(file_contents=io.read(), formatting_info=True)
+            buff.seek(0)
+            w = xlrd.open_workbook(file_contents=buff.read(), formatting_info=True)
             sheet = w.sheet_by_index(0)
 
             cell = sheet.cell(1, 1)
@@ -432,10 +415,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
         res_time = (time.time() - start)
         # print('Response returned in %.1f seconds' % res_time)
 
-        io = six.BytesIO(res.body)
+        buff = io.BytesIO(res.body)
 
-        io.seek(0)
-        w = xlrd.open_workbook(file_contents=io.read())
+        buff.seek(0)
+        w = xlrd.open_workbook(file_contents=buff.read())
         sheet = w.sheet_by_index(0)
 
         self.assertEqual(sheet.nrows, 3000 + user_count + 1)

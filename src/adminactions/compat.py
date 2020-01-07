@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
+from functools import partial
 
 import django.db.transaction as t
-from functools import partial
 
 
 class NoCommit(t.Atomic):

@@ -51,8 +51,7 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
         messages.error(request, str(e))
         return
 
-    cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields +
-            queryset.model._meta.many_to_many]
+    cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
                'action': get_action(request),
