@@ -5,6 +5,7 @@ import six
 import unittest
 from collections import namedtuple
 
+import django
 import xlrd
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
