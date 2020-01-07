@@ -17,6 +17,11 @@ env:
   - DJANGO=2.2
   - DJANGO=3.0
 
+matrix:
+  exclude:
+    - env: DJANGO=3.0
+      python: 3.5
+
 
 install:
   - pip install tox
