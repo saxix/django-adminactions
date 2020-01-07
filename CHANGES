@@ -1,6 +1,12 @@
+Release 1.8.1
+=============
+* Official Django 3.0 support
+
+
 Release 1.8
 =============
 * MassUpdate: add new configuration `mass_update_fields`, `mass_update_exclude`, `mass_update_hints`
+
 
 Release 1.7.1
 =============
