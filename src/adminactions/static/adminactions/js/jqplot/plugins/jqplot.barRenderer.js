@@ -59,7 +59,7 @@
         this.barWidth = null;
         // prop: shadowOffset
         // offset of the shadow from the slice and offset of 
-        // each succesive stroke of the shadow from the last.
+        // each successive stroke of the shadow from the last.
         this.shadowOffset = 2;
         // prop: shadowDepth
         // number of strokes to apply to the shadow, 
