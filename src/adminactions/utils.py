@@ -1,8 +1,22 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
 
 from adminactions.compat import get_all_field_names, get_field_by_name
+
+
+def get_ignored_fields(model, setting_var_name):
+    """
+    returns list of ignored fields which must not be modified
+    """
+    ignored_setting = getattr(settings, setting_var_name, {})
+    ignored_app = ignored_setting.get(model._meta.app_label, {})
+    if ignored_app:
+        ignored_fields = ignored_app.get(model._meta.model_name, [])
+    else:
+        ignored_fields = []
+    return ignored_fields
 
 
 def clone_instance(instance, fieldnames=None):
