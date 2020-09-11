@@ -8,7 +8,11 @@ import xlwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import FileField
-from django.db.models.fields import FieldDoesNotExist
+
+try:
+    from django.core.exceptions import FieldDoesNotExist
+except:
+    from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.db.transaction import atomic
 from django.http import HttpResponse, StreamingHttpResponse
@@ -215,7 +219,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
 
     if streaming_enabled:
         content_attr = 'content' if (
-            StreamingHttpResponse is HttpResponse) else 'streaming_content'
+                StreamingHttpResponse is HttpResponse) else 'streaming_content'
         setattr(response, content_attr,
                 itertools.chain(yield_header(), yield_rows()))
     else:
