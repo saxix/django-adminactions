@@ -18,3 +18,4 @@ sonar-project.properties
 .scannerwork
 Pipfile
 Pipfile.lock
+poetry.lock

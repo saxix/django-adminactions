@@ -26,7 +26,9 @@ Contributors
 * Viator (`@viatoriche`_)
 * Serhiy Zahoriya (`@int-ua`_)
 * Pavel Savchenko (`@asfaltboy`_)
+* Petr Kůdela (`@PetrKudy`_)
 
+.. _`@PetrKudy`: https://github.com/PetrKudy
 .. _`@tdruez`: https://github.com/tdruez
 .. _`@jht001`: https://github.com/jht001
 .. _`@Narsil`: https://github.com/Narsil
