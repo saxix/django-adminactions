@@ -18,7 +18,7 @@ from django.utils.timezone import get_default_timezone
 
 from . import compat
 from .templatetags.actions import get_field_value
-from .utils import clone_instance, get_field_by_path
+from .utils import clone_instance, get_field_by_path, get_ignored_fields
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -76,7 +76,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
         raise ValueError('Cannot save related with `commit=False`')
     with atomic():
         result = clone_instance(master)
-
         for fieldname in fields:
             f = get_field_by_path(master, fieldname)
             if isinstance(f, FileField) or f and not f.primary_key:
@@ -111,6 +110,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                     setattr(element, rel_fieldname, master)
                     element.save()
             other.delete()
+            ignored_fields = get_ignored_fields(result._meta.model, 'MERGE_ACTION_IGNORED_FIELDS')
+            for ig_field in ignored_fields:
+                setattr(result, ig_field, result._meta.get_field(ig_field).get_default())
             result.save()
             for fieldname, elements in list(all_m2m.items()):
                 dest_m2m = getattr(result, fieldname)
