@@ -1,6 +1,4 @@
-dist: xenial
 language: python
-sudo: false
 
 cache:
   directories:
@@ -13,7 +11,6 @@ python:
   - 3.8
 
 env:
-  - DJANGO=2.0
   - DJANGO=2.1
   - DJANGO=2.2
   - DJANGO=3.0
@@ -21,8 +18,13 @@ env:
 
 matrix:
   exclude:
+    - env: DJANGO=2.1
+      python: 3.8
     - env: DJANGO=3.0
       python: 3.5
+    - env: DJANGO=3.1
+      python: 3.5
+
 
 
 install:
