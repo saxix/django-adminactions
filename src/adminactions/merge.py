@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime
 
 from django import forms
@@ -57,13 +56,13 @@ class MergeFormBase(forms.Form):
             return None
 
     def full_clean(self):
-        super(MergeFormBase, self).full_clean()
+        super().full_clean()
 
     def clean(self):
-        return super(MergeFormBase, self).clean()
+        return super().clean()
 
     def is_valid(self):
-        return super(MergeFormBase, self).is_valid()
+        return super().is_valid()
 
     class Media:
         js = [

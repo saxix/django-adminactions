@@ -1,26 +1,25 @@
-# -*- coding: utf-8 -*-
 import os
 import string
 from random import choice, randrange, shuffle
-
-from django.contrib.contenttypes.models import ContentType
 
 from django.conf import global_settings
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group, Permission, User
+from django.contrib.contenttypes.models import ContentType
 from django.forms import BaseForm
 from django.test.testcases import TestCase
 from django_dynamic_fixture import G
-from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
+from django_dynamic_fixture.fixture_algorithms.random_fixture import \
+    RandomDataFixture
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start, )
+                                  adminaction_start,)
 
 
-class admin_register(object):
+class admin_register:
     def __init__(self, model, model_admin=None, unregister=False):
         self.model = model
         self.model_admin = model_admin
@@ -77,7 +76,7 @@ def get_group(name=None, permissions=None):
     return group
 
 
-class user_grant_permission(object):
+class user_grant_permission:
     def __init__(self, user, permissions=None):
         self.user = user
         self.permissions = permissions
@@ -106,7 +105,7 @@ class user_grant_permission(object):
         return self.__exit__()
 
 
-class SelectRowsMixin(object):
+class SelectRowsMixin:
     _selected_rows = []
     _selected_values = []
     csrf_checks = False
@@ -123,7 +122,7 @@ class SelectRowsMixin(object):
                 self._selected_values.append(int(chk.value))
 
 
-class CheckSignalsMixin(object):
+class CheckSignalsMixin:
     MESSAGE = 'Action Interrupted Test'
 
     def test_signal_sent(self):
@@ -258,11 +257,11 @@ PWD = '123'
 USER_EMAIL = 'user@moreply.org'
 
 
-class BaseTestCaseMixin(object):
+class BaseTestCaseMixin:
     fixtures = ['adminactions.json', ]
 
     def setUp(self):
-        super(BaseTestCaseMixin, self).setUp()
+        super().setUp()
         self.sett = self.settings(**SETTINGS)
         self.sett.enable()
         self.login()

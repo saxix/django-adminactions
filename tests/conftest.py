@@ -100,6 +100,7 @@ def users():
 @pytest.fixture(scope='function')
 def demomodels():
     from django_dynamic_fixture import G
+
     from demo.models import DemoModel
 
     return G(DemoModel, n=20)
@@ -107,8 +108,8 @@ def demomodels():
 
 @pytest.fixture(scope='function')
 def admin():
-    from django_dynamic_fixture import G
     from django.contrib.auth.models import User
+    from django_dynamic_fixture import G
 
     return G(User, is_staff=True, is_active=True)
 

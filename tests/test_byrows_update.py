@@ -11,7 +11,7 @@ from adminactions.byrows_update import byrows_update_get_fields
 from demo.models import DemoModel
 
 
-class MockRequest(object):
+class MockRequest:
     pass
 
 
@@ -24,7 +24,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
     csrf_checks = False
 
     def setUp(self):
-        super(TestByRowsUpdateAction, self).setUp()
+        super().setUp()
         self._url = reverse('admin:demo_demomodel_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
         self.site = AdminSite()

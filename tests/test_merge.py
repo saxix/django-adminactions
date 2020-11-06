@@ -23,12 +23,12 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
     fixtures = ['adminactions.json', 'demoproject.json']
 
     def setUp(self):
-        super(MergeTestApi, self).setUp()
+        super().setUp()
         self.master_pk = 2
         self.other_pk = 3
 
     def tearDown(self):
-        super(MergeTestApi, self).tearDown()
+        super().tearDown()
 
     def test_merge_success_no_commit(self):
         master = User.objects.get(pk=self.master_pk)
@@ -177,7 +177,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
     _selected_rows = [1, 2]
 
     def setUp(self):
-        super(TestMergeAction, self).setUp()
+        super().setUp()
         self.url = reverse('admin:auth_user_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
@@ -362,7 +362,7 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
     _selected_rows = [0, 2]
 
     def setUp(self):
-        super(TestMergeImageAction, self).setUp()
+        super().setUp()
         self.url = reverse('admin:demo_demomodel_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
 

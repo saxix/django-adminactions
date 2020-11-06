@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Django site maintenance documentation build configuration file, created by
 # sphinx-quickstart on Sun Dec  5 19:11:46 2010.
 #

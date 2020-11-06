@@ -3,6 +3,7 @@ import pytest
 from django.contrib.auth.models import Group, User
 from django.db import IntegrityError
 from django.db.transaction import atomic
+from django.test import TransactionTestCase
 from django_dynamic_fixture import G
 
 from adminactions import compat
@@ -10,7 +11,7 @@ from adminactions.api import merge
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_end
 
-pytestmarker = pytest.mark.Skip
+pytestmarker = pytest.mark.skip
 
 
 @pytest.mark.django_db()
@@ -57,12 +58,16 @@ def test_transaction_mass_update(app, users, administrator):
         res.form['is_staff'].checked = True
 
         # res.form.submit('apply').follow()
-        #
         # assert User.objects.filter(is_staff=True).count() == 1
 
-        with pytest.raises(Exception):
+        with pytest.raises(BaseException):
             adminaction_end.connect(_handler)
             res.form.submit('apply').follow()
             adminaction_end.disconnect(_handler)
 
         assert User.objects.filter(is_staff=True).count() == 1
+
+
+class TestIsLibero(TransactionTestCase):
+    def test_true(self):
+        self.assertTrue(True)
