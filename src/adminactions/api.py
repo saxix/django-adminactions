@@ -6,9 +6,8 @@ from io import BytesIO
 
 import xlwt
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db.models import FileField
-from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.db.transaction import atomic
 from django.http import HttpResponse, StreamingHttpResponse
