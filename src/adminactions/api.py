@@ -454,7 +454,6 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                     except ValueError:
                         value = dateformat.format(value, config['datetime_format'])
 
-                # if isinstance(value, six.binary_type):
                 value = str(value)
 
                 sheet.write(rownum + 1, idx + 1, smart_str(value), fmt)
@@ -470,7 +469,6 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         response = HttpResponse(out.read(),
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         # content_type='application/vnd.ms-excel')
-        # response['Content-Disposition'] = six.b('attachment;filename="%s"') % six.b(filename.encode('us-ascii', 'replace'))
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
         return response
     return out
