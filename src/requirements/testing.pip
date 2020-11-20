@@ -1,5 +1,5 @@
 check-manifest
-django-dynamic-fixture
+django-dynamic-fixture>=3.1.1
 django-webtest
 flake8
 mock>=1.0.1
