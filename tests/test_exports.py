@@ -1,14 +1,13 @@
-# -*- encoding: utf-8 -*-
-
 import csv
+import io
 import time
 import unittest
-import io
+
 import mock
 import xlrd
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 from utils import (CheckSignalsMixin, SelectRowsMixin, admin_register,
@@ -18,13 +17,13 @@ __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest',
            'ExportDeleteTreeTest', 'ExportAsXlsTest']
 
 
-class ExportMixin(object):
+class ExportMixin:
     fixtures = ['adminactions', 'demoproject']
     urls = 'demo.urls'
     csrf_checks = True
 
     def setUp(self):
-        super(ExportMixin, self).setUp()
+        super().setUp()
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
 
@@ -177,7 +176,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             self._select_rows(form)
             res = form.submit()
             res = res.form.submit('apply')
-            buff = io.StringIO(smart_text(res.body))
+            buff = io.StringIO(smart_str(res.body))
             csv_reader = csv.reader(buff)
 
             self.assertEqual(len(list(csv_reader)), 2)
@@ -220,7 +219,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
     @override_settings(ADMINACTIONS_STREAM_CSV=True)
     def test_streaming_export(self):
         res = self._run_action()
-        buff = io.StringIO(smart_text(res.body))
+        buff = io.StringIO(smart_str(res.body))
         csv_reader = csv.reader(buff)
 
         self.assertEqual(len(list(csv_reader)), 2)

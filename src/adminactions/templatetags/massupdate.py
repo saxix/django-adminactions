@@ -73,7 +73,7 @@ class SelectOptionsAttribute(widgets.Select):
 
     def __init__(self, attrs=None, choices=(), options_attributes=None):
         self.options_attributes = options_attributes or {}
-        super(SelectOptionsAttribute, self).__init__(attrs, choices)
+        super().__init__(attrs, choices)
 
     def render_option(self, selected_choices, option_value, option_label):
         option_value = smart_str(option_value)

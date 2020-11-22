@@ -15,7 +15,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from .api import (export_as_csv as _export_as_csv,
-                  export_as_xls as _export_as_xls, )
+                  export_as_xls as _export_as_xls,)
 from .exceptions import ActionInterrupted
 from .forms import CSVOptions, XLSOptions
 from .models import get_permission_codename
@@ -151,20 +151,20 @@ def export_as_xls(modeladmin, request, queryset):
 export_as_xls.short_description = _("Export as XLS")
 
 
-class FlatCollector(object):
+class FlatCollector:
     def __init__(self, using):
         self._visited = []
-        super(FlatCollector, self).__init__()
+        super().__init__()
 
     def collect(self, objs):
         self.data = objs
         self.models = set([o.__class__ for o in self.data])
 
 
-class ForeignKeysCollector(object):
+class ForeignKeysCollector:
     def __init__(self, using):
         self._visited = []
-        super(ForeignKeysCollector, self).__init__()
+        super().__init__()
 
     def _collect(self, objs):
         objects = []

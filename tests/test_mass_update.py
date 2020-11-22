@@ -21,7 +21,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
     sender_model = DemoModel
 
     def setUp(self):
-        super(MassUpdateTest, self).setUp()
+        super().setUp()
         self._url = reverse('admin:demo_demomodel_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
 

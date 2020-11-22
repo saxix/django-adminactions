@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+import csv
 import io
 import unittest
 from collections import namedtuple
@@ -10,8 +10,6 @@ from django.http import HttpResponse
 from django.test import TestCase
 
 from adminactions.api import export_as_csv, export_as_xls
-
-import csv
 
 
 class TestExportQuerySetAsCsv(TestCase):

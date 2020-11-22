@@ -1,10 +1,7 @@
 #!/usr/bin/env python
-# pylint: disable=W,I,C
-
 import ast
 import codecs
 import os
-import sys
 
 import re
 from setuptools import find_packages, setup
@@ -23,10 +20,6 @@ _version_re = re.compile(r'__version__\s+=\s+(.*)')
 with open(init, 'rb') as f:
     version = str(ast.literal_eval(_version_re.search(
         f.read().decode('utf-8')).group(1)))
-
-# rel = lambda fname: os.path.join(os.path.dirname(__file__),
-#                                  'src',
-#                                  'requirements', fname)
 
 requirements = read("install.pip")
 tests_require = read('testing.pip')
@@ -56,14 +49,13 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Operating System :: OS Independent',
-        'Framework :: Django :: 2.1',
         'Framework :: Django :: 2.2',
         'Framework :: Django :: 3.0',
         'Framework :: Django :: 3.1',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Intended Audience :: Developers'],
     long_description=open('README.rst').read()
 )
