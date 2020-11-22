@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django import forms
 from django.forms.models import ModelForm
 from django.forms.widgets import SelectMultiple
@@ -6,6 +5,7 @@ from django.utils import formats
 from django.utils.translation import gettext_lazy as _
 
 from .api import csv, delimiters, quotes
+from .utils import get_ignored_fields
 
 
 class GenericActionForm(ModelForm):
@@ -19,10 +19,11 @@ class GenericActionForm(ModelForm):
 
     def model_fields(self):
         """
-        Returns a list of BoundField objects that aren't "private" fields.
+        Returns a list of BoundField objects that aren't "private" fields or are not ignored.
         """
+        ignored_fields = get_ignored_fields(self._meta.model, "UPDATE_ACTION_IGNORED_FIELDS")
         return [field for field in self if
-                not (field.name.startswith('_') or field.name in ['select_across', 'action'])]
+                not (field.name.startswith('_') or field.name in ['select_across', 'action'] + ignored_fields)]
 
 
 class CSVOptions(forms.Form):

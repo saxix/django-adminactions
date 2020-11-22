@@ -2,7 +2,7 @@ VERSION=2.0.0
 BUILDDIR=${PWD}/~build
 BINDIR=${PWD}/~build/bin
 PYTHONPATH:=${PWD}/tests/:${PWD}
-DJANGO?='1.7.x'
+DJANGO?='3.1.x'
 
 .mkbuilddir:
 	mkdir -p ${BUILDDIR}

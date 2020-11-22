@@ -37,6 +37,18 @@ Update one or more fields of the selected queryset to a common value and/or appl
 
 .. _transform_operations:
 
+``Ignore Fields``
+------------------------
+.. versionadded:: 1.9
+
+It is possible to prevent some fields to be displayed to avoid changes.
+To filter out some fields you need to set `UPDATE_ACTION_IGNORED_FIELDS` settings parameter as follow::
+
+    UPDATE_ACTION_IGNORED_FIELDS = {
+        'app_name': {
+                'user': ['is_staff', 'is_superuser'],
+        },
+    }
 
 ``Transform Operation``
 ------------------------
@@ -297,3 +309,17 @@ Step 2
 **Limitations/TODO**
 
 - merge doesn't work for models related with ``on_delete=Protect`` (see :ghissue:`85`)
+
+
+``Ignore Fields``
+------------------------
+.. versionadded:: 1.9
+
+It is possible to prevent some fields to be displayed to avoid merge.
+To filter out some fields you need to set `MERGE_ACTION_IGNORED_FIELDS` settings parameter as follow::
+
+    MERGE_ACTION_IGNORED_FIELDS = {
+        'app_name': {
+                'user': ['is_staff', 'is_superuser'],
+        },
+    }

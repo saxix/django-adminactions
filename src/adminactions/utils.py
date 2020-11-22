@@ -1,8 +1,22 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
 
 from adminactions.compat import get_all_field_names, get_field_by_name
+
+
+def get_ignored_fields(model, setting_var_name):
+    """
+    returns list of ignored fields which must not be modified
+    """
+    ignored_setting = getattr(settings, setting_var_name, {})
+    ignored_app = ignored_setting.get(model._meta.app_label, {})
+    if ignored_app:
+        ignored_fields = ignored_app.get(model._meta.model_name, [])
+    else:
+        ignored_fields = []
+    return ignored_fields
 
 
 def clone_instance(instance, fieldnames=None):
@@ -29,7 +43,7 @@ def clone_instance(instance, fieldnames=None):
 def get_attr(obj, attr, default=None):
     """Recursive get object's attribute. May use dot notation.
 
-    >>> class C(object): pass
+    >>> class C: pass
     >>> a = C()
     >>> a.b = C()
     >>> a.b.c = 4
@@ -67,11 +81,12 @@ def getattr_or_item(obj, name):
     1
     >>> print(getattr_or_item(p, 'name'))
     perm
-    >>> getattr_or_item(dict, "!!!")
-    Traceback (most recent call last):
-        ...
-    AttributeError: type object has no attribute/item '!!!'
     """
+    # this change type from type to dict in python3.9
+    # >>> getattr_or_item({}, "!!!")
+    # Traceback (most recent call last):
+    #     ...
+    # AttributeError: dict object has no attribute/item '!!!'
     try:
         ret = get_attr(obj, name, AttributeError())
     except AttributeError:

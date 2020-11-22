@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pytest
 from django.contrib.auth.models import User
 from selenium.webdriver.support.select import Select

@@ -13,7 +13,7 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
     _selected_rows = [0, 1]
 
     def setUp(self):
-        super(TestGraph, self).setUp()
+        super().setUp()
         self.user = G(User, username='user', is_staff=True, is_active=True)
 
     def _run_action(self, steps=2):

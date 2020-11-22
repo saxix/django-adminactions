@@ -92,7 +92,7 @@
         this.fill = true;
         // prop: shadowOffset
         // offset of the shadow from the slice and offset of 
-        // each succesive stroke of the shadow from the last.
+        // each successive stroke of the shadow from the last.
         this.shadowOffset = 2;
         // prop: shadowAlpha
         // transparency of the shadow (0 = transparent, 1 = opaque)

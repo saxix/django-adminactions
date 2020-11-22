@@ -18,5 +18,5 @@ sonar-project.properties
 .scannerwork
 Pipfile
 Pipfile.lock
-/poetry.lock
-/pyproject.toml
+poetry.lock
+pyproject.toml

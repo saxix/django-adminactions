@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime
 
 from django import forms
@@ -17,7 +16,7 @@ from django.utils.translation import gettext as _
 from . import api, compat as transaction
 from .forms import GenericActionForm
 from .models import get_permission_codename
-from .utils import clone_instance
+from .utils import clone_instance, get_ignored_fields
 
 
 class MergeFormBase(forms.Form):
@@ -57,13 +56,13 @@ class MergeFormBase(forms.Form):
             return None
 
     def full_clean(self):
-        super(MergeFormBase, self).full_clean()
+        super().full_clean()
 
     def clean(self):
-        return super(MergeFormBase, self).clean()
+        return super().clean()
 
     def is_valid(self):
-        return super(MergeFormBase, self).is_valid()
+        return super().is_valid()
 
     class Media:
         js = [
@@ -130,16 +129,17 @@ def merge(modeladmin, request, queryset):  # noqa
 
     tpl = 'adminactions/merge.html'
     # transaction_supported = model_supports_transactions(modeladmin.model)
+    ignored_fields = get_ignored_fields(queryset.model, "MERGE_ACTION_IGNORED_FIELDS")
+
     ctx = {
         '_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
         'transaction_supported': 'Un',
         'select_across': request.POST.get('select_across') == '1',
         'action': request.POST.get('action'),
-        'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable],
+        'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable and f.name not in ignored_fields],
         'app_label': queryset.model._meta.app_label,
         'result': '',
         'opts': queryset.model._meta}
-
     if 'preview' in request.POST:
         master = queryset.get(pk=request.POST.get('master_pk'))
         original = clone_instance(master)

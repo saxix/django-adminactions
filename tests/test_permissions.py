@@ -3,7 +3,6 @@ import logging
 import pytest
 from django.contrib.auth.models import Permission
 from django.urls import reverse
-
 from utils import user_grant_permission
 
 logger = logging.getLogger(__name__)

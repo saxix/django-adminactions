@@ -6,19 +6,18 @@ from io import BytesIO
 
 import xlwt
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db.models import FileField
-from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.db.transaction import atomic
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import dateformat
-from django.utils.encoding import force_text, smart_str
+from django.utils.encoding import force_str, smart_str
 from django.utils.timezone import get_default_timezone
 
 from . import compat
 from .templatetags.actions import get_field_value
-from .utils import clone_instance, get_field_by_path
+from .utils import clone_instance, get_field_by_path, get_ignored_fields
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -76,7 +75,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
         raise ValueError('Cannot save related with `commit=False`')
     with atomic():
         result = clone_instance(master)
-
         for fieldname in fields:
             f = get_field_by_path(master, fieldname)
             if isinstance(f, FileField) or f and not f.primary_key:
@@ -111,6 +109,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                     setattr(element, rel_fieldname, master)
                     element.save()
             other.delete()
+            ignored_fields = get_ignored_fields(result._meta.model, 'MERGE_ACTION_IGNORED_FIELDS')
+            for ig_field in ignored_fields:
+                setattr(result, ig_field, result._meta.get_field(ig_field).get_default())
             result.save()
             for fieldname, elements in list(all_m2m.items()):
                 dest_m2m = getattr(result, fieldname)
@@ -119,7 +120,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     return result
 
 
-class Echo(object):
+class Echo:
     """An object that implements just the write method of the file-like
     interface.
     """
@@ -299,7 +300,7 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.write(row, 0, u'#', style)
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name) for f in
+            header = [force_str(f.verbose_name) for f in
                       queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
@@ -422,14 +423,14 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
     formats = _get_qs_formats(queryset)
 
     row = 0
-    sheet.write(row, 0, force_text('#'), formats['_general_'])
+    sheet.write(row, 0, force_str('#'), formats['_general_'])
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name) for f in
+            header = [force_str(f.verbose_name) for f in
                       queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
-            sheet.write(row, col, force_text(fieldname), formats['_general_'])
+            sheet.write(row, col, force_str(fieldname), formats['_general_'])
 
     settingstime_zone = get_default_timezone()
 
@@ -453,13 +454,11 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                     except ValueError:
                         value = dateformat.format(value, config['datetime_format'])
 
-                # if isinstance(value, six.binary_type):
                 value = str(value)
 
                 sheet.write(rownum + 1, idx + 1, smart_str(value), fmt)
-            except Exception as e:
+            except BaseException:
                 raise
-                sheet.write(rownum + 1, idx + 1, smart_str(e), fmt)
 
     book.close()
     out.seek(0)
@@ -469,7 +468,6 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         response = HttpResponse(out.read(),
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         # content_type='application/vnd.ms-excel')
-        # response['Content-Disposition'] = six.b('attachment;filename="%s"') % six.b(filename.encode('us-ascii', 'replace'))
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
         return response
     return out
