@@ -58,7 +58,6 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     if related == ALL_FIELDS:
         related = [rel.get_accessor_name()
                    for rel in utils.get_all_related_objects(master)]
-    # for rel in master._meta.get_all_related_objects(False, False, False)]
 
     if m2m == ALL_FIELDS:
         m2m = set()
@@ -156,7 +155,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
         if filename is None:
             filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = response_class(content_type='text/csv')
-        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
+        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('utf-8', 'replace')
     else:
         response = out
 
@@ -269,8 +268,6 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
                     formats[i] = fmt
                 except FieldDoesNotExist:
                     pass
-                    # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
-                    # styles[i] = xls_options_default.get(col_class, 'general')
 
         return formats
 
@@ -278,7 +275,7 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
         if filename is None:
             filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
         response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
+        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('utf-8', 'replace')
     else:
         response = out
 
@@ -393,20 +390,11 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                     formats[fieldname] = fmt
                 except FieldDoesNotExist:
                     pass
-                    # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
-                    # styles[i] = xls_options_default.get(col_class, 'general')
-
         return formats
 
     http_response = out is None
     if out is None:
-        # if filename is None:
-        # filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        # response = HttpResponse(content_type='application/vnd.ms-excel')
-        # response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
         out = BytesIO()
-        #
-        # out = StringIO()
 
     config = xlsxwriter_options.copy()
     if options:

@@ -1,47 +1,61 @@
 {% extends "admin/change_form.html" %}{% load i18n static admin_modify admin_urls %}{% load url from aa_compat %}
 {% block extrahead %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'adminactions/js/jqplot/jquery.jqplot.min.css' %}"/>
-    <script>(function ($) {
-        jQuery = $.noConflict(true);
-    })(django.jQuery);</script>
-    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/jquery.jqplot.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.pieRenderer.js' %}"></script>
-    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.barRenderer.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.categoryAxisRenderer.min.js' %}"></script>
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'adminactions/js/jqplot/jquery.jqplot.min.css' %}"/>
+<script>(function ($) {
+  jQuery = $.noConflict(true);
+})(django.jQuery);</script>
+<script type="text/javascript" src="{% static 'adminactions/js/jqplot/jquery.jqplot.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.pieRenderer.js' %}"></script>
+<script type="text/javascript" src="{% static 'adminactions/js/jqplot/plugins/jqplot.barRenderer.min.js' %}"></script>
+<script type="text/javascript"
+        src="{% static 'adminactions/js/jqplot/plugins/jqplot.categoryAxisRenderer.min.js' %}"></script>
 
 
 {% endblock %}
 
 {% block breadcrumbs %}{% if not is_popup %}
-    <div class="breadcrumbs">
-        <a href="../../">{% trans "Home" %}</a> &rsaquo;
-        <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
-        <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-	{{ action_short_description|capfirst }}
-    </div>
-{% endif %}
-{% endblock %}
+<div class="breadcrumbs">
+  <a href="../../">{% trans "Home" %}</a> &rsaquo;
+  <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+  <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+  {{ action_short_description|capfirst }}
+</div>
+{% endif %}{% endblock %}
 
 {% block content %}
-    <div class="left">
-        <form action="." method="post">-{% csrf_token %}=
-            <table>
-                {{ adminform.form }}
-            </table>
-            <input type="hidden" name="action" value="{{ action }}"/>
-            <input type="submit" name="apply" value="go"/>
-        </form>
-    </div>
-    {% if graph_type %}
-        <div id="chart_div2" class='left'></div>
-        <div id="chart_div" style="height:300px; width:800px;"></div>
-    {% endif %}
-    <script type="text/javascript">
-        {%  if graph_type %}
-            (function ($) {
-                var plot1 = $.jqplot('chart_div', {{ as_json|safe }}, {{ extra|safe }});
-            })(django.jQuery);
-        {% endif %}
-    </script>
+<div class="left">
+  <form action="." method="post">-{% csrf_token %}=
+    <table>
+      {{ adminform.form }}
+    </table>
+    <input type="hidden" name="action" value="{{ action }}"/>
+    <input type="submit" name="apply" value="{% trans 'go' %}"/>
+  </form>
+</div>
+{% if graph_type %}
+<div id="chart_div2" class='left'></div>
+<div id="chart_div" style="height:300px; width:800px;"></div>
+{% endif %}
+<script type="text/javascript">
+  {%
+    if graph_type %}
+  (function ($) {
+    var plot1 = $.jqplot('chart_div', {
+    {
+      as_json | safe
+    }
+  },
+    {
+      {
+        extra | safe
+      }
+    }
+  )
+    ;
+  })(django.jQuery);
+  {%
+    endif %
+  }
+</script>
 {% endblock %}

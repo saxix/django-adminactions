@@ -30,11 +30,6 @@ class MergeFormBase(forms.Form):
     dependencies = forms.ChoiceField(label=_('Dependencies'),
                                      choices=((DEP_MOVE, _("Move")), (DEP_DELETE, _("Delete"))))
 
-    # generic = forms.ChoiceField(label=_('Search GenericForeignKeys'),
-    #                             help_text=_("Search for generic relation"),
-    #                             choices=((GEN_IGNORE, _("No")),
-    #                                      (GEN_RELATED, _("Only Related (look for Managers)")),
-    #                                      (GEN_DEEP, _("Analyze Mode (very slow)"))))
 
     master_pk = forms.CharField(widget=HiddenInput)
     other_pk = forms.CharField(widget=HiddenInput)
@@ -128,7 +123,6 @@ def merge(modeladmin, request, queryset):  # noqa
                 return (False, merge_form, merge_kwargs)
 
     tpl = 'adminactions/merge.html'
-    # transaction_supported = model_supports_transactions(modeladmin.model)
     ignored_fields = get_ignored_fields(queryset.model, "MERGE_ACTION_IGNORED_FIELDS")
 
     ctx = {
