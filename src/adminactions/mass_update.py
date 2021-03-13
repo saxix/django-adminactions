@@ -86,37 +86,30 @@ class OperationManager:
 
 
 OPERATIONS = OperationManager({
-    df.CharField: [('upper', (str.upper, False, True, "convert to uppercase")),
-                   ('lower', (str.lower, False, True, "convert to lowercase")),
-                   ('capitalize', (str.capitalize, False, True, "capitalize first character")),
-                   # ('capwords', (string.capwords, False, True, "capitalize each word")),
-                   # ('swapcase', (string.swapcase, False, True, "")),
-                   ('trim', (str.strip, False, True, "leading and trailing whitespace"))],
-    df.IntegerField: [('add percent', (add_percent, True, True, "add <arg> percent to existing value")),
+    df.CharField: [('upper', (str.upper, False, True, _("convert to uppercase"))),
+                   ('lower', (str.lower, False, True, _("convert to lowercase"))),
+                   ('capitalize', (str.capitalize, False, True, _("capitalize first character"))),
+                   ('trim', (str.strip, False, True, _("leading and trailing whitespace")))],
+    df.IntegerField: [('add percent', (add_percent, True, True, _("add <arg> percent to existing value"))),
                       ('sub percent', (sub_percent, True, True, "")),
                       ('sub', (sub_percent, True, True, "")),
                       ('add', (add, True, True, ""))],
     df.BooleanField: [('swap', (negate, False, True, ""))],
     df.NullBooleanField: [('swap', (negate, False, True, ""))],
     df.EmailField: [('change domain', (change_domain, True, True, "")),
-                    ('upper', (str.upper, False, True, "convert to uppercase")),
-                    ('lower', (str.lower, False, True, "convert to lowercase"))],
+                    ('upper', (str.upper, False, True, _("convert to uppercase"))),
+                    ('lower', (str.lower, False, True, _("convert to lowercase")))],
     df.URLField: [('change protocol', (change_protocol, True, True, ""))]
 })
 
 
 class MassUpdateForm(GenericActionForm):
-    _clean = forms.BooleanField(label='clean()',
+    _clean = forms.BooleanField(label=_('clean()'),
                                 required=False,
-                                help_text="if checked calls obj.clean()")
+                                help_text=_("if checked calls obj.clean()"))
 
-    _validate = forms.BooleanField(label='Validate',
-                                   help_text="if checked use obj.save() instead of manager.update()")
-
-    # _unique_transaction = forms.BooleanField(label='Unique transaction',
-    # required=False,
-    # help_text="If checked create one transaction for the whole update. "
-    #                                                    "If any record cannot be updated everything will be rolled-back")
+    _validate = forms.BooleanField(label=_('Validate'),
+                                   help_text=_("if checked use obj.save() instead of manager.update()"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -156,7 +149,6 @@ class MassUpdateForm(GenericActionForm):
                     enabler = 'chk_id_%s' % name
                     function = self.data.get('func_id_%s' % name, False)
                     if self.data.get(enabler, False):
-                        # field_object, model, direct, m2m = self._meta.model._meta.get_field_by_name(name)
                         field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
                         value = field.clean(raw_value)
                         if function:
@@ -179,9 +171,6 @@ class MassUpdateForm(GenericActionForm):
 
     def clean__validate(self):
         return bool(self.data.get('_validate', 0))
-
-    # def clean__unique_transaction(self):
-    #     return bool(self.data.get('_unique_transaction', 0))
 
     def clean__clean(self):
         return bool(self.data.get('_clean', 0))
@@ -302,7 +291,6 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.get_full_path())
 
-            # need_transaction = form.cleaned_data.get('_unique_transaction', False)
             validate = form.cleaned_data.get('_validate', False)
             clean = form.cleaned_data.get('_clean', False)
 
@@ -314,10 +302,10 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 values = {}
                 for field_name, value in list(form.cleaned_data.items()):
                     if isinstance(form.fields[field_name], ModelMultipleChoiceField):
-                        messages.error(request, "Unable no mass update ManyToManyField without 'validate'")
+                        messages.error(request, _("Unable no mass update ManyToManyField without 'validate'"))
                         return HttpResponseRedirect(request.get_full_path())
                     elif callable(value):
-                        messages.error(request, "Unable no mass update using operators without 'validate'")
+                        messages.error(request, _("Unable no mass update using operators without 'validate'"))
                         return HttpResponseRedirect(request.get_full_path())
                     elif field_name not in ['_selected_action', '_validate', 'select_across', 'action',
                                             '_unique_transaction', '_clean']:

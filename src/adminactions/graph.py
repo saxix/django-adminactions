@@ -31,8 +31,8 @@ def graph_form_factory(model):
              'select_across': BooleanField(initial='0', widget=HiddenInput, required=False),
              'app': CharField(initial=app_name, widget=HiddenInput),
              'model': CharField(initial=model_name, widget=HiddenInput),
-             'graph_type': ChoiceField(label="Graph type", choices=graphs, required=True),
-             'axes_x': ChoiceField(label="Group by and count by", choices=model_fields, required=True)}
+             'graph_type': ChoiceField(label=_("Graph type"), choices=graphs, required=True),
+             'axes_x': ChoiceField(label=_("Group by and count by"), choices=model_fields, required=True)}
 
     return DeclarativeFieldsMetaclass(str(class_name), (Form,), attrs)
 
@@ -125,7 +125,6 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                                      modeladmin=modeladmin,
                                      form=form)
     elif request.method == 'POST':
-        # total = queryset.all().count()
         initial = {helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                    'select_across': request.POST.get('select_across', 0)}
         form = MForm(initial=initial)
