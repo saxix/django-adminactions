@@ -2,6 +2,7 @@ import os
 import string
 from random import choice, randrange, shuffle
 
+from django import VERSION as django_version
 from django.conf import global_settings
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
@@ -171,7 +172,8 @@ class CheckSignalsMixin:
             adminaction_requested.connect(myhandler, sender=self.sender_model)
             self._run_action(1)
             self.assertTrue(myhandler.invoked)
-            self.assertIn(self.MESSAGE, self.app.cookies['messages'])
+            if django_version < (3, 2):
+                self.assertIn(self.MESSAGE, self.app.cookies['messages'])
         finally:
             adminaction_requested.disconnect(myhandler, sender=self.sender_model)
 
@@ -190,7 +192,8 @@ class CheckSignalsMixin:
             adminaction_start.connect(myhandler, sender=self.sender_model)
             self._run_action(2)
             self.assertTrue(myhandler.invoked)
-            self.assertIn(self.MESSAGE, self.app.cookies['messages'])
+            if django_version < (3, 2):
+                self.assertIn(self.MESSAGE, self.app.cookies['messages'])
         finally:
             adminaction_start.disconnect(myhandler, sender=self.sender_model)
 

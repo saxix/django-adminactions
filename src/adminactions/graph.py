@@ -83,7 +83,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                     for value, cnt in cc:
                         data_labels.append(str(field.rel.to.objects.get(pk=value)))
                 elif isinstance(field, BooleanField):
-                    data_labels = [str(l) for l, v in cc]
+                    data_labels = [str(label) for label, _ in cc]
                 elif hasattr(modeladmin.model, 'get_%s_display' % field.name):
                     data_labels = []
                     for value, cnt in cc:

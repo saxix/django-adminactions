@@ -4,7 +4,7 @@ from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
-
+from django import VERSION as django_version
 from demo.models import DemoModel
 
 __all__ = ['MassUpdateTest', ]
@@ -64,7 +64,8 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
 
     def test_validate_off(self):
         self._run_action(**{'_validate': 0})
-        self.assertIn("Unable no mass update using operators without", self.app.cookies['messages'])
+        if django_version < (3, 2):
+            self.assertIn("Unable no mass update using operators without", self.app.cookies['messages'])
 
     def test_clean_on(self):
         self._run_action(**{'_clean': 1})

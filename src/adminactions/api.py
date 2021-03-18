@@ -28,8 +28,6 @@ csv_options_default = {'date_format': 'd/m/Y',
                        'delimiter': ';',
                        'escapechar': '\\', }
 
-delimiters = ",;|:"
-quotes = "'\"`"
 escapechars = " \\"
 ALL_FIELDS = -999
 

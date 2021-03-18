@@ -1,11 +1,15 @@
+import csv
+
 from django import forms
 from django.forms.models import ModelForm
 from django.forms.widgets import SelectMultiple
 from django.utils import formats
 from django.utils.translation import gettext_lazy as _
 
-from .api import csv, delimiters, quotes
 from .utils import get_ignored_fields
+
+delimiters = ",;|:"
+quotes = "'\"`"
 
 
 class GenericActionForm(ModelForm):
