@@ -1,3 +1,8 @@
+Release 1.11
+=============
+* add new configuration settings.AA_PERMISSION_HANDLER to customise how to create extra permissions
+
+
 Release 1.10
 =============
 * Drop support Django < 2.2

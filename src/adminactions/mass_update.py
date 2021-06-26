@@ -22,7 +22,7 @@ from django.utils.translation import gettext as _
 from .compat import curry, get_field_by_name
 from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'

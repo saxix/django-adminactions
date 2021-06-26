@@ -15,7 +15,7 @@ from django.utils.translation import gettext as _
 
 from . import api, compat as transaction
 from .forms import GenericActionForm
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .utils import clone_instance, get_ignored_fields
 
 
