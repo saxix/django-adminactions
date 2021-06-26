@@ -199,7 +199,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
     """
 
     def not_required(field, **kwargs):
-        """force all fields as not required and return modeladmin field"""
+        """ force all fields as not required"""
         kwargs['required'] = False
         kwargs['request'] = request
         return modeladmin.formfield_for_dbfield(field, **kwargs)
