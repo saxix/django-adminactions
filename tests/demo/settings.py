@@ -91,6 +91,7 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',)
 
+MESSAGE_STORAGE = 'demo.storage.PlainCookieStorage'
 
 # MIDDLEWARE_CLASSES = [
 #     'django.middleware.security.SecurityMiddleware',
