@@ -1,3 +1,9 @@
+Release 1.10
+=============
+* Drop support Django < 2.2
+* change create_extra_permission to be executed after all other migrations
+* add `create_extra_permission` to handle situaations where permissions are not created for all models
+
 Release 1.9
 =============
 * Drop support Django < 2.2
