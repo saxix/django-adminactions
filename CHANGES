@@ -1,5 +1,6 @@
 Release 1.9
 =============
+* Drop support Django < 2.2
 * Official Django 3.2 support
 * Official Django 3.1 support
 * Official python 3.8 and 3.9 support
