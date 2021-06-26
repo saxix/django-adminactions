@@ -1,15 +1,19 @@
 from functools import partial
 
 import django.db.transaction as t
-
+import django
 
 class NoCommit(t.Atomic):
     def __exit__(self, exc_type, exc_value, traceback):
         super().__exit__(Exception, Exception(), None)
 
 
-def nocommit(using=None, savepoint=True):
-    return NoCommit(using, savepoint)
+if django.VERSION >= (3, 2):
+    def nocommit(using=None, savepoint=True, durable=False):
+        return NoCommit(using, savepoint, durable)
+else:
+    def nocommit(using=None, savepoint=True):
+        return NoCommit(using, savepoint)
 
 
 def get_field_by_name(model, name):
