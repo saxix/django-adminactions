@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 import json
 import re
@@ -13,12 +12,12 @@ from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory, )
+                                 modelform_factory,)
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from .compat import curry, get_field_by_name
 from .exceptions import ActionInterrupted
@@ -42,7 +41,7 @@ disable_if_not_nullable = lambda field: field.null
 disable_if_unique = lambda field: not field.unique
 
 
-class OperationManager(object):
+class OperationManager:
     """
     Operate like a dictionary where the key are django.form.Field classes
     and value are tuple of function, param_allowed, enabler, description
@@ -120,14 +119,11 @@ class MassUpdateForm(GenericActionForm):
     #                                                    "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
-        super(MassUpdateForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._errors = None
 
-    # def is_valid(self):
-    #    return super(MassUpdateForm, self).is_valid()
-
     def _get_validation_exclusions(self):
-        exclude = super(MassUpdateForm, self)._get_validation_exclusions()
+        exclude = super()._get_validation_exclusions()
         for name, field in list(self.fields.items()):
             function = self.data.get('func_id_%s' % name, False)
             if function:

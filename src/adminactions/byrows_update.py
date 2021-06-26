@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from .forms import GenericActionForm
 from .models import get_permission_codename
 from .utils import get_ignored_fields
+
 
 def byrows_update(modeladmin, request, queryset):  # noqa
     """
@@ -28,7 +28,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     class modelform(modeladmin.form):
         def __init__(self, *args, **kwargs):
-            super(modeladmin.form, self).__init__(*args, **kwargs)
+            super().__init__(*args, **kwargs)
             if self.instance:
                 readonly_fields = (modeladmin.model._meta.pk.name,) + tuple(modeladmin.get_readonly_fields(request))
                 for fname in readonly_fields:

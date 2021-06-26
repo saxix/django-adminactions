@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.apps import apps
 from django.db.models.signals import post_migrate, pre_migrate
 

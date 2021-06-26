@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from functools import partial
 
 import django.db.transaction as t
@@ -6,7 +5,7 @@ import django
 
 class NoCommit(t.Atomic):
     def __exit__(self, exc_type, exc_value, traceback):
-        super(NoCommit, self).__exit__(Exception, Exception(), None)
+        super().__exit__(Exception, Exception(), None)
 
 
 if django.VERSION >= (3, 2):

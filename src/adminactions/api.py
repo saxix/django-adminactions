@@ -6,18 +6,13 @@ from io import BytesIO
 
 import xlwt
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db.models import FileField
-
-try:
-    from django.core.exceptions import FieldDoesNotExist
-except:
-    from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.db.transaction import atomic
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import dateformat
-from django.utils.encoding import force_text, smart_str
+from django.utils.encoding import force_str, smart_str
 from django.utils.timezone import get_default_timezone
 
 from . import compat
@@ -125,7 +120,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     return result
 
 
-class Echo(object):
+class Echo:
     """An object that implements just the write method of the file-like
     interface.
     """
@@ -219,7 +214,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
 
     if streaming_enabled:
         content_attr = 'content' if (
-                StreamingHttpResponse is HttpResponse) else 'streaming_content'
+            StreamingHttpResponse is HttpResponse) else 'streaming_content'
         setattr(response, content_attr,
                 itertools.chain(yield_header(), yield_rows()))
     else:
@@ -305,7 +300,7 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     sheet.write(row, 0, u'#', style)
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name) for f in
+            header = [force_str(f.verbose_name) for f in
                       queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
@@ -428,14 +423,14 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
     formats = _get_qs_formats(queryset)
 
     row = 0
-    sheet.write(row, 0, force_text('#'), formats['_general_'])
+    sheet.write(row, 0, force_str('#'), formats['_general_'])
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_text(f.verbose_name) for f in
+            header = [force_str(f.verbose_name) for f in
                       queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
 
         for col, fieldname in enumerate(header, start=1):
-            sheet.write(row, col, force_text(fieldname), formats['_general_'])
+            sheet.write(row, col, force_str(fieldname), formats['_general_'])
 
     settingstime_zone = get_default_timezone()
 
@@ -459,13 +454,11 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                     except ValueError:
                         value = dateformat.format(value, config['datetime_format'])
 
-                # if isinstance(value, six.binary_type):
                 value = str(value)
 
                 sheet.write(rownum + 1, idx + 1, smart_str(value), fmt)
-            except Exception as e:
+            except BaseException:
                 raise
-                sheet.write(rownum + 1, idx + 1, smart_str(e), fmt)
 
     book.close()
     out.seek(0)
@@ -475,7 +468,6 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         response = HttpResponse(out.read(),
                                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         # content_type='application/vnd.ms-excel')
-        # response['Content-Disposition'] = six.b('attachment;filename="%s"') % six.b(filename.encode('us-ascii', 'replace'))
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
         return response
     return out

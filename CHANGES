@@ -2,7 +2,7 @@ Release 1.9
 =============
 * Official Django 3.2 support
 * Official Django 3.1 support
-* Official python 3.8 support
+* Official python 3.8 and 3.9 support
 * MassUpdate: add new settings configuration `UPDATE_ACTION_IGNORED_FIELDS`. (thanks PetrKudy)
 * Merge: add new settings configuration `MERGE_ACTION_IGNORED_FIELDS`. (thanks PetrKudy)
 * change create_extra_permission to be executed after all other migrations

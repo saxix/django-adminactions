@@ -5,7 +5,7 @@ from adminactions.utils import get_verbose_name
 
 
 def test_get_verbose_name():
-    from django.contrib.auth.models import User, Permission
+    from django.contrib.auth.models import Permission, User
 
     user = User()
     p = Permission()
