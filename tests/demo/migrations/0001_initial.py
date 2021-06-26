@@ -23,7 +23,6 @@ class Migration(migrations.Migration):
                 ('char', models.CharField(max_length=255, verbose_name='Chäř')),
                 ('integer', models.IntegerField()),
                 ('logic', models.BooleanField(default=False)),
-                ('null_logic', models.NullBooleanField(default=None)),
                 ('date', models.DateField()),
                 ('datetime', models.DateTimeField()),
                 ('time', models.TimeField()),

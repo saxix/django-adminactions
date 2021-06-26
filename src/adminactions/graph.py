@@ -1,4 +1,3 @@
-
 import json
 
 from django.contrib import messages
@@ -14,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .compat import get_field_by_name
 from .exceptions import ActionInterrupted
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 
@@ -83,14 +82,14 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                     for value, cnt in cc:
                         data_labels.append(str(field.rel.to.objects.get(pk=value)))
                 elif isinstance(field, BooleanField):
-                    data_labels = [str(l) for l, v in cc]
+                    data_labels = [str(label) for label, v in cc]
                 elif hasattr(modeladmin.model, 'get_%s_display' % field.name):
                     data_labels = []
                     for value, cnt in cc:
                         data_labels.append(smart_str(dict(field.flatchoices).get(value, value), strings_only=True))
                 else:
-                    data_labels = [str(l) for l, v in cc]
-                data = [v for l, v in cc]
+                    data_labels = [str(label) for label, v in cc]
+                data = [v for label, v in cc]
 
                 if graph_type == 'BarChart':
                     table = [data]

@@ -11,7 +11,7 @@ class DemoModel(models.Model):
     char = models.CharField('Chäř', max_length=255)
     integer = models.IntegerField()
     logic = models.BooleanField(default=False)
-    null_logic = models.NullBooleanField(default=None)
+    # null_logic = models.NullBooleanField(default=None)
     date = models.DateField()
     datetime = models.DateTimeField()
     time = models.TimeField()
