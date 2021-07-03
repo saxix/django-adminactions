@@ -1,9 +1,24 @@
+Release 1.11
+=============
+* add new configuration settings.AA_PERMISSION_HANDLER to customise how to create extra permissions
+
+
+Release 1.10
+=============
+* Drop support Django < 2.2
+* change create_extra_permission to be executed after all other migrations
+* add `create_extra_permission` to handle situaations where permissions are not created for all models
+
 Release 1.9
 =============
+* Drop support Django < 2.2
+* Official Django 3.2 support
 * Official Django 3.1 support
 * Official python 3.8 and 3.9 support
 * MassUpdate: add new settings configuration `UPDATE_ACTION_IGNORED_FIELDS`. (thanks PetrKudy)
 * Merge: add new settings configuration `MERGE_ACTION_IGNORED_FIELDS`. (thanks PetrKudy)
+* change create_extra_permission to be executed after all other migrations
+* add `create_extra_permission` to handle situaations where permissions are not created for all models
 
 
 Release 1.8.1
@@ -36,7 +51,7 @@ Release 1.6
 =================
 * fixes :ghissue:`142` Updates README.rst with svg badges
 * fixes :ghissue:`136` RemovedInDjango19Warning
-* add official support for Django up to 2.0 and Python 3.6
+* add official support to Django 2.0 and Python 3.6
 * `add_to_site` now accept `include` argument
 * cleaner merge interface
 
@@ -59,7 +74,7 @@ Release 1.4
 
 
 Release 1.3
-===========fir
+===========
 * fixes :ghissue:`92` translations are not compiled in package
 * fixes :ghissue:`105` Support exporting many to many fields
 * fixes :ghissue:`109` AttributeError: module 'adminactions.compat' has no attribute 'nocommit'

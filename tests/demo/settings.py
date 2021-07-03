@@ -76,12 +76,6 @@ MEDIA_URL = ''
 STATIC_ROOT = os.path.join(here, 'static')
 STATIC_URL = '/static/'
 SECRET_KEY = 'c73*n!y=)tziu^2)y*@5i2^)$8z$tx#b9*_r3i6o1ohxo%*2^a'
-# MIDDLEWARE_CLASSES = (
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',)
 
 MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -90,18 +84,14 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',)
 
-
-# MIDDLEWARE_CLASSES = [
-#     'django.middleware.security.SecurityMiddleware',
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-# ]
+MESSAGE_STORAGE = 'demo.storage.PlainCookieStorage'
 
 ROOT_URLCONF = 'demo.urls'
+
+
+from adminactions.perms import AA_PERMISSION_CREATE_USE_COMMAND
+
+AA_PERMISSION_HANDLER = AA_PERMISSION_CREATE_USE_COMMAND
 
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -112,15 +102,6 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'adminactions.apps.Config',
     'demo']
-
-# TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
-
-# DDF_DEFAULT_DATA_FIXTURE = 'utils.DataFixtureClass'
-
-# TEMPLATE_LOADERS = (
-#     'django.template.loaders.filesystem.Loader',
-#     'django.template.loaders.app_directories.Loader',
-# )
 
 CACHES = {
     'default': {
