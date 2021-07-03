@@ -6,7 +6,6 @@ from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 
 from adminactions.compat import get_field_by_name
-from adminactions.mass_update import OPERATIONS
 
 register = Library()
 
@@ -93,6 +92,8 @@ class SelectOptionsAttribute(widgets.Select):
 
 @register.simple_tag
 def field_function(model, form_field):
+    from adminactions.mass_update import OPERATIONS
+
     model_object, model, direct, m2m = get_field_by_name(model, form_field.name)
     attrs = {'class': 'func_select'}
     options_attrs = {}
