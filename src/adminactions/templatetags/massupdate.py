@@ -27,7 +27,10 @@ def link_fields_values(d, field_name):
     >>> data = {'name1': [(1, 'value1.1'), (11, 'value1.2')],
     ...         'name2': [(2, 'value2.1'), (22, 'value2.2')], }
     >>> print(link_fields_values(data, 'name1'))
-    <a name="name1_fastfieldvalue"><a href="#name1_fastfieldvalue" data-value="1" class="fastfieldvalue name1 value">value1.1</a>, <a name="name1_fastfieldvalue"><a href="#name1_fastfieldvalue" data-value="11" class="fastfieldvalue name1 value">value1.2</a>
+    <a name="name1_fastfieldvalue"><a href="#name1_fastfieldvalue" \
+data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
+<a name="name1_fastfieldvalue">\
+<a href="#name1_fastfieldvalue" data-value="11" class="fastfieldvalue name1 value">value1.2</a>
     """
     ret = []
     name = "{0}_fastfieldvalue".format(field_name)

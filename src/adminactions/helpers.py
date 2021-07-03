@@ -12,7 +12,6 @@ class ImportFixtureForm(forms.Form):
     use_natural_foreign_keys = forms.BooleanField(required=False)
     use_natural_primary_keys = forms.BooleanField(required=False)
 
-
     def clean(self):
         if not (self.cleaned_data['fixture_file'] or self.cleaned_data['fixture_content']):
             raise ValidationError('You must provide file or content')
