@@ -1,5 +1,3 @@
-from itertools import chain
-
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -13,6 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from itertools import chain
 
 from .api import (export_as_csv as _export_as_csv,
                   export_as_xls as _export_as_xls,)
