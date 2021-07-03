@@ -17,7 +17,7 @@ jobs:
                   tox -e lint
 
     test:
-        if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+#        if: ${{github.event}} && ${{ !contains(github.event.head_commit.message, 'ci skip') }}
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
