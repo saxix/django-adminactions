@@ -5,9 +5,11 @@ class Config(AppConfig):
     name = 'adminactions'
 
     def ready(self):
-        from . import checks  # noqa
-        import adminactions.perms as p
         from django.conf import settings
+
+        import adminactions.perms as p
+
+        from . import checks  # noqa
         p.AA_PERMISSION_HANDLER = getattr(settings, 'AA_PERMISSION_HANDLER',
                                           p.AA_PERMISSION_CREATE_USE_SIGNAL)
 
