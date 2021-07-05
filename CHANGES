@@ -1,7 +1,10 @@
+Release 1.12
+=============
+* Add GitHub Actions / lint
+
 Release 1.11
 =============
 * add new configuration settings.AA_PERMISSION_HANDLER to customise how to create extra permissions
-
 
 Release 1.10
 =============
