@@ -6,7 +6,6 @@ from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 
 from adminactions.compat import get_field_by_name
-from adminactions.mass_update import OPERATIONS
 
 register = Library()
 
@@ -28,7 +27,10 @@ def link_fields_values(d, field_name):
     >>> data = {'name1': [(1, 'value1.1'), (11, 'value1.2')],
     ...         'name2': [(2, 'value2.1'), (22, 'value2.2')], }
     >>> print(link_fields_values(data, 'name1'))
-    <a name="name1_fastfieldvalue"><a href="#name1_fastfieldvalue" data-value="1" class="fastfieldvalue name1 value">value1.1</a>, <a name="name1_fastfieldvalue"><a href="#name1_fastfieldvalue" data-value="11" class="fastfieldvalue name1 value">value1.2</a>
+    <a name="name1_fastfieldvalue"><a href="#name1_fastfieldvalue" \
+data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
+<a name="name1_fastfieldvalue">\
+<a href="#name1_fastfieldvalue" data-value="11" class="fastfieldvalue name1 value">value1.2</a>
     """
     ret = []
     name = "{0}_fastfieldvalue".format(field_name)
@@ -93,6 +95,8 @@ class SelectOptionsAttribute(widgets.Select):
 
 @register.simple_tag
 def field_function(model, form_field):
+    from adminactions.mass_update import OPERATIONS
+
     model_object, model, direct, m2m = get_field_by_name(model, form_field.name)
     attrs = {'class': 'func_select'}
     options_attrs = {}

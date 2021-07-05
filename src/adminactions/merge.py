@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -130,7 +129,8 @@ def merge(modeladmin, request, queryset):  # noqa
         'transaction_supported': 'Un',
         'select_across': request.POST.get('select_across') == '1',
         'action': request.POST.get('action'),
-        'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable and f.name not in ignored_fields],
+        'fields': [f for f in queryset.model._meta.fields
+                   if not f.primary_key and f.editable and f.name not in ignored_fields],
         'app_label': queryset.model._meta.app_label,
         'result': '',
         'opts': queryset.model._meta}
