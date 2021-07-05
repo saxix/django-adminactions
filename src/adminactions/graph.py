@@ -1,6 +1,4 @@
-
 import json
-
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.db.models.aggregates import Count
@@ -14,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .compat import get_field_by_name
 from .exceptions import ActionInterrupted
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 
@@ -22,7 +20,7 @@ def graph_form_factory(model):
     app_name = model._meta.app_label
     model_name = model.__name__
 
-    model_fields = [(f.name, f.verbose_name) for f in model._meta.fields if not f.primary_key]
+    model_fields = [(str(f.name), str(f.verbose_name)) for f in model._meta.fields if not f.primary_key]
     graphs = [('PieChart', 'PieChart'), ('BarChart', 'BarChart')]
     model_fields.insert(0, ('', 'N/A'))
     class_name = "%s%sGraphForm" % (app_name, model_name)
@@ -89,8 +87,8 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                     for value, cnt in cc:
                         data_labels.append(smart_str(dict(field.flatchoices).get(value, value), strings_only=True))
                 else:
-                    data_labels = [str(l) for l, v in cc]
-                data = [v for l, v in cc]
+                    data_labels = [str(label) for label, v in cc]
+                data = [str(v) for label, v in cc]
 
                 if graph_type == 'BarChart':
                     table = [data]
@@ -107,7 +105,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                                       }
                                 }""" % (json.dumps(data_labels), json.dumps(data_labels))
                 elif graph_type == 'PieChart':
-                    table = [list(zip(data_labels, data))]
+                    table = [list(zip(list(map(str, data_labels)), list(map(str, data))))]
                     extra = """{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,
                                                 rendererOptions: {fill: true,
                                                                     showDataLabels: true,

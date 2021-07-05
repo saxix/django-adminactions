@@ -1,0 +1,22 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load i18n static extra_urls admin_list admin_urls %}
+{% block breadcrumbs-items %}
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  {% if original %}
+  &rsaquo; <a href="{% url opts|admin_urlname:'change' original.pk %}">{{ original }}</a>
+  {% endif %}
+  {% block breadcrumbs-active %}&rsaquo; {{ action|default_if_empty:title }}{% endblock breadcrumbs-active %}
+{% endblock breadcrumbs-items %}
+
+{% block action-content %}
+  <form method="post">
+    {% csrf_token %}
+    <table>
+    {{ form }}
+    </table>
+  <input type="submit" value="Import">
+  </form>
+
+
+{% endblock %}

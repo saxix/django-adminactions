@@ -2,7 +2,6 @@ import datetime
 import json
 import re
 from collections import OrderedDict as SortedDict, defaultdict
-
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -22,7 +21,7 @@ from django.utils.translation import gettext as _
 from .compat import curry, get_field_by_name
 from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
@@ -116,7 +115,7 @@ class MassUpdateForm(GenericActionForm):
     # _unique_transaction = forms.BooleanField(label='Unique transaction',
     # required=False,
     # help_text="If checked create one transaction for the whole update. "
-    #                                                    "If any record cannot be updated everything will be rolled-back")
+    # "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -199,7 +198,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
     """
 
     def not_required(field, **kwargs):
-        """force all fields as not required and return modeladmin field"""
+        """ force all fields as not required"""
         kwargs['required'] = False
         kwargs['request'] = request
         return modeladmin.formfield_for_dbfield(field, **kwargs)

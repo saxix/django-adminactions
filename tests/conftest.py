@@ -53,7 +53,7 @@ def pytest_configure(config):
 
     if config.option.markexpr.find("selenium") < 0 and \
         not config.option.keyword and \
-            config.option.keyword.find('selenium') < 0:
+        config.option.keyword.find('selenium') < 0:
         if not config.option.selenium_enable:
             setattr(config.option, 'markexpr', 'not selenium')
 
@@ -78,6 +78,12 @@ def pytest_configure(config):
                 logger = logging.getLogger(pkg)
                 logger.setLevel(levelNames[level])
                 logger.addHandler(handler)
+
+
+@pytest.fixture(autouse=True)
+def create_aa_permissions(db):
+    from adminactions.perms import create_extra_permissions
+    create_extra_permissions()
 
 
 @pytest.fixture(scope='function')
@@ -123,4 +129,3 @@ def administrator():
                                                        password=PWD,
                                                        email="sax@noreply.org")
     return superuser
-

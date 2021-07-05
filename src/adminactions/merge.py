@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -15,7 +14,7 @@ from django.utils.translation import gettext as _
 
 from . import api, compat as transaction
 from .forms import GenericActionForm
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .utils import clone_instance, get_ignored_fields
 
 
@@ -136,7 +135,8 @@ def merge(modeladmin, request, queryset):  # noqa
         'transaction_supported': 'Un',
         'select_across': request.POST.get('select_across') == '1',
         'action': request.POST.get('action'),
-        'fields': [f for f in queryset.model._meta.fields if not f.primary_key and f.editable and f.name not in ignored_fields],
+        'fields': [f for f in queryset.model._meta.fields
+                   if not f.primary_key and f.editable and f.name not in ignored_fields],
         'app_label': queryset.model._meta.app_label,
         'result': '',
         'opts': queryset.model._meta}

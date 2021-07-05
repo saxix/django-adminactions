@@ -13,19 +13,21 @@ if db == 'pg':
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'adminactions',
-            'HOST': '127.0.0.1',
-            'PORT': '',
-            'USER': 'postgres',
-            'PASSWORD': ''}}
+            'HOST': os.environ.get('PG_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('PG_PORT', ''),
+            'USER': os.environ.get('PG_USER', 'postgres'),
+            'PASSWORD': os.environ.get('PG_PASSWORD', ''),
+            }}
 elif db == 'mysql':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'adminactions',
-            'HOST': '127.0.0.1',
-            'PORT': '',
-            'USER': 'root',
-            'PASSWORD': '',
+            'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('MYSQL_PORT', ''),
+            'USER': os.environ.get('MYSQL_USER', 'root'),
+            'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
+
             'CHARSET': 'utf8',
             'COLLATION': 'utf8_general_ci',
             'TEST': {
@@ -39,10 +41,11 @@ elif db == 'myisam':
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'adminactions',
-            'HOST': '127.0.0.1',
-            'PORT': '',
-            'USER': 'root',
-            'PASSWORD': '',
+            'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('MYSQL_PORT', ''),
+            'USER': os.environ.get('MYSQL_USER', 'root'),
+            'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
+
             'CHARSET': 'utf8',
             'OPTIONS': {'init_command': 'SET storage_engine=MyISAM'},
             'COLLATION': 'utf8_general_ci',
@@ -76,12 +79,6 @@ MEDIA_URL = ''
 STATIC_ROOT = os.path.join(here, 'static')
 STATIC_URL = '/static/'
 SECRET_KEY = 'c73*n!y=)tziu^2)y*@5i2^)$8z$tx#b9*_r3i6o1ohxo%*2^a'
-# MIDDLEWARE_CLASSES = (
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',)
 
 MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -90,18 +87,14 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',)
 
-
-# MIDDLEWARE_CLASSES = [
-#     'django.middleware.security.SecurityMiddleware',
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-# ]
+MESSAGE_STORAGE = 'demo.storage.PlainCookieStorage'
 
 ROOT_URLCONF = 'demo.urls'
+
+
+from adminactions.perms import AA_PERMISSION_CREATE_USE_COMMAND
+
+AA_PERMISSION_HANDLER = AA_PERMISSION_CREATE_USE_COMMAND
 
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -110,17 +103,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'admin_extra_urls',
     'adminactions.apps.Config',
     'demo']
-
-# TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
-
-# DDF_DEFAULT_DATA_FIXTURE = 'utils.DataFixtureClass'
-
-# TEMPLATE_LOADERS = (
-#     'django.template.loaders.filesystem.Loader',
-#     'django.template.loaders.app_directories.Loader',
-# )
 
 CACHES = {
     'default': {
@@ -163,6 +148,7 @@ TEMPLATES = [
              'django.template.context_processors.media',
              'django.template.context_processors.static',
              'django.template.context_processors.tz',
+             "django.template.context_processors.request",
              'django.contrib.messages.context_processors.messages',
          ],
      },

@@ -19,3 +19,4 @@ sonar-project.properties
 Pipfile
 Pipfile.lock
 poetry.lock
+pyproject.toml

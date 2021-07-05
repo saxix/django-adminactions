@@ -1,7 +1,9 @@
 check-manifest
 django-dynamic-fixture
-django-webtest
+django-webtest>1.9.6
+django-admin-extra-urls
 flake8
+flake8-isort
 mock>=1.0.1
 modernize
 pillow

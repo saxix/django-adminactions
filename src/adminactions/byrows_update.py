@@ -7,7 +7,7 @@ from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
 
 from .forms import GenericActionForm
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .utils import get_ignored_fields
 
 

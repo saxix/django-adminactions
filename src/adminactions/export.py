@@ -1,5 +1,3 @@
-from itertools import chain
-
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -13,12 +11,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from itertools import chain
 
 from .api import (export_as_csv as _export_as_csv,
                   export_as_xls as _export_as_xls,)
 from .exceptions import ActionInterrupted
 from .forms import CSVOptions, XLSOptions
-from .models import get_permission_codename
+from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 

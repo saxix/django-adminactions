@@ -1,0 +1,13 @@
+[flake8]
+max-complexity = 14
+max-line-length = 120
+exclude = _plugin_template migrations settings python_twitter tweepy
+ignore = E401,W391,E128,E261,E731,Q000,W504,W606
+putty-ignore =
+    ;    tests/test_choice_as_instance.py : E501
+    tests/test_multiple.py : E501
+    src/bitcaster/dispatchers/handlers/__init__.py:F401
+
+per-file-ignores =
+    */__init__.py:F401,F403
+    src/bitcaster/utils/backup.py:C901

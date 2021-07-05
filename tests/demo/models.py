@@ -2,6 +2,9 @@ from django.contrib.admin import ModelAdmin, site
 from django.contrib.auth.models import User
 from django.db import models
 
+from admin_extra_urls.api import button
+from admin_extra_urls.mixins import ExtraUrlMixin
+
 
 class SubclassedImageField(models.ImageField):
     pass
@@ -11,7 +14,7 @@ class DemoModel(models.Model):
     char = models.CharField('Chäř', max_length=255)
     integer = models.IntegerField()
     logic = models.BooleanField(default=False)
-    null_logic = models.NullBooleanField(default=None)
+    # null_logic = models.NullBooleanField(default=None)
     date = models.DateField()
     datetime = models.DateTimeField()
     time = models.TimeField()
@@ -55,13 +58,18 @@ class DemoOneToOne(models.Model):
         app_label = 'demo'
 
 
-class UserDetailModelAdmin(ModelAdmin):
+class UserDetailModelAdmin(ExtraUrlMixin, ModelAdmin):
     list_display = [f.name for f in UserDetail._meta.fields]
 
 
-class DemoModelAdmin(ModelAdmin):
+class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
     # list_display = ('char', 'integer', 'logic', 'null_logic',)
     list_display = [f.name for f in DemoModel._meta.fields]
+
+    @button()
+    def import_fixture(self, request):
+        from adminactions.helpers import import_fixture as _import_fixture
+        return _import_fixture(self, request)
 
 
 site.register(DemoModel, DemoModelAdmin)
