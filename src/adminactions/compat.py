@@ -1,7 +1,6 @@
-from functools import partial
-
-import django.db.transaction as t
 import django
+import django.db.transaction as t
+from functools import partial
 
 
 class NoCommit(t.Atomic):

@@ -2,7 +2,6 @@ import datetime
 import json
 import re
 from collections import OrderedDict as SortedDict, defaultdict
-
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -116,7 +115,7 @@ class MassUpdateForm(GenericActionForm):
     # _unique_transaction = forms.BooleanField(label='Unique transaction',
     # required=False,
     # help_text="If checked create one transaction for the whole update. "
-    #                                                    "If any record cannot be updated everything will be rolled-back")
+    # "If any record cannot be updated everything will be rolled-back")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

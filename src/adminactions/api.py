@@ -2,8 +2,6 @@ import collections
 import csv
 import datetime
 import itertools
-from io import BytesIO
-
 import xlwt
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
@@ -14,6 +12,7 @@ from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_str, smart_str
 from django.utils.timezone import get_default_timezone
+from io import BytesIO
 
 from . import compat
 from .templatetags.actions import get_field_value

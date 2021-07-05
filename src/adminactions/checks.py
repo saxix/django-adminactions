@@ -4,10 +4,10 @@ from django.core.checks import Error, register
 @register()
 def check_adminactions_settings(app_configs, **kwargs):
     errors = []
-    from adminactions.perms import AA_PERMISSION_HANDLER
-    from adminactions.perms import AA_PERMISSION_CREATE_USE_COMMAND
-    from adminactions.perms import AA_PERMISSION_CREATE_USE_APPCONFIG
-    from adminactions.perms import AA_PERMISSION_CREATE_USE_SIGNAL
+    from adminactions.perms import (AA_PERMISSION_CREATE_USE_APPCONFIG,
+                                    AA_PERMISSION_CREATE_USE_COMMAND,
+                                    AA_PERMISSION_CREATE_USE_SIGNAL,
+                                    AA_PERMISSION_HANDLER,)
 
     if AA_PERMISSION_HANDLER not in [AA_PERMISSION_CREATE_USE_APPCONFIG,
                                      AA_PERMISSION_CREATE_USE_SIGNAL,
