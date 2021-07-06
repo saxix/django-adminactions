@@ -52,7 +52,8 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             form.set('_selected_action', True, 0)
             form.set('_selected_action', True, 1)
             res = form.submit()
-            res.form['use_natural_key'] = True
+            res.form['use_natural_pk'] = False
+            res.form['use_natural_fk'] = True
             res = res.form.submit('apply')
             assert res.json[0]['pk'] == 1
 
@@ -66,7 +67,8 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             form.set('_selected_action', True, 0)
             form.set('_selected_action', True, 1)
             res = form.submit()
-            res.form['use_natural_key'] = True
+            res.form['use_natural_pk'] = False
+            res.form['use_natural_fk'] = True
             res.form['add_foreign_keys'] = True
             res = res.form.submit('apply')
             assert res.json[0]['pk'] == 1
@@ -110,7 +112,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
             form['action'] = self.action_name
             self._select_rows(form, [0, 1])
             res = form.submit()
-            res.form['use_natural_key'] = True
+            res.form['use_natural_fk'] = True
             res = res.form.submit('apply')
             assert res.json[0]['pk'] == 1
 
