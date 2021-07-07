@@ -199,7 +199,8 @@ class FixtureOptions(forms.Form):
                                        widget=forms.HiddenInput({'class': 'select-across'}))
     action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
 
-    use_natural_key = forms.BooleanField(required=False)
+    use_natural_pk = forms.BooleanField(label=_('Use Natural Primary Keys'), required=False)
+    use_natural_fk = forms.BooleanField(label=_('Use Natural Foreign Keys'), required=False)
     on_screen = forms.BooleanField(label='Dump on screen', required=False)
     add_foreign_keys = forms.BooleanField(required=False)
 
@@ -212,7 +213,8 @@ def _dump_qs(form, queryset, data, filename):
 
     json = ser.get_serializer(fmt)()
     ret = json.serialize(data,
-                         use_natural_foreign_keys=form.cleaned_data.get('use_natural_key', False),
+                         use_natural_foreign_keys=form.cleaned_data.get('use_natural_fk', False),
+                         use_natural_primary_keys=form.cleaned_data.get('use_natural_pk', False),
                          indent=form.cleaned_data.get('indent'))
 
     response = HttpResponse(content_type='application/json')
