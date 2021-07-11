@@ -30,7 +30,6 @@ class MergeFormBase(forms.Form):
     dependencies = forms.ChoiceField(label=_('Dependencies'),
                                      choices=((DEP_MOVE, _("Move")), (DEP_DELETE, _("Delete"))))
 
-
     master_pk = forms.CharField(widget=HiddenInput)
     other_pk = forms.CharField(widget=HiddenInput)
     field_names = forms.CharField(required=False, widget=HiddenInput)

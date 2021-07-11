@@ -2,7 +2,6 @@ import datetime
 import json
 import re
 from collections import OrderedDict as SortedDict, defaultdict
-
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
