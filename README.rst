@@ -38,14 +38,14 @@ Project links
 
 
 
-.. |master-build| image:: https://secure.travis-ci.org/saxix/django-adminactions.svg?branch=master
+.. |master-build| image:: https://github.com/saxix/django-adminactions/actions/workflows/test.yml/badge.svg?branch=master
                     :target: http://travis-ci.org/saxix/django-adminactions/
 
 .. |master-cov| image:: https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=master
     :target: https://codecov.io/github/saxix/django-adminactions?branch=develop
 
 
-.. |dev-build| image:: https://secure.travis-ci.org/saxix/django-adminactions.svg?branch=develop
+.. |dev-build| image:: https://github.com/saxix/django-adminactions/actions/workflows/test.yml/badge.svg?branch=develop
                   :target: http://travis-ci.org/saxix/django-adminactions/
 
 .. |dev-cov| image:: https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=develop
