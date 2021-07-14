@@ -55,6 +55,7 @@ class XLSOptions(forms.Form):
     select_across = forms.BooleanField(label='', required=False, initial=0,
                                        widget=forms.HiddenInput({'class': 'select-across'}))
     action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
+
     header = forms.BooleanField(label=_('Header'), required=False)
     use_display = forms.BooleanField(label=_('Use display'), required=False)
     columns = forms.MultipleChoiceField(label=_('Columns'), widget=SelectMultiple(attrs={'size': 20}))
