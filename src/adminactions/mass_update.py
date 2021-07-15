@@ -382,3 +382,4 @@ def mass_update(modeladmin, request, queryset):  # noqa
 
 
 mass_update.short_description = _("Mass update")
+mass_update.base_permission = 'adminactions_massupdate'

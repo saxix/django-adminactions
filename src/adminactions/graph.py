@@ -153,3 +153,4 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
 
 
 graph_queryset.short_description = _("Graph selected records")
+graph_queryset.base_permission = 'adminactions_chart'

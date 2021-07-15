@@ -132,6 +132,7 @@ def export_as_csv(modeladmin, request, queryset):
 
 
 export_as_csv.short_description = _("Export as CSV")
+export_as_csv.base_permission = 'adminactions_export'
 
 
 def export_as_xls(modeladmin, request, queryset):
@@ -148,7 +149,7 @@ def export_as_xls(modeladmin, request, queryset):
 
 
 export_as_xls.short_description = _("Export as XLS")
-
+export_as_xls.base_permission = 'adminactions_export'
 
 class FlatCollector:
     def __init__(self, using):
@@ -307,7 +308,7 @@ def export_as_fixture(modeladmin, request, queryset):
 
 
 export_as_fixture.short_description = _("Export as fixture")
-
+export_as_fixture.base_permission = 'adminactions_export'
 
 def export_delete_tree(modeladmin, request, queryset):  # noqa
     """
@@ -399,3 +400,4 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
 
 
 export_delete_tree.short_description = _("Export delete tree")
+export_delete_tree.base_permission = 'adminactions_export'

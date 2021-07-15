@@ -212,3 +212,4 @@ def merge(modeladmin, request, queryset):  # noqa
 
 
 merge.short_description = _("Merge selected %(verbose_name_plural)s")
+merge.base_permission = 'adminactions_merge'

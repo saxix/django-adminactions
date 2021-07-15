@@ -89,7 +89,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
 
 byrows_update.short_description = _("By rows update")
-
+byrows_update.base_permission = 'adminactions_byrowsupdate'
 
 def byrows_update_get_fields(modeladmin):
     """

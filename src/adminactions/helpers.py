@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.template.response import TemplateResponse
-
+from .perms import get_permission_codename
 
 class ImportFixtureForm(forms.Form):
     fixture_file = forms.FileField(required=False)
@@ -51,4 +51,17 @@ def import_fixture(modeladmin, request):
     return TemplateResponse(request, "adminactions/helpers/import_fixture.html", context)
 
 
-
+class AdminActionPermMixin:
+    def _filter_actions_by_permissions(self, request, actions):
+        opts = self.model._meta
+        filtered_actions = []
+        actions = super()._filter_actions_by_permissions(request, actions)
+        from .actions import actions as aa
+        for action in actions:
+            if action[0] in aa:
+                perm = "{0}.{1}".format(opts.app_label,
+                                        get_permission_codename(action[0].base_permission, opts))
+                if not request.user.has_perm(perm):
+                    continue
+            filtered_actions.append(action)
+        return filtered_actions
