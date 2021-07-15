@@ -1,11 +1,10 @@
+from demo.models import DemoModel
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
-
-from demo.models import DemoModel
 
 __all__ = ['MassUpdateTest', ]
 

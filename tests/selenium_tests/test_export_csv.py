@@ -1,8 +1,7 @@
 import datetime
-from time import sleep
-
 import pytest
 from selenium.webdriver.support.select import Select
+from time import sleep
 
 FAKE_TIME = datetime.datetime(2020, 12, 25, 17, 5, 55)
 

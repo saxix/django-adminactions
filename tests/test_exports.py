@@ -1,17 +1,16 @@
 import csv
 import io
+import mock
 import time
 import unittest
-
-import mock
 import xlrd
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 from django.utils.encoding import smart_str
 from django_dynamic_fixture import G
 from django_webtest import WebTest
-from utils import (CheckSignalsMixin, SelectRowsMixin, admin_register,
-                   user_grant_permission,)
+from utils import (CheckSignalsMixin, SelectRowsMixin,
+                   admin_register, user_grant_permission,)
 
 __all__ = ['ExportAsCsvTest', 'ExportAsFixtureTest', 'ExportAsCsvTest',
            'ExportDeleteTreeTest', 'ExportAsXlsTest']
@@ -52,7 +51,8 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             form.set('_selected_action', True, 0)
             form.set('_selected_action', True, 1)
             res = form.submit()
-            res.form['use_natural_key'] = True
+            res.form['use_natural_pk'] = False
+            res.form['use_natural_fk'] = True
             res = res.form.submit('apply')
             assert res.json[0]['pk'] == 1
 
@@ -66,7 +66,8 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             form.set('_selected_action', True, 0)
             form.set('_selected_action', True, 1)
             res = form.submit()
-            res.form['use_natural_key'] = True
+            res.form['use_natural_pk'] = False
+            res.form['use_natural_fk'] = True
             res.form['add_foreign_keys'] = True
             res = res.form.submit('apply')
             assert res.json[0]['pk'] == 1
@@ -110,7 +111,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
             form['action'] = self.action_name
             self._select_rows(form, [0, 1])
             res = form.submit()
-            res.form['use_natural_key'] = True
+            res.form['use_natural_fk'] = True
             res = res.form.submit('apply')
             assert res.json[0]['pk'] == 1
 

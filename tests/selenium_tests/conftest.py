@@ -1,7 +1,6 @@
 import os
-import types
-
 import pytest
+import types
 from django_dynamic_fixture import G
 from selenium import webdriver
 
