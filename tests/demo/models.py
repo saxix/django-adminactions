@@ -1,9 +1,10 @@
+from admin_extra_urls.api import button
+from admin_extra_urls.mixins import ExtraUrlMixin
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.auth.models import User
 from django.db import models
 
-from admin_extra_urls.api import button
-from admin_extra_urls.mixins import ExtraUrlMixin
+from adminactions.helpers import AdminActionPermMixin
 
 
 class SubclassedImageField(models.ImageField):
@@ -72,5 +73,10 @@ class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
         return _import_fixture(self, request)
 
 
+class DemoOneToOneAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):
+    pass
+
+
 site.register(DemoModel, DemoModelAdmin)
+site.register(DemoOneToOne, DemoOneToOneAdmin)
 site.register(UserDetail, UserDetailModelAdmin)

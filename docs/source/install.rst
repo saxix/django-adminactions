@@ -56,5 +56,12 @@ Add service url to your urls.py ::
         url(r'^adminactions/', include('adminactions.urls')),
     )
 
+Bonus:
+    add `AdminActionPermMixin` to your `ModelAdmin`::
+
+    class MyModelAdmin(AdminActionPermMixin, admin.ModelAdmin):
+        pass
+
+
 
 

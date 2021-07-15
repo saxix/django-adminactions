@@ -35,7 +35,8 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
         export a queryset to csv file
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label,
+                            get_permission_codename(base_export.base_permission, opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -118,6 +119,9 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
     return render(request, template, ctx)
 
 
+base_export.base_permission = 'adminactions_export'
+
+
 def export_as_csv(modeladmin, request, queryset):
     return base_export(modeladmin, request, queryset,
                        impl=_export_as_csv,
@@ -132,6 +136,7 @@ def export_as_csv(modeladmin, request, queryset):
 
 
 export_as_csv.short_description = _("Export as CSV")
+export_as_csv.base_permission = 'adminactions_export'
 
 
 def export_as_xls(modeladmin, request, queryset):
@@ -148,6 +153,7 @@ def export_as_xls(modeladmin, request, queryset):
 
 
 export_as_xls.short_description = _("Export as XLS")
+export_as_xls.base_permission = 'adminactions_export'
 
 
 class FlatCollector:
@@ -233,7 +239,8 @@ def export_as_fixture(modeladmin, request, queryset):
                'serializer': 'json',
                'indent': 4}
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label,
+                            get_permission_codename(export_as_fixture.base_permission, opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -307,6 +314,7 @@ def export_as_fixture(modeladmin, request, queryset):
 
 
 export_as_fixture.short_description = _("Export as fixture")
+export_as_fixture.base_permission = 'adminactions_export'
 
 
 def export_delete_tree(modeladmin, request, queryset):  # noqa
@@ -315,7 +323,8 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
     That mean that dump what will be deleted if the queryset was deleted
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename('adminactions_export', opts))
+    perm = "{0}.{1}".format(opts.app_label,
+                            get_permission_codename(export_delete_tree.base_permission, opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -399,3 +408,4 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
 
 
 export_delete_tree.short_description = _("Export delete tree")
+export_delete_tree.base_permission = 'adminactions_export'

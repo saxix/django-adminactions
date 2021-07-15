@@ -9,16 +9,17 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
+import sys
 
 here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 up = lambda base, level: os.path.abspath(
     os.path.join(base, *([os.pardir] * level)))
 sys.path.insert(0, up(here, 2))
 
-import adminactions as app
 from django.conf import settings
+
+import adminactions as app
 
 settings.configure(SITE_ID=1)
 

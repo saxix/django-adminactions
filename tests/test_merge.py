@@ -1,5 +1,5 @@
 import os
-
+from demo.models import DemoModel, DemoOneToOne, UserDetail
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group, Permission, User
@@ -10,7 +10,6 @@ from django_webtest import WebTestMixin
 from utils import BaseTestCaseMixin, SelectRowsMixin, user_grant_permission
 
 from adminactions.api import ALL_FIELDS, merge
-from demo.models import DemoModel, DemoOneToOne, UserDetail
 
 PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'tests.UserProfile')
 

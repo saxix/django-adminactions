@@ -4,14 +4,12 @@ Sphinx plugins for Django documentation.
 import json
 import os
 import re
-
 from docutils import nodes, transforms
-
-from sphinx import addnodes, roles, __version__ as sphinx_ver
+from sphinx import __version__ as sphinx_ver, addnodes, roles
 from sphinx.builders.html import StandaloneHTMLBuilder
-from sphinx.writers.html import SmartyPantsHTMLTranslator
-from sphinx.util.console import bold
 from sphinx.util.compat import Directive
+from sphinx.util.console import bold
+from sphinx.writers.html import SmartyPantsHTMLTranslator
 
 # RE for option descriptions without a '--' prefix
 simple_option_desc_re = re.compile(

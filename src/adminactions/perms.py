@@ -18,13 +18,17 @@ def get_permission_codename(action, opts):
 def create_extra_permissions():
     from django.contrib.auth.models import Permission
     from django.contrib.contenttypes.models import ContentType
+
+    from .actions import actions as aa
+
+    #  ('adminactions_export', 'adminactions_massupdate',
+    #                        'adminactions_merge', 'adminactions_chart',
+    #                        'adminactions_byrowsupdate')
     for model in apps.get_models():
-        for action in ('adminactions_export', 'adminactions_massupdate',
-                       'adminactions_merge', 'adminactions_chart',
-                       'adminactions_byrowsupdate'):
+        for action in aa:
             opts = model._meta
-            codename = get_permission_codename(action, opts)
-            label = 'Can {} {} (adminactions)'.format(action.replace('adminactions_', ""),
+            codename = get_permission_codename(action.base_permission, opts)
+            label = 'Can {} {} (adminactions)'.format(action.base_permission.replace('adminactions_', ""),
                                                       opts.verbose_name_raw)
             ct = ContentType.objects.get_for_model(model)
             params = dict(codename=codename,

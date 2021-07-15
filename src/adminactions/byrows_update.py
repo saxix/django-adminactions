@@ -21,7 +21,8 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label.lower(), get_permission_codename('adminactions_byrowsupdate', opts))
+    perm = "{0}.{1}".format(opts.app_label.lower(),
+                            get_permission_codename(byrows_update.base_permission, opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -40,6 +41,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     def formfield_callback(field, **kwargs):
         return modeladmin.formfield_for_dbfield(field, request=request, **kwargs)
+
     ActionForm = modelform_factory(
         modeladmin.model,
         form=GenericActionForm,
@@ -89,6 +91,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
 
 byrows_update.short_description = _("By rows update")
+byrows_update.base_permission = 'adminactions_byrowsupdate'
 
 
 def byrows_update_get_fields(modeladmin):
