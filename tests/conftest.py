@@ -1,6 +1,5 @@
-import logging
-
 import django_webtest
+import logging
 import pytest
 
 logger = logging.getLogger("test")
@@ -105,9 +104,8 @@ def users():
 
 @pytest.fixture(scope='function')
 def demomodels():
-    from django_dynamic_fixture import G
-
     from demo.models import DemoModel
+    from django_dynamic_fixture import G
 
     return G(DemoModel, n=20)
 

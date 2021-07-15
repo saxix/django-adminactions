@@ -18,7 +18,9 @@ def get_permission_codename(action, opts):
 def create_extra_permissions():
     from django.contrib.auth.models import Permission
     from django.contrib.contenttypes.models import ContentType
+
     from .actions import actions as aa
+
     #  ('adminactions_export', 'adminactions_massupdate',
     #                        'adminactions_merge', 'adminactions_chart',
     #                        'adminactions_byrowsupdate')

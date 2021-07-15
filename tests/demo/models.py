@@ -1,9 +1,9 @@
+from admin_extra_urls.api import button
+from admin_extra_urls.mixins import ExtraUrlMixin
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.auth.models import User
 from django.db import models
 
-from admin_extra_urls.api import button
-from admin_extra_urls.mixins import ExtraUrlMixin
 from adminactions.helpers import AdminActionPermMixin
 
 
