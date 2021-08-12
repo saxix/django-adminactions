@@ -15,8 +15,8 @@ from django.utils.timezone import get_default_timezone
 from io import BytesIO
 
 from . import compat
-from .templatetags.actions import get_field_value
-from .utils import clone_instance, get_field_by_path, get_ignored_fields
+from .utils import (clone_instance, get_field_by_path,
+                    get_field_value, get_ignored_fields,)
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
