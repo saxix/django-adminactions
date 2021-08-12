@@ -5,7 +5,7 @@ from django.utils.encoding import smart_str
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 
-from adminactions.compat import get_field_by_name
+from adminactions.utils import get_field_by_name
 
 register = Library()
 

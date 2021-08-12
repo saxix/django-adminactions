@@ -18,11 +18,11 @@ from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-from .compat import curry, get_field_by_name
 from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
+from .utils import curry, get_field_by_name
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
 
