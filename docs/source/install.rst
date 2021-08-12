@@ -20,7 +20,7 @@ your project or ``PYTHONPATH``.
 Install test dependencies
 =========================
 
-If you wanto to run :mod:`adminactions` tests you need extra requirements
+If you want to run :mod:`adminactions` tests you need extra requirements
 
 
 .. code-block:: python
@@ -40,7 +40,6 @@ Add :mod:`adminactions` to your `INSTALLED_APPS`::
     )
 
 
-
 Add the actions to your site::
 
     from django.contrib.admin import site
@@ -49,12 +48,14 @@ Add the actions to your site::
     # register all adminactions
     actions.add_to_site(site)
 
+
 Add service url to your urls.py ::
 
     urlpatterns = patterns('',
         ...
         url(r'^adminactions/', include('adminactions.urls')),
     )
+
 
 Bonus:
     add `AdminActionPermMixin` to your `ModelAdmin`::
@@ -63,5 +64,18 @@ Bonus:
         pass
 
 
+Add defaults for the Export to CSV to the Django Config.
+See all available settings at :ref:`_export_as_csv`.::
 
-
+    import csv
+    
+    ADMINACTIONS_CSV_OPTIONS_DEFAULT = {
+        'date_format': 'Y-m-d',
+        'datetime_format': 'Y-m-d G:i:s O',
+        'time_format': 'G:i:s',
+        'header': True,
+        'quotechar': '"',
+        'quoting': csv.QUOTE_ALL,
+        'delimiter': ',',
+        'escapechar': '\\',
+    }
