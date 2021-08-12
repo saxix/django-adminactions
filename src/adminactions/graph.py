@@ -10,10 +10,10 @@ from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 
-from .utils import get_field_by_name
 from .exceptions import ActionInterrupted
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
+from .utils import get_field_by_name
 
 
 def graph_form_factory(model):

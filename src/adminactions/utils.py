@@ -261,7 +261,6 @@ def flatten(iterable):
     return list(result)
 
 
-
 def get_field_by_name(model, name):
     field = model._meta.get_field(name)
     direct = not field.auto_created or field.concrete
