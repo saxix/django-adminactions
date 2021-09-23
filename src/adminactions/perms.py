@@ -24,14 +24,26 @@ def create_extra_permissions():
     #  ('adminactions_export', 'adminactions_massupdate',
     #                        'adminactions_merge', 'adminactions_chart',
     #                        'adminactions_byrowsupdate')
-    for model in apps.get_models():
+    perm_suffix = 'adminactions_'
+    existing_perms = set(
+        Permission.objects.filter(codename__startswith=perm_suffix).values_list(
+            'codename', 'content_type_id'
+        )
+    )
+    models = list(apps.get_models())
+    content_types = ContentType.objects.get_for_models(*models)
+
+    new_permissions = []
+    for model in models:
         for action in aa:
             opts = model._meta
-            codename = get_permission_codename(action.base_permission, opts)
-            label = 'Can {} {} (adminactions)'.format(action.base_permission.replace('adminactions_', ""),
+            codename = get_permission_codename(action.base_permission, opts)[:100]
+            ct = content_types[model]
+            if (codename, ct.id) in existing_perms:
+                continue
+            label = 'Can {} {} (adminactions)'.format(action.base_permission.replace(perm_suffix, ""),
                                                       opts.verbose_name_raw)
-            ct = ContentType.objects.get_for_model(model)
-            params = dict(codename=codename,
-                          content_type=ct,
-                          defaults={'name': label[:50]})
-            Permission.objects.get_or_create(**params)
+            permission = Permission(codename=codename, content_type=ct, name=label[:255])
+            new_permissions.append(permission)
+
+    Permission.objects.bulk_create(new_permissions, ignore_conflicts=True)
