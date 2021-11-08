@@ -30,7 +30,7 @@
                 {{ adminform.form }}
             </table>
             <input type="hidden" name="action" value="{{ action }}"/>
-            <input type="submit" name="apply" value="go"/>
+            <input type="submit" name="apply" value="{% trans 'go' %}"/>
         </form>
     </div>
     {% if graph_type %}

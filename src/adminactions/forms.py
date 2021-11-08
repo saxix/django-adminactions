@@ -58,16 +58,4 @@ class XLSOptions(forms.Form):
 
     header = forms.BooleanField(label=_('Header'), required=False)
     use_display = forms.BooleanField(label=_('Use display'), required=False)
-    # delimiter = forms.ChoiceField(choices=zip(delimiters, delimiters), initial=',')
-    # quotechar = forms.ChoiceField(choices=zip(quotes, quotes), initial="'")
-    # quoting = forms.ChoiceField(
-    #     choices=((csv.QUOTE_ALL, 'All'),
-    #              (csv.QUOTE_MINIMAL, 'Minimal'),
-    #              (csv.QUOTE_NONE, 'None'),
-    #              (csv.QUOTE_NONNUMERIC, 'Non Numeric')), initial=csv.QUOTE_ALL)
-    #
-    # escapechar = forms.ChoiceField(choices=(('', ''), ('\\', '\\')), required=False)
-    # datetime_format = forms.CharField(initial=formats.get_format('DATETIME_FORMAT'))
-    # date_format = forms.CharField(initial=formats.get_format('DATE_FORMAT'))
-    # time_format = forms.CharField(initial=formats.get_format('TIME_FORMAT'))
     columns = forms.MultipleChoiceField(label=_('Columns'), widget=SelectMultiple(attrs={'size': 20}))

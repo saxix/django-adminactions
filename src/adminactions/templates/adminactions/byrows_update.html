@@ -67,6 +67,6 @@
         {% for hidden in actionform.hidden_fields %}
             {{ hidden }}
         {% endfor %}
-        <input type="submit" name="apply" value="Update records"/>
+        <input type="submit" name="apply" value="{% trans 'Update records' %}"/>
     </form>
 {% endblock %}
