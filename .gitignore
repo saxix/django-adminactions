@@ -20,3 +20,4 @@ Pipfile
 Pipfile.lock
 poetry.lock
 pyproject.toml
+.venv/

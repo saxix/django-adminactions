@@ -24,7 +24,7 @@
             <th>{% trans "After Merging" %}</th>
         </tr>
         {% for field in fields %}
-        <tr class="{% cycle "row2" "row1" %} preview-row">
+        <tr class="{% cycle 'row2' 'row1' %} preview-row">
             <th class="column label">{{ master|verbose_name:field.name }}</th>
             <td class="column original">
                 <span class="display">{{ original|field_display:field.name }}</span>
@@ -36,6 +36,6 @@
             </td>
         {% endfor %}
     </table>
-    <input type="submit" value="{% trans "Merge" %}" name="apply">
+    <input type="submit" value="{% trans 'Merge' %}" name="apply">
     </form>
 {% endblock %}

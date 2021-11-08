@@ -134,10 +134,6 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     if isinstance(value, models.Model):
         return smart_str(value)
 
-    # if isinstance(obj, Model):
-    #     field = get_field_by_path(obj, fieldname)
-    #     if isinstance(field, ForeignKey):
-    #         return unicode(value)
     if isinstance(value, str):
         value = smart_str(value)
 
