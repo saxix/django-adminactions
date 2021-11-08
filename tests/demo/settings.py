@@ -17,7 +17,8 @@ if db == 'pg':
             'PORT': os.environ.get('PG_PORT', ''),
             'USER': os.environ.get('PG_USER', 'postgres'),
             'PASSWORD': os.environ.get('PG_PASSWORD', ''),
-            }}
+        }
+    }
 elif db == 'mysql':
     DATABASES = {
         'default': {
@@ -35,7 +36,9 @@ elif db == 'mysql':
                 'COLLATION': 'utf8_general_ci',
             },
             'TEST_CHARSET': 'utf8',
-            'TEST_COLLATION': 'utf8_general_ci'}}
+            'TEST_COLLATION': 'utf8_general_ci'
+        }
+    }
 elif db == 'myisam':
     DATABASES = {
         'default': {
@@ -54,7 +57,9 @@ elif db == 'myisam':
                 'COLLATION': 'utf8_general_ci',
             },
             'TEST_CHARSET': 'utf8',
-            'TEST_COLLATION': 'utf8_general_ci'}}
+            'TEST_COLLATION': 'utf8_general_ci'
+        }
+    }
 else:
     DATABASES = {
         'default': {
@@ -66,7 +71,9 @@ else:
             'TEST_NAME': ':memory:',
             'HOST': '',
             'PORT': '',
-            'ATOMIC_REQUESTS': True}}
+            'ATOMIC_REQUESTS': True
+        }
+    }
 
 TIME_ZONE = 'Asia/Bangkok'
 LANGUAGE_CODE = 'en-us'
@@ -92,7 +99,7 @@ MESSAGE_STORAGE = 'demo.storage.PlainCookieStorage'
 ROOT_URLCONF = 'demo.urls'
 
 
-from adminactions.perms import AA_PERMISSION_CREATE_USE_COMMAND
+from adminactions.perms import AA_PERMISSION_CREATE_USE_COMMAND  # noqa
 
 AA_PERMISSION_HANDLER = AA_PERMISSION_CREATE_USE_COMMAND
 
