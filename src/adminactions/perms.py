@@ -32,6 +32,8 @@ def create_extra_permissions():
     )
     models = list(apps.get_models())
     content_types = ContentType.objects.get_for_models(*models)
+    # https://github.com/saxix/django-adminactions/issues/199
+    ContentType.objects.bulk_create(content_types.values(), ignore_conflicts=True)
 
     new_permissions = []
     for model in models:
