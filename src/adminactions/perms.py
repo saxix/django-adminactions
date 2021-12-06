@@ -45,5 +45,5 @@ def create_extra_permissions():
                                                       opts.verbose_name_raw)
             permission = Permission(codename=codename, content_type=ct, name=label[:255])
             new_permissions.append(permission)
-
+    ContentType.objects.clear_cache()
     Permission.objects.bulk_create(new_permissions, ignore_conflicts=True)
