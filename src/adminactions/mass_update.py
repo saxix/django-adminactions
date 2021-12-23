@@ -225,7 +225,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                     changed_attr = getattr(record, field_name, None)
 
                     if changed_attr.__class__.__name__ == 'ManyRelatedManager':
-                            changed_attr.set(value_or_func)
+                        changed_attr.set(value_or_func)
                     else:
                         setattr(record, field_name, value_or_func)
 
