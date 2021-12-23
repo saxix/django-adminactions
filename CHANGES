@@ -1,3 +1,10 @@
+Release 1.14
+=============
+* added support to django 4 and python 3.10
+* added portugues translations
+* optimized extra permission creation
+
+
 Release 1.13
 =============
 * permission refactoring

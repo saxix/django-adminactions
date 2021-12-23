@@ -1,8 +1,6 @@
 import os
 
 here = os.path.dirname(__file__)
-# sys.path.append(os.path.abspath(os.path.join(here, os.pardir)))
-# sys.path.append(os.path.abspath(os.path.join(here, os.pardir, 'demo')))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
