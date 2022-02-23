@@ -14,7 +14,7 @@ from django.utils.encoding import force_str, smart_str
 from django.utils.timezone import get_default_timezone
 from io import BytesIO
 
-from . import compat
+from . import compat, utils
 from .utils import (clone_instance, get_field_by_path,
                     get_field_value, get_ignored_fields,)
 
@@ -56,8 +56,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
 
     if related == ALL_FIELDS:
         related = [rel.get_accessor_name()
-                   for rel in compat.get_all_related_objects(master)]
-    # for rel in master._meta.get_all_related_objects(False, False, False)]
+                   for rel in utils.get_all_related_objects(master)]
 
     if m2m == ALL_FIELDS:
         m2m = set()
@@ -263,7 +262,7 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
         if hasattr(queryset, 'model'):
             for i, fieldname in enumerate(fields):
                 try:
-                    f, __, __, __, = compat.get_field_by_name(queryset.model, fieldname)
+                    f, __, __, __, = utils.get_field_by_name(queryset.model, fieldname)
                     fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, 'general'))
                     formats[i] = fmt
                 except FieldDoesNotExist:

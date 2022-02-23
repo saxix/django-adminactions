@@ -1,3 +1,10 @@
+Release 1.14
+=============
+* drop support Django 2.x
+* mass_update_hints is now empty by default
+* minor perms refactoring
+
+
 Release 1.13.1
 =============
 * refactor to avoid some startup loading issue

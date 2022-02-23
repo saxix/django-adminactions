@@ -92,7 +92,7 @@ MESSAGE_STORAGE = 'demo.storage.PlainCookieStorage'
 ROOT_URLCONF = 'demo.urls'
 
 
-from adminactions.perms import AA_PERMISSION_CREATE_USE_COMMAND
+from adminactions.consts import AA_PERMISSION_CREATE_USE_COMMAND
 
 AA_PERMISSION_HANDLER = AA_PERMISSION_CREATE_USE_COMMAND
 

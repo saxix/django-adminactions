@@ -110,6 +110,7 @@ class MassUpdateForm(GenericActionForm):
                                 help_text="if checked calls obj.clean()")
 
     _validate = forms.BooleanField(label='Validate',
+                                   required=False,
                                    help_text="if checked use obj.save() instead of manager.update()")
 
     # _unique_transaction = forms.BooleanField(label='Unique transaction',
@@ -273,8 +274,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
     mass_update_exclude = getattr(modeladmin, 'mass_update_exclude', ['pk']) or []
     if 'pk' not in mass_update_exclude:
         mass_update_exclude.append('pk')
-    mass_update_hints = getattr(modeladmin, 'mass_update_hints',
-                                [f.name for f in modeladmin.model._meta.fields])
+    mass_update_hints = getattr(modeladmin, 'mass_update_hints', [])
 
     if mass_update_fields and mass_update_exclude:
         raise Exception("Cannot set both 'mass_update_exclude' and 'mass_update_fields'")
