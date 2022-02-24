@@ -1,5 +1,7 @@
 import os
 
+from adminactions.consts import AA_PERMISSION_CREATE_USE_COMMAND
+
 here = os.path.dirname(__file__)
 
 DEBUG = True
@@ -78,7 +80,7 @@ LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
-USE_TZ = False
+USE_TZ = True
 MEDIA_ROOT = os.path.join(here, 'media')
 MEDIA_URL = ''
 STATIC_ROOT = os.path.join(here, 'static')
@@ -95,9 +97,6 @@ MIDDLEWARE = (
 MESSAGE_STORAGE = 'demo.storage.PlainCookieStorage'
 
 ROOT_URLCONF = 'demo.urls'
-
-
-from adminactions.perms import AA_PERMISSION_CREATE_USE_COMMAND  # noqa
 
 AA_PERMISSION_HANDLER = AA_PERMISSION_CREATE_USE_COMMAND
 

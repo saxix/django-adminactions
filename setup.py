@@ -23,6 +23,7 @@ with open(init, 'rb') as f:
 requirements = read("install.pip")
 tests_require = read('testing.pip')
 dev_require = read('develop.pip')
+docs_require = read('rtd.pip')
 
 setup(
     name='django-adminactions',
@@ -41,6 +42,7 @@ setup(
     extras_require={
         'test': requirements + tests_require,
         'dev': dev_require + tests_require,
+        'docs': dev_require + docs_require,
     },
     zip_safe=False,
     platforms=['any'],
@@ -55,5 +57,6 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Intended Audience :: Developers'],
-    long_description=open('README.rst').read()
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
 )

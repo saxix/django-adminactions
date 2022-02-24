@@ -193,4 +193,3 @@ Templatetags
 ------------
 .. autofunction:: adminactions.templatetags.actions.verbose_name
 .. autofunction:: adminactions.templatetags.actions.field_display
-.. autofunction:: adminactions.templatetags.actions.raw_value

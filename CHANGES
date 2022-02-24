@@ -1,8 +1,16 @@
+Release 1.15
+=============
+* perms refactoring. Add module `consts` to handle import errors in some circumstances
+
+
 Release 1.14
 =============
+* drop support Django 2.x
 * added support to django 4 and python 3.10
 * added portugues translations
 * optimized extra permission creation
+* mass_update_hints is now empty by default
+* minor perms refactoring
 
 
 Release 1.13

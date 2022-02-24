@@ -7,10 +7,9 @@ class NoCommit(t.Atomic):
         super().__exit__(Exception, Exception(), None)
 
 
-if django.VERSION >= (3, 2):
-    def nocommit(using=None, savepoint=True, durable=False):
-        return NoCommit(using, savepoint, durable)
-else:
+if django.VERSION[0] == 2:
     def nocommit(using=None, savepoint=True):
         return NoCommit(using, savepoint)
-
+else:
+    def nocommit(using=None, savepoint=True, durable=False):
+        return NoCommit(using, savepoint, durable)

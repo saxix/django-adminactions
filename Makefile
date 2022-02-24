@@ -8,7 +8,7 @@ DJANGO?='3.1.x'
 	mkdir -p ${BUILDDIR}
 
 develop:
-	pip install -e .[dev]
+	CRYPTOGRAPHY_DONT_BUILD_RUST=1 pip install -e .[dev,docs]
 
 
 demo:
@@ -16,11 +16,10 @@ demo:
 	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
 	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py runserver --settings=demo.settings
 
-qa:
-	flake8 src/ tests/
-	isort -rc src tests --check-only
-	check-manifest
-	py.test tests/ --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc
+lint:
+	@flake8 src/ tests/
+	@isort -c src/
+
 
 clean:
 	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST
