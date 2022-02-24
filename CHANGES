@@ -1,3 +1,8 @@
+Release 1.15
+=============
+* perms refactoring. Add module `consts` to handle import errors in some circumstances
+
+
 Release 1.14
 =============
 * drop support Django 2.x
