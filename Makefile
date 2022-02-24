@@ -17,8 +17,8 @@ demo:
 	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py runserver --settings=demo.settings
 
 lint:
-	flake8 src/ tests/
-	isort -rc src tests --check-only
+	@flake8 src/ tests/
+	@isort -c src/
 
 
 clean:
