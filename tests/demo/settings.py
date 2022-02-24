@@ -1,5 +1,7 @@
 import os
 
+from adminactions.consts import AA_PERMISSION_CREATE_USE_COMMAND
+
 here = os.path.dirname(__file__)
 
 DEBUG = True
@@ -95,9 +97,6 @@ MIDDLEWARE = (
 MESSAGE_STORAGE = 'demo.storage.PlainCookieStorage'
 
 ROOT_URLCONF = 'demo.urls'
-
-
-from adminactions.consts import AA_PERMISSION_CREATE_USE_COMMAND
 
 AA_PERMISSION_HANDLER = AA_PERMISSION_CREATE_USE_COMMAND
 

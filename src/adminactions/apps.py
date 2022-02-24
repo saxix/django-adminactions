@@ -7,8 +7,7 @@ class Config(AppConfig):
     def ready(self):
         from django.conf import settings
 
-        from adminactions import perms
-        from adminactions import consts
+        from adminactions import consts, perms
 
         from . import checks  # noqa
         perms.AA_PERMISSION_HANDLER = getattr(settings, 'AA_PERMISSION_HANDLER',

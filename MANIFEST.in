@@ -12,6 +12,7 @@ include Makefile
 exclude .bumpversion.cfg
 exclude .editorconfig
 exclude manage.py
+exclude .*
 
 recursive-include docs *
 recursive-include src *.css

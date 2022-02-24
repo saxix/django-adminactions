@@ -16,11 +16,10 @@ demo:
 	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py loaddata adminactions.json demoproject.json --settings=demo.settings
 	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py runserver --settings=demo.settings
 
-qa:
+lint:
 	flake8 src/ tests/
 	isort -rc src tests --check-only
-	check-manifest
-	py.test tests/ --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc
+
 
 clean:
 	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST
