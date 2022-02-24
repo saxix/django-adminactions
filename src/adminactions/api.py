@@ -14,7 +14,8 @@ from django.utils.encoding import force_str, smart_str
 from django.utils.timezone import get_default_timezone
 from io import BytesIO
 
-from . import compat, utils
+from adminactions import utils
+
 from .utils import (clone_instance, get_field_by_path,
                     get_field_value, get_ignored_fields,)
 
@@ -267,8 +268,6 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
                     formats[i] = fmt
                 except FieldDoesNotExist:
                     pass
-                    # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
-                    # styles[i] = xls_options_default.get(col_class, 'general')
 
         return formats
 
@@ -391,20 +390,11 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
                     formats[fieldname] = fmt
                 except FieldDoesNotExist:
                     pass
-                    # styles[i] = xlwt.easyxf(num_format_str=xls_options_default.get(col_class, 'general'))
-                    # styles[i] = xls_options_default.get(col_class, 'general')
-
         return formats
 
     http_response = out is None
     if out is None:
-        # if filename is None:
-        # filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        # response = HttpResponse(content_type='application/vnd.ms-excel')
-        # response['Content-Disposition'] = 'attachment;filename="%s"' % filename.encode('us-ascii', 'replace')
         out = BytesIO()
-        #
-        # out = StringIO()
 
     config = xlsxwriter_options.copy()
     if options:

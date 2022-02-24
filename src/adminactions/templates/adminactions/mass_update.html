@@ -87,20 +87,7 @@
             {% for hidden in form.hidden_fields %}
                 {{ hidden }}
             {% endfor %}
-{#            <input type="hidden" name="action" value="{{ action }}"/>#}
             <input type="submit" name="apply" value="Update {{ selection.count }} records"/>
         </form>
     </div>
-{#    <div id='col2'>#}
-{#        Selected records:#}
-{#        <ul>#}
-{#            {% for el in selection %}#}
-{#                <li>#}
-{#                    <input name="prefill-with" type="radio" value="{{ object.pk }}"{% if el.pk == form.instance.pk %} checked="checked"{% endif %}>#}
-{#                    {{ el }}#}
-{#                </li>#}
-{#            {% endfor %}#}
-{#        </ul>#}
-{#        <input type="submit" class="grp-button grp-default" value="Prefill fields with selected record">#}
-{#    </div>#}
 {% endblock %}

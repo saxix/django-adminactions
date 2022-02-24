@@ -1,6 +1,11 @@
-===================
 django-adminactions
 ===================
+
+
+[![Pypi](https://badge.fury.io/py/django-adminactions.svg)](https://badge.fury.io/py/django-aadminactions)
+[![coverage](https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=develop)](https://codecov.io/github/saxix/django-adminactions?branch=develop)
+[![Test](https://github.com/saxix/django-adminactions/actions/workflows/test.yml/badge.svg)](https://github.com/saxix/django-adminactions/actions/workflows/test.yml)
+[![Docs](https://readthedocs.org/projects/django-adminactions/badge/?version=latest)](https://django-adminactions.readthedocs.io/en/latest/)
 
 Collection of useful actions to use with
 django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite

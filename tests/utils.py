@@ -168,7 +168,7 @@ class CheckSignalsMixin:
 
         try:
             adminaction_requested.connect(myhandler, sender=self.sender_model)
-            res = self._run_action(1)
+            self._run_action(1)
             self.assertTrue(myhandler.invoked)
             # self.assertIn(self.MESSAGE, res.context['messages'])
             self.assertIn(self.MESSAGE, self.app.cookies['messages'])

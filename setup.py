@@ -49,12 +49,12 @@ setup(
         'Framework :: Django',
         'Operating System :: OS Independent',
         'Framework :: Django :: 2.2',
-        'Framework :: Django :: 3.0',
-        'Framework :: Django :: 3.1',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Framework :: Django :: 3.2',
+        'Framework :: Django :: 4.0',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Intended Audience :: Developers'],
-    long_description=open('README.rst').read()
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
 )

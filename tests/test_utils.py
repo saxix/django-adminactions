@@ -1,6 +1,6 @@
 import pytest
 
-from adminactions.utils import get_verbose_name, get_field_by_name
+from adminactions.utils import get_field_by_name, get_verbose_name
 
 
 def test_get_verbose_name():
