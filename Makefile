@@ -8,7 +8,7 @@ DJANGO?='3.1.x'
 	mkdir -p ${BUILDDIR}
 
 develop:
-	pip install -e .[dev]
+	CRYPTOGRAPHY_DONT_BUILD_RUST=1 pip install -e .[dev,docs]
 
 
 demo:

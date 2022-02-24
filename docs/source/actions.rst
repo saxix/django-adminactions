@@ -170,9 +170,6 @@ Behind the scenes, this attaches an iterator as the response content (using a :c
 The benefit of this approach is a shorter initial response which unblocks the customer from request/response and he is free to do other things while waiting for the download to finish.
 
 
-.. seealso:: `csv_defaults`_
-
-
 .. _export_as_fixture:
 
 ``Export as Fixture``

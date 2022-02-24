@@ -48,8 +48,9 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.viewcode',
               # 'djangodocs',
-              'version',
-              'github']
+              # 'version',
+              'github'
+              ]
 
 
 # issuetracker = 'github'
@@ -63,7 +64,7 @@ todo_include_todos = True
 intersphinx_mapping = {
     'python': ('http://python.readthedocs.org/en/latest/', None),
     'django': ('http://django.readthedocs.org/en/1.7.x/', None),
-    'sphinx': ('http://sphinx.readthedocs.org/en/latest/', None)}
+}
 intersphinx_cache_limit = 90  # days
 
 # Add any paths that contain templates here, relative to this directory.
@@ -80,7 +81,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Django Admin Actions'
-copyright = u'2012-2019, Stefano Apostolico'
+copyright = u'2012-2022, Stefano Apostolico'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
