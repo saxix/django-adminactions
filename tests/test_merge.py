@@ -283,8 +283,10 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         from adminactions.merge import MergeForm
 
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
-            # removed = User.objects.get(pk=self._selected_rows[0])
-            # preserved = User.objects.get(pk=self._selected_rows[1])
+            removed = User.objects.get(pk=self._selected_rows[0])
+            group = Group.objects.get_or_create(name='G1')[0]
+            removed.groups.add(group)
+            removed.save()
 
             res = self.app.get('/', user='user')
             res = res.click('Users')
@@ -292,7 +294,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             form['action'] = 'merge'
             self._select_rows(form, [1, 2])
             res = form.submit()
-            removed = User.objects.get(pk=self._selected_values[0])
+            removed = User.objects.get(pk=self._selected_values[0]) # reload
             preserved = User.objects.get(pk=self._selected_values[1])
 
             removed.userdetail_set.create(note='1')
@@ -314,6 +316,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 2)
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
+            self.assertSequenceEqual(preserved_after.groups.all(), [group])
 
     def test_merge_delete_detail(self):
         from adminactions.merge import MergeForm
