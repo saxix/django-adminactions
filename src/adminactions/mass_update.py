@@ -4,13 +4,14 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
+from django.contrib.admin.models import LogEntry
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import ForeignKey, fields as df
 from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory,)
+                                 modelform_factory, )
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
@@ -229,9 +230,11 @@ class MassUpdateForm(GenericActionForm):
         )
 
 
-def mass_update_execute(queryset, rules, validate, clean, request=None):
+def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None):
     errors = {}
     updated = 0
+    opts = queryset.model._meta
+    ids = ", ".join(map(str, queryset.only("pk").values_list('pk', flat=True)))
     adminaction_start.send(sender=queryset.model,
                            action='mass_update',
                            request=request,
@@ -263,6 +266,17 @@ def mass_update_execute(queryset, rules, validate, clean, request=None):
                                  action='mass_update',
                                  request=request,
                                  queryset=queryset)
+            from django.contrib.admin.models import CHANGE, LogEntry
+            LogEntry.objects.log_action(
+                user_id=user_pk,
+                content_type_id=None,
+                object_id=None,
+                object_repr=f'Mass Update {opts.model_name}',
+                action_flag=CHANGE,
+                change_message={"rules": str(rules),
+                                "records": ids
+                                }
+            )
     except ActionInterrupted:
         updated, errors = 0, {}
 
@@ -367,10 +381,16 @@ def mass_update(modeladmin, request, queryset):  # noqa
                                        ids=list(queryset.only("pk").values_list('pk', flat=True)),
                                        rules=rules,
                                        validate=validate, clean=clean,
-                                       )
+                                       user_pk=request.user.pk,
+                                       request=request)
             else:
                 try:
-                    updated, errors = mass_update_execute(queryset, rules, validate, clean)
+                    updated, errors = mass_update_execute(queryset,
+                                                          rules,
+                                                          validate,
+                                                          clean,
+                                                          user_pk=request.user.pk,
+                                                          request=request)
                     messages.info(request, _("Updated %s records") % updated)
                 except ActionInterrupted as e:
                     messages.error(request, str(e))
