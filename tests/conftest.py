@@ -23,11 +23,12 @@ levelNames = {
 
 def pytest_addoption(parser):
     group = parser.getgroup("selenium", "Selenium Web Browser Automation")
-    group.addoption(
-        "--selenium-enable", action='store_true', dest='selenium_enable',
-        default=False,
-        help="launch Selenium tests on hub"
-    )
+    group.addoption("--selenium-enable",
+                    action='store_true',
+                    dest='selenium_enable',
+                    default=False,
+                    help="launch Selenium tests on hub"
+                    )
 
     group.addoption(
         "--chrome-driver", metavar="PATH",

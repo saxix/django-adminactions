@@ -1,0 +1,26 @@
+
+table.mass-update {
+    border: 1px solid #c9c9c9;
+
+    td {
+        border-left: 1px solid #c9c9c9;
+    }
+
+    select.func_select {
+        min-width: 100px;
+    }
+}
+
+#col1 {
+    float: left;
+    width: 70%;
+}
+
+#col2 {
+    float: right;
+    width: 30%;
+}
+
+#col2 select {
+    width: 100%;
+}

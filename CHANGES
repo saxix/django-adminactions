@@ -1,3 +1,11 @@
+Release 2.0
+===========
+* add Celery support
+* MassUpdateForm sort fields by label
+* BACKWARD INCOMPATIBLE: removed `modeladmin` from signals arguments
+* BACKWARD INCOMPATIBLE: signals `request` argument is now optional to support async execution
+
+
 Release 1.15
 =============
 * perms refactoring. Add module `consts` to handle import errors in some circumstances

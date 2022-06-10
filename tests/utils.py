@@ -165,12 +165,12 @@ class CheckSignalsMixin:
             self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
                                      sorted(self._selected_values))
             raise ActionInterrupted(self.MESSAGE)
+        myhandler.invoked = False
 
         try:
             adminaction_requested.connect(myhandler, sender=self.sender_model)
             self._run_action(1)
             self.assertTrue(myhandler.invoked)
-            # self.assertIn(self.MESSAGE, res.context['messages'])
             self.assertIn(self.MESSAGE, self.app.cookies['messages'])
         finally:
             adminaction_requested.disconnect(myhandler, sender=self.sender_model)
@@ -178,12 +178,11 @@ class CheckSignalsMixin:
     def test_signal_start(self):
         # test if adminaction_start Signal can stop the action
 
-        def myhandler(sender, action, request, queryset, form, **kwargs):
+        def myhandler(sender, action, request, queryset, **kwargs):
             myhandler.invoked = True
             self.assertEqual(action, self.action_name)
             self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
                                      sorted(self._selected_values))
-            self.assertTrue(isinstance(form, BaseForm))
             raise ActionInterrupted(self.MESSAGE)
 
         try:
@@ -202,7 +201,7 @@ class CheckSignalsMixin:
             self.assertEqual(action, self.action_name)
             self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
                                      sorted(self._selected_values))
-
+        myhandler.invoked = False
         try:
             adminaction_end.connect(myhandler, sender=self.sender_model)
             self._run_action(2)

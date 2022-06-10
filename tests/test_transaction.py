@@ -63,6 +63,7 @@ def test_transaction_mass_update(app, users, administrator):
         with pytest.raises(BaseException):
             adminaction_end.connect(_handler)
             res.form.submit('apply').follow()
+            assert res.status_code == 302
             adminaction_end.disconnect(_handler)
 
         assert User.objects.filter(is_staff=True).count() == 1

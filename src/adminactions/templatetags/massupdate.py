@@ -56,9 +56,12 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
 
 @register.simple_tag(takes_context=True)
 def checkbox_enabler(context, field):
-    selected = context['selected_fields']
+    form = context['adminform'].form
     name = "chk_id_%s" % field.name
-    checked = {True: 'checked="checked"', False: ''}[name in selected]
+    checked = ""
+    if form.is_bound:
+        chk = form.cleaned_data.get(name, False)
+        checked = {True: 'checked="checked"', False: ''}[chk]
     return mark_safe('<input type="checkbox" name="%s" %s class="enabler">' % (name, checked))
 
 
@@ -74,35 +77,46 @@ class SelectOptionsAttribute(widgets.Select):
     """
 
     def __init__(self, attrs=None, choices=(), options_attributes=None):
-        self.options_attributes = options_attributes or {}
+        # self.options_attributes = options_attributes or {}
         super().__init__(attrs, choices)
 
-    def render_option(self, selected_choices, option_value, option_label):
-        option_value = smart_str(option_value)
-        attrs = flatatt(self.options_attributes.get(option_value, {}))
-        if option_value in selected_choices:
-            selected_html = u' selected="selected"'
-            if not self.allow_multiple_selected:
-                # Only allow for a single selection.
-                selected_choices.remove(option_value)
-        else:
-            selected_html = ''
-        return u'<option%s value="%s"%s>%s</option>' % (
-            attrs,
-            escape(option_value), selected_html,
-            conditional_escape(smart_str(option_label)))
+    # def render_option(self, selected_choices, option_value, option_label):
+    #     # FIXME: remove me (print)
+    #     print(111, "massupdate.py:85 (render_option)", 11111)
+    #     print(111, "massupdate.py:85 (render_option)", 11111)
+    #     print(111, "massupdate.py:85 (render_option)", 11111)
+    #     print(111, "massupdate.py:85 (render_option)", 11111)
+    #     print(111, "massupdate.py:85 (render_option)", selected_choices)
+    #     option_value = smart_str(option_value)
+    #     attrs = flatatt(self.options_attributes.get(option_value, {}))
+    #     if option_value in selected_choices:
+    #         selected_html = u' selected="selected"'
+    #         if not self.allow_multiple_selected:
+    #             # Only allow for a single selection.
+    #             selected_choices.remove(option_value)
+    #     else:
+    #         selected_html = ''
+    #     return u'<option%s value="%s"%s>1111111 %s</option>' % (
+    #         attrs,
+    #         escape(option_value), selected_html,
+    #         conditional_escape(smart_str(option_label)))
 
 
-@register.simple_tag
-def field_function(model, form_field):
+@register.simple_tag(takes_context=True)
+def field_function(context, model, form_field):
     from adminactions.mass_update import OPERATIONS
-
-    model_object, model, direct, m2m = get_field_by_name(model, form_field.name)
+    model_field, model, direct, m2m = get_field_by_name(model, form_field.name)
     attrs = {'class': 'func_select'}
     options_attrs = {}
     choices = []
     classes = {True: 'param', False: 'noparam'}
-    for label, (__, param, enabler, __) in list(OPERATIONS.get_for_field(model_object).items()):
+    form = context['adminform'].form
+    value = ""
+    if form.is_bound:
+        value = form.cleaned_data.get("func_id_%s" % form_field.name, "")
+
+    for label, (__, param, enabler, __) in list(OPERATIONS.get_for_field(model_field).items()):
         options_attrs[label] = {'class': classes[param], 'label': label}
         choices.append((label, label))
-    return SelectOptionsAttribute(attrs, choices, options_attrs).render("func_id_%s" % form_field.name, "")
+    return widgets.Select(attrs, choices).render("func_id_%s" % form_field.name,
+                                                                        value)

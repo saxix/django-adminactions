@@ -1,6 +1,10 @@
 import os
 
+from environ import Env
+
 from adminactions.consts import AA_PERMISSION_CREATE_USE_COMMAND
+
+env = Env()
 
 here = os.path.dirname(__file__)
 
@@ -172,3 +176,14 @@ AUTH_PASSWORD_VALIDATORS = [
     #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     # },
 ]
+
+# CELERY STUFF
+BROKER_URL = env("CELERY_BROKER_URL")
+# CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
+# CELERY_ACCEPT_CONTENT = ["application/json"]
+# CELERY_TASK_SERIALIZER = "json"
+CELERY_TASK_ALWAYS_EAGER = env("CELERY_ALWAYS_EAGER")
+# CELERY_ALWAYS_EAGER = env("CELERY_ALWAYS_EAGER")
+# CELERY_RESULT_SERIALIZER = "json"
+# CELERY_TIMEZONE = TIME_ZONE
+# CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
