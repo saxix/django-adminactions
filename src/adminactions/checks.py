@@ -7,7 +7,7 @@ def check_adminactions_settings(app_configs, **kwargs):
     from .consts import (AA_PERMISSION_CREATE_USE_APPCONFIG,
                          AA_PERMISSION_CREATE_USE_COMMAND,
                          AA_PERMISSION_CREATE_USE_SIGNAL,)
-    from .perms import AA_PERMISSION_HANDLER
+    from .config import AA_PERMISSION_HANDLER
 
     if AA_PERMISSION_HANDLER not in [AA_PERMISSION_CREATE_USE_APPCONFIG,
                                      AA_PERMISSION_CREATE_USE_SIGNAL,

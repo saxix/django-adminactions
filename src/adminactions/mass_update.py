@@ -18,6 +18,7 @@ from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
+from . import config
 from .compat import celery_present
 from .exceptions import ActionInterrupted
 from .forms import GenericActionForm
@@ -173,9 +174,7 @@ class MassUpdateForm(GenericActionForm):
             try:
                 value = raw_value
                 initial = self.initial.get(name, field.initial)
-                if isinstance(field, ff.JSONField):
-                    value = field.clean(raw_value)
-                elif isinstance(field, ff.FileField):
+                if isinstance(field, ff.FileField):
                     value = field.clean(raw_value, initial)
                 else:
                     enabler = 'chk_id_%s' % name
@@ -229,12 +228,16 @@ class MassUpdateForm(GenericActionForm):
             },
         )
 
+    def fix_json(self):
+        for nn, ff in self.fields.items():
+            if isinstance(ff, forms.JSONField):
+                ff.disabled = nn not in self.data
+
 
 def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None):
     errors = {}
     updated = 0
     opts = queryset.model._meta
-    ids = ", ".join(map(str, queryset.only("pk").values_list('pk', flat=True)))
     adminaction_start.send(sender=queryset.model,
                            action='mass_update',
                            request=request,
@@ -266,17 +269,19 @@ def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None)
                                  action='mass_update',
                                  request=request,
                                  queryset=queryset)
-            from django.contrib.admin.models import CHANGE, LogEntry
-            LogEntry.objects.log_action(
-                user_id=user_pk,
-                content_type_id=None,
-                object_id=None,
-                object_repr=f'Mass Update {opts.model_name}',
-                action_flag=CHANGE,
-                change_message={"rules": str(rules),
-                                "records": ids
-                                }
-            )
+            if config.AA_ENABLE_LOG:
+                from django.contrib.admin.models import CHANGE, LogEntry
+                ids = list(queryset.only("pk").values_list('pk', flat=True))
+                LogEntry.objects.log_action(
+                    user_id=user_pk,
+                    content_type_id=None,
+                    object_id=None,
+                    object_repr=f'Mass Update {opts.model_name}',
+                    action_flag=CHANGE,
+                    change_message={"rules": str(rules),
+                                    "records": ids
+                                    }
+                )
     except ActionInterrupted:
         updated, errors = 0, {}
 
@@ -395,8 +400,9 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 except ActionInterrupted as e:
                     messages.error(request, str(e))
                     return HttpResponseRedirect(request.get_full_path())
-
             return HttpResponseRedirect(request.get_full_path())
+        else:
+            form.fix_json()
     else:
         initial.update({'action': 'mass_update', '_validate': 1})
         prefill_with = request.POST.get('prefill-with', None)

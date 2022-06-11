@@ -1,5 +1,6 @@
 Release 2.0
 ===========
+* Add Admin logging support (LogEntry)
 * add Celery support
 * MassUpdateForm sort fields by label
 * BACKWARD INCOMPATIBLE: removed `modeladmin` from signals arguments
