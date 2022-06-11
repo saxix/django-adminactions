@@ -5,6 +5,8 @@ Release 2.0
 * MassUpdateForm sort fields by label
 * BACKWARD INCOMPATIBLE: removed `modeladmin` from signals arguments
 * BACKWARD INCOMPATIBLE: signals `request` argument is now optional to support async execution
+* BACKWARD INCOMPATIBLE: Drop support for Django 2.x
+* BACKWARD INCOMPATIBLE: Removes internal api SelectOptionsAttribute
 
 
 Release 1.15

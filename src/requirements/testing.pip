@@ -1,4 +1,5 @@
 check-manifest
+celery
 django-dynamic-fixture
 django-webtest>1.9.6
 django-admin-extra-urls

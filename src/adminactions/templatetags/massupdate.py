@@ -65,43 +65,6 @@ def checkbox_enabler(context, field):
     return mark_safe('<input type="checkbox" name="%s" %s class="enabler">' % (name, checked))
 
 
-class SelectOptionsAttribute(widgets.Select):
-    """
-        Select widget with the capability to render option's attributes
-
-    >>> opt = SelectOptionsAttribute()
-    >>> opt.render_option(["1"], 1, "a") == '<option value="1" selected="selected">a</option>'
-    True
-    >>> opt.render_option([], 1, "a") == '<option value="1">a</option>'
-    True
-    """
-
-    def __init__(self, attrs=None, choices=(), options_attributes=None):
-        # self.options_attributes = options_attributes or {}
-        super().__init__(attrs, choices)
-
-    # def render_option(self, selected_choices, option_value, option_label):
-    #     # FIXME: remove me (print)
-    #     print(111, "massupdate.py:85 (render_option)", 11111)
-    #     print(111, "massupdate.py:85 (render_option)", 11111)
-    #     print(111, "massupdate.py:85 (render_option)", 11111)
-    #     print(111, "massupdate.py:85 (render_option)", 11111)
-    #     print(111, "massupdate.py:85 (render_option)", selected_choices)
-    #     option_value = smart_str(option_value)
-    #     attrs = flatatt(self.options_attributes.get(option_value, {}))
-    #     if option_value in selected_choices:
-    #         selected_html = u' selected="selected"'
-    #         if not self.allow_multiple_selected:
-    #             # Only allow for a single selection.
-    #             selected_choices.remove(option_value)
-    #     else:
-    #         selected_html = ''
-    #     return u'<option%s value="%s"%s>1111111 %s</option>' % (
-    #         attrs,
-    #         escape(option_value), selected_html,
-    #         conditional_escape(smart_str(option_label)))
-
-
 @register.simple_tag(takes_context=True)
 def field_function(context, model, form_field):
     from adminactions.mass_update import OPERATIONS

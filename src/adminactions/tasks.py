@@ -11,7 +11,7 @@ def mass_update_task(model, ids, rules, validate, clean, user_pk):
     try:
         model = apps.get_model(*model.split("."))
         queryset = model.objects.filter(id__in=ids)
-        mass_update_execute(queryset, rules, validate, clean, user=user_pk)
+        mass_update_execute(queryset, rules, validate, clean, user_pk=user_pk)
     except Exception as e:
         logger.exception(e)
         raise

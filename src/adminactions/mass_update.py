@@ -386,8 +386,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                                        ids=list(queryset.only("pk").values_list('pk', flat=True)),
                                        rules=rules,
                                        validate=validate, clean=clean,
-                                       user_pk=request.user.pk,
-                                       request=request)
+                                       user_pk=request.user.pk)
             else:
                 try:
                     updated, errors = mass_update_execute(queryset,
