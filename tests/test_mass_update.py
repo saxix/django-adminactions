@@ -1,7 +1,3 @@
-from unittest import mock
-from unittest.mock import MagicMock, patch
-
-import adminactions
 # from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 from demo.models import DemoModel
 from django.contrib.auth.models import User
@@ -9,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
+from unittest.mock import patch
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
 __all__ = ['MassUpdateTest', ]

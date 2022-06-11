@@ -1,6 +1,5 @@
 from django.apps import apps
 
-
 __all__ = ["create_extra_permissions"]
 
 

@@ -9,6 +9,7 @@ class NoCommit(t.Atomic):
 def nocommit(using=None, savepoint=True, durable=False):
     return NoCommit(using, savepoint, durable)
 
+
 try:
     from celery import current_app  # noqa
 

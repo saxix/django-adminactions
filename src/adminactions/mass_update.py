@@ -4,14 +4,13 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.contrib.admin.models import LogEntry
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import ForeignKey, fields as df
 from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory, )
+                                 modelform_factory,)
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
@@ -229,9 +228,9 @@ class MassUpdateForm(GenericActionForm):
         )
 
     def fix_json(self):
-        for nn, ff in self.fields.items():
-            if isinstance(ff, forms.JSONField):
-                ff.disabled = nn not in self.data
+        for label, field in self.fields.items():
+            if isinstance(field, forms.JSONField):
+                field.disabled = label not in self.data
 
 
 def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None):

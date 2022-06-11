@@ -6,7 +6,6 @@ from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
-from django.forms import BaseForm
 from django.test.testcases import TestCase
 from django_dynamic_fixture import G
 from django_dynamic_fixture.fixture_algorithms.random_fixture import \

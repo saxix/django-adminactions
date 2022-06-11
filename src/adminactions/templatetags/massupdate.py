@@ -1,8 +1,5 @@
 from django.forms import widgets
-from django.forms.utils import flatatt
 from django.template import Library
-from django.utils.encoding import smart_str
-from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 
 from adminactions.utils import get_field_by_name
@@ -81,5 +78,4 @@ def field_function(context, model, form_field):
     for label, (__, param, enabler, __) in list(OPERATIONS.get_for_field(model_field).items()):
         options_attrs[label] = {'class': classes[param], 'label': label}
         choices.append((label, label))
-    return widgets.Select(attrs, choices).render("func_id_%s" % form_field.name,
-                                                                        value)
+    return widgets.Select(attrs, choices).render("func_id_%s" % form_field.name, value)
