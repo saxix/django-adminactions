@@ -1,3 +1,8 @@
+Release 2.1
+===========
+* new action "Find Duplicates"
+
+
 Release 2.0
 ===========
 * Add Admin logging support (LogEntry)

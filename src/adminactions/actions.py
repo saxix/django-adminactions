@@ -4,11 +4,13 @@ from .export import (export_as_csv, export_as_fixture,
 from .graph import graph_queryset
 from .mass_update import mass_update
 from .merge import merge
+from .duplicates import find_duplicates_action
 
 actions = [export_as_fixture,
            export_as_csv,
            export_as_xls,
            export_delete_tree,
+           find_duplicates_action,
            merge,
            mass_update,
            graph_queryset,
