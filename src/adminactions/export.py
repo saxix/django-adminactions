@@ -14,7 +14,7 @@ from itertools import chain
 from .api import (export_as_csv as _export_as_csv,
                   export_as_xls as _export_as_xls,)
 from .exceptions import ActionInterrupted
-from .forms import CSVOptions, XLSOptions, FixtureOptions
+from .forms import CSVOptions, FixtureOptions, XLSOptions
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
