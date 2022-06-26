@@ -1,16 +1,15 @@
-from django.contrib import messages
 from django import forms
+from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ValidationError
-from django.db.models import F, CharField, Count
-from django.db.models.functions import Concat
-from django.forms import Media
+from django.db.models import Count
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.perms import get_permission_codename
-from adminactions.signals import adminaction_requested, adminaction_end, adminaction_start
+from adminactions.signals import (adminaction_end, adminaction_requested,
+                                  adminaction_start,)
 from adminactions.utils import get_common_context
 
 

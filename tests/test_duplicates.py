@@ -5,7 +5,6 @@ from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
-from unittest.mock import patch
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
 __all__ = ['FindDuplicatesTest', ]
