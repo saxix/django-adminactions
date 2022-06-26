@@ -49,3 +49,23 @@ p.display {
     background-color: transparent;
     display: none;
 }
+
+div.duplicates{
+    table{
+        width: 100%;
+        tr th {
+            white-space: nowrap;
+        }
+    }
+    display: flex;
+    .left{
+        flex-shrink: initial;
+    }
+    .right{
+        border: 1px solid #c9c9c9;
+        margin-left: 40px;
+        padding: 5px;
+        flex-grow: initial;
+        width: 100%;
+    }
+}

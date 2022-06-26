@@ -282,3 +282,16 @@ def get_all_field_names(model):
 
 def curry(func, *a, **kw):
     return partial(func, *a, **kw)
+
+
+def get_common_context(modeladmin, **kwargs):
+    ctx = {'change': True,
+           'is_popup': False,
+           'save_as': False,
+           'has_delete_permission': False,
+           'has_add_permission': False,
+           'has_change_permission': True,
+           'opts': modeladmin.model._meta,
+           'app_label': modeladmin.model._meta.app_label}
+    ctx.update(**kwargs)
+    return ctx
