@@ -1,9 +1,11 @@
+# from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 from demo.models import DemoModel
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
+from unittest.mock import patch
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
 __all__ = ['MassUpdateTest', ]
@@ -36,13 +38,13 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
                 self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
-                for k, v in kwargs.items():
-                    res.form[k] = v
                 res.form['chk_id_char'].checked = True
                 res.form['func_id_char'] = 'upper'
                 res.form['chk_id_choices'].checked = True
                 res.form['func_id_choices'] = 'set'
                 res.form['choices'] = '1'
+                for k, v in kwargs.items():
+                    res.form[k] = v
                 res = res.form.submit('apply')
         return res
 
@@ -62,8 +64,10 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         assert not DemoModel.objects.filter(char='ccccc').exists()
 
     def test_validate_off(self):
-        self._run_action(**{'_validate': 0})
-        self.assertIn("Unable no mass update using operators without", self.app.cookies['messages'])
+        res = self._run_action(**{'_validate': 0})
+        assert res.status_code == 200
+        form = res.context['adminform'].form
+        assert form.errors['__all__'] == ["Cannot use operators without 'validate'"]
 
     def test_clean_on(self):
         self._run_action(**{'_clean': 1})
@@ -73,7 +77,8 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
 
     def test_messages(self):
         with user_grant_permission(self.user, ['demo.change_demomodel', 'demo.adminactions_massupdate_demomodel']):
-            res = self._run_action(**{'_clean': 1}).follow()
+            res = self._run_action(**{'_clean': 1})
+            res = res.follow()
             messages = [m.message for m in list(res.context['messages'])]
             self.assertTrue(messages)
             self.assertEqual('Updated 2 records', messages[0])
@@ -82,3 +87,21 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             messages = [m.message for m in list(res.context['messages'])]
             self.assertTrue(messages)
             self.assertEqual('Updated 1 records', messages[0])
+
+    def test_async_qs(self):
+        # Create handler
+        res = self._run_action(**{'_async': 1, '_validate': 0, 'chk_id_char': False})
+        assert res.status_code == 302
+        assert DemoModel.objects.filter(choices=1).exists()
+
+    @patch('adminactions.mass_update.adminaction_end.send')
+    @patch('adminactions.mass_update.adminaction_start.send')
+    @patch('adminactions.mass_update.adminaction_requested.send')
+    def test_async_single(self, req, start, end):
+        res = self._run_action(**{'_async': 1, '_validate': 1})
+        assert res.status_code == 302
+        assert req.called
+        assert start.called
+        assert end.called
+        assert DemoModel.objects.filter(char='CCCCC').exists()
+        assert not DemoModel.objects.filter(char='ccccc').exists()

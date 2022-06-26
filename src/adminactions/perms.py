@@ -1,9 +1,4 @@
 from django.apps import apps
-from django.conf import settings
-
-from .consts import AA_PERMISSION_CREATE_USE_SIGNAL
-
-AA_PERMISSION_HANDLER = getattr(settings, 'AA_PERMISSION_HANDLER', AA_PERMISSION_CREATE_USE_SIGNAL)
 
 __all__ = ["create_extra_permissions"]
 
@@ -29,9 +24,6 @@ def create_extra_permissions():
 
     from .actions import actions as aa
 
-    #  ('adminactions_export', 'adminactions_massupdate',
-    #                        'adminactions_merge', 'adminactions_chart',
-    #                        'adminactions_byrowsupdate')
     perm_suffix = 'adminactions_'
     existing_perms = set(
         Permission.objects.filter(codename__startswith=perm_suffix).values_list(

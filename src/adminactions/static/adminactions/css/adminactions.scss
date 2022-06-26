@@ -1,0 +1,71 @@
+.mergetable {
+    width: 100%;
+    border: 1px solid black;
+}
+p.display {
+    width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
+    /*word-wrap: break-word;*/
+}
+
+.mergetable tr.header th {
+    font-weight: bold;
+    text-align: center;
+}
+
+.mergetable td {
+    /*width: 30%;*/
+    vertical-align: middle;
+    border-right: 1px solid #000000;
+}
+
+.mergetable .column {
+     /*width: 30%;*/
+}
+
+.mergetable .origin *, .mergetable .result * {
+    /*width: 30%;*/
+    /*word-wrap: break-word;*/
+    /*white-space:pre-line;*/
+}
+
+.mergetable .label {
+    /*width: 10%;*/
+    font-weight: bold;
+}
+
+.mergetable .selected {
+    background-color: #81b10c;
+}
+
+.mergetable .changed {
+    background-color: #f9adaf;
+}
+
+.mergetable input.raw-value {
+    /*width: 200px;*/
+    border: 0px transparent;
+    background-color: transparent;
+    display: none;
+}
+
+div.duplicates{
+    table{
+        width: 100%;
+        tr th {
+            white-space: nowrap;
+        }
+    }
+    display: flex;
+    .left{
+        flex-shrink: initial;
+    }
+    .right{
+        border: 1px solid #c9c9c9;
+        margin-left: 40px;
+        padding: 5px;
+        flex-grow: initial;
+        width: 100%;
+    }
+}

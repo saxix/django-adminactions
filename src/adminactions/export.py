@@ -1,9 +1,7 @@
-from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core import serializers as ser
-from django.core.serializers import get_serializer_formats
 from django.db import router
 from django.db.models import ForeignKey, ManyToManyField
 from django.db.models.deletion import Collector
@@ -16,7 +14,7 @@ from itertools import chain
 from .api import (export_as_csv as _export_as_csv,
                   export_as_xls as _export_as_xls,)
 from .exceptions import ActionInterrupted
-from .forms import CSVOptions, XLSOptions
+from .forms import CSVOptions, FixtureOptions, XLSOptions
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
@@ -30,7 +28,7 @@ def get_action(request):
 
 
 def base_export(modeladmin, request, queryset, title, impl,  # noqa
-                name, action_short_description, template, form_class, ):
+                name, action_short_description, template, form_class):
     """
         export a queryset to csv file
     """
@@ -50,8 +48,10 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
-
-    cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+    if hasattr(modeladmin, 'get_exportable_columns'):
+        cols = modeladmin.get_exportable_columns(request, form_class)
+    else:
+        cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
                'action': get_action(request),
@@ -123,6 +123,10 @@ base_export.base_permission = 'adminactions_export'
 
 
 def export_as_csv(modeladmin, request, queryset):
+    if hasattr(modeladmin, 'get_export_form'):
+        form_class = modeladmin.get_export_form(request, 'csv') or CSVOptions
+    else:
+        form_class = CSVOptions
     return base_export(modeladmin, request, queryset,
                        impl=_export_as_csv,
                        name='export_as_csv',
@@ -132,7 +136,7 @@ def export_as_csv(modeladmin, request, queryset):
                            modeladmin.opts.verbose_name_plural,
                        ),
                        template='adminactions/export_csv.html',
-                       form_class=CSVOptions)
+                       form_class=form_class)
 
 
 export_as_csv.short_description = _("Export as CSV")
@@ -140,6 +144,10 @@ export_as_csv.base_permission = 'adminactions_export'
 
 
 def export_as_xls(modeladmin, request, queryset):
+    if hasattr(modeladmin, 'get_export_form'):
+        form_class = modeladmin.get_export_form(request, 'xls') or XLSOptions
+    else:
+        form_class = XLSOptions
     return base_export(modeladmin, request, queryset,
                        impl=_export_as_xls,
                        name='export_as_xls',
@@ -149,7 +157,7 @@ def export_as_xls(modeladmin, request, queryset):
                            modeladmin.opts.verbose_name_plural,
                        ),
                        template='adminactions/export_xls.html',
-                       form_class=XLSOptions)
+                       form_class=form_class)
 
 
 export_as_xls.short_description = _("Export as XLS")
@@ -199,21 +207,6 @@ class ForeignKeysCollector:
         return mark_safe(self.data)
 
 
-class FixtureOptions(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    select_across = forms.BooleanField(label='', required=False, initial=0,
-                                       widget=forms.HiddenInput({'class': 'select-across'}))
-    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
-
-    use_natural_pk = forms.BooleanField(label=_('Use Natural Primary Keys'), required=False)
-    use_natural_fk = forms.BooleanField(label=_('Use Natural Foreign Keys'), required=False)
-    on_screen = forms.BooleanField(label='Dump on screen', required=False)
-    add_foreign_keys = forms.BooleanField(required=False)
-
-    indent = forms.IntegerField(required=True, max_value=10, min_value=0)
-    serializer = forms.ChoiceField(choices=list(zip(get_serializer_formats(), get_serializer_formats())))
-
-
 def _dump_qs(form, queryset, data, filename):
     fmt = form.cleaned_data.get('serializer')
 
@@ -235,7 +228,6 @@ def export_as_fixture(modeladmin, request, queryset):
     initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
                'select_across': request.POST.get('select_across') == '1',
                'action': get_action(request),
-
                'serializer': 'json',
                'indent': 4}
     opts = modeladmin.model._meta
@@ -254,9 +246,13 @@ def export_as_fixture(modeladmin, request, queryset):
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
+    if hasattr(modeladmin, 'get_export_form'):
+        form_class = modeladmin.get_export_form(request, 'fixture') or FixtureOptions
+    else:
+        form_class = FixtureOptions
 
     if 'apply' in request.POST:
-        form = FixtureOptions(request.POST)
+        form = form_class(request.POST)
         if form.is_valid():
             try:
                 adminaction_start.send(sender=modeladmin.model,
@@ -288,7 +284,7 @@ def export_as_fixture(modeladmin, request, queryset):
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.path)
     else:
-        form = FixtureOptions(initial=initial)
+        form = form_class(initial=initial)
 
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
@@ -345,8 +341,13 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
                'serializer': 'json',
                'indent': 4}
 
+    if hasattr(modeladmin, 'get_export_form'):
+        form_class = modeladmin.get_export_form(request, 'delete') or FixtureOptions
+    else:
+        form_class = FixtureOptions
+
     if 'apply' in request.POST:
-        form = FixtureOptions(request.POST)
+        form = form_class(request.POST)
         if form.is_valid():
             try:
                 adminaction_start.send(sender=modeladmin.model,
@@ -382,7 +383,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
                 messages.error(request, str(e))
                 return HttpResponseRedirect(request.path)
     else:
-        form = FixtureOptions(initial=initial)
+        form = form_class(initial=initial)
 
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
     media = modeladmin.media + adminForm.media

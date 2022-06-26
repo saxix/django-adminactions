@@ -1,7 +1,9 @@
 check-manifest
+celery
 django-dynamic-fixture
 django-webtest>1.9.6
 django-admin-extra-urls
+django-environ
 flake8
 flake8-isort
 mock>=1.0.1
@@ -13,6 +15,7 @@ pytest-cov
 pytest-django
 pytest-echo
 pytest-pythonpath
+redis
 readme
 selenium>=2.42.0
 setuptools>=15.0

@@ -1,0 +1,42 @@
+{% extends "admin/change_form.html" %}{% load i18n admin_modify actions static %}
+{% block extrahead %}{{ block.super }}{{ form.media }}{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+  <div class="breadcrumbs">
+    <a href="../../">{% trans "Home" %}</a> &rsaquo;
+    <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+    <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+    {{ action_short_description|capfirst }}
+  </div>
+{% endif %}{% endblock %}
+{% block coltype %}{% endblock %}
+
+{% block content %}
+  <div class="duplicates">
+    <div class="left">
+      {% if form %}
+        <form action="." method="post">
+          {% csrf_token %}
+          <table class="mass-update">
+            {{ form }}
+          </table>
+          <input type="submit" name="apply" value="Check {{ selection.count }} records"/>
+        </form>
+      {% endif %}
+    </div>
+    <div class="right">
+      {% if checked and results %}
+        <table>
+          <tr>{% for k in checked%}<th>{{ k }}</th>{% endfor %}
+          <th>duplicates</th>
+          </tr>
+          {% for result in results %}
+            <tr>{% for k,v in result.items %}
+              <th>{{ v }}</th>{% endfor %}</tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+    </div>
+  </div>
+  {#  <textarea style="width: 100%;height: 100px;border-style: none" readonly="readonly">{{ sql }}</textarea>#}
+{% endblock %}

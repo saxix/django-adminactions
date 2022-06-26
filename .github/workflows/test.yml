@@ -22,16 +22,21 @@ jobs:
                     tox -e lint
 
     test:
+        services:
+            redis:
+                image: redis
+
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             matrix:
                 python-version: [ "3.8", "3.9", "3.10" ]
-                django-version: [ "2.2", "3.2", "4.0" ]
+                django-version: [ "3.2", "4.0" ]
         env:
             PY_VER: ${{ matrix.python-version}}
             DJ_VER: ${{ matrix.django-version}}
-
+            CELERY_BROKER_URL: redis://redis:6379/0
+            CELERY_ALWAYS_EAGER: true
         steps:
             -   uses: actions/checkout@v2
 

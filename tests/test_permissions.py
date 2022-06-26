@@ -44,7 +44,7 @@ def test_permission_needed(app, admin, demomodels, action):
 
 @pytest.mark.django_db()
 def test_permissions(admin):
-    assert Permission.objects.filter(codename__startswith='adminactions').count() == 45
+    assert Permission.objects.filter(codename__startswith='adminactions').count() == 54
 
     with user_grant_permission(admin, ['demo.adminactions_export_demomodel']):
         assert admin.get_all_permissions() == set([u'demo.adminactions_export_demomodel'])

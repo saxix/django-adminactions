@@ -1,22 +1,7 @@
 {% extends "admin/change_form.html" %}
 {% load i18n admin_modify actions massupdate static %}
 {% block extrahead %}{{ block.super }}
-    <style type="text/css">
-        #col1 {
-            float: left;
-            width: 70%;
-        }
-
-        #col2 {
-            float: right;
-            width: 30%;
-        }
-
-        #col2 select {
-            width: 100%;
-        }
-    </style>
-  {{ media }}
+{#  {{ media }}#}
 {% endblock %}
 
 {% block breadcrumbs %}{% if not is_popup %}
@@ -40,7 +25,7 @@
     <div id='col1'>
         <form action="" method="post">
             {% csrf_token %}
-            <table border="1">
+            <table class="mass-update">
                 {% for field in adminform.form.configured_fields %}
                     <tr>
                         <td>{{ field.label_tag }}</td>

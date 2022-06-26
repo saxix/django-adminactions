@@ -18,7 +18,6 @@
                 var $right = $(this).find('td.other');
                 var field_name = $(this).find('td:first').attr('data-content');
 
-
                 $('td', this).removeClass("selected");
 
                 if ($('input.raw-value', $right).val() === $('input.raw-value', $left).val()) {
@@ -39,7 +38,6 @@
                 var $left = $(this).find('td.origin');
                 var $right = $(this).find('td.other');
                 var field_name = $(this).find('td:first').attr('data-content');
-
 
                 $('td', this).removeClass("selected");
 
@@ -88,8 +86,6 @@
             });
             highlight();
         });
-
         highlight();
-
     });
 })(django.jQuery);

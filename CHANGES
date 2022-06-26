@@ -1,3 +1,17 @@
+Release 2.0
+===========
+* new action "Find Duplicates"
+* allows customization of exportable columns (`get_exportable_columns(request)`)
+* allows customization od ExportForm (`get_export_form(request, export_type)`)
+* Add Admin logging support (LogEntry)
+* add Celery support
+* MassUpdateForm sort fields by label
+* BACKWARD INCOMPATIBLE: removed `modeladmin` from signals arguments
+* BACKWARD INCOMPATIBLE: signals `request` argument is now optional to support async execution
+* BACKWARD INCOMPATIBLE: Drop support for Django 2.x
+* BACKWARD INCOMPATIBLE: Removes internal api SelectOptionsAttribute
+
+
 Release 1.15
 =============
 * perms refactoring. Add module `consts` to handle import errors in some circumstances
