@@ -1,12 +1,8 @@
-Release 2.1
+Release 2.0
 ===========
 * new action "Find Duplicates"
 * allows customization of exportable columns (`get_exportable_columns(request)`)
 * allows customization od ExportForm (`get_export_form(request, export_type)`)
-
-
-Release 2.0
-===========
 * Add Admin logging support (LogEntry)
 * add Celery support
 * MassUpdateForm sort fields by label
