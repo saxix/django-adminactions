@@ -158,6 +158,36 @@ Available options: (see :ref:`python:csv-fmt-params`).
 
 .. figure:: _static/export_as_csv.png
 
+
+.. _export_as_csv_options:
+
+Customize Options Form:
+-----------------------
+
+To customize Option Form add `get_export_form(request, export_type)` to your ModelAdmin.
+By default Option form used based on `export_type` argument:
+
+    - 'xls': `adminactions.forms.XLSOptions`
+    - 'csv': `adminactions.forms.CSVOptions`
+    - 'fixture': `adminactions.forms.FixtureOptions`
+    - 'delete': `adminactions.forms.FixtureOptions`
+
+
+.. _export_as_csv_columns:
+
+Limit columns
+-------------
+
+To limit the columns that can be exported, you can add `get_exportable_columns(request, options)` to the ModelAdmin to returns
+the list of the allowed columns, it should returns a list of `[(field_name, field_label),...]`
+
+By default::
+
+    cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+
+`options` is and instance of: `CSVOptions`, `XLSOptions` `FixtureOptions`
+
+
 Streaming CSV Response
 ----------------------
 
@@ -248,6 +278,17 @@ Available options:
 **columns**           Which columns will be included in the dump
 
 ===================   ===========================================================================================
+
+Customize Options Form:
+-----------------------
+
+see :ref:`export_as_csv_options`
+
+
+Limit columns
+-------------
+
+see :ref:`export_as_csv_columns`
 
 
 .. _graph_queryset:
