@@ -1,5 +1,6 @@
 import csv
 from django import forms
+from django.core.serializers import get_serializer_formats
 from django.forms.models import ModelForm
 from django.forms.widgets import SelectMultiple
 from django.utils import formats
@@ -59,3 +60,19 @@ class XLSOptions(forms.Form):
     header = forms.BooleanField(label=_('Header'), required=False)
     use_display = forms.BooleanField(label=_('Use display'), required=False)
     columns = forms.MultipleChoiceField(label=_('Columns'), widget=SelectMultiple(attrs={'size': 20}))
+
+
+class FixtureOptions(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    select_across = forms.BooleanField(label='', required=False, initial=0,
+                                       widget=forms.HiddenInput({'class': 'select-across'}))
+    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
+
+    use_natural_pk = forms.BooleanField(label=_('Use Natural Primary Keys'), required=False)
+    use_natural_fk = forms.BooleanField(label=_('Use Natural Foreign Keys'), required=False)
+    on_screen = forms.BooleanField(label='Dump on screen', required=False)
+    add_foreign_keys = forms.BooleanField(required=False)
+
+    indent = forms.IntegerField(required=True, max_value=10, min_value=0)
+    serializer = forms.ChoiceField(choices=list(zip(get_serializer_formats(), get_serializer_formats())))
+
