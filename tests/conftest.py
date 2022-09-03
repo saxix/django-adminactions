@@ -48,7 +48,7 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     # import warnings
-    # enable this to removee deprecations
+    # enable this to remove deprecations
     # warnings.simplefilter('once', DeprecationWarning)
 
     if config.option.markexpr.find("selenium") < 0 and \

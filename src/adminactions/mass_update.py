@@ -307,7 +307,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 filters = {"%s__in" % f.remote_field.name: queryset}
                 # Order by random to get a nice sample
                 query = f.related_model.objects.filter(**filters).distinct().order_by('?')
-                # Limit the amount of results so we don't accidently query
+                # Limit the amount of results so we don't accidentally query
                 # many thousands of items and kill the database.
                 grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
             elif hasattr(f, 'flatchoices') and f.flatchoices:
