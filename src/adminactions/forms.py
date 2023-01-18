@@ -23,9 +23,8 @@ class GenericActionForm(ModelForm):
         """
         Returns a list of BoundField objects that aren't "private" fields or are not ignored.
         """
-        ignored_fields = get_ignored_fields(self._meta.model, "UPDATE_ACTION_IGNORED_FIELDS")
-        return [field for field in self if
-                not (field.name.startswith('_') or field.name in ['select_across', 'action'] + ignored_fields)]
+        ignored_fields = ('select_accross', 'action', *get_ignored_fields(self._meta.model, "UPDATE_ACTION_IGNORED_FIELDS"))
+        return [field for field in self if not field.name.startswith('_') and field.name not in ignored_fields]
 
 
 class CSVOptions(forms.Form):
