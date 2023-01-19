@@ -79,8 +79,9 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                 cc = queryset.values_list(x).annotate(Count(x)).order_by()
                 if isinstance(field, ForeignKey):
                     data_labels = []
+                    object_rel = field.rel if hasattr(objfield, 'rel') else objfield.remote_field
                     for value, cnt in cc:
-                        data_labels.append(str(field.rel.to.objects.get(pk=value)))
+                        data_labels.append(str(object_rel.to.objects.get(pk=value)))
                 elif isinstance(field, BooleanField):
                     data_labels = [str(label) for label, v in cc]
                 elif hasattr(modeladmin.model, 'get_%s_display' % field.name):
