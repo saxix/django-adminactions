@@ -62,30 +62,39 @@ class OperationManager:
               ('set null', (lambda old_value: None, False, disable_if_not_nullable, ""))]
 
     def __init__(self, _dict):
-        self._dict = dict()
+        self._dict = defaultdict(SortedDict)
         self.operations = dict()
-        for field_class, args in list(_dict.items()):
-            self._dict[field_class] = SortedDict(self.COMMON + args)
-            for label, (func, param, enabler, help) in args:
-                self.operations[label] = func
+        self.register_function(df.Field, COMMON)
+        for field_class, args in _dict.items():
+            self.register_operations(field_class, args)
+
+    def register_operations(self, field_class, operations):
+        for label, operation in operations:
+            self._dict[field_class][label] = operation
+            if operation:
+                self.operations[label] = operation[0]
 
     def get_function(self, name):
         return self.operations.get(name, None)
 
-    def get(self, field_class, d=None):
-        return self._dict.get(field_class, SortedDict(self.COMMON))
+    def get(self, field_class: type):
+        data = SortedDict()
+        # reversed to make the most specific overrule the more general ones
+        for typ in reversed(field_class.__mro__):
+            data |= self._dict.get(typ, ())
+        return data
 
     def get_for_field(self, field):
         """ returns valid functions for passed field
             :param field Field django Model Field
             :return list of (label, (__, param, enabler, help))
         """
-        valid = SortedDict()
-        operators = self.get(field.__class__)
-        for label, (func, param, enabler, help) in list(operators.items()):
-            if (callable(enabler) and enabler(field)) or enabler is True:
-                valid[label] = (func, param, enabler, help)
-        return valid
+        return SortedDict([(label, operation)
+            for label, operation in self.get(field.__class__)
+            if operation  # check if not None
+            # check if the enabler is satisfied
+            and (operation[2] is True or (callable(operation[2]) and operation[2](field)))
+        ])
 
     def __getitem__(self, field_class):
         return self.get(field_class)
@@ -101,11 +110,14 @@ OPERATIONS = OperationManager({
                       ('sub', (sub_percent, True, True, "")),
                       ('add', (add, True, True, ""))],
     df.BooleanField: [('toggle', (negate, False, True, ""))],
-    df.NullBooleanField: [('toggle', (negate, False, True, ""))],
     df.EmailField: [('change domain', (change_domain, True, True, "")),
-                    ('upper', (str.upper, False, True, _("convert to uppercase"))),
-                    ('lower', (str.lower, False, True, _("convert to lowercase")))],
-    df.URLField: [('change protocol', (change_protocol, True, True, ""))]
+                    ('capitalize', None),
+                    ('trim', None)],
+    df.URLField: [('change protocol', (change_protocol, True, True, "")),
+                  ('capitalize', None),
+                  ('trim', None),
+                  ('upper', None),
+                  ('lower', None)]
 })
 
 
