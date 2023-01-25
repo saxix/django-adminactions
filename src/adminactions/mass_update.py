@@ -84,6 +84,12 @@ class OperationManager:
             data |= self._dict.get(typ, ())
         return data
 
+    def operation_enabled(self, field, operation):
+        if operation:
+            enabler = operation[2]
+            return enabler is True or (callable(enabler) and enabler(field))
+        return False
+
     def get_for_field(self, field):
         """ returns valid functions for passed field
             :param field Field django Model Field
@@ -91,9 +97,7 @@ class OperationManager:
         """
         return SortedDict([(label, operation)
             for label, operation in self.get(field.__class__)
-            if operation  # check if not None
-            # check if the enabler is satisfied
-            and (operation[2] is True or (callable(operation[2]) and operation[2](field)))
+            if self.operation_enabled(field, operation)
         ])
 
     def __getitem__(self, field_class):
