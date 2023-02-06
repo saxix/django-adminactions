@@ -24,7 +24,6 @@ Contributors
 * jht001 (`@jht001`_)
 * Cesar Abel (`@xangmuve`_)
 * Viator (`@viatoriche`_)
-* Serhiy Zahoriya (`@int-ua`_)
 * Pavel Savchenko (`@asfaltboy`_)
 * Petr Kůdela (`@PetrKudy`_)
 * Bastien Vallet (`@Djailla`_)
