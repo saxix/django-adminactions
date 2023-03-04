@@ -2,7 +2,7 @@ import os
 from demo.models import DemoModel, DemoOneToOne, UserDetail
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
-from django.contrib.auth.models import Group, Permission, User, ContentType
+from django.contrib.auth.models import Group, Permission, User
 from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
@@ -179,16 +179,6 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         super().setUp()
         self.url = reverse('admin:auth_user_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
-        content_type = ContentType.objects.filter(
-            app_label='auth',
-            model='user'
-        ).first()
-        G(
-            Permission,
-            codename='adminactions_merge_user',
-            name='Admin action merge user',
-            content_type=content_type
-        )
 
     def _run_action(self, steps=3, page_start=None):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
@@ -365,17 +355,6 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
         super().setUp()
         self.url = reverse('admin:demo_demomodel_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
-
-        content_type = ContentType.objects.filter(
-            app_label='demo',
-            model='demomodel'
-        ).first()
-        G(
-            Permission,
-            codename='adminactions_merge_demomodel',
-            name='Admin action merge demo model',
-            content_type=content_type
-        )
 
     def _run_action(self, steps=3, page_start=None):
         with user_grant_permission(self.user,
