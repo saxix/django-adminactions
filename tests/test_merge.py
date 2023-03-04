@@ -256,13 +256,11 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
 
     def test_swap(self):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
-            # removed = User.objects.get(pk=self._selected_rows[0])
-            # preserved = User.objects.get(pk=self._selected_rows[1])
-
             res = self.app.get('/', user='user')
             res = res.click('Users')
             form = res.forms['changelist-form']
             form['action'] = 'merge'
+
             self._select_rows(form, [1, 2])
             res = form.submit()
             removed = User.objects.get(pk=self._selected_values[0])
@@ -276,8 +274,6 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             res.form['email'] = res.form['form-0-email'].value
             res.form['last_login'] = res.form['form-1-last_login'].value
             res.form['date_joined'] = res.form['form-1-date_joined'].value
-
-            # res.form['field_names'] = 'username,email'
 
             res = res.form.submit('preview')
             # steps = 3:
@@ -294,9 +290,6 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         from adminactions.merge import MergeForm
 
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
-            # removed = User.objects.get(pk=self._selected_rows[0])
-            # preserved = User.objects.get(pk=self._selected_rows[1])
-
             res = self.app.get('/', user='user')
             res = res.click('Users')
             form = res.forms['changelist-form']
@@ -330,9 +323,6 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         from adminactions.merge import MergeForm
 
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
-            # removed = User.objects.get(pk=self._selected_rows[0])
-            # preserved = User.objects.get(pk=self._selected_rows[1])
-
             res = self.app.get('/', user='user')
             res = res.click('Users')
             form = res.forms['changelist-form']
@@ -409,7 +399,7 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
                 res.form['image'] = res.form['form-1-image'].value
                 res.form['field_names'] = 'image,subclassed_image'
                 res = res.form.submit('preview')
-                assert not hasattr(res.form[0], 'errors')
+                assert not hasattr(res.form, 'errors')
 
             if 3 in steps:
                 res = res.form.submit('apply')
