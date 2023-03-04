@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -15,6 +16,7 @@ from django.utils.translation import gettext as _
 from . import api, compat as transaction
 from .forms import GenericActionForm
 from .perms import get_permission_codename
+from .signals import adminaction_end, adminaction_start
 from .utils import clone_instance, get_ignored_fields
 
 
@@ -27,17 +29,18 @@ class MergeFormBase(forms.Form):
     GEN_RELATED = 2
     GEN_DEEP = 3
 
-    dependencies = forms.ChoiceField(label=_('Dependencies'),
-                                     choices=((DEP_MOVE, _("Move")), (DEP_DELETE, _("Delete"))))
+    dependencies = forms.ChoiceField(
+        label=_('Dependencies'),
+        choices=((DEP_MOVE, _("Move")), (DEP_DELETE, _("Delete"))))
 
     master_pk = forms.CharField(widget=HiddenInput)
     other_pk = forms.CharField(widget=HiddenInput)
     field_names = forms.CharField(required=False, widget=HiddenInput)
 
     def action_fields(self):
-        for fieldname in ['dependencies', 'master_pk', 'other_pk', 'field_names']:
-            bf = self[fieldname]
-            yield HiddenInput().render(fieldname, bf.value())
+        for field_name in ['dependencies', 'master_pk', 'other_pk', 'field_names']:
+            bf = self[field_name]
+            yield HiddenInput().render(field_name, bf.value())
 
     def clean_dependencies(self):
         return int(self.cleaned_data['dependencies'])
@@ -70,6 +73,7 @@ class MergeForm(GenericActionForm, MergeFormBase):
     pass
 
 
+# noinspection PyProtectedMember
 def merge(modeladmin, request, queryset):  # noqa
     """
     Merge two model instances. Move all foreign keys.
@@ -77,8 +81,9 @@ def merge(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label,
-                            get_permission_codename(merge.base_permission, opts))
+    perm = "{0}.{1}".format(
+        opts.app_label,
+        get_permission_codename(merge.base_permission, opts))
     if not request.user.has_perm(perm):
         messages.error(request, _('Sorry you do not have rights to execute this action'))
         return
@@ -92,35 +97,45 @@ def merge(modeladmin, request, queryset):  # noqa
         return field.formfield(**kwargs)
 
     merge_form = getattr(modeladmin, 'merge_form', MergeForm)
-    MForm = modelform_factory(modeladmin.model,
-                              form=merge_form,
-                              exclude=('pk',),
-                              formfield_callback=raw_widget)
-    OForm = modelform_factory(modeladmin.model,
-                              exclude=('pk',),
-                              formfield_callback=raw_widget)
+    merge_form_factory = modelform_factory(
+        modeladmin.model,
+        form=merge_form,
+        exclude=('pk',),
+        formfield_callback=raw_widget
+    )
+    other_form_factory = modelform_factory(
+        modeladmin.model,
+        exclude=('pk',),
+        formfield_callback=raw_widget
+    )
 
-    def validate(request, master, other):
+    def validate(v_request, v_master, v_other):
         """Validate the model is still valid after the merge"""
-        merge_kwargs = {}
-        with transaction.nocommit():
-            merge_form = MergeFormBase(request.POST)
-            if merge_form.is_valid():
-                form = MForm(request.POST, instance=master)
-                if merge_form.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
-                    merge_kwargs['related'] = api.ALL_FIELDS
-                    merge_kwargs['m2m'] = api.ALL_FIELDS
-                else:
-                    merge_kwargs['related'] = None
-                    merge_kwargs['m2m'] = None
-                merge_kwargs['fields'] = merge_form.cleaned_data['field_names']
-                stored_pk = other.pk
-                api.merge(master, other, commit=True, **merge_kwargs)
-                other.pk = stored_pk
-                return (form.is_valid(), form, merge_kwargs)
-            else:
-                return (False, merge_form, merge_kwargs)
+        v_merge_kwargs = {}
 
+        with transaction.nocommit():
+            merge_form_base = MergeFormBase(v_request.POST)
+
+            if merge_form_base.is_valid():
+                validate_form = merge_form_factory(v_request.POST, instance=v_master)
+
+                if merge_form_base.cleaned_data['dependencies'] == MergeForm.DEP_MOVE:
+                    v_merge_kwargs['related'] = api.ALL_FIELDS
+                    v_merge_kwargs['m2m'] = api.ALL_FIELDS
+                else:
+                    v_merge_kwargs['related'] = None
+                    v_merge_kwargs['m2m'] = None
+
+                v_merge_kwargs['fields'] = merge_form_base.cleaned_data['field_names']
+                stored_pk = v_other.pk
+                api.merge(v_master, v_other, commit=True, **v_merge_kwargs)
+                v_other.pk = stored_pk
+
+                return validate_form.is_valid(), validate_form, v_merge_kwargs
+            else:
+                return False, merge_form_base, v_merge_kwargs
+
+    name = 'merge'  # Action name -- currently hardcoded - sent to signal
     tpl = 'adminactions/merge.html'
     ignored_fields = get_ignored_fields(queryset.model, "MERGE_ACTION_IGNORED_FIELDS")
 
@@ -138,7 +153,9 @@ def merge(modeladmin, request, queryset):  # noqa
         master = queryset.get(pk=request.POST.get('master_pk'))
         original = clone_instance(master)
         other = queryset.get(pk=request.POST.get('other_pk'))
-        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
+        formset = formset_factory(other_form_factory)(
+            initial=[model_to_dict(master), model_to_dict(other)]
+        )
         is_valid, form, merge_kwargs = validate(request, master, other)
         if is_valid:
             ctx.update({'original': original})
@@ -151,10 +168,30 @@ def merge(modeladmin, request, queryset):  # noqa
     elif 'apply' in request.POST:
         master = queryset.get(pk=request.POST.get('master_pk'))
         other = queryset.get(pk=request.POST.get('other_pk'))
-        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
+        formset = formset_factory(other_form_factory)(
+            initial=[model_to_dict(master), model_to_dict(other)]
+        )
         ok, form, merge_kwargs = validate(request, master, other)
+
         if ok:
+            adminaction_start.send(
+                sender=modeladmin.model,
+                action=name,
+                request=request,
+                queryset=queryset,
+                modeladmin=modeladmin,
+                form=form
+            )
             api.merge(master, other, commit=True, **merge_kwargs)
+            adminaction_end.send(
+                sender=modeladmin.model,
+                action=name,
+                request=request,
+                queryset=queryset,
+                modeladmin=modeladmin,
+                form=form
+            )
+
             return HttpResponseRedirect(request.get_full_path())
         else:
             messages.error(request, form.errors)
@@ -162,10 +199,10 @@ def merge(modeladmin, request, queryset):  # noqa
         try:
             master, other = queryset.all()
             # django 1.4 need to remove the trailing milliseconds
-            for field in master._meta.fields:
-                if isinstance(field, models.DateTimeField):
+            for master_field in master._meta.fields:
+                if isinstance(master_field, models.DateTimeField):
                     for target in (master, other):
-                        raw_value = getattr(target, field.name)
+                        raw_value = getattr(target, master_field.name)
                         if raw_value:
                             fixed_value = datetime(
                                 raw_value.year,
@@ -174,7 +211,7 @@ def merge(modeladmin, request, queryset):  # noqa
                                 raw_value.hour,
                                 raw_value.minute,
                                 raw_value.second)
-                            setattr(target, field.name, fixed_value)
+                            setattr(target, master_field.name, fixed_value)
         except ValueError:
             messages.error(request, _('Please select exactly 2 records'))
             return
@@ -186,12 +223,17 @@ def merge(modeladmin, request, queryset):  # noqa
                    'action': 'merge',
                    'master_pk': master.pk,
                    'other_pk': other.pk}
-        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
-        form = MForm(initial=initial, instance=master)
+        formset = formset_factory(other_form_factory)(
+            initial=[model_to_dict(master), model_to_dict(other)]
+        )
+        form = merge_form_factory(initial=initial, instance=master)
 
-    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
-    media = modeladmin.media + adminForm.media
-    ctx.update({'adminform': adminForm,
+    admin_form = helpers.AdminForm(
+        form, modeladmin.get_fieldsets(request), {}, [],
+        model_admin=modeladmin
+    )
+    media = modeladmin.media + admin_form.media
+    ctx.update({'adminform': admin_form,
                 'formset': formset,
                 'media': mark_safe(media),
                 'action_short_description': merge.short_description,

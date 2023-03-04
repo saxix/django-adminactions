@@ -2,7 +2,7 @@ import os
 from demo.models import DemoModel, DemoOneToOne, UserDetail
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
-from django.contrib.auth.models import Group, Permission, User
+from django.contrib.auth.models import Group, Permission, User, ContentType
 from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
@@ -179,6 +179,16 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         super().setUp()
         self.url = reverse('admin:auth_user_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
+        content_type = ContentType.objects.filter(
+            app_label='auth',
+            model='user'
+        ).first()
+        G(
+            Permission,
+            codename='adminactions_merge_user',
+            name='Admin action merge user',
+            content_type=content_type
+        )
 
     def _run_action(self, steps=3, page_start=None):
         with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
@@ -217,6 +227,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             res = form.submit().follow()
             assert 'Sorry you do not have rights to execute this action' in str(res.body)
 
+    # noinspection PyTypeChecker
     def test_success(self):
         res = self._run_action(1)
         preserved = User.objects.get(pk=self._selected_values[0])
@@ -224,7 +235,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
 
         assert preserved.email != removed.email  # sanity check
 
-        res = self._run_action([2, 3], res)
+        self._run_action([2, 3], res)
 
         self.assertFalse(User.objects.filter(pk=removed.pk).exists())
         self.assertTrue(User.objects.filter(pk=preserved.pk).exists())
@@ -270,7 +281,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
 
             res = res.form.submit('preview')
             # steps = 3:
-            res = res.form.submit('apply')
+            res.form.submit('apply')
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
@@ -309,7 +320,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             res.form['dependencies'] = MergeForm.DEP_MOVE
             res = res.form.submit('preview')
             # steps = 3:
-            res = res.form.submit('apply')
+            res.form.submit('apply')
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 2)
@@ -345,7 +356,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             res.form['dependencies'] = MergeForm.DEP_DELETE
             res = res.form.submit('preview')
             # steps = 3:
-            res = res.form.submit('apply')
+            res.form.submit('apply')
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 1)
@@ -364,6 +375,17 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
         super().setUp()
         self.url = reverse('admin:demo_demomodel_changelist')
         self.user = G(User, username='user', is_staff=True, is_active=True)
+
+        content_type = ContentType.objects.filter(
+            app_label='demo',
+            model='demomodel'
+        ).first()
+        G(
+            Permission,
+            codename='adminactions_merge_demomodel',
+            name='Admin action merge demo model',
+            content_type=content_type
+        )
 
     def _run_action(self, steps=3, page_start=None):
         with user_grant_permission(self.user,
@@ -387,12 +409,13 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
                 res.form['image'] = res.form['form-1-image'].value
                 res.form['field_names'] = 'image,subclassed_image'
                 res = res.form.submit('preview')
-                assert not hasattr(res.form, 'errors')
+                assert not hasattr(res.form[0], 'errors')
 
             if 3 in steps:
                 res = res.form.submit('apply')
             return res
 
+    # noinspection PyTypeChecker
     def test_success(self):
         res = self._run_action(1)
         preserved = DemoModel.objects.get(pk=self._selected_values[0])
