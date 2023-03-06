@@ -16,7 +16,7 @@ from django.utils.translation import gettext as _
 from . import api, compat as transaction
 from .forms import GenericActionForm
 from .perms import get_permission_codename
-from .signals import adminaction_end, adminaction_start
+from .signals import adminaction_requested, adminaction_end, adminaction_start
 from .utils import clone_instance, get_ignored_fields
 
 
@@ -149,6 +149,16 @@ def merge(modeladmin, request, queryset):  # noqa
         'app_label': queryset.model._meta.app_label,
         'result': '',
         'opts': queryset.model._meta}
+
+    if 'preview' in request.POST and 'apply' not in request.POST:
+        adminaction_requested.send(
+            sender=modeladmin.model,
+            action=name,
+            request=request,
+            queryset=queryset,
+            modeladmin=modeladmin
+        )
+
     if 'preview' in request.POST:
         master = queryset.get(pk=request.POST.get('master_pk'))
         original = clone_instance(master)
