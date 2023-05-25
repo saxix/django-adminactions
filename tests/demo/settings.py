@@ -9,6 +9,11 @@ here = os.path.dirname(__file__)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+AUTHENTICATION_BACKENDS = ('demo.backends.AnyUserAuthBackend',)
+FILE_UPLOAD_HANDLERS = [
+    # "django.core.files.uploadhandler.MemoryFileUploadHandler",
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+]
 
 db = os.environ.get('DBENGINE', None)
 if db == 'pg':

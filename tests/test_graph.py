@@ -30,8 +30,8 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
                 # form.set('_selected_action', True, 1)
                 res = form.submit()
             if steps >= 2:
-                res.form['axes_x'] = 'username'
-                res = res.form.submit('apply')
+                res.forms["charts-form"]['axes_x'] = 'username'
+                res = res.forms["charts-form"].submit('apply')
 
             return res
 

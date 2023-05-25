@@ -38,14 +38,14 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
                 self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
-                res.form['chk_id_char'].checked = True
-                res.form['func_id_char'] = 'upper'
-                res.form['chk_id_choices'].checked = True
-                res.form['func_id_choices'] = 'set'
-                res.form['choices'] = '1'
+                res.forms["mass-update-form"]['chk_id_char'].checked = True
+                res.forms["mass-update-form"]['func_id_char'] = 'upper'
+                res.forms["mass-update-form"]['chk_id_choices'].checked = True
+                res.forms["mass-update-form"]['func_id_choices'] = 'set'
+                res.forms["mass-update-form"]['choices'] = '1'
                 for k, v in kwargs.items():
-                    res.form[k] = v
-                res = res.form.submit('apply')
+                    res.forms["mass-update-form"][k] = v
+                res = res.forms["mass-update-form"].submit('apply')
         return res
 
     def test_no_permission(self):

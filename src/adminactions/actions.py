@@ -5,6 +5,7 @@ from .export import (export_as_csv, export_as_fixture,
 from .graph import graph_queryset
 from .mass_update import mass_update
 from .merge import merge
+from .bulk_update import bulk_update
 
 actions = [export_as_fixture,
            export_as_csv,
@@ -14,6 +15,7 @@ actions = [export_as_fixture,
            merge,
            mass_update,
            graph_queryset,
+           bulk_update,
            byrows_update]
 
 

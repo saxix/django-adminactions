@@ -4,6 +4,7 @@ from django.core.serializers import get_serializer_formats
 from django.forms.models import ModelForm
 from django.forms.widgets import SelectMultiple
 from django.utils import formats
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from .api import delimiters, quotes
@@ -19,21 +20,17 @@ class GenericActionForm(ModelForm):
     def configured_fields(self):
         return [field for field in self if not field.is_hidden and field.name.startswith('_')]
 
-    def model_fields(self):
-        """
-        Returns a list of BoundField objects that aren't "private" fields or are not ignored.
-        """
+    @cached_property
+    def model_field_names(self):
         ignored_fields = get_ignored_fields(self._meta.model, "UPDATE_ACTION_IGNORED_FIELDS")
-        return [field for field in self if
-                not (field.name.startswith('_') or field.name in ['select_across', 'action'] + ignored_fields)]
+        return [f.name for f in self._meta.model._meta.get_fields() if f.name not in ignored_fields]
+
+    def model_fields(self):
+        # field_names = [f.name for f in self._meta.model._meta.get_fields() if f.name not in self.model_field_names]
+        return [field for field in self if field.name in self.model_field_names]
 
 
-class CSVOptions(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    select_across = forms.BooleanField(label='', required=False, initial=0,
-                                       widget=forms.HiddenInput({'class': 'select-across'}))
-    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
-
+class CSVConfigForm(forms.Form):
     header = forms.BooleanField(label=_('Header'), required=False)
     delimiter = forms.ChoiceField(label=_('Delimiter'), choices=list(zip(delimiters, delimiters)), initial=',')
     quotechar = forms.ChoiceField(label=_('Quotechar'), choices=list(zip(quotes, quotes)), initial="'")
@@ -45,6 +42,22 @@ class CSVOptions(forms.Form):
                  (csv.QUOTE_NONNUMERIC, _('Non Numeric'))), initial=csv.QUOTE_ALL)
 
     escapechar = forms.ChoiceField(label=_('Escapechar'), choices=(('', ''), ('\\', '\\')), required=False)
+
+    def csv_fields(self):
+        return [field for field in self if field.name in ["header",
+                                                          "delimiter",
+                                                          "quotechar",
+                                                          "quoting",
+                                                          "escapechar",
+                                                          ]]
+
+
+class CSVOptions(CSVConfigForm):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    select_across = forms.BooleanField(label='', required=False, initial=0,
+                                       widget=forms.HiddenInput({'class': 'select-across'}))
+    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
+
     datetime_format = forms.CharField(label=_('Datetime format'), initial=formats.get_format('DATETIME_FORMAT'))
     date_format = forms.CharField(label=_('Date format'), initial=formats.get_format('DATE_FORMAT'))
     time_format = forms.CharField(label=_('Time format'), initial=formats.get_format('TIME_FORMAT'))
@@ -75,4 +88,3 @@ class FixtureOptions(forms.Form):
 
     indent = forms.IntegerField(required=True, max_value=10, min_value=0)
     serializer = forms.ChoiceField(choices=list(zip(get_serializer_formats(), get_serializer_formats())))
-

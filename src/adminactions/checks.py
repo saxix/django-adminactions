@@ -1,4 +1,7 @@
+from celery.app.control import Control, Inspect
 from django.core.checks import Error, register
+
+from adminactions.compat import celery_present
 
 
 @register()

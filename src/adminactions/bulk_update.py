@@ -1,0 +1,229 @@
+import csv
+from io import StringIO
+from pathlib import Path
+from typing import Union, Dict, Optional, List, Sequence
+
+from django import forms
+from django.contrib import messages
+from django.contrib.admin import helpers
+from django.core.exceptions import ValidationError
+from django.core.files import File
+from django.db.models import Model
+from django.db.transaction import atomic
+from django.forms import modelform_factory, TextInput
+from django.http import JsonResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.utils.encoding import smart_str
+from django.utils.safestring import mark_safe
+
+from adminactions.compat import celery_present
+from adminactions.exceptions import ActionInterrupted
+from adminactions.forms import GenericActionForm, CSVOptions, CSVConfigForm
+from django.utils.translation import gettext as _
+
+from adminactions.perms import get_permission_codename
+from adminactions.signals import adminaction_start, adminaction_requested, adminaction_end
+
+
+class BulkUpdateForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    select_across = forms.BooleanField(label='', required=False, initial=0,
+                                       widget=forms.HiddenInput({'class': 'select-across'}))
+    action = forms.CharField(label='', required=True, initial='', widget=forms.HiddenInput())
+
+    _async = forms.BooleanField(label='Async',
+                                required=False,
+                                help_text=_("use Celery to run update in background"))
+    _clean = forms.BooleanField(label='Clean()',
+                                required=False,
+                                help_text=_("if checked calls obj.clean()"))
+
+    _validate = forms.BooleanField(label='Validate',
+                                   required=False,
+                                   help_text=_("if checked use obj.save() instead of manager.bulk_update()"))
+
+    _date_format = forms.CharField(label='Date format',
+                                   required=True,
+                                   help_text=_("Date format"))
+    _file = forms.FileField(label='CSV File',
+                            required=True,
+                            help_text=_("CSV file"))
+
+
+class BulkUpdateMappingForm(forms.Form):
+    index_field = forms.MultipleChoiceField(choices=[],
+                                            widget=forms.CheckboxSelectMultiple)
+
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop("model")
+        super().__init__(*args, **kwargs)
+        # self._errors = None
+        # self.update_using_queryset_allowed = True
+        for f in sorted([(f.name, getattr(f, "verbose_name", f.name)) for f in self.model._meta.get_fields()],
+                        key=lambda item: item[1].casefold()):
+            self.fields[f[0]] = forms.CharField(label=f[1].title(),
+                                                required=False)
+            self.initial[f[0]] = f[0]
+            # self.fields[f[0]].widget.initial = f[0]
+
+    def _clean_fields(self):
+        for name, field in self.fields.items():
+            value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
+            self.cleaned_data[name] = value
+        if not self.cleaned_data['index_field']:
+            self.add_error('index_field', ValidationError(_("Please select one or more index fields")))
+
+    def _post_clean(self):
+        pass
+
+    def get_mapping(self):
+        mapping = self.cleaned_data.copy()
+        mapping.pop('index_field')
+        return mapping
+
+
+def bulk_update(modeladmin, request, queryset):  # noqa
+    opts = modeladmin.model._meta
+    perm = "{0}.{1}".format(opts.app_label,
+                            get_permission_codename(bulk_update.base_permission, opts))
+    bulk_update_form = getattr(modeladmin, 'bulk_update_form', BulkUpdateMappingForm)
+    bulk_update_fields = getattr(modeladmin, 'bulk_update_fields', None)
+    bulk_update_exclude = getattr(modeladmin, 'bulk_update_exclude', None)
+    if bulk_update_exclude is None:
+        bulk_update_exclude = []
+
+    if bulk_update_fields and bulk_update_exclude:
+        raise Exception("Cannot set both 'bulk_update_exclude' and 'bulk_update_fields'")
+    if not request.user.has_perm(perm):
+        messages.error(request, _('Sorry you do not have rights to execute this action'))
+        return
+
+    # def cb(field, **kwargs):
+    #     """ force all fields as not required"""
+    #     kwargs['widget'] = TextInput()
+    #     kwargs['validators'] = []
+    #     kwargs['initial'] = field.name
+    #     kwargs['required'] = False
+    #     # kwargs['request'] = request
+    #     return forms.CharField(**kwargs)
+
+    if 'apply' not in request.POST:
+        try:
+            adminaction_requested.send(sender=modeladmin.model,
+                                       action='bulk_update',
+                                       request=request,
+                                       queryset=queryset,
+                                       modeladmin=modeladmin)
+        except ActionInterrupted as e:
+            messages.error(request, str(e))
+            return
+    # MappingForm = modelform_factory(modeladmin.model,
+    #                                 form=BulkUpdateMappingForm,
+    #                                 exclude=bulk_update_exclude,
+    #                                 fields=bulk_update_fields,
+    #                                 formfield_callback=cb)
+    form_initial = {'_selected_action': request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+                    '_date_format': "%Y-%m-%d",
+                    'select_across': request.POST.get('select_across') == '1',
+                    'action': 'bulk_update'}
+    csv_initial = {}
+    map_initial = {}
+    if 'apply' in request.POST:
+        form = BulkUpdateForm(request.POST, request.FILES, initial=form_initial)
+        csv_form = CSVConfigForm(request.POST, initial=csv_initial, prefix="csv")
+        map_form = BulkUpdateMappingForm(request.POST, initial=map_initial, model=modeladmin.model, prefix="fld")
+        if form.is_valid() and csv_form.is_valid() and map_form.is_valid():
+            validate = form.cleaned_data.get('_validate', False)
+            clean = form.cleaned_data.get('_clean', False)
+            use_celery = form.cleaned_data.get('_async', False)
+            f = form.cleaned_data.pop("_file")
+            csv_options = csv_form.cleaned_data.pop('header')
+            try:
+                res = _bulk_update(queryset, f.file.name,
+                                   mapping=map_form.get_mapping(),
+                                   clean=clean,
+                                   indexes=map_form.cleaned_data['index_field'],
+                                   csv_options=csv_options)
+                c = len(res["updated"])
+                messages.info(request, _("Updated %s records") % c)
+            except ActionInterrupted as e:
+                messages.error(request, str(e))
+                return HttpResponseRedirect(request.get_full_path())
+            return HttpResponseRedirect(request.get_full_path())
+    else:
+        form = BulkUpdateForm(initial=form_initial)
+        csv_form = CSVConfigForm(initial=csv_initial, prefix="csv")
+        map_form = BulkUpdateMappingForm(prefix="fld", model=modeladmin.model)
+
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
+    media = modeladmin.media + adminForm.media
+    tpl = 'adminactions/bulk_update.html'
+    ctx = {'adminform': adminForm,
+           'form': form,
+           'csv_form': csv_form,
+           'map_form': map_form,
+           'action_short_description': bulk_update.short_description,
+           'title': u"%s (%s)" % (
+               bulk_update.short_description.capitalize(),
+               smart_str(modeladmin.opts.verbose_name_plural),
+           ),
+           'change': True,
+           'is_popup': False,
+           'save_as': False,
+           'has_delete_permission': False,
+           'has_add_permission': False,
+           'has_change_permission': True,
+           'opts': modeladmin.model._meta,
+           'app_label': modeladmin.model._meta.app_label,
+           'media': mark_safe(media),
+           'selection': queryset}
+    ctx.update(modeladmin.admin_site.each_context(request))
+
+    return render(request, tpl, context=ctx)
+
+
+bulk_update.short_description = _("Bulk update")
+bulk_update.base_permission = 'adminactions_bulkupdate'
+
+
+def _bulk_update(queryset, filename, *, mapping: Dict, indexes: Sequence[str], clean=False,
+                 csv_options: Optional[Dict] = None, request=None):
+    results = {"updated": [],
+               "errors": [],
+               "missing": [],
+               "duplicates": [],
+               }
+    adminaction_start.send(sender=queryset.model,
+                           action='bulk_update',
+                           request=request,
+                           queryset=queryset)
+
+    try:
+        print("adminactions/bulk_update.py: 195", queryset)
+        with Path(filename).open("r") as f:
+            reader = csv.DictReader(f.readlines(), **(csv_options or {}))
+            reverse = {v: k for k, v in mapping.items()}
+            with atomic():
+                for row in reader:
+                    key = {k: row[mapping[k]] for k in indexes}
+                    try:
+                        obj = queryset.get(**key)
+                        for colname, value in row.items():
+                            field = reverse[colname]
+                            setattr(obj, field, value)
+                        if clean:
+                            obj.clean()
+                        obj.save()
+                        results["updated"].append(key)
+                    except queryset.model.DoesNotExist:
+                        results["missing"].append(key)
+                    except queryset.model.MultipleObjectsReturned:
+                        results["duplicates"].append(key)
+        adminaction_end.send(sender=queryset.model,
+                             action='bulk_update',
+                             request=request,
+                             queryset=queryset)
+
+    except ActionInterrupted:
+        pass
+    return results
