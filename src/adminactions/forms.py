@@ -34,7 +34,8 @@ class CSVConfigForm(forms.Form):
     header = forms.BooleanField(label=_('Header'), required=False)
     delimiter = forms.ChoiceField(label=_('Delimiter'), choices=list(zip(delimiters, delimiters)), initial=',')
     quotechar = forms.ChoiceField(label=_('Quotechar'), choices=list(zip(quotes, quotes)), initial="'")
-    quoting = forms.ChoiceField(
+    quoting = forms.TypedChoiceField(
+        coerce=int,
         label=_('Quoting'),
         choices=((csv.QUOTE_ALL, _('All')),
                  (csv.QUOTE_MINIMAL, _('Minimal')),

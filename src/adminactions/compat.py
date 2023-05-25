@@ -12,7 +12,6 @@ def nocommit(using=None, savepoint=True, durable=False):
 
 try:
     from celery import current_app  # noqa
-
     celery_present = True
 except ImportError:
     celery_present = False

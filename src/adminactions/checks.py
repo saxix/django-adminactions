@@ -1,7 +1,4 @@
-from celery.app.control import Control, Inspect
 from django.core.checks import Error, register
-
-from adminactions.compat import celery_present
 
 
 @register()
@@ -25,3 +22,14 @@ def check_adminactions_settings(app_configs, **kwargs):
             )
         )
     return errors
+
+#
+# @register()
+# def check_celery_config(app_configs, **kwargs):
+#     errors = []
+#     if celery_present:
+#         from celery import current_app
+#         c: Control = current_app.control
+#         i: Inspect = c.inspect()
+#         print("adminactions/checks.py: 37", i.registered_tasks())
+#     return errors

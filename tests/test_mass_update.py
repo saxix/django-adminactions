@@ -1,4 +1,7 @@
 # from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from unittest import skipIf
+
+from adminactions.compat import celery_present
 from demo.models import DemoModel
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -88,8 +91,10 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             self.assertTrue(messages)
             self.assertEqual('Updated 1 records', messages[0])
 
+    @skipIf(not celery_present, "Celery not installed")
     def test_async_qs(self):
         # Create handler
+
         res = self._run_action(**{'_async': 1, '_validate': 0, 'chk_id_char': False})
         assert res.status_code == 302
         assert DemoModel.objects.filter(choices=1).exists()
@@ -97,6 +102,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
     @patch('adminactions.mass_update.adminaction_end.send')
     @patch('adminactions.mass_update.adminaction_start.send')
     @patch('adminactions.mass_update.adminaction_requested.send')
+    @skipIf(not celery_present, "Celery not installed")
     def test_async_single(self, req, start, end):
         res = self._run_action(**{'_async': 1, '_validate': 1})
         assert res.status_code == 302

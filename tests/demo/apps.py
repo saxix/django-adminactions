@@ -6,4 +6,7 @@ class Config(AppConfig):
     default = True
 
     def ready(self):
-        from .celery import app  # noqa
+        try:
+            from .celery import app  # noqa
+        except ImportError:
+            pass

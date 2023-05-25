@@ -76,6 +76,26 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
                 res.body
             )
 
+    def test_no_header(self):
+        self._run_action(
+            **{
+                "_clean": 1,
+                "_validate": 1,
+                "select_across": 1,
+                "csv-header": False,
+                "_file": Upload(
+                    "data.csv",
+                    b"1,aaa,111\n2,bbb,222\n3,ccc,333",
+                    "text/csv",
+                ),
+                "fld-id": "1",
+                "fld-char": "2",
+                "fld-integer": "3",
+            }
+        )
+        assert DemoModel.objects.filter(char="aaa", integer=111).exists()
+        assert DemoModel.objects.filter(char="bbb", integer=222).exists()
+
     def test_clean_on(self):
         self._run_action(
             **{
@@ -127,6 +147,23 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         assert res.context["map_form"].errors == {
             "index_field": ["Please select one or more index fields"]
         }
+
+    def test_wrong_mapping(self):
+
+        res = self._run_action(
+            **{
+                "_file": Upload(
+                    "data.csv",
+                    b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
+                    "text/csv",
+                ),
+                "fld-index_field": ["id"],
+                "fld-id": "miss",
+            }
+        )
+        assert res.status_code == 200
+        messages = [m.message for m in list(res.context['messages'])]
+        assert messages[0] == "['miss column is not present in the file']"
 
     def test_async_qs(self):
         # Create handler

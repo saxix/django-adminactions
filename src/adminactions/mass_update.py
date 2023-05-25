@@ -1,3 +1,4 @@
+import logging
 import re
 from collections import OrderedDict as SortedDict, defaultdict
 from django import forms
@@ -10,7 +11,7 @@ from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
                                  ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory,)
+                                 modelform_factory, )
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
@@ -24,6 +25,8 @@ from .forms import GenericActionForm
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import curry, get_field_by_name
+
+logger = logging.getLogger(__name__)
 
 DO_NOT_MASS_UPDATE = 'do_NOT_mass_UPDATE'
 
@@ -366,41 +369,47 @@ def mass_update(modeladmin, request, queryset):  # noqa
                'action': 'mass_update'}
     rules = {}
     if 'apply' in request.POST:
-        form = MForm(request.POST, request.FILES, initial=initial)
-        if form.is_valid():
-            # # need_transaction = form.cleaned_data.get('_unique_transaction', False)
-            validate = form.cleaned_data.get('_validate', False)
-            clean = form.cleaned_data.get('_clean', False)
-            use_celery = form.cleaned_data.get('_async', False)
-            for field_name, value in list(form.cleaned_data.items()):
-                enabler = 'chk_id_%s' % field_name
-                if form.data.get(enabler, False) == 'on':
-                    op = form.data.get('func_id_%s' % field_name)
-                    if callable(value):
-                        value = None
-                    rules[field_name] = (op, value)
-            if use_celery:
-                from .tasks import mass_update_task
-                mass_update_task.delay(f"{opts.app_label}.{opts.model_name}",
-                                       ids=list(queryset.only("pk").values_list('pk', flat=True)),
-                                       rules=rules,
-                                       validate=validate, clean=clean,
-                                       user_pk=request.user.pk)
+        try:
+            form = MForm(request.POST, request.FILES, initial=initial)
+            if form.is_valid():
+                # # need_transaction = form.cleaned_data.get('_unique_transaction', False)
+                validate = form.cleaned_data.get('_validate', False)
+                clean = form.cleaned_data.get('_clean', False)
+                use_celery = form.cleaned_data.get('_async', False)
+                for field_name, value in list(form.cleaned_data.items()):
+                    enabler = 'chk_id_%s' % field_name
+                    if form.data.get(enabler, False) == 'on':
+                        op = form.data.get('func_id_%s' % field_name)
+                        if callable(value):
+                            value = None
+                        rules[field_name] = (op, value)
+                if use_celery:
+                    from .tasks import mass_update_task
+                    mass_update_task.delay(f"{opts.app_label}.{opts.model_name}",
+                                           ids=list(queryset.only("pk").values_list('pk', flat=True)),
+                                           rules=rules,
+                                           validate=validate, clean=clean,
+                                           user_pk=request.user.pk)
+                else:
+                    try:
+                        updated, errors = mass_update_execute(queryset,
+                                                              rules,
+                                                              validate,
+                                                              clean,
+                                                              user_pk=request.user.pk,
+                                                              request=request)
+                        messages.info(request, _("Updated %s records") % updated)
+                    except ActionInterrupted as e:
+                        messages.error(request, str(e))
+                        return HttpResponseRedirect(request.get_full_path())
+                return HttpResponseRedirect(request.get_full_path())
             else:
-                try:
-                    updated, errors = mass_update_execute(queryset,
-                                                          rules,
-                                                          validate,
-                                                          clean,
-                                                          user_pk=request.user.pk,
-                                                          request=request)
-                    messages.info(request, _("Updated %s records") % updated)
-                except ActionInterrupted as e:
-                    messages.error(request, str(e))
-                    return HttpResponseRedirect(request.get_full_path())
+                form.fix_json()
+        except Exception as e:
+            messages.error(request, str(e))
+            logger.exception(e)
             return HttpResponseRedirect(request.get_full_path())
-        else:
-            form.fix_json()
+
     else:
         initial.update({'action': 'mass_update', '_validate': 1})
         prefill_with = request.POST.get('prefill-with', None)
