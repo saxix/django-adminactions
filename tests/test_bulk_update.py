@@ -1,16 +1,14 @@
 import csv
-from pathlib import Path
-
-from webtest import Upload
-
 from demo.models import DemoModel
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
+from pathlib import Path
 from unittest.mock import patch
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
+from webtest import Upload
 
 __all__ = [
     "BulkUpdateTest",
@@ -120,16 +118,18 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             self.user,
             ["demo.change_demomodel", "demo.adminactions_bulkupdate_demomodel"],
         ):
-            res = self._run_action(            **{
-                "select_across": 1,
-                "_file": Upload(
-                    "data.csv",
-                    b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
-                    "text/csv",
-                ),
-                "fld-char": "name",
-                "fld-integer": "number",
-            })
+            res = self._run_action(
+                **{
+                    "select_across": 1,
+                    "_file": Upload(
+                        "data.csv",
+                        b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
+                        "text/csv",
+                    ),
+                    "fld-char": "name",
+                    "fld-integer": "number",
+                }
+            )
             res = res.follow()
             messages = [m.message for m in list(res.context["messages"])]
 
@@ -149,7 +149,6 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         }
 
     def test_wrong_mapping(self):
-
         res = self._run_action(
             **{
                 "_file": Upload(
@@ -162,7 +161,7 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             }
         )
         assert res.status_code == 200
-        messages = [m.message for m in list(res.context['messages'])]
+        messages = [m.message for m in list(res.context["messages"])]
         assert messages[0] == "['miss column is not present in the file']"
 
     def test_async_qs(self):

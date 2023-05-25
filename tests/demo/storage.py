@@ -11,7 +11,8 @@ class MessageEncoder(json.JSONEncoder):
     """
     Compactly serialize instances of the ``Message`` class as JSON.
     """
-    message_key = '__json_message'
+
+    message_key = "__json_message"
 
     def default(self, obj):
         if isinstance(obj, Message):
@@ -37,8 +38,7 @@ class MessageDecoder(json.JSONDecoder):
                 return Message(*obj[2:])
             return [self.process_messages(item) for item in obj]
         if isinstance(obj, dict):
-            return {key: self.process_messages(value)
-                    for key, value in obj.items()}
+            return {key: self.process_messages(value) for key, value in obj.items()}
         return obj
 
     def decode(self, s, **kwargs):
@@ -50,13 +50,14 @@ class PlainCookieStorage(BaseStorage):
     """
     Store messages in a cookie.
     """
-    cookie_name = 'messages'
+
+    cookie_name = "messages"
     # uwsgi's default configuration enforces a maximum size of 4kb for all the
     # HTTP headers. In order to leave some room for other cookies and headers,
     # restrict the session cookie to 1/2 of 4kb. See #18781.
     max_cookie_size = 2048
-    not_finished = '__messagesnotfinished__'
-    key_salt = 'django.contrib.messages'
+    not_finished = "__messagesnotfinished__"
+    key_salt = "django.contrib.messages"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -84,15 +85,15 @@ class PlainCookieStorage(BaseStorage):
         """
         if encoded_data:
             response.set_cookie(
-                self.cookie_name, encoded_data,
+                self.cookie_name,
+                encoded_data,
                 domain=settings.SESSION_COOKIE_DOMAIN,
                 secure=None,
-                httponly=None
+                httponly=None,
             )
         else:
             response.delete_cookie(
-                self.cookie_name,
-                domain=settings.SESSION_COOKIE_DOMAIN
+                self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN
             )
 
     def _store(self, messages, response, remove_oldest=True, *args, **kwargs):
@@ -119,8 +120,9 @@ class PlainCookieStorage(BaseStorage):
                     unstored_messages.append(messages.pop(0))
                 else:
                     unstored_messages.insert(0, messages.pop())
-                encoded_data = self._encode(messages + [self.not_finished],
-                                            encode_empty=unstored_messages)
+                encoded_data = self._encode(
+                    messages + [self.not_finished], encode_empty=unstored_messages
+                )
         self._update_cookie(encoded_data, response)
         return unstored_messages
 
@@ -133,7 +135,7 @@ class PlainCookieStorage(BaseStorage):
         # The class wide key salt is not reused here since older Django
         # versions had it fixed and making it dynamic would break old hashes if
         # self.key_salt is changed.
-        key_salt = 'django.contrib.messages'
+        key_salt = "django.contrib.messages"
         return salted_hmac(key_salt, value).hexdigest()
 
     def _encode(self, messages, encode_empty=False):
@@ -145,7 +147,7 @@ class PlainCookieStorage(BaseStorage):
         also contains a hash to ensure that the data was not tampered with.
         """
         if messages or encode_empty:
-            encoder = MessageEncoder(separators=(',', ':'))
+            encoder = MessageEncoder(separators=(",", ":"))
             value = encoder.encode(messages)
             return self.signer.sign(value)
 
@@ -177,7 +179,7 @@ class PlainCookieStorage(BaseStorage):
 
     def _legacy_decode(self, data):
         # RemovedInDjango40Warning: pre-Django 3.1 hashes will be invalid.
-        bits = data.split('$', 1)
+        bits = data.split("$", 1)
         if len(bits) == 2:
             hash_, value = bits
             if constant_time_compare(hash_, self._legacy_hash(value)):

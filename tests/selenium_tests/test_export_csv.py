@@ -10,20 +10,21 @@ pytestmark = pytest.mark.selenium
 
 @pytest.fixture
 def now(monkeypatch):
-
     class FixedDateTime:
         @classmethod
         def now(cls):
             return FAKE_TIME
 
-    monkeypatch.setattr('adminactions.views.datetime', FixedDateTime)
+    monkeypatch.setattr("adminactions.views.datetime", FixedDateTime)
 
 
 def test_export_as_csv(admin_site):
     browser, administrator = admin_site
     browser.find_element_by_link_text("Demo models").click()
     browser.find_element_by_id("action-toggle").click()
-    Select(browser.find_element_by_name("action")).select_by_visible_text("Export as CSV")
+    Select(browser.find_element_by_name("action")).select_by_visible_text(
+        "Export as CSV"
+    )
     browser.find_element_by_name("index").click()
     browser.find_element_by_name("apply").click()
 
@@ -31,10 +32,12 @@ def test_export_as_csv(admin_site):
 @pytest.fixture
 def export_csv_page(admin_site):
     browser, administrator = admin_site
-    browser.go('/admin/')
+    browser.go("/admin/")
     browser.find_element_by_link_text("Demo models").click()
     browser.find_element_by_id("action-toggle").click()
-    Select(browser.find_element_by_name("action")).select_by_visible_text("Export as CSV")
+    Select(browser.find_element_by_name("action")).select_by_visible_text(
+        "Export as CSV"
+    )
     browser.find_element_by_name("index").click()
     return browser, administrator
 
@@ -52,6 +55,6 @@ def _test(browser, target, format, sample_num, expected_value):
 # @pytest.mark.skipif('django.VERSION[:2]==(1,8)')
 def test_datetime_format_ajax(export_csv_page, now):
     browser, administrator = export_csv_page
-    _test(browser, "id_datetime_format", 'l, d F Y', 0, 'Friday, 25 December 2020')
-    _test(browser, "id_date_format", 'd F Y', 1, '25 December 2020')
-    _test(browser, "id_time_format", 'H:i', 2, '17:05')
+    _test(browser, "id_datetime_format", "l, d F Y", 0, "Friday, 25 December 2020")
+    _test(browser, "id_date_format", "d F Y", 1, "25 December 2020")
+    _test(browser, "id_time_format", "H:i", 2, "17:05")

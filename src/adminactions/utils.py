@@ -54,11 +54,11 @@ def get_attr(obj, attr, default=None):
     >>> get_attr(a, 'b.c.y', 1)
     1
     """
-    if '.' not in attr:
+    if "." not in attr:
         ret = getattr(obj, attr, default)
     else:
-        L = attr.split('.')
-        ret = get_attr(getattr(obj, L[0], default), '.'.join(L[1:]), default)
+        L = attr.split(".")
+        ret = get_attr(getattr(obj, L[0], default), ".".join(L[1:]), default)
 
     if isinstance(ret, BaseException):
         raise ret
@@ -92,7 +92,9 @@ def getattr_or_item(obj, name):
         try:
             ret = obj[name]
         except (KeyError, TypeError):
-            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
+            raise AttributeError(
+                "%s object has no attribute/item '%s'" % (obj.__class__.__name__, name)
+            )
     return ret
 
 
@@ -119,15 +121,17 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     elif isinstance(field, models.Field):
         fieldname = field.name
     else:
-        raise ValueError('Invalid value for parameter `field`: Should be a field name or a Field instance')
+        raise ValueError(
+            "Invalid value for parameter `field`: Should be a field name or a Field instance"
+        )
 
-    if usedisplay and hasattr(obj, 'get_%s_display' % fieldname):
-        value = getattr(obj, 'get_%s_display' % fieldname)()
+    if usedisplay and hasattr(obj, "get_%s_display" % fieldname):
+        value = getattr(obj, "get_%s_display" % fieldname)()
     else:
         value = getattr_or_item(obj, fieldname)
 
-    if hasattr(value, 'all'):
-        value = ';'.join(smart_str(obj) for obj in value.all())
+    if hasattr(value, "all"):
+        value = ";".join(smart_str(obj) for obj in value.all())
     if not raw_callable and callable(value):
         value = value()
 
@@ -158,13 +162,15 @@ def get_field_by_path(model, field_path):
     >>> get_field_by_path(p, 'content_type.app_label').name
     'app_label'
     """
-    parts = field_path.split('.')
+    parts = field_path.split(".")
     target = parts[0]
     if target in get_all_field_names(model):
         field_object, model, direct, m2m = get_field_by_name(model, target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
-                return get_field_by_path(field_object.related_model, '.'.join(parts[1:]))
+                return get_field_by_path(
+                    field_object.related_model, ".".join(parts[1:])
+                )
             else:
                 return field_object
         else:
@@ -215,15 +221,17 @@ def get_verbose_name(model_or_queryset, field):
     elif type(model_or_queryset) is models.base.ModelBase:
         model = model_or_queryset
     else:
-        raise ValueError('`get_verbose_name` expects Manager, Queryset or Model as first parameter (got %s)' % type(
-            model_or_queryset))
+        raise ValueError(
+            "`get_verbose_name` expects Manager, Queryset or Model as first parameter (got %s)"
+            % type(model_or_queryset)
+        )
 
     if isinstance(field, str):
         field = get_field_by_path(model, field)
     elif isinstance(field, models.Field):
         field = field
     else:
-        raise ValueError('`get_verbose_name` field_path must be string or Field class')
+        raise ValueError("`get_verbose_name` field_path must be string or Field class")
 
     return field.verbose_name
 
@@ -268,16 +276,27 @@ def model_has_field(model, field_name):
 
 
 def get_all_related_objects(model):
-    return [f for f in model._meta.get_fields()
-            if (f.one_to_many or f.one_to_one) and f.auto_created]
+    return [
+        f
+        for f in model._meta.get_fields()
+        if (f.one_to_many or f.one_to_one) and f.auto_created
+    ]
 
 
 def get_all_field_names(model):
     from itertools import chain
-    return list(set(chain.from_iterable((field.name, field.attname)
-                                        if hasattr(field, 'attname') else (field.name,)
-                                        for field in model._meta.get_fields()
-                                        if not (field.many_to_one and field.related_model is None))))
+
+    return list(
+        set(
+            chain.from_iterable(
+                (field.name, field.attname)
+                if hasattr(field, "attname")
+                else (field.name,)
+                for field in model._meta.get_fields()
+                if not (field.many_to_one and field.related_model is None)
+            )
+        )
+    )
 
 
 def curry(func, *a, **kw):
@@ -285,13 +304,15 @@ def curry(func, *a, **kw):
 
 
 def get_common_context(modeladmin, **kwargs):
-    ctx = {'change': True,
-           'is_popup': False,
-           'save_as': False,
-           'has_delete_permission': False,
-           'has_add_permission': False,
-           'has_change_permission': True,
-           'opts': modeladmin.model._meta,
-           'app_label': modeladmin.model._meta.app_label}
+    ctx = {
+        "change": True,
+        "is_popup": False,
+        "save_as": False,
+        "has_delete_permission": False,
+        "has_add_permission": False,
+        "has_change_permission": True,
+        "opts": modeladmin.model._meta,
+        "app_label": modeladmin.model._meta.app_label,
+    }
     ctx.update(**kwargs)
     return ctx
