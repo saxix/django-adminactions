@@ -193,18 +193,18 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
                 form['action'] = 'merge'
                 self._select_rows(form)
                 res = form.submit()
-                assert not hasattr(res.form, 'errors')
+                assert not hasattr(res.forms['merge-form'], 'errors')
 
             if 2 in steps:
-                res.form['username'] = res.form['form-1-username'].value
-                res.form['email'] = res.form['form-1-email'].value
-                res.form['last_login'] = res.form['form-1-last_login'].value
-                res.form['date_joined'] = res.form['form-1-date_joined'].value
-                res = res.form.submit('preview')
-                assert not hasattr(res.form, 'errors')
+                res.forms['merge-form']['username'] = res.forms['merge-form']['form-1-username'].value
+                res.forms['merge-form']['email'] = res.forms['merge-form']['form-1-email'].value
+                res.forms['merge-form']['last_login'] = res.forms['merge-form']['form-1-last_login'].value
+                res.forms['merge-form']['date_joined'] = res.forms['merge-form']['form-1-date_joined'].value
+                res = res.forms['merge-form'].submit('preview')
+                assert not hasattr(res.forms['merge-form'], 'errors')
 
             if 3 in steps:
-                res = res.form.submit('apply')
+                res = res.forms['merge-form'].submit('apply')
             return res
 
     def test_no_permission(self):
@@ -258,19 +258,19 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             preserved = User.objects.get(pk=self._selected_values[1])
 
             # steps = 2 (swap):
-            res.form['master_pk'] = self._selected_values[1]
-            res.form['other_pk'] = self._selected_values[0]
+            res.forms['merge-form']['master_pk'] = self._selected_values[1]
+            res.forms['merge-form']['other_pk'] = self._selected_values[0]
 
-            res.form['username'] = res.form['form-0-username'].value
-            res.form['email'] = res.form['form-0-email'].value
-            res.form['last_login'] = res.form['form-1-last_login'].value
-            res.form['date_joined'] = res.form['form-1-date_joined'].value
+            res.forms['merge-form']['username'] = res.forms['merge-form']['form-0-username'].value
+            res.forms['merge-form']['email'] = res.forms['merge-form']['form-0-email'].value
+            res.forms['merge-form']['last_login'] = res.forms['merge-form']['form-1-last_login'].value
+            res.forms['merge-form']['date_joined'] = res.forms['merge-form']['form-1-date_joined'].value
 
             # res.form['field_names'] = 'username,email'
 
-            res = res.form.submit('preview')
+            res = res.forms['merge-form'].submit('preview')
             # steps = 3:
-            res = res.form.submit('apply')
+            res = res.forms['merge-form'].submit('apply')
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
@@ -299,17 +299,17 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             preserved.userdetail_set.create(note='2')
 
             # steps = 2:
-            res.form['master_pk'] = self._selected_values[1]
-            res.form['other_pk'] = self._selected_values[0]
+            res.forms['merge-form']['master_pk'] = self._selected_values[1]
+            res.forms['merge-form']['other_pk'] = self._selected_values[0]
 
-            res.form['username'] = res.form['form-0-username'].value
-            res.form['email'] = res.form['form-0-email'].value
-            res.form['last_login'] = res.form['form-1-last_login'].value
-            res.form['date_joined'] = res.form['form-1-date_joined'].value
-            res.form['dependencies'] = MergeForm.DEP_MOVE
-            res = res.form.submit('preview')
+            res.forms['merge-form']['username'] = res.forms['merge-form']['form-0-username'].value
+            res.forms['merge-form']['email'] = res.forms['merge-form']['form-0-email'].value
+            res.forms['merge-form']['last_login'] = res.forms['merge-form']['form-1-last_login'].value
+            res.forms['merge-form']['date_joined'] = res.forms['merge-form']['form-1-date_joined'].value
+            res.forms['merge-form']['dependencies'] = MergeForm.DEP_MOVE
+            res = res.forms['merge-form'].submit('preview')
             # steps = 3:
-            res = res.form.submit('apply')
+            res = res.forms['merge-form'].submit('apply')
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 2)
@@ -335,17 +335,17 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             preserved.userdetail_set.create(note='2')
 
             # steps = 2:
-            res.form['master_pk'] = self._selected_values[1]
-            res.form['other_pk'] = self._selected_values[0]
+            res.forms['merge-form']['master_pk'] = self._selected_values[1]
+            res.forms['merge-form']['other_pk'] = self._selected_values[0]
 
-            res.form['username'] = res.form['form-0-username'].value
-            res.form['email'] = res.form['form-0-email'].value
-            res.form['last_login'] = res.form['form-1-last_login'].value
-            res.form['date_joined'] = res.form['form-1-date_joined'].value
-            res.form['dependencies'] = MergeForm.DEP_DELETE
-            res = res.form.submit('preview')
+            res.forms['merge-form']['username'] = res.forms['merge-form']['form-0-username'].value
+            res.forms['merge-form']['email'] = res.forms['merge-form']['form-0-email'].value
+            res.forms['merge-form']['last_login'] = res.forms['merge-form']['form-1-last_login'].value
+            res.forms['merge-form']['date_joined'] = res.forms['merge-form']['form-1-date_joined'].value
+            res.forms['merge-form']['dependencies'] = MergeForm.DEP_DELETE
+            res = res.forms['merge-form'].submit('preview')
             # steps = 3:
-            res = res.form.submit('apply')
+            res = res.forms['merge-form'].submit('apply')
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 1)
@@ -381,16 +381,16 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
                 form['action'] = 'merge'
                 self._select_rows(form)
                 res = form.submit()
-                assert not hasattr(res.form, 'errors')
+                assert not hasattr(res.forms['merge-form'], 'errors')
 
             if 2 in steps:
-                res.form['image'] = res.form['form-1-image'].value
-                res.form['field_names'] = 'image,subclassed_image'
-                res = res.form.submit('preview')
-                assert not hasattr(res.form, 'errors')
+                res.forms['merge-form']['image'] = res.forms['merge-form']['form-1-image'].value
+                res.forms['merge-form']['field_names'] = 'image,subclassed_image'
+                res = res.forms['merge-form'].submit('preview')
+                assert not hasattr(res.forms['merge-form'], 'errors')
 
             if 3 in steps:
-                res = res.form.submit('apply')
+                res = res.forms['merge-form'].submit('apply')
             return res
 
     def test_success(self):

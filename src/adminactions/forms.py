@@ -44,6 +44,9 @@ class CSVConfigForm(forms.Form):
 
     escapechar = forms.ChoiceField(label=_('Escapechar'), choices=(('', ''), ('\\', '\\')), required=False)
 
+    def clean_escapechar(self):
+        return self.cleaned_data["escapechar"] or None
+
     def csv_fields(self):
         return [field for field in self if field.name in ["header",
                                                           "delimiter",

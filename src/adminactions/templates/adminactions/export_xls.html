@@ -33,7 +33,7 @@
         </ol>
     {% endif %}
     <div id='form'>
-        <form action="" method="post">
+        <form action="" method="post" id="export-form">
             {% csrf_token %}
             <table>
                 {{ adminform.form }}

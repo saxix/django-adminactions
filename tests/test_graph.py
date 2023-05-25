@@ -43,9 +43,9 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
         for i in range(0, 11):
             form.set('_selected_action', True, i)
         res = form.submit()
-        res.form['graph_type'] = 'PieChart'
-        res.form['axes_x'] = 'is_staff'
-        res = res.form.submit('apply')
+        res.forms["charts-form"]['graph_type'] = 'PieChart'
+        res.forms["charts-form"]['axes_x'] = 'is_staff'
+        res = res.forms["charts-form"].submit('apply')
 
     def test_graph_post(self):
         url = reverse('admin:auth_user_changelist')
@@ -55,6 +55,6 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
         for i in range(0, 11):
             form.set('_selected_action', True, i)
         res = form.submit()
-        res.form['graph_type'] = 'PieChart'
-        res.form['axes_x'] = 'is_staff'
-        res = res.form.submit()
+        res.forms["charts-form"]['graph_type'] = 'PieChart'
+        res.forms["charts-form"]['axes_x'] = 'is_staff'
+        res = res.forms["charts-form"].submit()

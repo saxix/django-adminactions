@@ -133,7 +133,7 @@ class MassUpdateForm(GenericActionForm):
         self.fields = {k: v for k, v in sorted(self.fields.items(), key=lambda item: item[1].label or '')}
 
     def _get_validation_exclusions(self):
-        exclude = super()._get_validation_exclusions()
+        exclude = list(super()._get_validation_exclusions())
         for name, field in list(self.fields.items()):
             function = self.data.get('func_id_%s' % name, False)
             if function:

@@ -31,7 +31,7 @@
         </p>
         {{ adminform.form.non_field_errors }}
     {% endif %}
-    <form action="" method="post">
+    <form action="" method="post" id="update-form">
         {% csrf_token %}
         {{ formset.non_form_errors.as_ul }}
         <div class="formset-container">

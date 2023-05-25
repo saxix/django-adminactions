@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -12,11 +14,13 @@ from django.utils.translation import gettext_lazy as _
 from itertools import chain
 
 from .api import (export_as_csv as _export_as_csv,
-                  export_as_xls as _export_as_xls,)
+                  export_as_xls as _export_as_xls, )
 from .exceptions import ActionInterrupted
 from .forms import CSVOptions, FixtureOptions, XLSOptions
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
+
+logger = logging.getLogger(__name__)
 
 
 def get_action(request):
@@ -86,6 +90,7 @@ def base_export(modeladmin, request, queryset, title, impl,  # noqa
                                 filename=filename,
                                 options=form.cleaned_data)
             except Exception as e:
+                logger.exception(e)
                 messages.error(request, "Error: (%s)" % str(e))
             else:
                 adminaction_end.send(sender=modeladmin.model,

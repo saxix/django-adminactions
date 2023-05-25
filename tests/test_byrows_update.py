@@ -82,11 +82,11 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
 
                     try:
                         # Attempt split (admin datetime widget) fields first
-                        assert res.form[fname + '_0']
+                        assert res.forms['update-form'][fname + '_0']
                     except AssertionError:
                         # assert for non-split fields to return the regular
                         # field name upon errors
-                        assert res.form[fname]
+                        assert res.forms['update-form'][fname]
 
     def test_form_rows_edit(self):
         """
@@ -104,8 +104,8 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
                 'char': 'Bob Marley'
             }
             for k, v in new_values.items():
-                res.form["form-%d-%s" % (row_to_modify, k)] = v
-            res.form.submit('apply')
+                res.forms['update-form']["form-%d-%s" % (row_to_modify, k)] = v
+            res.forms['update-form'].submit('apply')
             obj = DemoModel.objects.get(id=self._selected_values[row_to_modify])
             for k, v in new_values.items():
                 self.assertEqual(v, getattr(obj, k))

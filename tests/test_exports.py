@@ -51,9 +51,9 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             form.set('_selected_action', True, 0)
             form.set('_selected_action', True, 1)
             res = form.submit()
-            res.form['use_natural_pk'] = False
-            res.form['use_natural_fk'] = True
-            res = res.form.submit('apply')
+            res.forms['export-form']['use_natural_pk'] = False
+            res.forms['export-form']['use_natural_fk'] = True
+            res = res.forms['export-form'].submit('apply')
             assert res.json[0]['pk'] == 1
 
     def test_add_foreign_keys(self):
@@ -66,10 +66,10 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             form.set('_selected_action', True, 0)
             form.set('_selected_action', True, 1)
             res = form.submit()
-            res.form['use_natural_pk'] = False
-            res.form['use_natural_fk'] = True
-            res.form['add_foreign_keys'] = True
-            res = res.form.submit('apply')
+            res.forms['export-form']['use_natural_pk'] = False
+            res.forms['export-form']['use_natural_fk'] = True
+            res.forms['export-form']['add_foreign_keys'] = True
+            res = res.forms['export-form'].submit('apply')
             assert res.json[0]['pk'] == 1
 
     def _run_action(self, steps=2):
@@ -83,7 +83,7 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
                 self._select_rows(form)
                 res = form.submit()
             if steps >= 2:
-                res = res.form.submit('apply')
+                res = res.forms['export-form'].submit('apply')
         return res
 
 
@@ -111,8 +111,8 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
             form['action'] = self.action_name
             self._select_rows(form, [0, 1])
             res = form.submit()
-            res.form['use_natural_fk'] = True
-            res = res.form.submit('apply')
+            res.forms['export-form']['use_natural_fk'] = True
+            res = res.forms['export-form'].submit('apply')
             assert res.json[0]['pk'] == 1
 
     def _run_action(self, steps=2):
@@ -126,7 +126,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
                 self._select_rows(form)
                 res = form.submit()
             if steps >= 2:
-                res = res.form.submit('apply')
+                res = res.forms['export-form'].submit('apply')
         return res
 
     def test_custom_filename(self):
@@ -146,7 +146,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
                     form.set('_selected_action', True, 0)
                     form['select_across'] = 1
                     res = form.submit()
-                    res = res.form.submit('apply')
+                    res = res.forms['export-form'].submit('apply')
                     self.assertEqual(res.content_disposition,
                                      'attachment;filename="new.test"')
 
@@ -176,7 +176,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             # form.set('_selected_action', True, 1)
             self._select_rows(form)
             res = form.submit()
-            res = res.form.submit('apply')
+            res = res.forms['export-form'].submit('apply')
             buff = io.StringIO(smart_str(res.body))
             csv_reader = csv.reader(buff)
 
@@ -199,7 +199,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
                     form.set('_selected_action', True, 0)
                     form['select_across'] = 1
                     res = form.submit()
-                    res = res.form.submit('apply')
+                    res = res.forms['export-form'].submit('apply')
                     self.assertEqual(res.content_disposition,
                                      u'attachment;filename="new.test"')
 
@@ -214,7 +214,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
                 self._select_rows(form)
                 res = form.submit()
             if steps >= 2:
-                res = res.form.submit('apply')
+                res = res.forms['export-form'].submit('apply')
         return res
 
     @override_settings(ADMINACTIONS_STREAM_CSV=True)
@@ -242,8 +242,8 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
                 self._select_rows(form)
                 res = form.submit()
             if step >= 2:
-                res.form['header'] = 1
-                res = res.form.submit('apply')
+                res.forms['export-form']['header'] = 1
+                res = res.forms['export-form'].submit('apply')
             return res
 
     def test_no_permission(self):
@@ -268,10 +268,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             # form.set('_selected_action', True, 2)
             self._select_rows(form)
             res = form.submit()
-            res.form['header'] = 1
-            res.form['columns'] = ['id', 'username', 'first_name'
+            res.forms['export-form']['header'] = 1
+            res.forms['export-form']['columns'] = ['id', 'username', 'first_name'
                                                      '']
-            res = res.form.submit('apply')
+            res = res.forms['export-form'].submit('apply')
             buff = io.BytesIO(res.body)
 
             buff.seek(0)
@@ -295,11 +295,11 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             form['action'] = self.action_name
             self._select_rows(form)
             res = form.submit()
-            res.form['header'] = 1
-            res.form['use_display'] = 1
-            res.form['columns'] = ['char', 'text', 'bigint', 'choices'
+            res.forms['export-form']['header'] = 1
+            res.forms['export-form']['use_display'] = 1
+            res.forms['export-form']['columns'] = ['char', 'text', 'bigint', 'choices'
                                                              '']
-            res = res.form.submit('apply')
+            res = res.forms['export-form'].submit('apply')
             buff = io.BytesIO(res.body)
 
             buff.seek(0)
@@ -323,10 +323,10 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             form['action'] = self.action_name
             self._select_rows(form)
             res = form.submit()
-            res.form['header'] = 1
-            res.form['columns'] = ['char', 'text', 'bigint', 'choices'
+            res.forms['export-form']['header'] = 1
+            res.forms['export-form']['columns'] = ['char', 'text', 'bigint', 'choices'
                                                              '']
-            res = res.form.submit('apply')
+            res = res.forms['export-form'].submit('apply')
             buff = io.BytesIO(res.body)
 
             buff.seek(0)
@@ -350,9 +350,9 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             form['action'] = self.action_name
             self._select_rows(form)
             res = form.submit()
-            res.form['header'] = 1
-            res.form['columns'] = ['char', ]
-            res = res.form.submit('apply')
+            res.forms['export-form']['header'] = 1
+            res.forms['export-form']['columns'] = ['char', ]
+            res = res.forms['export-form'].submit('apply')
             buff = io.BytesIO(res.body)
 
             buff.seek(0)
@@ -371,9 +371,9 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             form['action'] = self.action_name
             self._select_rows(form)
             res = form.submit()
-            res.form['header'] = 1
-            res.form['columns'] = ['date', ]
-            res = res.form.submit('apply')
+            res.forms['export-form']['header'] = 1
+            res.forms['export-form']['columns'] = ['date', ]
+            res = res.forms['export-form'].submit('apply')
             buff = io.BytesIO(res.body)
 
             buff.seek(0)
@@ -409,7 +409,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             form['select_across'] = 1
             self._select_rows(form)
             res = form.submit()
-            res.form['header'] = 1
+            res.forms['export-form']['header'] = 1
             res = res.form.submit('apply')
 
         res_time = (time.time() - start)

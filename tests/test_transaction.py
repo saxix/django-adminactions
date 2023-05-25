@@ -54,15 +54,15 @@ def test_transaction_mass_update(app, users, administrator):
         form.get('_selected_action', index=2).checked = True
 
         res = form.submit()
-        res.form['chk_id_is_staff'].checked = True
-        res.form['is_staff'].checked = True
+        res.forms['mass-update-form']['chk_id_is_staff'].checked = True
+        res.forms['mass-update-form']['is_staff'].checked = True
 
         # res.form.submit('apply').follow()
         # assert User.objects.filter(is_staff=True).count() == 1
 
         with pytest.raises(BaseException):
             adminaction_end.connect(_handler)
-            res.form.submit('apply').follow()
+            res.forms['mass-update-form'].submit('apply').follow()
             assert res.status_code == 302
             adminaction_end.disconnect(_handler)
 

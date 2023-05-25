@@ -17,7 +17,7 @@ from io import BytesIO
 from adminactions import utils
 
 from .utils import (clone_instance, get_field_by_path,
-                    get_field_value, get_ignored_fields,)
+                    get_field_value, get_ignored_fields, )
 
 csv_options_default = {'date_format': 'd/m/Y',
                        'datetime_format': 'N j, Y, P',
@@ -164,7 +164,6 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
     else:
         config = csv_options_default.copy()
         config.update(options)
-
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
 
@@ -178,7 +177,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
         writer = csv.writer(buffer_object, dialect=dialect)
     else:
         writer = csv.writer(buffer_object,
-                            escapechar=str(config['escapechar']),
+                            escapechar=config['escapechar'],
                             delimiter=str(config['delimiter']),
                             quotechar=str(config['quotechar']),
                             quoting=int(config['quoting']))
