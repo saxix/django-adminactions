@@ -1,21 +1,19 @@
 # from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
-from pathlib import Path
-
-from webtest import Upload
-
-from adminactions.mass_update import OPERATIONS
 from demo.models import DemoModel
 from django.contrib.auth.models import User
+from django.db.models import fields
 from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
+from pathlib import Path
 from unittest import skipIf
 from unittest.mock import patch
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
+from webtest import Upload
 
 from adminactions.compat import celery_present
-from django.db.models import ForeignKey, fields
+from adminactions.mass_update import OPERATIONS
 
 __all__ = [
     "MassUpdateTest",
@@ -144,7 +142,6 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         obj1 = DemoModel.objects.get(pk=1)
         obj2 = DemoModel.objects.get(pk=2)
         assert obj1.image.read() == obj2.image.read()
-
 
     def test_file_field_prevent_async(self):
         res = self._run_action(

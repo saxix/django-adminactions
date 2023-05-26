@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
-from django.db.models import ForeignKey, fields as df, ImageField, FileField
+from django.db.models import FileField, ForeignKey, fields as df
 from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
@@ -101,10 +101,13 @@ class OperationManager:
         :param field Field django Model Field
         :return list of (label, (__, param, enabler, help))
         """
-        return SortedDict([(label, operation)
-            for label, operation in self.get(field.__class__).items()
-            if self.operation_enabled(field, operation)
-        ])
+        return SortedDict(
+            [
+                (label, operation)
+                for label, operation in self.get(field.__class__).items()
+                if self.operation_enabled(field, operation)
+            ]
+        )
 
     def __getitem__(self, field_class):
         return self.get(field_class)
@@ -202,7 +205,9 @@ class MassUpdateForm(GenericActionForm):
             return
         for field_name, value in list(self.cleaned_data.items()):
             if isinstance(self.fields.get(field_name, ""), forms.FileField):
-                if self.cleaned_data['_async'] and self.cleaned_data.get(field_name, None):
+                if self.cleaned_data["_async"] and self.cleaned_data.get(
+                    field_name, None
+                ):
                     self.add_error(field_name, _("Cannot use Async with FileField"))
 
         if not self.cleaned_data.get("_validate"):
@@ -321,7 +326,10 @@ def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None)
                                 setattr(record, field_name, func(old_value))
                             else:
                                 changed_attr = getattr(record, field_name, None)
-                                if changed_attr.__class__.__name__ == "ManyRelatedManager":
+                                if (
+                                    changed_attr.__class__.__name__
+                                    == "ManyRelatedManager"
+                                ):
                                     changed_attr.set(value)
                                 else:
                                     setattr(record, field_name, value)
