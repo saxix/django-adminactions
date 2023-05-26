@@ -2,4 +2,4 @@
 max-complexity = 14
 max-line-length = 120
 exclude = migrations settings
-ignore = E125,E401,W391,E128,E261,E731,Q000,W504,W606
+ignore = E125,E401,W391,E128,E261,E731,Q000,W504,W606,W503

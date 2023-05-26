@@ -1,4 +1,4 @@
-"use strict";
+    "use strict";
 (function ($) {
     $(function () {
         $('.func_select').change(function () {

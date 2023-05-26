@@ -22,6 +22,7 @@ Please see the changelog at http://django-adminactions.readthedocs.org/en/latest
 * Graph queryset
 * Merge records
 * Find Duplicates
+* Bulk Update
 
 
 #### Project Links

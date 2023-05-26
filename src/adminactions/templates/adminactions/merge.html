@@ -21,7 +21,7 @@
             </ol>
         {% endif %}
         {{ adminform.form.non_field_errors }}
-        <form method="post">{% csrf_token %}
+        <form method="post" id="merge-form">{% csrf_token %}
             {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
             <table>
                 <tr>

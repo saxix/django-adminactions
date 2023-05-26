@@ -19,14 +19,16 @@ from adminactions import utils
 from .utils import (clone_instance, get_field_by_path,
                     get_field_value, get_ignored_fields,)
 
-csv_options_default = {'date_format': 'd/m/Y',
-                       'datetime_format': 'N j, Y, P',
-                       'time_format': 'P',
-                       'header': False,
-                       'quotechar': '"',
-                       'quoting': csv.QUOTE_ALL,
-                       'delimiter': ';',
-                       'escapechar': '\\', }
+csv_options_default = {
+    "date_format": "d/m/Y",
+    "datetime_format": "N j, Y, P",
+    "time_format": "P",
+    "header": False,
+    "quotechar": '"',
+    "quoting": csv.QUOTE_ALL,
+    "delimiter": ";",
+    "escapechar": "\\",
+}
 
 delimiters = ",;|:"
 quotes = "'\"`"
@@ -56,13 +58,14 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
     all_related = {}
 
     if related == ALL_FIELDS:
-        related = [rel.get_accessor_name()
-                   for rel in utils.get_all_related_objects(master)]
+        related = [
+            rel.get_accessor_name() for rel in utils.get_all_related_objects(master)
+        ]
 
     if m2m == ALL_FIELDS:
         m2m = set()
         for field in master._meta.get_fields():
-            if getattr(field, 'many_to_many', None):
+            if getattr(field, "many_to_many", None):
                 if isinstance(field, ManyToManyField):
                     if not field.remote_field.through._meta.auto_created:
                         continue
@@ -71,7 +74,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                     # reverse relation
                     m2m.add(field.get_accessor_name())
     if m2m and not commit:
-        raise ValueError('Cannot save related with `commit=False`')
+        raise ValueError("Cannot save related with `commit=False`")
     with atomic():
         result = clone_instance(master)
         for fieldname in fields:
@@ -98,7 +101,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                 else:
                     accessor = getattr(other, name, None)
                     if accessor:
-                        rel_fieldname = list(accessor.core_filters.keys())[0].split('__')[0]
+                        rel_fieldname = list(accessor.core_filters.keys())[0].split(
+                            "__"
+                        )[0]
                         for r in accessor.all():
                             all_related[name].append((rel_fieldname, r))
 
@@ -108,9 +113,13 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                     setattr(element, rel_fieldname, master)
                     element.save()
             other.delete()
-            ignored_fields = get_ignored_fields(result._meta.model, 'MERGE_ACTION_IGNORED_FIELDS')
+            ignored_fields = get_ignored_fields(
+                result._meta.model, "MERGE_ACTION_IGNORED_FIELDS"
+            )
             for ig_field in ignored_fields:
-                setattr(result, ig_field, result._meta.get_field(ig_field).get_default())
+                setattr(
+                    result, ig_field, result._meta.get_field(ig_field).get_default()
+                )
             result.save()
             for fieldname, elements in list(all_m2m.items()):
                 dest_m2m = getattr(result, fieldname)
@@ -129,8 +138,9 @@ class Echo:
         return value
 
 
-def export_as_csv(queryset, fields=None, header=None,  # noqa
-                  filename=None, options=None, out=None):
+def export_as_csv(  # noqa: max-complexity: 20
+    queryset, fields=None, header=None, filename=None, options=None, out=None
+):  # noqa
     """
         Exports a queryset as csv from a queryset with the given fields.
 
@@ -143,9 +153,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
 
     :return: HttpResponse instance
     """
-    streaming_enabled = (
-        getattr(settings, 'ADMINACTIONS_STREAM_CSV', False)
-    )
+    streaming_enabled = getattr(settings, "ADMINACTIONS_STREAM_CSV", False)
     if out is None:
         if streaming_enabled:
             response_class = StreamingHttpResponse
@@ -153,9 +161,15 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
             response_class = HttpResponse
 
         if filename is None:
-            filename = filename or "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        response = response_class(content_type='text/csv')
-        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
+            filename = (
+                "%s.csv"
+                % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+            )
+
+        response = response_class(content_type="text/csv")
+        response["Content-Disposition"] = (
+            'attachment;filename="%s"' % filename
+        ).encode("us-ascii", "replace")
     else:
         response = out
 
@@ -164,24 +178,28 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
     else:
         config = csv_options_default.copy()
         config.update(options)
-
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+        fields = [
+            f.name
+            for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+        ]
 
     if streaming_enabled:
         buffer_object = Echo()
     else:
         buffer_object = response
 
-    dialect = config.get('dialect', None)
+    dialect = config.get("dialect", None)
     if dialect is not None:
         writer = csv.writer(buffer_object, dialect=dialect)
     else:
-        writer = csv.writer(buffer_object,
-                            escapechar=str(config['escapechar']),
-                            delimiter=str(config['delimiter']),
-                            quotechar=str(config['quotechar']),
-                            quoting=int(config['quoting']))
+        writer = csv.writer(
+            buffer_object,
+            escapechar=config["escapechar"],
+            delimiter=str(config["delimiter"]),
+            quotechar=str(config["quotechar"]),
+            quoting=int(config["quoting"]),
+        )
 
     settingstime_zone = get_default_timezone()
 
@@ -191,7 +209,7 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
                 yield writer.writerow(header)
             else:
                 yield writer.writerow([f for f in fields])
-        yield ''
+        yield ""
 
     def yield_rows():
         for obj in queryset:
@@ -200,50 +218,57 @@ def export_as_csv(queryset, fields=None, header=None,  # noqa
                 value = get_field_value(obj, fieldname)
                 if isinstance(value, datetime.datetime):
                     try:
-                        value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                        value = dateformat.format(
+                            value.astimezone(settingstime_zone),
+                            config["datetime_format"],
+                        )
                     except ValueError:
                         # astimezone() cannot be applied to a naive datetime
-                        value = dateformat.format(value, config['datetime_format'])
+                        value = dateformat.format(value, config["datetime_format"])
                 elif isinstance(value, datetime.date):
-                    value = dateformat.format(value, config['date_format'])
+                    value = dateformat.format(value, config["date_format"])
                 elif isinstance(value, datetime.time):
-                    value = dateformat.format(value, config['time_format'])
+                    value = dateformat.format(value, config["time_format"])
                 row.append(smart_str(value))
             yield writer.writerow(row)
 
     if streaming_enabled:
-        content_attr = 'content' if (
-            StreamingHttpResponse is HttpResponse) else 'streaming_content'
-        setattr(response, content_attr,
-                itertools.chain(yield_header(), yield_rows()))
+        content_attr = (
+            "content"
+            if (StreamingHttpResponse is HttpResponse)
+            else "streaming_content"
+        )
+        setattr(response, content_attr, itertools.chain(yield_header(), yield_rows()))
     else:
-        collections.deque(itertools.chain(
-            yield_header(), yield_rows()), maxlen=0)
+        collections.deque(itertools.chain(yield_header(), yield_rows()), maxlen=0)
 
     return response
 
 
-xls_options_default = {'date_format': 'd/m/Y',
-                       'datetime_format': 'N j, Y, P',
-                       'time_format': 'P',
-                       'sheet_name': 'Sheet1',
-                       'DateField': 'DD MMM-YY',
-                       'DateTimeField': 'DD MMD YY hh:mm',
-                       'TimeField': 'hh:mm',
-                       'IntegerField': '#,##',
-                       'PositiveIntegerField': '#,##',
-                       'PositiveSmallIntegerField': '#,##',
-                       'BigIntegerField': '#,##',
-                       'DecimalField': '#,##0.00',
-                       'BooleanField': 'boolean',
-                       'NullBooleanField': 'boolean',
-                       'EmailField': lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
-                       'URLField': lambda value: 'HYPERLINK("%s","%s")' % (value, value),
-                       'CurrencyColumn': '"$"#,##0.00);[Red]("$"#,##0.00)', }
+xls_options_default = {
+    "date_format": "d/m/Y",
+    "datetime_format": "N j, Y, P",
+    "time_format": "P",
+    "sheet_name": "Sheet1",
+    "DateField": "DD MMM-YY",
+    "DateTimeField": "DD MMD YY hh:mm",
+    "TimeField": "hh:mm",
+    "IntegerField": "#,##",
+    "PositiveIntegerField": "#,##",
+    "PositiveSmallIntegerField": "#,##",
+    "BigIntegerField": "#,##",
+    "DecimalField": "#,##0.00",
+    "BooleanField": "boolean",
+    "NullBooleanField": "boolean",
+    "EmailField": lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
+    "URLField": lambda value: 'HYPERLINK("%s","%s")' % (value, value),
+    "CurrencyColumn": '"$"#,##0.00);[Red]("$"#,##0.00)',
+}
 
 
-def export_as_xls2(queryset, fields=None, header=None,  # noqa
-                   filename=None, options=None, out=None):
+def export_as_xls2( # noqa: max-complexity: 24
+    queryset, fields=None, header=None, filename=None, options=None, out=None  # noqa
+):
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """
@@ -260,11 +285,18 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
 
     def _get_qs_formats(queryset):
         formats = {}
-        if hasattr(queryset, 'model'):
+        if hasattr(queryset, "model"):
             for i, fieldname in enumerate(fields):
                 try:
-                    f, __, __, __, = utils.get_field_by_name(queryset.model, fieldname)
-                    fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, 'general'))
+                    (
+                        f,
+                        __,
+                        __,
+                        __,
+                    ) = utils.get_field_by_name(queryset.model, fieldname)
+                    fmt = xls_options_default.get(
+                        f.name, xls_options_default.get(f.__class__.__name__, "general")
+                    )
                     formats[i] = fmt
                 except FieldDoesNotExist:
                     pass
@@ -273,9 +305,15 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
 
     if out is None:
         if filename is None:
-            filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = ('attachment;filename="%s"' % filename).encode('us-ascii', 'replace')
+            filename = (
+                "%s.xls"
+                % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+            )
+
+        response = HttpResponse(content_type="application/vnd.ms-excel")
+        response["Content-Disposition"] = (
+            'attachment;filename="%s"' % filename
+        ).encode("us-ascii", "replace")
     else:
         response = out
 
@@ -284,21 +322,29 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+        fields = [
+            f.name
+            for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+        ]
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=2)
-    sheet_name = config.pop('sheet_name')
-    use_display = config.get('use_display', False)
+    sheet_name = config.pop("sheet_name")
+    use_display = config.get("use_display", False)
 
     sheet = book.add_sheet(sheet_name)
     style = xlwt.XFStyle()
     row = 0
-    heading_xf = xlwt.easyxf('font:height 200; font: bold on; align: wrap on, vert centre, horiz center')
-    sheet.write(row, 0, u'#', style)
+    heading_xf = xlwt.easyxf(
+        "font:height 200; font: bold on; align: wrap on, vert centre, horiz center"
+    )
+    sheet.write(row, 0, "#", style)
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_str(f.verbose_name) for f in
-                      queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
+            header = [
+                force_str(f.verbose_name)
+                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+                if f.name in fields
+            ]
 
         for col, fieldname in enumerate(header, start=1):
             sheet.write(row, col, fieldname, heading_xf)
@@ -312,23 +358,28 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
         for col_idx, fieldname in enumerate(fields):
-            fmt = formats.get(col_idx, 'general')
+            fmt = formats.get(col_idx, "general")
             try:
-                value = get_field_value(row,
-                                        fieldname,
-                                        usedisplay=use_display,
-                                        raw_callable=False)
+                value = get_field_value(
+                    row, fieldname, usedisplay=use_display, raw_callable=False
+                )
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))
                 if hash(fmt) not in _styles:
                     if callable(fmt):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str='formula')
+                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str="formula")
                     elif isinstance(value, datetime.datetime):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['datetime_format'])
+                        _styles[hash(fmt)] = xlwt.easyxf(
+                            num_format_str=config["datetime_format"]
+                        )
                     elif isinstance(value, datetime.date):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['date_format'])
+                        _styles[hash(fmt)] = xlwt.easyxf(
+                            num_format_str=config["date_format"]
+                        )
                     elif isinstance(value, datetime.datetime):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config['time_format'])
+                        _styles[hash(fmt)] = xlwt.easyxf(
+                            num_format_str=config["time_format"]
+                        )
                     else:
                         _styles[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
 
@@ -343,27 +394,30 @@ def export_as_xls2(queryset, fields=None, header=None,  # noqa
     return response
 
 
-xlsxwriter_options = {'date_format': 'd/m/Y',
-                      'datetime_format': 'N j, Y, P',
-                      'time_format': 'P',
-                      'sheet_name': 'Sheet1',
-                      'DateField': 'DD MMM-YY',
-                      'DateTimeField': 'DD MMD YY hh:mm',
-                      'TimeField': 'hh:mm',
-                      'IntegerField': '#,##',
-                      'PositiveIntegerField': '#,##',
-                      'PositiveSmallIntegerField': '#,##',
-                      'BigIntegerField': '#,##',
-                      'DecimalField': '#,##0.00',
-                      'BooleanField': 'boolean',
-                      'NullBooleanField': 'boolean',
-                      # 'EmailField': lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
-                      # 'URLField': lambda value: 'HYPERLINK("%s","%s")' % (value, value),
-                      'CurrencyColumn': '"$"#,##0.00);[Red]("$"#,##0.00)', }
+xlsxwriter_options = {
+    "date_format": "d/m/Y",
+    "datetime_format": "N j, Y, P",
+    "time_format": "P",
+    "sheet_name": "Sheet1",
+    "DateField": "DD MMM-YY",
+    "DateTimeField": "DD MMD YY hh:mm",
+    "TimeField": "hh:mm",
+    "IntegerField": "#,##",
+    "PositiveIntegerField": "#,##",
+    "PositiveSmallIntegerField": "#,##",
+    "BigIntegerField": "#,##",
+    "DecimalField": "#,##0.00",
+    "BooleanField": "boolean",
+    "NullBooleanField": "boolean",
+    # 'EmailField': lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
+    # 'URLField': lambda value: 'HYPERLINK("%s","%s")' % (value, value),
+    "CurrencyColumn": '"$"#,##0.00);[Red]("$"#,##0.00)',
+}
 
 
-def export_as_xls3(queryset, fields=None, header=None,  # noqa
-                   filename=None, options=None, out=None):  # pragma: no cover
+def export_as_xls3(# noqa: max-complexity: 23
+    queryset, fields=None, header=None, filename=None, options=None, out=None  # noqa
+):  # pragma: no cover
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """
@@ -380,13 +434,20 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
     import xlsxwriter
 
     def _get_qs_formats(queryset):
-        formats = {'_general_': book.add_format()}
-        if hasattr(queryset, 'model'):
+        formats = {"_general_": book.add_format()}
+        if hasattr(queryset, "model"):
             for i, fieldname in enumerate(fields):
                 try:
-                    f, __, __, __, = queryset.model._meta.get_field_by_name(fieldname)
-                    pattern = xlsxwriter_options.get(f.name, xlsxwriter_options.get(f.__class__.__name__, 'general'))
-                    fmt = book.add_format({'num_format': pattern})
+                    (
+                        f,
+                        __,
+                        __,
+                        __,
+                    ) = queryset.model._meta.get_field_by_name(fieldname)
+                    pattern = xlsxwriter_options.get(
+                        f.name, xlsxwriter_options.get(f.__class__.__name__, "general")
+                    )
+                    fmt = book.add_format({"num_format": pattern})
                     formats[fieldname] = fmt
                 except FieldDoesNotExist:
                     pass
@@ -401,46 +462,54 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+        fields = [
+            f.name
+            for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+        ]
 
-    book = xlsxwriter.Workbook(out, {'in_memory': True})
-    sheet_name = config.pop('sheet_name')
-    use_display = config.get('use_display', False)
+    book = xlsxwriter.Workbook(out, {"in_memory": True})
+    sheet_name = config.pop("sheet_name")
+    use_display = config.get("use_display", False)
     sheet = book.add_worksheet(sheet_name)
     book.close()
     formats = _get_qs_formats(queryset)
 
     row = 0
-    sheet.write(row, 0, force_str('#'), formats['_general_'])
+    sheet.write(row, 0, force_str("#"), formats["_general_"])
     if header:
         if not isinstance(header, (list, tuple)):
-            header = [force_str(f.verbose_name) for f in
-                      queryset.model._meta.fields + queryset.model._meta.many_to_many if f.name in fields]
+            header = [
+                force_str(f.verbose_name)
+                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+                if f.name in fields
+            ]
 
         for col, fieldname in enumerate(header, start=1):
-            sheet.write(row, col, force_str(fieldname), formats['_general_'])
+            sheet.write(row, col, force_str(fieldname), formats["_general_"])
 
     settingstime_zone = get_default_timezone()
 
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
         for idx, fieldname in enumerate(fields):
-            fmt = formats.get(fieldname, formats['_general_'])
+            fmt = formats.get(fieldname, formats["_general_"])
             try:
-                value = get_field_value(row,
-                                        fieldname,
-                                        usedisplay=use_display,
-                                        raw_callable=False)
+                value = get_field_value(
+                    row, fieldname, usedisplay=use_display, raw_callable=False
+                )
                 if callable(fmt):
                     value = fmt(value)
                 if isinstance(value, (list, tuple)):
-                    value = smart_str(u"".join(value))
+                    value = smart_str("".join(value))
 
                 if isinstance(value, datetime.datetime):
                     try:
-                        value = dateformat.format(value.astimezone(settingstime_zone), config['datetime_format'])
+                        value = dateformat.format(
+                            value.astimezone(settingstime_zone),
+                            config["datetime_format"],
+                        )
                     except ValueError:
-                        value = dateformat.format(value, config['datetime_format'])
+                        value = dateformat.format(value, config["datetime_format"])
 
                 value = str(value)
 
@@ -452,11 +521,16 @@ def export_as_xls3(queryset, fields=None, header=None,  # noqa
     out.seek(0)
     if http_response:
         if filename is None:
-            filename = filename or "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
-        response = HttpResponse(out.read(),
-                                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            filename = (
+                "%s.xls"
+                % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+            )
+        response = HttpResponse(
+            out.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
         # content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+        response["Content-Disposition"] = 'attachment;filename="%s"' % filename
         return response
     return out
 

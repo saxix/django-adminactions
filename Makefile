@@ -4,6 +4,22 @@ BINDIR=${PWD}/~build/bin
 PYTHONPATH:=${PWD}/tests/:${PWD}
 DJANGO?='3.1.x'
 
+
+define PRINT_HELP_PYSCRIPT
+import re, sys
+
+for line in sys.stdin:
+	match = re.match(r'^([a-zA-Z0-9_-]+):.*?## (.*)$$', line)
+	if match:
+		target, help = match.groups()
+		print("\033[93m%-10s\033[0m %s" % (target, help))
+endef
+export PRINT_HELP_PYSCRIPT
+
+
+help:
+	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+
 .mkbuilddir:
 	mkdir -p ${BUILDDIR}
 

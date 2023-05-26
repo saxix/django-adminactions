@@ -4,11 +4,12 @@ __all__ = ["create_extra_permissions"]
 
 
 def get_permission_codename(action, opts):
-    return '%s_%s' % (action, opts.object_name.lower())
+    return "%s_%s" % (action, opts.object_name.lower())
 
 
 def get_contenttype_for_model(model):
     from django.contrib.contenttypes.models import ContentType
+
     model = model._meta.concrete_model
     opts = model._meta
     ct, __ = ContentType.objects.get_or_create(
@@ -24,10 +25,10 @@ def create_extra_permissions():
 
     from .actions import actions as aa
 
-    perm_suffix = 'adminactions_'
+    perm_suffix = "adminactions_"
     existing_perms = set(
         Permission.objects.filter(codename__startswith=perm_suffix).values_list(
-            'codename', 'content_type_id'
+            "codename", "content_type_id"
         )
     )
     models = list(apps.get_models())
@@ -41,9 +42,12 @@ def create_extra_permissions():
             ct = content_types[model]
             if (codename, ct.id) in existing_perms:
                 continue
-            label = 'Can {} {} (adminactions)'.format(action.base_permission.replace(perm_suffix, ""),
-                                                      opts.verbose_name_raw)
-            permission = Permission(codename=codename, content_type=ct, name=label[:255])
+            label = "Can {} {} (adminactions)".format(
+                action.base_permission.replace(perm_suffix, ""), opts.verbose_name_raw
+            )
+            permission = Permission(
+                codename=codename, content_type=ct, name=label[:255]
+            )
             new_permissions.append(permission)
 
     Permission.objects.bulk_create(new_permissions, ignore_conflicts=True)

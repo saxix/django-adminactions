@@ -17,16 +17,17 @@ pytestmarker = pytest.mark.skip
 @pytest.mark.django_db()
 def test_nocommit():
     with compat.nocommit():
-        G(Group, name='name')
-    assert not Group.objects.filter(name='name').exists()
+        G(Group, name="name")
+    assert not Group.objects.filter(name="name").exists()
 
 
 @pytest.mark.django_db()
 def test_transaction_merge(users):
     master, other = users
     with atomic():
-
-        with mock.patch('django.contrib.auth.models.User.delete', side_effect=IntegrityError):
+        with mock.patch(
+            "django.contrib.auth.models.User.delete", side_effect=IntegrityError
+        ):
             with pytest.raises(IntegrityError):
                 merge(master, other, commit=True)
 
@@ -44,25 +45,25 @@ def test_transaction_mass_update(app, users, administrator):
         raise ActionInterrupted()
 
     with atomic():
-        res = app.get('/admin/', user=administrator.username)
-        res = res.click('Users')
-        form = res.forms['changelist-form']
-        form['action'] = 'mass_update'
+        res = app.get("/admin/", user=administrator.username)
+        res = res.click("Users")
+        form = res.forms["changelist-form"]
+        form["action"] = "mass_update"
 
-        form.get('_selected_action', index=0).checked = True
-        form.get('_selected_action', index=1).checked = True
-        form.get('_selected_action', index=2).checked = True
+        form.get("_selected_action", index=0).checked = True
+        form.get("_selected_action", index=1).checked = True
+        form.get("_selected_action", index=2).checked = True
 
         res = form.submit()
-        res.form['chk_id_is_staff'].checked = True
-        res.form['is_staff'].checked = True
+        res.forms["mass-update-form"]["chk_id_is_staff"].checked = True
+        res.forms["mass-update-form"]["is_staff"].checked = True
 
         # res.form.submit('apply').follow()
         # assert User.objects.filter(is_staff=True).count() == 1
 
         with pytest.raises(BaseException):
             adminaction_end.connect(_handler)
-            res.form.submit('apply').follow()
+            res.forms["mass-update-form"].submit("apply").follow()
             assert res.status_code == 302
             adminaction_end.disconnect(_handler)
 

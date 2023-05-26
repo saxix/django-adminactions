@@ -8,9 +8,9 @@ register = Library()
 @register.filter()
 def field_display(obj, field):
     """
-        returns the representation (value or ``get_FIELD_display()``) of  a field
+    returns the representation (value or ``get_FIELD_display()``) of  a field
 
-        see `adminactions.utils.get_field_value`_
+    see `adminactions.utils.get_field_value`_
     """
     return get_field_value(obj, field)
 
@@ -18,6 +18,6 @@ def field_display(obj, field):
 @register.filter
 def verbose_name(model_or_queryset, field):
     """
-        templatetag wrapper to `adminactions.utils.get_verbose_name`_
+    templatetag wrapper to `adminactions.utils.get_verbose_name`_
     """
     return get_verbose_name(model_or_queryset, field)

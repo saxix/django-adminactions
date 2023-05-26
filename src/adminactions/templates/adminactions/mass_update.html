@@ -1,8 +1,8 @@
 {% extends "admin/change_form.html" %}
 {% load i18n admin_modify actions massupdate static %}
-{% block extrahead %}{{ block.super }}
+{#{% block extrahead %}{{ block.super }}#}
 {#  {{ media }}#}
-{% endblock %}
+{#{% endblock %}#}
 
 {% block breadcrumbs %}{% if not is_popup %}
     <div class="breadcrumbs">
@@ -23,7 +23,7 @@
     {% endif %}
     {{ form.non_field_errors }}
     <div id='col1'>
-        <form action="" method="post">
+        <form action="" method="post" id="mass-update-form">
             {% csrf_token %}
             <table class="mass-update">
                 {% for field in adminform.form.configured_fields %}

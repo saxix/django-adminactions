@@ -10,7 +10,7 @@
     </div>
 {% endif %}{% endblock %}
 {% block content %}
-    <form method="post">{% csrf_token %}
+    <form method="post" id="merge-form">{% csrf_token %}
         {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
         {% for f in adminform.form.action_fields %}{{ f }}{% endfor %}
     <table class="mergetable">

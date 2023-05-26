@@ -1,0 +1,92 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify actions massupdate static %}
+{% block extrahead %}{{ block.super }}
+  <meta name="opts.label" content="{{ opts.label }}">
+{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+  <div class="breadcrumbs">
+    <a href="../../">{% trans "Home" %}</a> &rsaquo;
+    <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+    <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+    {{ action_short_description|capfirst }}
+  </div>
+{% endif %}{% endblock %}
+
+{% block content %}
+  {% if form.subject.errors %}
+    <ol>
+      {% for error in form.subject.errors %}
+        <li><strong>{{ error|escape }}</strong></li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+  {{ form.non_field_errors }}
+  <div id='col1'>
+    <form action="." method="post" enctype="multipart/form-data" id="bulk-update">
+      {% csrf_token %}
+    <div>Configuration:             <small>
+              <select id="sel-cmd">
+                <option></option>
+                <option>clear</option>
+                <option>default</option>
+                <option>saved</option>
+              </select>
+            </small></div>
+      <table class="mass-update">
+        {% for field in adminform.form %}
+          {% if field.field.widget.input_type == "hidden" %}
+            {{ field }}
+          {% else %}
+            <tr>
+              <td>{{ field.label_tag }}</td>
+              <td colspan="4">
+                {{ field.errors }}
+                {{ field }}&nbsp;<div class="help">{{ field.help_text }}</div>
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+        <tr>
+          <th colspan="4"><h3>CSV Options</h3></th>
+        </tr>
+        {% for field in csv_form %}
+          <tr>
+            <td>{{ field.label_tag }}</td>
+            <td colspan="4">
+              {{ field.errors }}
+              {{ field }}&nbsp;<span class="help">{{ field.help_text }}</span>
+            </td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <th colspan="4"><h3>Columns Mapping</h3>
+            <div>{{ map_form.index_field.errors }}</div>
+          </th>
+        </tr>
+        <tr>
+          <th>field name</th>
+          <th>Use for index</th>
+          <th>Column name</th>
+        </tr>
+        {% for field in map_form %}
+          {% if field.name != "index_field" %}
+            <tr class="{{ field.name }}-row">
+              <td>{% if field.field.required %}<b>{% endif %}
+                {{ field.label_tag }}{% if field.field.required %}</b>{% endif %}  </td>
+              <td class='col_enabler'>
+                <input type="checkbox" name="fld-index_field" value="{{ field.name }}">
+              </td>
+              <td data-col="{{ field.name }}" class='col_field field-{{ map_form.prefix }}-{{ field.name }}-value'>{{ field.errors }}{{ field }}&nbsp;
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </table>
+      {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+      <input type="submit" name="apply" value="Update {{ selection.count }} records"/>
+    </form>
+  </div>
+{% endblock %}
