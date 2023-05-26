@@ -1,4 +1,5 @@
 # from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from adminactions.mass_update import OPERATIONS
 from demo.models import DemoModel
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -10,10 +11,16 @@ from unittest.mock import patch
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
 from adminactions.compat import celery_present
+from django.db.models import ForeignKey, fields
 
 __all__ = [
     "MassUpdateTest",
 ]
+
+
+def test_operationmanager():
+    assert OPERATIONS[fields.IntegerField] == OPERATIONS[fields.BigIntegerField]
+    assert OPERATIONS[fields.BooleanField] == OPERATIONS[fields.NullBooleanField]
 
 
 class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase):
