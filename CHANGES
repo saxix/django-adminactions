@@ -3,6 +3,8 @@ Release 2.1
 * new action "Bulk Update"
 * add Django 4.1 support
 * add Python 3.11 support
+* Use Black for code formatting
+
 
 Release 2.0
 ===========

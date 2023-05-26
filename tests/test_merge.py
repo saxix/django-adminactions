@@ -235,6 +235,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
                 res.body
             )
 
+    # noinspection PyTypeChecker
     def test_success(self):
         res = self._run_action(1)
         preserved = User.objects.get(pk=self._selected_values[0])
@@ -242,7 +243,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
 
         assert preserved.email != removed.email  # sanity check
 
-        res = self._run_action([2, 3], res)
+        self._run_action([2, 3], res)
 
         self.assertFalse(User.objects.filter(pk=removed.pk).exists())
         self.assertTrue(User.objects.filter(pk=preserved.pk).exists())
@@ -445,6 +446,7 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
                 res = res.forms["merge-form"].submit("apply")
             return res
 
+    # noinspection PyTypeChecker
     def test_success(self):
         res = self._run_action(1)
         preserved = DemoModel.objects.get(pk=self._selected_values[0])

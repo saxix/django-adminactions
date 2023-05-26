@@ -1,6 +1,6 @@
 from django.apps import apps
 
-__all__ = ["create_extra_permissions"]
+__all__ = ["create_extra_permissions", "get_permission_codename"]
 
 
 def get_permission_codename(action, opts):
