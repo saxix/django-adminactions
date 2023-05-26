@@ -350,7 +350,7 @@ Step 2
 
 
 ``Ignore Fields``
-------------------------
+-----------------
 .. versionadded:: 1.9
 
 It is possible to prevent some fields to be displayed to avoid merge.
@@ -361,3 +361,48 @@ To filter out some fields you need to set `MERGE_ACTION_IGNORED_FIELDS` settings
                 'user': ['is_staff', 'is_superuser'],
         },
     }
+
+``By Rows Update``
+=================
+
+.. versionadded:: 2.0
+
+Dynamycally enable changelist editing
+
+**Screenshots**
+
+.. figure:: _static/byrows_update.png
+
+
+
+``Find Duplicates``
+==================
+
+.. versionadded:: 2.0
+
+Find duplicated records.
+
+Note: This can be used to count records based on simple grouping
+
+
+======================= ===========================================================================================
+**min**                 only reports duplicates more than <value>
+**max**                 only reports duplicates less than <value>
+**fields**              selection of fields to be used to detect duplicates
+======================= ===========================================================================================
+
+**Screenshots**
+
+.. figure:: _static/find_duplicates.png
+
+
+
+``Bulk Update``
+==================
+
+.. versionadded:: 1.1
+
+Updates queryset using csv file
+
+**Screenshots**
+.. figure:: _static/bulk_update.png
