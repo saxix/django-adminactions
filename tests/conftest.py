@@ -1,5 +1,7 @@
-import django_webtest
 import logging
+import os
+
+import django_webtest
 import pytest
 
 logger = logging.getLogger("test")
@@ -23,42 +25,56 @@ levelNames = {
 
 def pytest_addoption(parser):
     group = parser.getgroup("selenium", "Selenium Web Browser Automation")
-    group.addoption("--selenium-enable",
-                    action='store_true',
-                    dest='selenium_enable',
-                    default=False,
-                    help="launch Selenium tests on hub"
-                    )
-
     group.addoption(
-        "--chrome-driver", metavar="PATH",
-        help="specify the full path for the chromedriver stored in your system. This is a mandatory field "
-             "to let start Selenium tests even with Chrome. Command line sample: "
-             "py.test --selenium-enable --chrome-driver=/home/chromedriver. -k test_name."
+        "--selenium-enable",
+        action="store_true",
+        dest="selenium_enable",
+        default=False,
+        help="launch Selenium tests on hub",
     )
 
-    parser.addoption("--log", default=None, action="store",
-                     dest="log_level",
-                     help="enable console log")
+    group.addoption(
+        "--chrome-driver",
+        metavar="PATH",
+        help="specify the full path for the chromedriver stored in your system. This is a mandatory field "
+        "to let start Selenium tests even with Chrome. Command line sample: "
+        "py.test --selenium-enable --chrome-driver=/home/chromedriver. -k test_name.",
+    )
 
-    parser.addoption("--log-add", default="", action="store",
-                     dest="log_add",
-                     help="add package to log")
+    parser.addoption(
+        "--log",
+        default=None,
+        action="store",
+        dest="log_level",
+        help="enable console log",
+    )
+
+    parser.addoption(
+        "--log-add",
+        default="",
+        action="store",
+        dest="log_add",
+        help="add package to log",
+    )
 
 
 def pytest_configure(config):
     # import warnings
-    # enable this to removee deprecations
+    # enable this to remove deprecations
     # warnings.simplefilter('once', DeprecationWarning)
 
-    if config.option.markexpr.find("selenium") < 0 and \
-        not config.option.keyword and \
-        config.option.keyword.find('selenium') < 0:
+    if (
+        config.option.markexpr.find("selenium") < 0
+        and not config.option.keyword
+        and config.option.keyword.find("selenium") < 0
+    ):
         if not config.option.selenium_enable:
-            setattr(config.option, 'markexpr', 'not selenium')
+            setattr(config.option, "markexpr", "not selenium")
+    os.environ["CELERY_ALWAYS_EAGER"] = "1"
 
     if config.option.log_level:
         import logging
+
         level = config.option.log_level.upper()
         assert level in levelNames.keys()
         format = "%(levelname)-7s %(name)-30s %(funcName)-20s:%(lineno)3s %(message)s"
@@ -83,10 +99,11 @@ def pytest_configure(config):
 @pytest.fixture(autouse=True)
 def create_aa_permissions(db):
     from adminactions.perms import create_extra_permissions
+
     create_extra_permissions()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def app(request):
     wtm = django_webtest.WebTestMixin()
     wtm.csrf_checks = False
@@ -95,7 +112,7 @@ def app(request):
     return django_webtest.DjangoTestApp()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def users():
     from django.contrib.auth.models import User
     from django_dynamic_fixture import G
@@ -103,7 +120,7 @@ def users():
     return G(User, n=2, is_staff=False, is_active=False)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def demomodels():
     from demo.models import DemoModel
     from django_dynamic_fixture import G
@@ -111,7 +128,7 @@ def demomodels():
     return G(DemoModel, n=20)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def admin():
     from django.contrib.auth.models import User
     from django_dynamic_fixture import G
@@ -119,12 +136,12 @@ def admin():
     return G(User, is_staff=True, is_active=True)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def administrator():
     from django.contrib.auth.models import User
     from utils import ADMIN, PWD
 
-    superuser = User._default_manager.create_superuser(username=ADMIN,
-                                                       password=PWD,
-                                                       email="sax@noreply.org")
+    superuser = User._default_manager.create_superuser(
+        username=ADMIN, password=PWD, email="sax@noreply.org"
+    )
     return superuser

@@ -7,58 +7,65 @@ from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 
-__all__ = ['FindDuplicatesTest', ]
+__all__ = [
+    "FindDuplicatesTest",
+]
 
 
 class FindDuplicatesTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase):
-    fixtures = ['adminactions', 'demoproject']
-    urls = 'demo.urls'
+    fixtures = ["adminactions", "demoproject"]
+    urls = "demo.urls"
     csrf_checks = True
 
     _selected_rows = [0, 1]
 
-    action_name = 'find_duplicates_action'
+    action_name = "find_duplicates_action"
     sender_model = DemoModel
 
     def setUp(self):
         super().setUp()
-        self._url = reverse('admin:demo_demomodel_changelist')
-        self.user = G(User, username='user', is_staff=True, is_active=True)
+        self._url = reverse("admin:demo_demomodel_changelist")
+        self.user = G(User, username="user", is_staff=True, is_active=True)
 
     def _run_action(self, steps=2, **kwargs):
-        selected_rows = kwargs.pop('selected_rows', self._selected_rows)
-        with user_grant_permission(self.user, ['demo.change_demomodel',
-                                               'demo.adminactions_find_duplicates_demomodel']):
-            res = self.app.get('/', user='user')
-            res = res.click('Demo models')
+        selected_rows = kwargs.pop("selected_rows", self._selected_rows)
+        with user_grant_permission(
+            self.user,
+            ["demo.change_demomodel", "demo.adminactions_find_duplicates_demomodel"],
+        ):
+            res = self.app.get("/", user="user")
+            res = res.click("Demo models")
             if steps >= 1:
-                form = res.forms['changelist-form']
-                form['action'] = 'find_duplicates_action'
+                form = res.forms["changelist-form"]
+                form["action"] = "find_duplicates_action"
                 self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
-                res.form['email'].checked = True
+                res.form["email"].checked = True
                 # res.form['func_id_char'] = 'upper'
                 # res.form['chk_id_choices'].checked = True
                 # res.form['func_id_choices'] = 'set'
                 # res.form['choices'] = '1'
                 for k, v in kwargs.items():
                     res.form[k] = v
-                res = res.form.submit('apply')
+                res = res.form.submit("apply")
         return res
 
     def test_no_permission(self):
-        with user_grant_permission(self.user, ['demo.change_demomodel']):
-            res = self.app.get('/', user='user')
-            res = res.click('Demo models')
-            form = res.forms['changelist-form']
-            form['action'] = 'find_duplicates_action'
-            form.set('_selected_action', True, 0)
+        with user_grant_permission(self.user, ["demo.change_demomodel"]):
+            res = self.app.get("/", user="user")
+            res = res.click("Demo models")
+            form = res.forms["changelist-form"]
+            form["action"] = "find_duplicates_action"
+            form.set("_selected_action", True, 0)
             res = form.submit().follow()
-            assert 'Sorry you do not have rights to execute this action' in str(res.body)
+            assert "Sorry you do not have rights to execute this action" in str(
+                res.body
+            )
 
     def test_validate_on(self):
         self._run_action()
+
     #
     # def test_validate_off(self):
     #     res = self._run_action(**{'_validate': 0})

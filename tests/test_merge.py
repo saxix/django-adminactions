@@ -1,4 +1,5 @@
 import os
+
 from demo.models import DemoModel, DemoOneToOne, UserDetail
 from django.conf import settings
 from django.contrib.admin.models import LogEntry
@@ -11,7 +12,7 @@ from utils import BaseTestCaseMixin, SelectRowsMixin, user_grant_permission
 
 from adminactions.api import ALL_FIELDS, merge
 
-PROFILE_MODULE = getattr(settings, 'AUTH_PROFILE_MODULE', 'tests.UserProfile')
+PROFILE_MODULE = getattr(settings, "AUTH_PROFILE_MODULE", "tests.UserProfile")
 
 
 def get_profile(user):
@@ -19,7 +20,7 @@ def get_profile(user):
 
 
 class MergeTestApi(BaseTestCaseMixin, TestCase):
-    fixtures = ['adminactions.json', 'demoproject.json']
+    fixtures = ["adminactions.json", "demoproject.json"]
 
     def setUp(self):
         super().setUp()
@@ -45,7 +46,7 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
     def test_merge_success_fields_no_commit(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
-        result = merge(master, other, ['password', 'last_login'])
+        result = merge(master, other, ["password", "last_login"])
 
         master = User.objects.get(pk=master.pk)
 
@@ -75,18 +76,18 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
     def test_merge_success_m2m(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
-        group = Group.objects.get_or_create(name='G1')[0]
+        group = Group.objects.get_or_create(name="G1")[0]
         other.groups.add(group)
         other.save()
 
-        result = merge(master, other, commit=True, m2m=['groups'])
+        result = merge(master, other, commit=True, m2m=["groups"])
         master = User.objects.get(pk=result.pk)  # reload
         self.assertSequenceEqual(master.groups.all(), [group])
 
     def test_merge_success_m2m_all(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
-        group = Group.objects.get_or_create(name='G1')[0]
+        group = Group.objects.get_or_create(name="G1")[0]
         perm = Permission.objects.all()[0]
         other.groups.add(group)
         other.user_permissions.add(perm)
@@ -100,7 +101,7 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
     def test_merge_success_related_all(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
-        entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+        entry = other.logentry_set.get_or_create(object_repr="test", action_flag=1)[0]
 
         result = merge(master, other, commit=True, related=ALL_FIELDS)
 
@@ -127,7 +128,9 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
         other = User.objects.get(pk=self.other_pk)
         profile = get_profile(other)
         if profile:
-            entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+            entry = other.logentry_set.get_or_create(object_repr="test", action_flag=1)[
+                0
+            ]
 
             result = merge(master, other, commit=True, related=ALL_FIELDS)
 
@@ -140,7 +143,7 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
     def test_merge_ignore_related(self):
         master = User.objects.get(pk=self.master_pk)
         other = User.objects.get(pk=self.other_pk)
-        entry = other.logentry_set.get_or_create(object_repr='test', action_flag=1)[0]
+        entry = other.logentry_set.get_or_create(object_repr="test", action_flag=1)[0]
         result = merge(master, other, commit=True, related=None)
 
         master = User.objects.get(pk=result.pk)  # reload
@@ -157,9 +160,13 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
         assert master.image != other.image
         assert master.subclassed_image != other.subclassed_image
 
-        result = merge(master, other,
-                       fields=['image', 'subclassed_image'],
-                       commit=True, related=None)
+        result = merge(
+            master,
+            other,
+            fields=["image", "subclassed_image"],
+            commit=True,
+            related=None,
+        )
 
         master = DemoModel.objects.get(pk=result.pk)  # reload
         self.assertFalse(DemoModel.objects.filter(pk=other.pk).exists())
@@ -169,54 +176,67 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
 
 class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
     csrf_checks = True
-    fixtures = ['adminactions.json', 'demoproject.json']
-    urls = 'demo.urls'
+    fixtures = ["adminactions.json", "demoproject.json"]
+    urls = "demo.urls"
     sender_model = User
-    action_name = 'merge'
+    action_name = "merge"
     _selected_rows = [1, 2]
 
     def setUp(self):
         super().setUp()
-        self.url = reverse('admin:auth_user_changelist')
-        self.user = G(User, username='user', is_staff=True, is_active=True)
+        self.url = reverse("admin:auth_user_changelist")
+        self.user = G(User, username="user", is_staff=True, is_active=True)
 
     def _run_action(self, steps=3, page_start=None):
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+        with user_grant_permission(
+            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
+        ):
             if isinstance(steps, int):
                 steps = list(range(1, steps + 1))
-                res = self.app.get('/', user='user')
-                res = res.click('Users')
+                res = self.app.get("/", user="user")
+                res = res.click("Users")
             else:
                 res = page_start
             if 1 in steps:
-                form = res.forms['changelist-form']
-                form['action'] = 'merge'
+                form = res.forms["changelist-form"]
+                form["action"] = "merge"
                 self._select_rows(form)
                 res = form.submit()
-                assert not hasattr(res.form, 'errors')
+                assert not hasattr(res.forms["merge-form"], "errors")
 
             if 2 in steps:
-                res.form['username'] = res.form['form-1-username'].value
-                res.form['email'] = res.form['form-1-email'].value
-                res.form['last_login'] = res.form['form-1-last_login'].value
-                res.form['date_joined'] = res.form['form-1-date_joined'].value
-                res = res.form.submit('preview')
-                assert not hasattr(res.form, 'errors')
+                res.forms["merge-form"]["username"] = res.forms["merge-form"][
+                    "form-1-username"
+                ].value
+                res.forms["merge-form"]["email"] = res.forms["merge-form"][
+                    "form-1-email"
+                ].value
+                res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
+                    "form-1-last_login"
+                ].value
+                res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
+                    "form-1-date_joined"
+                ].value
+                res = res.forms["merge-form"].submit("preview")
+                assert not hasattr(res.forms["merge-form"], "errors")
 
             if 3 in steps:
-                res = res.form.submit('apply')
+                res = res.forms["merge-form"].submit("apply")
             return res
 
     def test_no_permission(self):
-        with user_grant_permission(self.user, ['auth.change_user']):
-            res = self.app.get('/', user='user')
-            res = res.click('Users')
-            form = res.forms['changelist-form']
-            form['action'] = 'merge'
+        with user_grant_permission(self.user, ["auth.change_user"]):
+            res = self.app.get("/", user="user")
+            res = res.click("Users")
+            form = res.forms["changelist-form"]
+            form["action"] = "merge"
             self._select_rows(form)
             res = form.submit().follow()
-            assert 'Sorry you do not have rights to execute this action' in str(res.body)
+            assert "Sorry you do not have rights to execute this action" in str(
+                res.body
+            )
 
+    # noinspection PyTypeChecker
     def test_success(self):
         res = self._run_action(1)
         preserved = User.objects.get(pk=self._selected_values[0])
@@ -224,7 +244,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
 
         assert preserved.email != removed.email  # sanity check
 
-        res = self._run_action([2, 3], res)
+        self._run_action([2, 3], res)
 
         self.assertFalse(User.objects.filter(pk=removed.pk).exists())
         self.assertTrue(User.objects.filter(pk=preserved.pk).exists())
@@ -234,43 +254,55 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         self.assertFalse(LogEntry.objects.filter(pk=removed.pk).exists())
 
     def test_error_if_too_many_records(self):
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
-            res = self.app.get('/', user='user')
-            res = res.click('Users')
-            form = res.forms['changelist-form']
-            form['action'] = 'merge'
+        with user_grant_permission(
+            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
+        ):
+            res = self.app.get("/", user="user")
+            res = res.click("Users")
+            form = res.forms["changelist-form"]
+            form["action"] = "merge"
             self._select_rows(form, [1, 2, 3])
             res = form.submit().follow()
-            self.assertContains(res, 'Please select exactly 2 records')
+            self.assertContains(res, "Please select exactly 2 records")
 
     def test_swap(self):
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+        with user_grant_permission(
+            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
+        ):
             # removed = User.objects.get(pk=self._selected_rows[0])
             # preserved = User.objects.get(pk=self._selected_rows[1])
 
-            res = self.app.get('/', user='user')
-            res = res.click('Users')
-            form = res.forms['changelist-form']
-            form['action'] = 'merge'
+            res = self.app.get("/", user="user")
+            res = res.click("Users")
+            form = res.forms["changelist-form"]
+            form["action"] = "merge"
             self._select_rows(form, [1, 2])
             res = form.submit()
             removed = User.objects.get(pk=self._selected_values[0])
             preserved = User.objects.get(pk=self._selected_values[1])
 
             # steps = 2 (swap):
-            res.form['master_pk'] = self._selected_values[1]
-            res.form['other_pk'] = self._selected_values[0]
+            res.forms["merge-form"]["master_pk"] = self._selected_values[1]
+            res.forms["merge-form"]["other_pk"] = self._selected_values[0]
 
-            res.form['username'] = res.form['form-0-username'].value
-            res.form['email'] = res.form['form-0-email'].value
-            res.form['last_login'] = res.form['form-1-last_login'].value
-            res.form['date_joined'] = res.form['form-1-date_joined'].value
+            res.forms["merge-form"]["username"] = res.forms["merge-form"][
+                "form-0-username"
+            ].value
+            res.forms["merge-form"]["email"] = res.forms["merge-form"][
+                "form-0-email"
+            ].value
+            res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
+                "form-1-last_login"
+            ].value
+            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
+                "form-1-date_joined"
+            ].value
 
             # res.form['field_names'] = 'username,email'
 
-            res = res.form.submit('preview')
+            res = res.forms["merge-form"].submit("preview")
             # steps = 3:
-            res = res.form.submit('apply')
+            res = res.forms["merge-form"].submit("apply")
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertFalse(User.objects.filter(pk=removed.pk).exists())
@@ -282,34 +314,44 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
     def test_merge_move_detail(self):
         from adminactions.merge import MergeForm
 
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+        with user_grant_permission(
+            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
+        ):
             # removed = User.objects.get(pk=self._selected_rows[0])
             # preserved = User.objects.get(pk=self._selected_rows[1])
 
-            res = self.app.get('/', user='user')
-            res = res.click('Users')
-            form = res.forms['changelist-form']
-            form['action'] = 'merge'
+            res = self.app.get("/", user="user")
+            res = res.click("Users")
+            form = res.forms["changelist-form"]
+            form["action"] = "merge"
             self._select_rows(form, [1, 2])
             res = form.submit()
             removed = User.objects.get(pk=self._selected_values[0])
             preserved = User.objects.get(pk=self._selected_values[1])
 
-            removed.userdetail_set.create(note='1')
-            preserved.userdetail_set.create(note='2')
+            removed.userdetail_set.create(note="1")
+            preserved.userdetail_set.create(note="2")
 
             # steps = 2:
-            res.form['master_pk'] = self._selected_values[1]
-            res.form['other_pk'] = self._selected_values[0]
+            res.forms["merge-form"]["master_pk"] = self._selected_values[1]
+            res.forms["merge-form"]["other_pk"] = self._selected_values[0]
 
-            res.form['username'] = res.form['form-0-username'].value
-            res.form['email'] = res.form['form-0-email'].value
-            res.form['last_login'] = res.form['form-1-last_login'].value
-            res.form['date_joined'] = res.form['form-1-date_joined'].value
-            res.form['dependencies'] = MergeForm.DEP_MOVE
-            res = res.form.submit('preview')
+            res.forms["merge-form"]["username"] = res.forms["merge-form"][
+                "form-0-username"
+            ].value
+            res.forms["merge-form"]["email"] = res.forms["merge-form"][
+                "form-0-email"
+            ].value
+            res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
+                "form-1-last_login"
+            ].value
+            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
+                "form-1-date_joined"
+            ].value
+            res.forms["merge-form"]["dependencies"] = MergeForm.DEP_MOVE
+            res = res.forms["merge-form"].submit("preview")
             # steps = 3:
-            res = res.form.submit('apply')
+            res = res.forms["merge-form"].submit("apply")
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 2)
@@ -318,34 +360,44 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
     def test_merge_delete_detail(self):
         from adminactions.merge import MergeForm
 
-        with user_grant_permission(self.user, ['auth.change_user', 'auth.adminactions_merge_user']):
+        with user_grant_permission(
+            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
+        ):
             # removed = User.objects.get(pk=self._selected_rows[0])
             # preserved = User.objects.get(pk=self._selected_rows[1])
 
-            res = self.app.get('/', user='user')
-            res = res.click('Users')
-            form = res.forms['changelist-form']
-            form['action'] = 'merge'
+            res = self.app.get("/", user="user")
+            res = res.click("Users")
+            form = res.forms["changelist-form"]
+            form["action"] = "merge"
             self._select_rows(form, [1, 2])
             res = form.submit()
             removed = User.objects.get(pk=self._selected_values[0])
             preserved = User.objects.get(pk=self._selected_values[1])
 
-            removed.userdetail_set.create(note='1')
-            preserved.userdetail_set.create(note='2')
+            removed.userdetail_set.create(note="1")
+            preserved.userdetail_set.create(note="2")
 
             # steps = 2:
-            res.form['master_pk'] = self._selected_values[1]
-            res.form['other_pk'] = self._selected_values[0]
+            res.forms["merge-form"]["master_pk"] = self._selected_values[1]
+            res.forms["merge-form"]["other_pk"] = self._selected_values[0]
 
-            res.form['username'] = res.form['form-0-username'].value
-            res.form['email'] = res.form['form-0-email'].value
-            res.form['last_login'] = res.form['form-1-last_login'].value
-            res.form['date_joined'] = res.form['form-1-date_joined'].value
-            res.form['dependencies'] = MergeForm.DEP_DELETE
-            res = res.form.submit('preview')
+            res.forms["merge-form"]["username"] = res.forms["merge-form"][
+                "form-0-username"
+            ].value
+            res.forms["merge-form"]["email"] = res.forms["merge-form"][
+                "form-0-email"
+            ].value
+            res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
+                "form-1-last_login"
+            ].value
+            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
+                "form-1-date_joined"
+            ].value
+            res.forms["merge-form"]["dependencies"] = MergeForm.DEP_DELETE
+            res = res.forms["merge-form"].submit("preview")
             # steps = 3:
-            res = res.form.submit('apply')
+            res = res.forms["merge-form"].submit("apply")
 
             preserved_after = User.objects.get(pk=self._selected_values[1])
             self.assertEqual(preserved_after.userdetail_set.count(), 1)
@@ -354,45 +406,48 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
 
 class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
     csrf_checks = True
-    fixtures = ['adminactions.json', 'demoproject.json']
-    urls = 'demo.urls'
+    fixtures = ["adminactions.json", "demoproject.json"]
+    urls = "demo.urls"
     sender_model = User
-    action_name = 'merge'
+    action_name = "merge"
     _selected_rows = [0, 2]
 
     def setUp(self):
         super().setUp()
-        self.url = reverse('admin:demo_demomodel_changelist')
-        self.user = G(User, username='user', is_staff=True, is_active=True)
+        self.url = reverse("admin:demo_demomodel_changelist")
+        self.user = G(User, username="user", is_staff=True, is_active=True)
 
     def _run_action(self, steps=3, page_start=None):
-        with user_grant_permission(self.user,
-                                   ['demo.change_demomodel',
-                                    'demo.adminactions_merge_demomodel']):
+        with user_grant_permission(
+            self.user, ["demo.change_demomodel", "demo.adminactions_merge_demomodel"]
+        ):
             if isinstance(steps, int):
                 steps = list(range(1, steps + 1))
-                res = self.app.get('/', user='user')
-                res = res.click('Demo models')
+                res = self.app.get("/", user="user")
+                res = res.click("Demo models")
             else:
                 res = page_start
 
             if 1 in steps:
-                form = res.forms['changelist-form']
-                form['action'] = 'merge'
+                form = res.forms["changelist-form"]
+                form["action"] = "merge"
                 self._select_rows(form)
                 res = form.submit()
-                assert not hasattr(res.form, 'errors')
+                assert not hasattr(res.forms["merge-form"], "errors")
 
             if 2 in steps:
-                res.form['image'] = res.form['form-1-image'].value
-                res.form['field_names'] = 'image,subclassed_image'
-                res = res.form.submit('preview')
-                assert not hasattr(res.form, 'errors')
+                res.forms["merge-form"]["image"] = res.forms["merge-form"][
+                    "form-1-image"
+                ].value
+                res.forms["merge-form"]["field_names"] = "image,subclassed_image"
+                res = res.forms["merge-form"].submit("preview")
+                assert not hasattr(res.forms["merge-form"], "errors")
 
             if 3 in steps:
-                res = res.form.submit('apply')
+                res = res.forms["merge-form"].submit("apply")
             return res
 
+    # noinspection PyTypeChecker
     def test_success(self):
         res = self._run_action(1)
         preserved = DemoModel.objects.get(pk=self._selected_values[0])

@@ -221,7 +221,7 @@
             // keep a reference to these tick labels to use for redrawing plot (see bug #57)
             this.ticks = labels;
             
-            // now bin the data values to the right lables.
+            // now bin the data values to the right labels.
             for (var i=0; i<this._series.length; i++) {
                 var s = this._series[i];
                 for (var j=0; j<s.data.length; j++) {

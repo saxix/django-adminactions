@@ -12,7 +12,7 @@ class SubclassedImageField(models.ImageField):
 
 
 class DemoModel(models.Model):
-    char = models.CharField('Chäř', max_length=255)
+    char = models.CharField("Chäř", max_length=255)
     integer = models.IntegerField()
     logic = models.BooleanField(default=False)
     # null_logic = models.NullBooleanField(default=None)
@@ -32,15 +32,19 @@ class DemoModel(models.Model):
     unique = models.CharField(max_length=255, unique=True)
     nullable = models.CharField(max_length=255, null=True)
     blank = models.CharField(max_length=255, blank=True, null=True)
-    not_editable = models.CharField(max_length=255, editable=False, blank=True, null=True)
-    choices = models.IntegerField(choices=((1, 'Choice 1'), (2, 'Choice 2'), (3, 'Choice 3')))
+    not_editable = models.CharField(
+        max_length=255, editable=False, blank=True, null=True
+    )
+    choices = models.IntegerField(
+        choices=((1, "Choice 1"), (2, "Choice 2"), (3, "Choice 3"))
+    )
 
     image = models.ImageField(blank=True, null=True)
     subclassed_image = SubclassedImageField(blank=True, null=True)
 
     class Meta:
-        app_label = 'demo'
-        ordering = ('-id',)
+        app_label = "demo"
+        ordering = ("-id",)
 
 
 class UserDetail(models.Model):
@@ -48,15 +52,16 @@ class UserDetail(models.Model):
     note = models.CharField(max_length=10, blank=True)
 
     class Meta:
-        app_label = 'demo'
+        app_label = "demo"
 
 
 class DemoOneToOne(models.Model):
-    demo = models.OneToOneField(DemoModel, on_delete=models.CASCADE,
-                                related_name='onetoone')
+    demo = models.OneToOneField(
+        DemoModel, on_delete=models.CASCADE, related_name="onetoone"
+    )
 
     class Meta:
-        app_label = 'demo'
+        app_label = "demo"
 
 
 class UserDetailModelAdmin(ExtraUrlMixin, ModelAdmin):
@@ -70,6 +75,7 @@ class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
     @button()
     def import_fixture(self, request):
         from adminactions.helpers import import_fixture as _import_fixture
+
         return _import_fixture(self, request)
 
 

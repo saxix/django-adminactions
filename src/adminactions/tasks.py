@@ -1,13 +1,15 @@
 import logging
-from celery.app import default_app
+
+from celery import shared_task  # noqa
 from django.apps import apps
 
 logger = logging.getLogger(__name__)
 
 
-@default_app.task()
+@shared_task()
 def mass_update_task(model, ids, rules, validate, clean, user_pk):
     from adminactions.mass_update import mass_update_execute
+
     try:
         model = apps.get_model(*model.split("."))
         queryset = model.objects.filter(id__in=ids)

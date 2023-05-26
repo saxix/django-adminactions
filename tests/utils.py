@@ -1,5 +1,7 @@
 import os
 import string
+from random import choice, randrange, shuffle
+
 from django.conf import global_settings
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
@@ -8,13 +10,14 @@ from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.test.testcases import TestCase
 from django_dynamic_fixture import G
-from django_dynamic_fixture.fixture_algorithms.random_fixture import \
-    RandomDataFixture
-from random import choice, randrange, shuffle
+from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
 
 from adminactions.exceptions import ActionInterrupted
-from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+from adminactions.signals import (
+    adminaction_end,
+    adminaction_requested,
+    adminaction_start,
+)
 
 
 class admin_register:
@@ -46,7 +49,7 @@ class admin_register:
 
 
 def text(length, choices=string.ascii_letters):
-    """ returns a random (fixed length) string
+    """returns a random (fixed length) string
 
     :param length: string length
     :param choices: string containing all the chars can be used to build the string
@@ -54,7 +57,7 @@ def text(length, choices=string.ascii_letters):
     .. seealso::
        :py:func:`rtext`
     """
-    return ''.join(choice(choices) for x in range(length))
+    return "".join(choice(choices) for x in range(length))
 
 
 def get_group(name=None, permissions=None):
@@ -62,14 +65,14 @@ def get_group(name=None, permissions=None):
     permission_names = permissions or []
     for permission_name in permission_names:
         try:
-            app_label, codename = permission_name.split('.')
+            app_label, codename = permission_name.split(".")
         except ValueError:
             raise ValueError("Invalid permission name `{0}`".format(permission_name))
-        __, model_name = codename.rsplit('_', 1)
-        ct = ContentType.objects.get(app_label__iexact=app_label,
-                                     model__iexact=model_name)
-        permission = Permission.objects.get(content_type=ct,
-                                            codename=codename)
+        __, model_name = codename.rsplit("_", 1)
+        ct = ContentType.objects.get(
+            app_label__iexact=app_label, model__iexact=model_name
+        )
+        permission = Permission.objects.get(content_type=ct, codename=codename)
         group.permissions.add(permission)
     return group
 
@@ -81,9 +84,9 @@ class user_grant_permission:
         self.group = None
 
     def __enter__(self):
-        if hasattr(self.user, '_group_perm_cache'):
+        if hasattr(self.user, "_group_perm_cache"):
             del self.user._group_perm_cache
-        if hasattr(self.user, '_perm_cache'):
+        if hasattr(self.user, "_perm_cache"):
             del self.user._perm_cache
         self.group = get_group(permissions=self.permissions or [])
         self.user.groups.add(self.group)
@@ -114,41 +117,43 @@ class SelectRowsMixin:
 
         self._selected_values = []
         for r in selected_rows:
-            chk = form.get('_selected_action', r, default=None)
+            chk = form.get("_selected_action", r, default=None)
             if chk:
-                form.set('_selected_action', True, r)
+                form.set("_selected_action", True, r)
                 self._selected_values.append(int(chk.value))
 
 
 class CheckSignalsMixin:
-    MESSAGE = 'Action Interrupted Test'
+    MESSAGE = "Action Interrupted Test"
 
     def test_signal_sent(self):
         def handler_factory(name):
             def myhandler(sender, action, request, queryset, **kwargs):
                 handler_factory.invoked[name] = True
                 self.assertEqual(action, self.action_name)
-                self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
-                                         sorted(self._selected_values))
+                self.assertSequenceEqual(
+                    queryset.order_by("id").values_list("id", flat=True),
+                    sorted(self._selected_values),
+                )
 
             return myhandler
 
         handler_factory.invoked = {}
 
         try:
-            m1 = handler_factory('adminaction_requested')
+            m1 = handler_factory("adminaction_requested")
             adminaction_requested.connect(m1, sender=self.sender_model)
 
-            m2 = handler_factory('adminaction_start')
+            m2 = handler_factory("adminaction_start")
             adminaction_start.connect(m2, sender=self.sender_model)
 
-            m3 = handler_factory('adminaction_end')
+            m3 = handler_factory("adminaction_end")
             adminaction_end.connect(m3, sender=self.sender_model)
 
             self._run_action()
-            self.assertIn('adminaction_requested', handler_factory.invoked)
-            self.assertIn('adminaction_start', handler_factory.invoked)
-            self.assertIn('adminaction_end', handler_factory.invoked)
+            self.assertIn("adminaction_requested", handler_factory.invoked)
+            self.assertIn("adminaction_start", handler_factory.invoked)
+            self.assertIn("adminaction_end", handler_factory.invoked)
 
         finally:
             adminaction_requested.disconnect(m1, sender=self.sender_model)
@@ -161,16 +166,19 @@ class CheckSignalsMixin:
         def myhandler(sender, action, request, queryset, **kwargs):
             myhandler.invoked = True
             self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
-                                     sorted(self._selected_values))
+            self.assertSequenceEqual(
+                queryset.order_by("id").values_list("id", flat=True),
+                sorted(self._selected_values),
+            )
             raise ActionInterrupted(self.MESSAGE)
+
         myhandler.invoked = False
 
         try:
             adminaction_requested.connect(myhandler, sender=self.sender_model)
             self._run_action(1)
             self.assertTrue(myhandler.invoked)
-            self.assertIn(self.MESSAGE, self.app.cookies['messages'])
+            self.assertIn(self.MESSAGE, self.app.cookies["messages"])
         finally:
             adminaction_requested.disconnect(myhandler, sender=self.sender_model)
 
@@ -180,15 +188,17 @@ class CheckSignalsMixin:
         def myhandler(sender, action, request, queryset, **kwargs):
             myhandler.invoked = True
             self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
-                                     sorted(self._selected_values))
+            self.assertSequenceEqual(
+                queryset.order_by("id").values_list("id", flat=True),
+                sorted(self._selected_values),
+            )
             raise ActionInterrupted(self.MESSAGE)
 
         try:
             adminaction_start.connect(myhandler, sender=self.sender_model)
             self._run_action(2)
             self.assertTrue(myhandler.invoked)
-            self.assertIn(self.MESSAGE, self.app.cookies['messages'])
+            self.assertIn(self.MESSAGE, self.app.cookies["messages"])
         finally:
             adminaction_start.disconnect(myhandler, sender=self.sender_model)
 
@@ -198,8 +208,11 @@ class CheckSignalsMixin:
         def myhandler(sender, action, request, queryset, **kwargs):
             myhandler.invoked = True
             self.assertEqual(action, self.action_name)
-            self.assertSequenceEqual(queryset.order_by('id').values_list('id', flat=True),
-                                     sorted(self._selected_values))
+            self.assertSequenceEqual(
+                queryset.order_by("id").values_list("id", flat=True),
+                sorted(self._selected_values),
+            )
+
         myhandler.invoked = False
         try:
             adminaction_end.connect(myhandler, sender=self.sender_model)
@@ -221,42 +234,61 @@ def ipaddress(not_valid=None):
     shuffle(class_a)
     first = class_a.pop()
 
-    return ".".join([str(first), str(randrange(1, 256)),
-                     str(randrange(1, 256)), str(randrange(1, 256))])
+    return ".".join(
+        [
+            str(first),
+            str(randrange(1, 256)),
+            str(randrange(1, 256)),
+            str(randrange(1, 256)),
+        ]
+    )
 
 
-class DataFixtureClass(RandomDataFixture):  # it can inherit of SequentialDataFixture, RandomDataFixture etc.
-    def genericipaddressfield_config(self, field, key):  # method name must have the format: FIELDNAME_config
+class DataFixtureClass(
+    RandomDataFixture
+):  # it can inherit of SequentialDataFixture, RandomDataFixture etc.
+    def genericipaddressfield_config(
+        self, field, key
+    ):  # method name must have the format: FIELDNAME_config
         return ipaddress()
 
 
-TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__),
-                                  os.pardir, 'tests', 'templates')
+TEST_TEMPLATES_DIR = os.path.join(
+    os.path.dirname(__file__), os.pardir, "tests", "templates"
+)
 
-SETTINGS = {'TEMPLATE_DIRS': [TEST_TEMPLATES_DIR],
-            'AUTHENTICATION_BACKENDS': ('django.contrib.auth.backends.ModelBackend',),
-            'TEMPLATE_LOADERS': ('django.template.loaders.filesystem.Loader',
-                                 'django.template.loaders.app_directories.Loader'),
-            # 'AUTH_PROFILE_MODULE': None,
-            'TEMPLATE_CONTEXT_PROCESSORS': ("django.contrib.auth.context_processors.auth",
-                                            "django.core.context_processors.debug",
-                                            "django.core.context_processors.i18n",
-                                            "django.core.context_processors.media",
-                                            "django.core.context_processors.static",
-                                            "django.core.context_processors.request",
-                                            "django.core.context_processors.tz",
-                                            "django.contrib.messages.context_processors.messages")}
+SETTINGS = {
+    "TEMPLATE_DIRS": [TEST_TEMPLATES_DIR],
+    "AUTHENTICATION_BACKENDS": ("django.contrib.auth.backends.ModelBackend",),
+    "TEMPLATE_LOADERS": (
+        "django.template.loaders.filesystem.Loader",
+        "django.template.loaders.app_directories.Loader",
+    ),
+    # 'AUTH_PROFILE_MODULE': None,
+    "TEMPLATE_CONTEXT_PROCESSORS": (
+        "django.contrib.auth.context_processors.auth",
+        "django.core.context_processors.debug",
+        "django.core.context_processors.i18n",
+        "django.core.context_processors.media",
+        "django.core.context_processors.static",
+        "django.core.context_processors.request",
+        "django.core.context_processors.tz",
+        "django.contrib.messages.context_processors.messages",
+    ),
+}
 
-SETTINGS['MIDDLEWARE'] = global_settings.MIDDLEWARE
+SETTINGS["MIDDLEWARE"] = global_settings.MIDDLEWARE
 
-ADMIN = 'sax'
-USER = 'user'
-PWD = '123'
-USER_EMAIL = 'user@moreply.org'
+ADMIN = "sax"
+USER = "user"
+PWD = "123"
+USER_EMAIL = "user@moreply.org"
 
 
 class BaseTestCaseMixin:
-    fixtures = ['adminactions.json', ]
+    fixtures = [
+        "adminactions.json",
+    ]
 
     def setUp(self):
         super().setUp()
@@ -267,26 +299,28 @@ class BaseTestCaseMixin:
     def tearDown(self):
         self.sett.disable()
 
-    def login(self, username='user_00', password='123'):
+    def login(self, username="user_00", password="123"):
         user = User.objects.get(username=username)
         try:
             self.client.force_login(user)
         except AttributeError:  # for Django<1.8
             logged = self.client.login(username=username, password=password)
-            assert logged, 'Unable login with credentials'
+            assert logged, "Unable login with credentials"
         self._user = authenticate(username=username, password=password)
 
     def add_permission(self, *perms, **kwargs):
-        """ add the right permission to the user """
-        target = kwargs.pop('user', self._user)
-        if hasattr(target, '_perm_cache'):
+        """add the right permission to the user"""
+        target = kwargs.pop("user", self._user)
+        if hasattr(target, "_perm_cache"):
             del target._perm_cache
         for perm_name in perms:
-            app_label, code = perm_name.split('.')
-            if code == '*':
+            app_label, code = perm_name.split(".")
+            if code == "*":
                 perms = Permission.objects.filter(content_type__app_label=app_label)
             else:
-                perms = Permission.objects.filter(codename=code, content_type__app_label=app_label)
+                perms = Permission.objects.filter(
+                    codename=code, content_type__app_label=app_label
+                )
             target.user_permissions.add(*perms)
 
         target.save()
