@@ -148,7 +148,7 @@
             this._stackAxis = 'x';
             this.fillAxis = 'x';
         }
-        // index of the currenty highlighted point, if any
+        // index of the currently highlighted point, if any
         this._highlightedPoint = null;
         // total number of values for all bar series, total number of bar series, and position of this series
         this._plotSeriesInfo = null;

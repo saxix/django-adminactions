@@ -165,7 +165,7 @@
         this._radius = null;
         // array of [start,end] angles arrays, one for each slice.  In radians.
         this._sliceAngles = [];
-        // index of the currenty highlighted point, if any
+        // index of the currently highlighted point, if any
         this._highlightedPoint = null;
         
         // set highlight colors if none provided
@@ -519,7 +519,7 @@
         // I don't think I'm going to need _dataBounds here.
         // have to go Axis scaling in a way to fit chart onto plot area
         // and provide u2p and p2u functionality for mouse cursor, etc.
-        // for convienence set _dataBounds to 0 and 100 and
+        // for convenience set _dataBounds to 0 and 100 and
         // set min/max to 0 and 100.
         this._dataBounds = {min:0, max:100};
         this.min = 0;
