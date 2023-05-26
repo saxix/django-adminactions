@@ -4,6 +4,9 @@ Release 2.1
 * add Django 4.1 support
 * add Python 3.11 support
 * Use Black for code formatting
+* Merged #212 - Inspect the MRO (in reversed order) - https://github.com/saxix/django-adminactions/pull/212
+* Merged #215 - Merge action support signals  - https://github.com/saxix/django-adminactions/pull/212
+
 
 
 Release 2.0

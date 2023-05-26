@@ -9,13 +9,7 @@ def get_ignored_fields(model, setting_var_name):
     """
     returns list of ignored fields which must not be modified
     """
-    ignored_setting = getattr(settings, setting_var_name, {})
-    ignored_app = ignored_setting.get(model._meta.app_label, {})
-    if ignored_app:
-        ignored_fields = ignored_app.get(model._meta.model_name, [])
-    else:
-        ignored_fields = []
-    return ignored_fields
+    return getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
 
 
 def clone_instance(instance, fieldnames=None):
@@ -31,8 +25,7 @@ def clone_instance(instance, fieldnames=None):
     if fieldnames is None:
         fieldnames = [fld.name for fld in instance._meta.fields]
 
-    new_kwargs = dict([(name, getattr(instance, name)) for name in fieldnames])
-    return instance.__class__(**new_kwargs)
+    return instance.__class__(**{name: getattr(instance, name) for name in fieldnames})
 
 
 # def get_copy_of_instance(instance):
