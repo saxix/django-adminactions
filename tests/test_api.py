@@ -1,9 +1,10 @@
 import csv
-import django
 import io
 import unittest
-import xlrd
 from collections import namedtuple
+
+import django
+import xlrd
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.test import TestCase

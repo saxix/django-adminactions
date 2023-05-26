@@ -1,6 +1,7 @@
-import django_webtest
 import logging
 import os
+
+import django_webtest
 import pytest
 
 logger = logging.getLogger("test")

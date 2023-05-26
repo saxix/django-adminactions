@@ -1,7 +1,6 @@
 import pytest
 
-from adminactions.templatetags.massupdate import (fields_values,
-                                                  link_fields_values,)
+from adminactions.templatetags.massupdate import fields_values, link_fields_values
 
 
 @pytest.mark.parametrize(

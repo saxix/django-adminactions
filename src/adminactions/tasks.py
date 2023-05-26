@@ -1,4 +1,5 @@
 import logging
+
 from celery import shared_task  # noqa
 from django.apps import apps
 

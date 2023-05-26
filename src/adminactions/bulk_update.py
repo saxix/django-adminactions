@@ -1,5 +1,8 @@
 import csv
 import logging
+from pathlib import Path
+from typing import Dict, Optional, Sequence
+
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -12,14 +15,15 @@ from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
-from pathlib import Path
-from typing import Dict, Optional, Sequence
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVConfigForm
 from adminactions.perms import get_permission_codename
-from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+from adminactions.signals import (
+    adminaction_end,
+    adminaction_requested,
+    adminaction_start,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -118,9 +122,7 @@ def bulk_update(modeladmin, request, queryset):  # noqa
         perm = "{0}.{1}".format(
             opts.app_label, get_permission_codename(bulk_update.base_permission, opts)
         )
-        bulk_update_form = getattr(
-            modeladmin, "bulk_update_form", BulkUpdateForm
-        )
+        bulk_update_form = getattr(modeladmin, "bulk_update_form", BulkUpdateForm)
         bulk_update_fields = getattr(modeladmin, "bulk_update_fields", None)
         bulk_update_exclude = getattr(modeladmin, "bulk_update_exclude", None)
         if bulk_update_exclude is None:

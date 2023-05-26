@@ -1,4 +1,5 @@
 import os
+
 from demo.models import DemoModel, DemoOneToOne, UserDetail
 from django.conf import settings
 from django.contrib.admin.models import LogEntry

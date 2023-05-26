@@ -1,4 +1,8 @@
 # from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from pathlib import Path
+from unittest import skipIf
+from unittest.mock import patch
+
 from demo.models import DemoModel
 from django.contrib.auth.models import User
 from django.db.models import fields
@@ -6,9 +10,6 @@ from django.test import TestCase
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
-from pathlib import Path
-from unittest import skipIf
-from unittest.mock import patch
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 from webtest import Upload
 

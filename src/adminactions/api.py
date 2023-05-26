@@ -2,6 +2,8 @@ import collections
 import csv
 import datetime
 import itertools
+from io import BytesIO
+
 import xlwt
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
@@ -12,12 +14,15 @@ from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import dateformat
 from django.utils.encoding import force_str, smart_str
 from django.utils.timezone import get_default_timezone
-from io import BytesIO
 
 from adminactions import utils
 
-from .utils import (clone_instance, get_field_by_path,
-                    get_field_value, get_ignored_fields,)
+from .utils import (
+    clone_instance,
+    get_field_by_path,
+    get_field_value,
+    get_ignored_fields,
+)
 
 csv_options_default = {
     "date_format": "d/m/Y",
@@ -266,7 +271,7 @@ xls_options_default = {
 }
 
 
-def export_as_xls2( # noqa: max-complexity: 24
+def export_as_xls2(  # noqa: max-complexity: 24
     queryset, fields=None, header=None, filename=None, options=None, out=None  # noqa
 ):
     # sheet_name=None,  header_alt=None,
@@ -415,7 +420,7 @@ xlsxwriter_options = {
 }
 
 
-def export_as_xls3(# noqa: max-complexity: 23
+def export_as_xls3(  # noqa: max-complexity: 23
     queryset, fields=None, header=None, filename=None, options=None, out=None  # noqa
 ):  # pragma: no cover
     # sheet_name=None,  header_alt=None,

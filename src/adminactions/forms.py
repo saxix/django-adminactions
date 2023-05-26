@@ -1,4 +1,5 @@
 import csv
+
 from django import forms
 from django.core.serializers import get_serializer_formats
 from django.forms.models import ModelForm
@@ -32,9 +33,11 @@ class GenericActionForm(ModelForm):
 
     @cached_property
     def model_field_names(self):
-        ignored_fields = {'select_accross', 'action', *get_ignored_fields(
-            self._meta.model, "UPDATE_ACTION_IGNORED_FIELDS"
-        )}
+        ignored_fields = {
+            "select_accross",
+            "action",
+            *get_ignored_fields(self._meta.model, "UPDATE_ACTION_IGNORED_FIELDS"),
+        }
         return [
             f.name
             for f in self._meta.model._meta.get_fields()

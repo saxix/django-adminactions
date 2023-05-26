@@ -1,18 +1,24 @@
 import logging
 import re
-from collections import OrderedDict as SortedDict, defaultdict
+from collections import OrderedDict as SortedDict
+from collections import defaultdict
+
 from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
-from django.db.models import FileField, ForeignKey, fields as df
+from django.db.models import FileField, ForeignKey
+from django.db.models import fields as df
 from django.db.transaction import atomic
 from django.forms import fields as ff
-from django.forms.models import (InlineForeignKeyField,
-                                 ModelMultipleChoiceField, construct_instance,
-                                 modelform_factory,)
+from django.forms.models import (
+    InlineForeignKeyField,
+    ModelMultipleChoiceField,
+    construct_instance,
+    modelform_factory,
+)
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str

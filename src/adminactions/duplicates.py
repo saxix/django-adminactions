@@ -8,8 +8,11 @@ from django.utils.translation import gettext as _
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.perms import get_permission_codename
-from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+from adminactions.signals import (
+    adminaction_end,
+    adminaction_requested,
+    adminaction_start,
+)
 from adminactions.utils import get_common_context
 
 

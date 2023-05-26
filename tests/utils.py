@@ -1,5 +1,7 @@
 import os
 import string
+from random import choice, randrange, shuffle
+
 from django.conf import global_settings
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
@@ -8,13 +10,14 @@ from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.test.testcases import TestCase
 from django_dynamic_fixture import G
-from django_dynamic_fixture.fixture_algorithms.random_fixture import (
-    RandomDataFixture,)
-from random import choice, randrange, shuffle
+from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
 
 from adminactions.exceptions import ActionInterrupted
-from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+from adminactions.signals import (
+    adminaction_end,
+    adminaction_requested,
+    adminaction_start,
+)
 
 
 class admin_register:

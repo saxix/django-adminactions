@@ -1,15 +1,20 @@
+from functools import partial
+
 from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
-from functools import partial
 
 
 def get_ignored_fields(model, setting_var_name):
     """
     returns list of ignored fields which must not be modified
     """
-    return getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
+    return (
+        getattr(settings, setting_var_name, {})
+        .get(model._meta.app_label, {})
+        .get(model._meta.model_name, ())
+    )
 
 
 def clone_instance(instance, fieldnames=None):

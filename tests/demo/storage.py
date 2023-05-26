@@ -1,4 +1,5 @@
 import json
+
 from django.conf import settings
 from django.contrib.messages.storage.base import BaseStorage, Message
 from django.core import signing

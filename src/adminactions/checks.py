@@ -5,9 +5,11 @@ from django.core.checks import Error, register
 def check_adminactions_settings(app_configs, **kwargs):
     errors = []
     from .config import AA_PERMISSION_HANDLER
-    from .consts import (AA_PERMISSION_CREATE_USE_APPCONFIG,
-                         AA_PERMISSION_CREATE_USE_COMMAND,
-                         AA_PERMISSION_CREATE_USE_SIGNAL,)
+    from .consts import (
+        AA_PERMISSION_CREATE_USE_APPCONFIG,
+        AA_PERMISSION_CREATE_USE_COMMAND,
+        AA_PERMISSION_CREATE_USE_SIGNAL,
+    )
 
     if AA_PERMISSION_HANDLER not in [
         AA_PERMISSION_CREATE_USE_APPCONFIG,
