@@ -32,9 +32,9 @@ class GenericActionForm(ModelForm):
 
     @cached_property
     def model_field_names(self):
-        ignored_fields = get_ignored_fields(
+        ignored_fields = {'select_accross', 'action', *get_ignored_fields(
             self._meta.model, "UPDATE_ACTION_IGNORED_FIELDS"
-        )
+        )}
         return [
             f.name
             for f in self._meta.model._meta.get_fields()
