@@ -1,4 +1,8 @@
 # from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from pathlib import Path
+
+from webtest import Upload
+
 from adminactions.mass_update import OPERATIONS
 from demo.models import DemoModel
 from django.contrib.auth.models import User
@@ -127,3 +131,28 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         assert end.called
         assert DemoModel.objects.filter(char="CCCCC").exists()
         assert not DemoModel.objects.filter(char="ccccc").exists()
+
+    def test_file_field(self):
+        self._run_action(
+            **{
+                "_validate": 1,
+                "select_across": 1,
+                "chk_id_image": True,
+                "image": Upload(str(Path(__file__).parent / "test.jpeg")),
+            }
+        )
+        obj1 = DemoModel.objects.get(pk=1)
+        obj2 = DemoModel.objects.get(pk=2)
+        assert obj1.image.read() == obj2.image.read()
+
+
+    def test_file_field_prevent_async(self):
+        res = self._run_action(
+            **{
+                "_async": 1,
+                "select_across": 1,
+                "chk_id_image": True,
+                "image": Upload(str(Path(__file__).parent / "test.jpeg")),
+            }
+        )
+        assert res.status_code == 200

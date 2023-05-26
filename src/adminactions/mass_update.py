@@ -6,7 +6,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import ForeignKey, fields as df
+from django.core.files import File
+from django.db.models import ForeignKey, fields as df, ImageField, FileField
 from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (InlineForeignKeyField,
@@ -199,6 +200,10 @@ class MassUpdateForm(GenericActionForm):
         super().full_clean()
         if not self.is_bound:  # Stop further processing.
             return
+        for field_name, value in list(self.cleaned_data.items()):
+            if isinstance(self.fields.get(field_name, ""), forms.FileField):
+                if self.cleaned_data['_async'] and self.cleaned_data.get(field_name, None):
+                    self.add_error(field_name, _("Cannot use Async with FileField"))
 
         if not self.cleaned_data.get("_validate"):
             if not self.update_using_queryset_allowed:
@@ -305,16 +310,21 @@ def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None)
             else:
                 for record in queryset:
                     for field_name, (func_name, value) in rules.items():
-                        func = OPERATIONS.get_function(func_name)
-                        if callable(func):
-                            old_value = getattr(record, field_name)
-                            setattr(record, field_name, func(old_value))
+                        field = queryset.model._meta.get_field(field_name)
+                        if isinstance(field, FileField):
+                            file_field = getattr(record, field_name)
+                            file_field.save(value.name, File(value.file))
                         else:
-                            changed_attr = getattr(record, field_name, None)
-                            if changed_attr.__class__.__name__ == "ManyRelatedManager":
-                                changed_attr.set(value)
+                            func = OPERATIONS.get_function(func_name)
+                            if callable(func):
+                                old_value = getattr(record, field_name)
+                                setattr(record, field_name, func(old_value))
                             else:
-                                setattr(record, field_name, value)
+                                changed_attr = getattr(record, field_name, None)
+                                if changed_attr.__class__.__name__ == "ManyRelatedManager":
+                                    changed_attr.set(value)
+                                else:
+                                    setattr(record, field_name, value)
 
                     if clean:
                         record.clean()

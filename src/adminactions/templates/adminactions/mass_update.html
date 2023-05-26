@@ -23,7 +23,7 @@
     {% endif %}
     {{ form.non_field_errors }}
     <div id='col1'>
-        <form action="" method="post" id="mass-update-form">
+        <form action="" method="post" id="mass-update-form" enctype="multipart/form-data">
             {% csrf_token %}
             <table class="mass-update">
                 {% for field in adminform.form.configured_fields %}
