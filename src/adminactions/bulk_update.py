@@ -39,12 +39,17 @@ class BulkUpdateForm(forms.Form):
     action = forms.CharField(
         label="", required=True, initial="", widget=forms.HiddenInput()
     )
-
-    _async = forms.BooleanField(
-        label="Async",
-        required=False,
-        help_text=_("use Celery to run update in background"),
+    _file = forms.FileField(
+        label="CSV File",
+        required=True,
+        help_text=_("CSV file"),
+        validators=[FileExtensionValidator(allowed_extensions=["csv", "txt"])],
     )
+    # _async = forms.BooleanField(
+    #     label="Async",
+    #     required=False,
+    #     help_text=_("use Celery to run update in background"),
+    # )
     _clean = forms.BooleanField(
         label="Clean()", required=False, help_text=_("if checked calls obj.clean()")
     )
@@ -55,20 +60,18 @@ class BulkUpdateForm(forms.Form):
         help_text=_("if checked use obj.save() instead of manager.bulk_update()"),
     )
 
-    _date_format = forms.CharField(
-        label="Date format", required=True, help_text=_("Date format")
-    )
-    _file = forms.FileField(
-        label="CSV File",
-        required=True,
-        help_text=_("CSV file"),
-        validators=[FileExtensionValidator(allowed_extensions=["csv", "txt"])],
-    )
+    # _date_format = forms.CharField(
+    #     label="Date format", required=True, help_text=_("Date format")
+    # )
+
 
     @property
     def media(self):
         """Return all media required to render the widgets on this form."""
-        media = Media(js=["adminactions/js/bulkupdate.js"])
+        media = Media(js=["adminactions/js/bulkupdate.js"],
+                      css={"all":
+                               ["adminactions/css/bulkupdate.css"]
+                           })
         for field in self.fields.values():
             media = media + field.widget.media
         return media
@@ -218,10 +221,10 @@ def bulk_update(modeladmin, request, queryset):  # noqa
             "map_form": map_form,
             "action_short_description": bulk_update.short_description,
             "title": "%s (%s)"
-            % (
-                bulk_update.short_description.capitalize(),
-                smart_str(modeladmin.opts.verbose_name_plural),
-            ),
+                     % (
+                         bulk_update.short_description.capitalize(),
+                         smart_str(modeladmin.opts.verbose_name_plural),
+                     ),
             "change": True,
             "is_popup": False,
             "save_as": False,

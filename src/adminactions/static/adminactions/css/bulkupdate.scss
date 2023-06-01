@@ -1,0 +1,37 @@
+
+table.bulk-update {
+    border: 1px solid #c9c9c9;
+
+    td {
+        border-left: 1px solid #c9c9c9;
+    }
+
+    select.func_select {
+        min-width: 100px;
+    }
+}
+table{
+    th.title{
+        background-color: var(--header-bg);
+    }
+}
+#col1 {
+    float: left;
+    //padding-right: 10px;
+    width: 70%;
+    table{
+        width: 90%;
+    }
+}
+
+#col2 {
+    float: right;
+    width: 30%;
+    table{
+        width: 90%;
+    }
+}
+
+#col2 select {
+    width: 100%;
+}
