@@ -136,7 +136,6 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         config.AA_MASSUPDATE_FORM = "adminactions.mass_update.MassUpdateForm"
         assert isinstance(res.context["adminform"].form, TestMassUpdateForm)
 
-
     def test_validate_on(self):
         self._run_action(**{"_validate": 1})
         assert DemoModel.objects.filter(char="CCCCC").exists()
