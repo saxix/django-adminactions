@@ -1,3 +1,10 @@
+Release <dev>
+=============
+* new `MassUpdateForm.sort_fields`. Make optional MassUpdateForm fields sorting
+* make possible globally customize MassUpdateForm
+* removes async feature from Bulk update
+
+
 Release 2.1
 ===========
 * new action "Bulk Update"

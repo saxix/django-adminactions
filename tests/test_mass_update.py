@@ -21,10 +21,14 @@ __all__ = [
 ]
 
 
-def test_operationmanager():
+def test_operationmanager_get():
     assert OPERATIONS[fields.IntegerField] == OPERATIONS[fields.BigIntegerField]
     assert OPERATIONS[fields.BooleanField] == OPERATIONS[fields.NullBooleanField]
 
+
+def test_operationmanager_get_for_field():
+    assert list(OPERATIONS[fields.CharField].keys()) == ['set', 'set null', 'upper', 'lower', 'capitalize', 'trim']
+    assert list(OPERATIONS.get_for_field(fields.CharField(null=True)).keys()) == ['set', 'set null', 'upper', 'lower', 'capitalize', 'trim']
 
 class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase):
     fixtures = ["adminactions", "demoproject"]

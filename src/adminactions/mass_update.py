@@ -22,6 +22,7 @@ from django.forms.models import (
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
+from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
@@ -166,19 +167,21 @@ class MassUpdateForm(GenericActionForm):
         required=False,
         help_text=_("if checked use obj.save() instead of manager.update()"),
     )
-
+    sort_fields = True
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._errors = None
         self.update_using_queryset_allowed = True
         if not celery_present:
             self.fields["_async"].widget = forms.HiddenInput()
-        self.fields = {
-            k: v
-            for k, v in sorted(
-                self.fields.items(), key=lambda item: item[1].label or ""
-            )
-        }
+
+        if self.sort_fields:
+            self.fields = {
+                k: v
+                for k, v in sorted(
+                    self.fields.items(), key=lambda item: item[1].label or ""
+                )
+            }
 
     def _get_validation_exclusions(self):
         exclude = list(super()._get_validation_exclusions())
@@ -433,7 +436,8 @@ def mass_update(modeladmin, request, queryset):  # noqa
             messages.error(request, str(e))
             return
 
-    mass_update_form = getattr(modeladmin, "mass_update_form", MassUpdateForm)
+    formClass = import_string(config.AA_MASSUPDATE_FORM)
+    mass_update_form = getattr(modeladmin, "mass_update_form", formClass)
     mass_update_fields = getattr(modeladmin, "mass_update_fields", None)
     mass_update_exclude = getattr(modeladmin, "mass_update_exclude", None)
     if mass_update_fields and mass_update_exclude:
