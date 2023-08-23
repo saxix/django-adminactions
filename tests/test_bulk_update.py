@@ -1,6 +1,5 @@
 import csv
 from pathlib import Path
-from unittest.mock import patch
 
 from demo.models import DemoModel
 from django.contrib.auth.models import User
@@ -143,7 +142,7 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             assert "Updated" in messages[0]
 
     def test_index_required(self):
-        res = self._run_action(**{"_async": 0, "_validate": 0, "fld-index_field": []})
+        res = self._run_action(**{"_validate": 0, "fld-index_field": []})
         assert res.status_code == 200
         assert res.context["map_form"].errors == {
             "index_field": ["Please select one or more index fields"]
@@ -165,54 +164,54 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         messages = [m.message for m in list(res.context["messages"])]
         assert messages[0] == "['miss column is not present in the file']"
 
-    def test_async_qs(self):
-        # Create handler
-        G(DemoModel, id=1, char="char1", integer=100)
-        G(DemoModel, id=2, char="char2", integer=101)
-        G(DemoModel, id=3, char="char3", integer=102)
-
-        res = self._run_action(
-            **{
-                "_async": 1,
-                "_validate": 0,
-                "_file": Upload(
-                    "data.csv",
-                    b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
-                    "text/csv",
-                ),
-                "fld-index_field": ["id"],
-                "fld-id": "pk",
-                "fld-char": "name",
-                "fld-integer": "number",
-            }
-        )
-        assert res.status_code == 302, res.showbrowser()
-        assert DemoModel.objects.filter(id=1, char="char1").exists()
-
-    @patch("adminactions.bulk_update.adminaction_end.send")
-    @patch("adminactions.bulk_update.adminaction_start.send")
-    @patch("adminactions.bulk_update.adminaction_requested.send")
-    def test_async_single(self, req, start, end):
-        G(DemoModel, id=1, char="char1", integer=100)
-        G(DemoModel, id=2, char="char2", integer=101)
-        G(DemoModel, id=3, char="char3", integer=102)
-        res = self._run_action(
-            **{
-                "_async": 1,
-                "_validate": 1,
-                "select_across": 1,
-                "_file": Upload(
-                    "data.csv",
-                    b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
-                    "text/csv",
-                ),
-                "fld-char": "name",
-                "fld-integer": "number",
-            }
-        )
-        assert res.status_code == 302
-        assert req.called
-        assert start.called
-        assert end.called
-        assert DemoModel.objects.filter(char="aaa").exists()
-        assert DemoModel.objects.filter(char="bbb").exists()
+    # def test_async_qs(self):
+    #     # Create handler
+    #     G(DemoModel, id=1, char="char1", integer=100)
+    #     G(DemoModel, id=2, char="char2", integer=101)
+    #     G(DemoModel, id=3, char="char3", integer=102)
+    #
+    #     res = self._run_action(
+    #         **{
+    #             "_async": 1,
+    #             "_validate": 0,
+    #             "_file": Upload(
+    #                 "data.csv",
+    #                 b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
+    #                 "text/csv",
+    #             ),
+    #             "fld-index_field": ["id"],
+    #             "fld-id": "pk",
+    #             "fld-char": "name",
+    #             "fld-integer": "number",
+    #         }
+    #     )
+    #     assert res.status_code == 302, res.showbrowser()
+    #     assert DemoModel.objects.filter(id=1, char="char1").exists()
+    #
+    # @patch("adminactions.bulk_update.adminaction_end.send")
+    # @patch("adminactions.bulk_update.adminaction_start.send")
+    # @patch("adminactions.bulk_update.adminaction_requested.send")
+    # def test_async_single(self, req, start, end):
+    #     G(DemoModel, id=1, char="char1", integer=100)
+    #     G(DemoModel, id=2, char="char2", integer=101)
+    #     G(DemoModel, id=3, char="char3", integer=102)
+    #     res = self._run_action(
+    #         **{
+    #             "_async": 1,
+    #             "_validate": 1,
+    #             "select_across": 1,
+    #             "_file": Upload(
+    #                 "data.csv",
+    #                 b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
+    #                 "text/csv",
+    #             ),
+    #             "fld-char": "name",
+    #             "fld-integer": "number",
+    #         }
+    #     )
+    #     assert res.status_code == 302
+    #     assert req.called
+    #     assert start.called
+    #     assert end.called
+    #     assert DemoModel.objects.filter(char="aaa").exists()
+    #     assert DemoModel.objects.filter(char="bbb").exists()

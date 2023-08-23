@@ -64,14 +64,13 @@ class BulkUpdateForm(forms.Form):
     #     label="Date format", required=True, help_text=_("Date format")
     # )
 
-
     @property
     def media(self):
         """Return all media required to render the widgets on this form."""
-        media = Media(js=["adminactions/js/bulkupdate.js"],
-                      css={"all":
-                               ["adminactions/css/bulkupdate.css"]
-                           })
+        media = Media(
+            js=["adminactions/js/bulkupdate.js"],
+            css={"all": ["adminactions/css/bulkupdate.css"]},
+        )
         for field in self.fields.values():
             media = media + field.widget.media
         return media
@@ -221,10 +220,10 @@ def bulk_update(modeladmin, request, queryset):  # noqa
             "map_form": map_form,
             "action_short_description": bulk_update.short_description,
             "title": "%s (%s)"
-                     % (
-                         bulk_update.short_description.capitalize(),
-                         smart_str(modeladmin.opts.verbose_name_plural),
-                     ),
+            % (
+                bulk_update.short_description.capitalize(),
+                smart_str(modeladmin.opts.verbose_name_plural),
+            ),
             "change": True,
             "is_popup": False,
             "save_as": False,
