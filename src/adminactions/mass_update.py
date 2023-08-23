@@ -437,8 +437,8 @@ def mass_update(modeladmin, request, queryset):  # noqa
             messages.error(request, str(e))
             return
 
-    formClass = import_string(config.AA_MASSUPDATE_FORM)
-    mass_update_form = getattr(modeladmin, "mass_update_form", formClass)
+    defaultFormClass = import_string(config.AA_MASSUPDATE_FORM)
+    mass_update_form = getattr(modeladmin, "mass_update_form", defaultFormClass)
     mass_update_fields = getattr(modeladmin, "mass_update_fields", None)
     mass_update_exclude = getattr(modeladmin, "mass_update_exclude", None)
     if mass_update_fields and mass_update_exclude:

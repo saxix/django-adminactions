@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from adminactions.helpers import AdminActionPermMixin
+from adminactions.mass_update import MassUpdateForm
 
 
 class SubclassedImageField(models.ImageField):
@@ -81,6 +82,14 @@ class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
 
 class DemoOneToOneAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):
     pass
+
+
+class TestMassUpdateForm(MassUpdateForm):
+    pass
+
+
+class DemoModelMassUpdateForm(MassUpdateForm):
+    sort_fields = False
 
 
 site.register(DemoModel, DemoModelAdmin)

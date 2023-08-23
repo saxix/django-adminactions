@@ -3,10 +3,19 @@ from pathlib import Path
 from unittest import skipIf
 from unittest.mock import patch
 
-from demo.models import DemoModel
+from django.conf import settings
+
+from adminactions import config
+from demo.models import (
+    DemoModel,
+    DemoModelAdmin,
+    DemoModelMassUpdateForm,
+    TestMassUpdateForm,
+)
 from django.contrib.auth.models import User
 from django.db.models import fields
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.urls import reverse
 from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
@@ -95,6 +104,39 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             assert "Sorry you do not have rights to execute this action" in str(
                 res.body
             )
+
+    def test_custom_modeladmin_form(self):
+        DemoModelAdmin.mass_update_form = DemoModelMassUpdateForm
+        with user_grant_permission(
+            self.user,
+            ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel"],
+        ):
+            res = self.app.get("/", user="user")
+            res = res.click("Demo models")
+            form = res.forms["changelist-form"]
+            form["action"] = "mass_update"
+            self._select_rows(form, [0, 1])
+            res = form.submit()
+
+            assert isinstance(res.context["adminform"].form, DemoModelMassUpdateForm)
+
+    def test_custom_form(self):
+        with override_settings(AA_MASSUPDATE_FORM="demo.models.TestMassUpdateForm"):
+            config.AA_MASSUPDATE_FORM = settings.AA_MASSUPDATE_FORM
+            with user_grant_permission(
+                self.user,
+                ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel"],
+            ):
+                res = self.app.get("/", user="user")
+                res = res.click("Demo models")
+                form = res.forms["changelist-form"]
+                form["action"] = "mass_update"
+                self._select_rows(form, [0, 1])
+                res = form.submit()
+
+        config.AA_MASSUPDATE_FORM = "adminactions.mass_update.MassUpdateForm"
+        assert isinstance(res.context["adminform"].form, TestMassUpdateForm)
+
 
     def test_validate_on(self):
         self._run_action(**{"_validate": 1})
