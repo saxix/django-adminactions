@@ -3,15 +3,13 @@ from pathlib import Path
 from unittest import skipIf
 from unittest.mock import patch
 
-from django.conf import settings
-
-from adminactions import config
 from demo.models import (
     DemoModel,
     DemoModelAdmin,
     DemoModelMassUpdateForm,
     TestMassUpdateForm,
 )
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import fields
 from django.test import TestCase
@@ -22,6 +20,7 @@ from django_webtest import WebTestMixin
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 from webtest import Upload
 
+from adminactions import config
 from adminactions.compat import celery_present
 from adminactions.mass_update import OPERATIONS
 
