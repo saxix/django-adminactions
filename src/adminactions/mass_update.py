@@ -168,6 +168,7 @@ class MassUpdateForm(GenericActionForm):
         help_text=_("if checked use obj.save() instead of manager.update()"),
     )
     sort_fields = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._errors = None

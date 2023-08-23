@@ -64,14 +64,12 @@ class BulkUpdateForm(forms.Form):
     #     label="Date format", required=True, help_text=_("Date format")
     # )
 
-
     @property
     def media(self):
         """Return all media required to render the widgets on this form."""
         media = Media(js=["adminactions/js/bulkupdate.js"],
-                      css={"all":
-                               ["adminactions/css/bulkupdate.css"]
-                           })
+                      css={"all": ["adminactions/css/bulkupdate.css"]}
+                      )
         for field in self.fields.values():
             media = media + field.widget.media
         return media
