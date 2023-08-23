@@ -27,8 +27,23 @@ def test_operationmanager_get():
 
 
 def test_operationmanager_get_for_field():
-    assert list(OPERATIONS[fields.CharField].keys()) == ['set', 'set null', 'upper', 'lower', 'capitalize', 'trim']
-    assert list(OPERATIONS.get_for_field(fields.CharField(null=True)).keys()) == ['set', 'set null', 'upper', 'lower', 'capitalize', 'trim']
+    assert list(OPERATIONS[fields.CharField].keys()) == [
+        "set",
+        "set null",
+        "upper",
+        "lower",
+        "capitalize",
+        "trim",
+    ]
+    assert list(OPERATIONS.get_for_field(fields.CharField(null=True)).keys()) == [
+        "set",
+        "set null",
+        "upper",
+        "lower",
+        "capitalize",
+        "trim",
+    ]
+
 
 class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase):
     fixtures = ["adminactions", "demoproject"]

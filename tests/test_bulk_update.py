@@ -1,6 +1,5 @@
 import csv
 from pathlib import Path
-from unittest.mock import patch
 
 from demo.models import DemoModel
 from django.contrib.auth.models import User
