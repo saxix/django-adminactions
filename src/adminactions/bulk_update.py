@@ -2,7 +2,9 @@ import csv
 import logging
 from pathlib import Path
 from typing import Dict, Optional, Sequence
-
+import tempfile
+import os
+from django.core.exceptions import ObjectDoesNotExist
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -39,17 +41,12 @@ class BulkUpdateForm(forms.Form):
     action = forms.CharField(
         label="", required=True, initial="", widget=forms.HiddenInput()
     )
-    _file = forms.FileField(
-        label="CSV File",
-        required=True,
-        help_text=_("CSV file"),
-        validators=[FileExtensionValidator(allowed_extensions=["csv", "txt"])],
+
+    _async = forms.BooleanField(
+        label="Async",
+        required=False,
+        help_text=_("use Celery to run update in background"),
     )
-    # _async = forms.BooleanField(
-    #     label="Async",
-    #     required=False,
-    #     help_text=_("use Celery to run update in background"),
-    # )
     _clean = forms.BooleanField(
         label="Clean()", required=False, help_text=_("if checked calls obj.clean()")
     )
@@ -60,17 +57,20 @@ class BulkUpdateForm(forms.Form):
         help_text=_("if checked use obj.save() instead of manager.bulk_update()"),
     )
 
-    # _date_format = forms.CharField(
-    #     label="Date format", required=True, help_text=_("Date format")
-    # )
+    _date_format = forms.CharField(
+        label="Date format", required=True, help_text=_("Date format")
+    )
+    _file = forms.FileField(
+        label="CSV File",
+        required=True,
+        help_text=_("CSV file"),
+        validators=[FileExtensionValidator(allowed_extensions=["csv", "txt"])],
+    )
 
     @property
     def media(self):
         """Return all media required to render the widgets on this form."""
-        media = Media(
-            js=["adminactions/js/bulkupdate.js"],
-            css={"all": ["adminactions/css/bulkupdate.css"]},
-        )
+        media = Media(js=["adminactions/js/bulkupdate.js"])
         for field in self.fields.values():
             media = media + field.widget.media
         return media
@@ -179,9 +179,12 @@ def bulk_update(modeladmin, request, queryset):  # noqa
                 # use_celery = form.cleaned_data.get("_async", False)
                 try:
                     f = form.cleaned_data.pop("_file")
+                    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+                    temp_file.write(f.read())
+                    temp_file.close()
                     res = _bulk_update(
                         queryset,
-                        f.file.name,
+                        temp_file.name,
                         mapping=map_form.get_mapping(),
                         header=header,
                         clean=clean,
@@ -203,6 +206,8 @@ def bulk_update(modeladmin, request, queryset):  # noqa
                     return HttpResponseRedirect(request.get_full_path())
                 else:
                     return HttpResponseRedirect(request.get_full_path())
+                finally:
+                    os.unlink(temp_file.name)
         else:
             form = bulk_update_form(initial=form_initial)
             csv_form = CSVConfigForm(initial=csv_initial, prefix="csv")
@@ -269,7 +274,9 @@ def _bulk_update(  # noqa: max-complexity: 18
     try:
         with Path(filename).open("r") as f:
             if header:
-                reader = csv.DictReader(f.readlines(), **(csv_options or {}))
+                reader = csv.DictReader(
+                    f.readlines(), skipinitialspace=True, **(csv_options or {})
+                )
                 for k, v in mapping.items():
                     if v not in reader.fieldnames:
                         raise ValidationError(
@@ -289,6 +296,18 @@ def _bulk_update(  # noqa: max-complexity: 18
                             for colname, value in row.items():
                                 field = reverse[colname]
                                 if field not in indexes:
+                                    model_field = queryset.model._meta.get_field(field)
+                                    if (
+                                        model_field.is_relation
+                                        and model_field.many_to_one
+                                    ):
+                                        related_model = model_field.related_model
+                                        try:
+                                            value = related_model.objects.get(pk=value)
+                                        except ObjectDoesNotExist:
+                                            raise ValidationError(
+                                                f"No {related_model._meta.verbose_name} found with id {value}"
+                                            )
                                     setattr(obj, field, value)
                         else:
                             for i, value in enumerate(row):
