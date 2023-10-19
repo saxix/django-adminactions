@@ -46,7 +46,7 @@ def base_export(
     export a queryset to csv file
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label, get_permission_codename(base_export.base_permission, opts)
     )
     if not request.user.has_perm(perm):
@@ -214,7 +214,7 @@ class FlatCollector:
 
     def collect(self, objs):
         self.data = objs
-        self.models = set([o.__class__ for o in self.data])
+        self.models = {o.__class__ for o in self.data}
 
 
 class ForeignKeysCollector:
@@ -244,7 +244,7 @@ class ForeignKeysCollector:
     def collect(self, objs):
         self._visited = []
         self.data = self._collect(objs)
-        self.models = set([o.__class__ for o in self.data])
+        self.models = {o.__class__ for o in self.data}
 
     def __str__(self):
         return mark_safe(self.data)
@@ -263,7 +263,7 @@ def _dump_qs(form, queryset, data, filename):
 
     response = HttpResponse(content_type="application/json")
     if not form.cleaned_data.get("on_screen", False):
-        filename = filename or "%s.%s" % (
+        filename = filename or "{}.{}".format(
             queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"),
             fmt,
         )
@@ -283,7 +283,7 @@ def export_as_fixture(modeladmin, request, queryset):
         "indent": 4,
     }
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label, get_permission_codename(export_as_fixture.base_permission, opts)
     )
     if not request.user.has_perm(perm):
@@ -391,7 +391,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
     That mean that dump what will be deleted if the queryset was deleted
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label,
         get_permission_codename(export_delete_tree.base_permission, opts),
     )
@@ -447,7 +447,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
                 c = Collector(using)
                 c.collect(queryset, collect_related=collect_related)
                 data = []
-                for model, instances in list(c.data.items()):
+                for _model, instances in list(c.data.items()):
                     data.extend(instances)
                 adminaction_end.send(
                     sender=modeladmin.model,

@@ -86,7 +86,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
             self._select_rows(form, selected_rows=self._selected_rows)
             res = self._get_action_form_response(change_list_response=res)
             byrows_update_get_fields(ModelAdmin(DemoModel, self.site))
-            for r, value in enumerate(self._selected_values):
+            for r, _value in enumerate(self._selected_values):
                 for fname in byrows_update_get_fields(ModelAdmin(DemoModel, self.site)):
                     fname = "form-%d-%s" % (r, fname)
 

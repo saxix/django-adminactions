@@ -1,4 +1,5 @@
-import mock
+from unittest import mock
+
 import pytest
 from django.contrib.auth.models import Group, User
 from django.db import IntegrityError

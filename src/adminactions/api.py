@@ -113,7 +113,7 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                             all_related[name].append((rel_fieldname, r))
 
         if commit:
-            for name, elements in list(all_related.items()):
+            for _name, elements in list(all_related.items()):
                 for rel_fieldname, element in elements:
                     setattr(element, rel_fieldname, master)
                     element.save()
@@ -265,8 +265,8 @@ xls_options_default = {
     "DecimalField": "#,##0.00",
     "BooleanField": "boolean",
     "NullBooleanField": "boolean",
-    "EmailField": lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
-    "URLField": lambda value: 'HYPERLINK("%s","%s")' % (value, value),
+    "EmailField": lambda value: 'HYPERLINK("mailto:{}","{}")'.format(value, value),
+    "URLField": lambda value: 'HYPERLINK("{}","{}")'.format(value, value),
     "CurrencyColumn": '"$"#,##0.00);[Red]("$"#,##0.00)',
 }
 
@@ -441,7 +441,7 @@ def export_as_xls3(  # noqa: max-complexity: 23
     def _get_qs_formats(queryset):
         formats = {"_general_": book.add_format()}
         if hasattr(queryset, "model"):
-            for i, fieldname in enumerate(fields):
+            for _i, fieldname in enumerate(fields):
                 try:
                     (
                         f,

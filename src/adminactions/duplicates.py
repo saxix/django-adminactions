@@ -68,7 +68,7 @@ def find_duplicates(qs, fields, min_dupe=1, max_dupe=None):
 
 def find_duplicates_action(modeladmin, request, queryset):
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label,
         get_permission_codename(find_duplicates_action.base_permission, opts),
     )

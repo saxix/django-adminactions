@@ -91,7 +91,9 @@ def getattr_or_item(obj, name):
             ret = obj[name]
         except (KeyError, TypeError):
             raise AttributeError(
-                "%s object has no attribute/item '%s'" % (obj.__class__.__name__, name)
+                "{} object has no attribute/item '{}'".format(
+                    obj.__class__.__name__, name
+                )
             )
     return ret
 

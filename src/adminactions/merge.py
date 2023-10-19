@@ -83,7 +83,7 @@ def merge(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label, get_permission_codename(merge.base_permission, opts)
     )
     if not request.user.has_perm(perm):

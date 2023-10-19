@@ -12,14 +12,13 @@
 import os
 import sys
 
-here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-up = lambda base, level: os.path.abspath(
-    os.path.join(base, *([os.pardir] * level)))
-sys.path.insert(0, up(here, 2))
-
 from django.conf import settings
 
 import adminactions as app
+
+here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+up = lambda base, level: os.path.abspath(os.path.join(base, *([os.pardir] * level)))
+sys.path.insert(0, up(here, 2))
 
 settings.configure(SITE_ID=1)
 
@@ -32,56 +31,56 @@ settings.configure(SITE_ID=1)
 # -- General configuration -----------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.0'
+needs_sphinx = "1.0"
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-sys.path.append(os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "_ext")))
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.todo',
-              'sphinx.ext.graphviz',
-              'sphinx.ext.intersphinx',
-              'sphinx.ext.doctest',
-              'sphinx.ext.extlinks',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.coverage',
-              'sphinx.ext.viewcode',
-              # 'djangodocs',
-              # 'version',
-              'github'
-              ]
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext")))
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.todo",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.viewcode",
+    # 'djangodocs',
+    # 'version',
+    "github",
+]
 
 
 # issuetracker = 'github'
 # issuetracker_project = 'saxix/django-adminactions'
 # issuetracker_plaintext_issues = True
-next_version = '1.5'
-github_project_url = 'https://github.com/saxix/django-adminactions/'
-github_project_url_basesource = 'https://github.com/saxix/django-adminactions/'
+next_version = "1.5"
+github_project_url = "https://github.com/saxix/django-adminactions/"
+github_project_url_basesource = "https://github.com/saxix/django-adminactions/"
 
 todo_include_todos = True
 intersphinx_mapping = {
-    'python': ('http://python.readthedocs.org/en/latest/', None),
-    'django': ('http://django.readthedocs.org/en/1.7.x/', None),
+    "python": ("http://python.readthedocs.org/en/latest/", None),
+    "django": ("http://django.readthedocs.org/en/1.7.x/", None),
 }
 intersphinx_cache_limit = 90  # days
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'Django Admin Actions'
-copyright = u'2012-2022, Stefano Apostolico'
+project = "Django Admin Actions"
+copyright = "2012-2022, Stefano Apostolico"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -104,7 +103,7 @@ release = app.VERSION
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ["_build"]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -121,7 +120,7 @@ exclude_patterns = ['_build']
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -131,10 +130,11 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-if os.environ.get('READTHEDOCS', None) == 'True':
+if os.environ.get("READTHEDOCS", None) == "True":
     html_theme = "default"
 else:
     import sphinx_rtd_theme
+
     html_theme = "sphinx_rtd_theme"
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 #
@@ -144,7 +144,7 @@ else:
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['.']
+html_theme_path = ["."]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -215,7 +215,7 @@ html_use_smartypants = True
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'djangoadminactionsdoc'
+htmlhelp_basename = "djangoadminactionsdoc"
 
 
 # -- Options for LaTeX output --------------------------------------------
@@ -229,8 +229,13 @@ htmlhelp_basename = 'djangoadminactionsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'DjangoAdminActions.tex', u"Django Admin Actions Documentation",
-     u'Stefano Apostolico', 'manual'),
+    (
+        "index",
+        "DjangoAdminActions.tex",
+        "Django Admin Actions Documentation",
+        "Stefano Apostolico",
+        "manual",
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -262,6 +267,11 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'djangoadminactions', u"Django Admin Actions Documentation",
-     [u'Stefano Apostolico'], 1)
+    (
+        "index",
+        "djangoadminactions",
+        "Django Admin Actions Documentation",
+        ["Stefano Apostolico"],
+        1,
+    )
 ]
