@@ -46,7 +46,7 @@ negate = lambda value: not value
 trim = lambda arg, value: value.strip(arg)
 
 change_domain = lambda arg, value: re.sub("@.*", arg, value)
-change_protocol = lambda arg, value: re.sub("^[a-z]*://", "%s://" % arg, value)
+change_protocol = lambda arg, value: re.sub("^[a-z]*://", f"{arg}://", value)
 
 disable_if_not_nullable = lambda field: field.null
 disable_if_unique = lambda field: not field.unique
@@ -187,7 +187,7 @@ class MassUpdateForm(GenericActionForm):
     def _get_validation_exclusions(self):
         exclude = list(super()._get_validation_exclusions())
         for name, _field in list(self.fields.items()):
-            function = self.data.get("func_id_%s" % name, False)
+            function = self.data.get(f"func_id_{name}", False)
             if function:
                 exclude.append(name)
         return exclude
@@ -248,11 +248,11 @@ class MassUpdateForm(GenericActionForm):
                 if isinstance(field, ff.FileField):
                     value = field.clean(raw_value, initial)
                 else:
-                    enabler = "chk_id_%s" % name
-                    function = self.data.get("func_id_%s" % name, "")
+                    enabler = f"chk_id_{name}"
+                    function = self.data.get(f"func_id_{name}", "")
                     apply = self.data.get(enabler, "") == "on"
                     self.cleaned_data[enabler] = apply
-                    self.cleaned_data["func_id_%s" % name] = function
+                    self.cleaned_data[f"func_id_{name}"] = function
                     # self.cleaned_data[name] = field.clean(raw_value)
                     if apply:
                         field_object, model, direct, m2m = get_field_by_name(
@@ -271,8 +271,8 @@ class MassUpdateForm(GenericActionForm):
                             else:
                                 value = func
                         self.cleaned_data[name] = value
-                if hasattr(self, "clean_%s" % name):
-                    value = getattr(self, "clean_%s" % name)()
+                if hasattr(self, f"clean_{name}"):
+                    value = getattr(self, f"clean_{name}")()
                 self.cleaned_data[name] = value
             except ValidationError as e:
                 self._errors[name] = self.error_class(e.messages)
@@ -293,8 +293,8 @@ class MassUpdateForm(GenericActionForm):
         extra = "" if settings.DEBUG else ".min"
         return super().media + forms.Media(
             js=(
-                "admin/js/vendor/jquery/jquery%s.js" % extra,
-                "adminactions/js/massupdate%s.js" % extra,
+                f"admin/js/vendor/jquery/jquery{extra}.js",
+                f"adminactions/js/massupdate{extra}.js",
             ),
             css={
                 "screen": ("adminactions/css/massupdate.css",),
@@ -389,7 +389,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
             if isinstance(f, ForeignKey):
                 # Filter by queryset so we only get results without our
                 # current resultset
-                filters = {"%s__in" % f.remote_field.name: queryset}
+                filters = {f"{f.remote_field.name}__in": queryset}
                 # Order by random to get a nice sample
                 query = (
                     f.related_model.objects.filter(**filters).distinct().order_by("?")
@@ -474,9 +474,9 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 clean = form.cleaned_data.get("_clean", False)
                 use_celery = form.cleaned_data.get("_async", False)
                 for field_name, value in list(form.cleaned_data.items()):
-                    enabler = "chk_id_%s" % field_name
+                    enabler = f"chk_id_{field_name}"
                     if form.data.get(enabler, False) == "on":
-                        op = form.data.get("func_id_%s" % field_name)
+                        op = form.data.get(f"func_id_{field_name}")
                         if callable(value):
                             value = None
                         rules[field_name] = (op, value)

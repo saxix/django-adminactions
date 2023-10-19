@@ -99,7 +99,7 @@ def base_export(
                 messages.error(request, str(e))
                 return
 
-            if hasattr(modeladmin, "get_%s_filename" % name):
+            if hasattr(modeladmin, f"get_{name}_filename"):
                 filename = modeladmin.get_export_as_csv_filename(request, queryset)
             else:
                 filename = None
@@ -113,7 +113,7 @@ def base_export(
                 )
             except Exception as e:
                 logger.exception(e)
-                messages.error(request, "Error: (%s)" % str(e))
+                messages.error(request, f"Error: ({str(e)})")
             else:
                 adminaction_end.send(
                     sender=modeladmin.model,
@@ -267,9 +267,9 @@ def _dump_qs(form, queryset, data, filename):
             queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"),
             fmt,
         )
-        response["Content-Disposition"] = (
-            'attachment;filename="%s"' % filename
-        ).encode("us-ascii", "replace")
+        response["Content-Disposition"] = (f'attachment;filename="{filename}"').encode(
+            "us-ascii", "replace"
+        )
     response.content = ret
     return response
 

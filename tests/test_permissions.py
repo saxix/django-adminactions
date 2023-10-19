@@ -31,7 +31,7 @@ def test_permission_needed(app, admin, demomodels, action):
         "merge": "adminactions_merge",
         "graph_queryset": "adminactions_chart",
     }
-    perm = "demo.{}_demomodel".format(permission_mapping[action])
+    perm = f"demo.{permission_mapping[action]}_demomodel"
     url = reverse("admin:demo_demomodel_changelist")
     pks = [demomodels[0].pk, demomodels[1].pk]
     with user_grant_permission(admin, ["demo.change_demomodel"]):

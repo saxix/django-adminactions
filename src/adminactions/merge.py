@@ -83,9 +83,7 @@ def merge(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{}.{}".format(
-        opts.app_label, get_permission_codename(merge.base_permission, opts)
-    )
+    perm = f"{opts.app_label}.{get_permission_codename(merge.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(
             request, _("Sorry you do not have rights to execute this action")

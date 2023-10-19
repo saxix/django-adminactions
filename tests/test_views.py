@@ -12,9 +12,9 @@ def test_format_date(app):
 
     url = reverse("adminactions.format_date")
     fmt = "d-m-Y"
-    res = app.get("{}?fmt={}".format(url, fmt))
+    res = app.get(f"{url}?fmt={fmt}")
     assert smart_str(res.body) == dateformat.format(d, fmt)
 
     fmt = "d mm Y"
-    res = app.get("{}?fmt={}".format(url, fmt))
+    res = app.get(f"{url}?fmt={fmt}")
     assert smart_str(res.body) == dateformat.format(d, fmt)

@@ -4,7 +4,7 @@ __all__ = ["create_extra_permissions", "get_permission_codename"]
 
 
 def get_permission_codename(action, opts):
-    return "{}_{}".format(action, opts.object_name.lower())
+    return f"{action}_{opts.object_name.lower()}"
 
 
 def get_contenttype_for_model(model):

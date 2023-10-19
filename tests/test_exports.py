@@ -440,9 +440,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
         # generate 3k users
         start = time.time()
         user_count = User.objects.count()
-        User.objects.bulk_create(
-            [User(username="bulk_user_%s" % i) for i in range(3000)]
-        )
+        User.objects.bulk_create([User(username=f"bulk_user_{i}") for i in range(3000)])
         # print('created 3k users in %.1f seconds' % (time.time() - start))
         self.assertEqual(User.objects.count(), 3000 + user_count)
 
@@ -473,5 +471,5 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
         self.assertLessEqual(
             res_time,
             6.5,
-            "Response should return under 6.5 " "seconds, was %.2f" % res_time,
+            f"Response should return under 6.5 seconds, was {res_time:.2f}",
         )

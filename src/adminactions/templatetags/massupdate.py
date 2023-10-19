@@ -30,7 +30,7 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
 <a href="#name1_fastfieldvalue" data-value="11" class="fastfieldvalue name1 value">value1.2</a>
     """
     ret = []
-    name = "{}_fastfieldvalue".format(field_name)
+    name = f"{field_name}_fastfieldvalue"
 
     for el in d.get(field_name, []):
         try:
@@ -55,14 +55,12 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
 @register.simple_tag(takes_context=True)
 def checkbox_enabler(context, field):
     form = context["adminform"].form
-    name = "chk_id_%s" % field.name
+    name = f"chk_id_{field.name}"
     checked = ""
     if form.is_bound:
         chk = form.cleaned_data.get(name, False)
         checked = {True: 'checked="checked"', False: ""}[chk]
-    return mark_safe(
-        '<input type="checkbox" name="{}" {} class="enabler">'.format(name, checked)
-    )
+    return mark_safe(f'<input type="checkbox" name="{name}" {checked} class="enabler">')
 
 
 @register.simple_tag(takes_context=True)
@@ -77,11 +75,11 @@ def field_function(context, model, form_field):
     form = context["adminform"].form
     value = ""
     if form.is_bound:
-        value = form.cleaned_data.get("func_id_%s" % form_field.name, "")
+        value = form.cleaned_data.get(f"func_id_{form_field.name}", "")
 
     for label, (__, param, _enabler, __) in list(
         OPERATIONS.get_for_field(model_field).items()
     ):
         options_attrs[label] = {"class": classes[param], "label": label}
         choices.append((label, label))
-    return widgets.Select(attrs, choices).render("func_id_%s" % form_field.name, value)
+    return widgets.Select(attrs, choices).render(f"func_id_{form_field.name}", value)

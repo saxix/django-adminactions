@@ -35,7 +35,7 @@ def browser(live_server, driver):
 
     def dump(self, filename=None):
         dest = filename or self._last_url.replace("/", "_").replace("#", "~")
-        self.get_screenshot_as_file("./{}.jpg".format(dest))
+        self.get_screenshot_as_file(f"./{dest}.jpg")
 
     b = driver
     b.live_server = live_server

@@ -91,9 +91,7 @@ def getattr_or_item(obj, name):
             ret = obj[name]
         except (KeyError, TypeError):
             raise AttributeError(
-                "{} object has no attribute/item '{}'".format(
-                    obj.__class__.__name__, name
-                )
+                f"{obj.__class__.__name__} object has no attribute/item '{name}'"
             )
     return ret
 
@@ -125,8 +123,8 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
             "Invalid value for parameter `field`: Should be a field name or a Field instance"
         )
 
-    if usedisplay and hasattr(obj, "get_%s_display" % fieldname):
-        value = getattr(obj, "get_%s_display" % fieldname)()
+    if usedisplay and hasattr(obj, f"get_{fieldname}_display"):
+        value = getattr(obj, f"get_{fieldname}_display")()
     else:
         value = getattr_or_item(obj, fieldname)
 

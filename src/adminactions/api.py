@@ -172,9 +172,9 @@ def export_as_csv(  # noqa: max-complexity: 20
             )
 
         response = response_class(content_type="text/csv")
-        response["Content-Disposition"] = (
-            'attachment;filename="%s"' % filename
-        ).encode("us-ascii", "replace")
+        response["Content-Disposition"] = (f'attachment;filename="{filename}"').encode(
+            "us-ascii", "replace"
+        )
     else:
         response = out
 
@@ -265,8 +265,8 @@ xls_options_default = {
     "DecimalField": "#,##0.00",
     "BooleanField": "boolean",
     "NullBooleanField": "boolean",
-    "EmailField": lambda value: 'HYPERLINK("mailto:{}","{}")'.format(value, value),
-    "URLField": lambda value: 'HYPERLINK("{}","{}")'.format(value, value),
+    "EmailField": lambda value: f'HYPERLINK("mailto:{value}","{value}")',
+    "URLField": lambda value: f'HYPERLINK("{value}","{value}")',
     "CurrencyColumn": '"$"#,##0.00);[Red]("$"#,##0.00)',
 }
 
@@ -316,9 +316,9 @@ def export_as_xls2(  # noqa: max-complexity: 24
             )
 
         response = HttpResponse(content_type="application/vnd.ms-excel")
-        response["Content-Disposition"] = (
-            'attachment;filename="%s"' % filename
-        ).encode("us-ascii", "replace")
+        response["Content-Disposition"] = (f'attachment;filename="{filename}"').encode(
+            "us-ascii", "replace"
+        )
     else:
         response = out
 
@@ -535,7 +535,7 @@ def export_as_xls3(  # noqa: max-complexity: 23
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         # content_type='application/vnd.ms-excel')
-        response["Content-Disposition"] = 'attachment;filename="%s"' % filename
+        response["Content-Disposition"] = f'attachment;filename="{filename}"'
         return response
     return out
 

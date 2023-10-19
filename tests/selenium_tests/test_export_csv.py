@@ -50,7 +50,7 @@ def _test(browser, target, format, sample_num, expected_value):
     sleep(1)
     sample = browser.find_elements_by_css_selector("span.sample")[sample_num]
     # expected_value = dateformat.format(datetime.datetime.now(), format)
-    assert sample.text == expected_value, "Failed Ajax call on %s" % target
+    assert sample.text == expected_value, f"Failed Ajax call on {target}"
 
 
 # @pytest.mark.skipif('django.VERSION[:2]==(1,8)')

@@ -28,7 +28,7 @@ def graph_form_factory(model):
     ]
     graphs = [("PieChart", "PieChart"), ("BarChart", "BarChart")]
     model_fields.insert(0, ("", "N/A"))
-    class_name = "{}{}GraphForm".format(app_name, model_name)
+    class_name = f"{app_name}{model_name}GraphForm"
     attrs = {
         "initial": {"app": app_name, "model": model_name},
         "_selected_action": CharField(widget=MultipleHiddenInput),
@@ -100,7 +100,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                         data_labels.append(str(field.rel.to.objects.get(pk=value)))
                 elif isinstance(field, BooleanField):
                     data_labels = [str(label) for label, v in cc]
-                elif hasattr(modeladmin.model, "get_%s_display" % field.name):
+                elif hasattr(modeladmin.model, f"get_{field.name}_display"):
                     data_labels = []
                     for value, _cnt in cc:
                         data_labels.append(
@@ -142,7 +142,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                              legend: {show: true, location: 'e'}}"""
 
             except Exception as e:
-                messages.error(request, "Unable to produce valid data: %s" % str(e))
+                messages.error(request, f"Unable to produce valid data: {str(e)}")
             else:
                 adminaction_end.send(
                     sender=modeladmin.model,

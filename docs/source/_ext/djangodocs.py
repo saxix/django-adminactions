@@ -135,7 +135,7 @@ class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
         title = "{}{}".format(
             self.version_text[node["type"]] % node["version"], len(node) and ":" or "."
         )
-        self.body.append('<span class="title">%s</span> ' % title)
+        self.body.append(f'<span class="title">{title}</span> ')
 
     def depart_versionmodified(self, node):
         self.body.append("</div>\n")
@@ -152,7 +152,7 @@ class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
 def parse_django_admin_node(env, sig, signode):
     command = sig.split(" ")[0]
     env._django_curr_admin_command = command
-    title = "django-admin.py %s" % sig
+    title = f"django-admin.py {sig}"
     signode += addnodes.desc_name(title, title)
     return sig
 

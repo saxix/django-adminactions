@@ -21,12 +21,12 @@ class TestExportQuerySetAsCsv(TestCase):
         if django.VERSION[0] == 2:
             self.assertEqual(
                 ret.content.decode("utf8"),
-                '"%s";"Can add user";"user";"add_user"\r\n' % qs[0].pk,
+                f'"{qs[0].pk}";"Can add user";"user";"add_user"\r\n',
             )
         elif django.VERSION[0] == 3:
             self.assertEqual(
                 ret.content.decode("utf8"),
-                '"%s";"Can add user";"auth | user";"add_user"\r\n' % qs[0].pk,
+                f'"{qs[0].pk}";"Can add user";"auth | user";"add_user"\r\n',
             )
 
     def test_header_is_true(self):
