@@ -186,7 +186,7 @@ class MassUpdateForm(GenericActionForm):
 
     def _get_validation_exclusions(self):
         exclude = list(super()._get_validation_exclusions())
-        for name, field in list(self.fields.items()):
+        for name, _field in list(self.fields.items()):
             function = self.data.get("func_id_%s" % name, False)
             if function:
                 exclude.append(name)
@@ -213,7 +213,7 @@ class MassUpdateForm(GenericActionForm):
         super().full_clean()
         if not self.is_bound:  # Stop further processing.
             return
-        for field_name, value in list(self.cleaned_data.items()):
+        for field_name, _value in list(self.cleaned_data.items()):
             if isinstance(self.fields.get(field_name, ""), forms.FileField):
                 if self.cleaned_data["_async"] and self.cleaned_data.get(
                     field_name, None
@@ -224,7 +224,7 @@ class MassUpdateForm(GenericActionForm):
             if not self.update_using_queryset_allowed:
                 self.add_error(None, "Cannot use operators without 'validate'")
             else:
-                for field_name, value in list(self.cleaned_data.items()):
+                for field_name, _value in list(self.cleaned_data.items()):
                     if isinstance(
                         self.fields.get(field_name, ""), ModelMultipleChoiceField
                     ):
@@ -384,7 +384,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
         return modeladmin.formfield_for_dbfield(field, **kwargs)
 
     def _get_sample():
-        grouped = defaultdict(lambda: [])
+        grouped = defaultdict(list)
         for f in mass_update_hints:
             if isinstance(f, ForeignKey):
                 # Filter by queryset so we only get results without our
@@ -398,9 +398,9 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 # many thousands of items and kill the database.
                 grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
             elif hasattr(f, "flatchoices") and f.flatchoices:
-                grouped[f.name] = dict(getattr(f, "flatchoices")).keys()
+                grouped[f.name] = dict(f.flatchoices).keys()
             elif hasattr(f, "choices") and f.choices:
-                grouped[f.name] = dict(getattr(f, "choices")).keys()
+                grouped[f.name] = dict(f.choices).keys()
             elif isinstance(f, df.BooleanField):
                 grouped[f.name] = [("True", True), ("False", False)]
         already_grouped = set(grouped)
@@ -416,7 +416,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
         return grouped
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label, get_permission_codename(mass_update.base_permission, opts)
     )
     if not request.user.has_perm(perm):

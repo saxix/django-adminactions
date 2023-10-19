@@ -1,14 +1,14 @@
 import csv
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Dict, Optional, Sequence
-import tempfile
-import os
-from django.core.exceptions import ObjectDoesNotExist
+
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db.transaction import atomic
 from django.forms import Media
@@ -121,7 +121,7 @@ class BulkUpdateMappingForm(forms.Form):
 def bulk_update(modeladmin, request, queryset):  # noqa
     try:
         opts = modeladmin.model._meta
-        perm = "{0}.{1}".format(
+        perm = "{}.{}".format(
             opts.app_label, get_permission_codename(bulk_update.base_permission, opts)
         )
         bulk_update_form = getattr(modeladmin, "bulk_update_form", BulkUpdateForm)
@@ -277,7 +277,7 @@ def _bulk_update(  # noqa: max-complexity: 18
                 reader = csv.DictReader(
                     f.readlines(), skipinitialspace=True, **(csv_options or {})
                 )
-                for k, v in mapping.items():
+                for _k, v in mapping.items():
                     if v not in reader.fieldnames:
                         raise ValidationError(
                             _("%s column is not present in the file") % v

@@ -69,7 +69,7 @@ def pytest_configure(config):
         and config.option.keyword.find("selenium") < 0
     ):
         if not config.option.selenium_enable:
-            setattr(config.option, "markexpr", "not selenium")
+            config.option.markexpr = "not selenium"
     os.environ["CELERY_ALWAYS_EAGER"] = "1"
 
     if config.option.log_level:

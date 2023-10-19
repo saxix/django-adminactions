@@ -71,7 +71,7 @@ class AdminActionPermMixin:
 
         for action in actions:
             if action[0] in aa:
-                perm = "{0}.{1}".format(
+                perm = "{}.{}".format(
                     opts.app_label,
                     get_permission_codename(action[0].base_permission, opts),
                 )

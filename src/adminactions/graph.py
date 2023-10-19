@@ -28,7 +28,7 @@ def graph_form_factory(model):
     ]
     graphs = [("PieChart", "PieChart"), ("BarChart", "BarChart")]
     model_fields.insert(0, ("", "N/A"))
-    class_name = "%s%sGraphForm" % (app_name, model_name)
+    class_name = "{}{}GraphForm".format(app_name, model_name)
     attrs = {
         "initial": {"app": app_name, "model": model_name},
         "_selected_action": CharField(widget=MultipleHiddenInput),
@@ -46,7 +46,7 @@ def graph_form_factory(model):
 
 def graph_queryset(modeladmin, request, queryset):  # noqa
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label.lower(),
         get_permission_codename(graph_queryset.base_permission, opts),
     )
@@ -96,13 +96,13 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                 cc = queryset.values_list(x).annotate(Count(x)).order_by()
                 if isinstance(field, ForeignKey):
                     data_labels = []
-                    for value, cnt in cc:
+                    for value, _cnt in cc:
                         data_labels.append(str(field.rel.to.objects.get(pk=value)))
                 elif isinstance(field, BooleanField):
                     data_labels = [str(label) for label, v in cc]
                 elif hasattr(modeladmin.model, "get_%s_display" % field.name):
                     data_labels = []
-                    for value, cnt in cc:
+                    for value, _cnt in cc:
                         data_labels.append(
                             smart_str(
                                 dict(field.flatchoices).get(value, value),
@@ -115,18 +115,18 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
 
                 if graph_type == "BarChart":
                     table = [data]
-                    extra = """{seriesDefaults:{renderer:$.jqplot.BarRenderer,
-                                                rendererOptions: {fillToZero: true,
-                                                                  barDirection: 'horizontal'},
+                    extra = """{{seriesDefaults:{{renderer:$.jqplot.BarRenderer,
+                                                rendererOptions: {{fillToZero: true,
+                                                                  barDirection: 'horizontal'}},
                                                 shadowAngle: -135,
-                                               },
-                                series:[%s],
-                                axes: {yaxis: {renderer: $.jqplot.CategoryAxisRenderer,
-                                                ticks: %s},
-                                       xaxis: {pad: 1.05,
-                                               tickOptions: {formatString: '%%d'}}
-                                      }
-                                }""" % (
+                                               }},
+                                series:[{}],
+                                axes: {{yaxis: {{renderer: $.jqplot.CategoryAxisRenderer,
+                                                ticks: {}}},
+                                       xaxis: {{pad: 1.05,
+                                               tickOptions: {{formatString: '%d'}}}}
+                                      }}
+                                }}""".format(
                         json.dumps(data_labels),
                         json.dumps(data_labels),
                     )

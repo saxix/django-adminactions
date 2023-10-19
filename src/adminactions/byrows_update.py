@@ -21,7 +21,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
+    perm = "{}.{}".format(
         opts.app_label.lower(),
         get_permission_codename(byrows_update.base_permission, opts),
     )

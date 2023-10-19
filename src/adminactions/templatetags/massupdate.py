@@ -30,7 +30,7 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
 <a href="#name1_fastfieldvalue" data-value="11" class="fastfieldvalue name1 value">value1.2</a>
     """
     ret = []
-    name = "{0}_fastfieldvalue".format(field_name)
+    name = "{}_fastfieldvalue".format(field_name)
 
     for el in d.get(field_name, []):
         try:
@@ -61,7 +61,7 @@ def checkbox_enabler(context, field):
         chk = form.cleaned_data.get(name, False)
         checked = {True: 'checked="checked"', False: ""}[chk]
     return mark_safe(
-        '<input type="checkbox" name="%s" %s class="enabler">' % (name, checked)
+        '<input type="checkbox" name="{}" {} class="enabler">'.format(name, checked)
     )
 
 
@@ -79,7 +79,7 @@ def field_function(context, model, form_field):
     if form.is_bound:
         value = form.cleaned_data.get("func_id_%s" % form_field.name, "")
 
-    for label, (__, param, enabler, __) in list(
+    for label, (__, param, _enabler, __) in list(
         OPERATIONS.get_for_field(model_field).items()
     ):
         options_attrs[label] = {"class": classes[param], "label": label}

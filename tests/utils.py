@@ -67,7 +67,7 @@ def get_group(name=None, permissions=None):
         try:
             app_label, codename = permission_name.split(".")
         except ValueError:
-            raise ValueError("Invalid permission name `{0}`".format(permission_name))
+            raise ValueError("Invalid permission name `{}`".format(permission_name))
         __, model_name = codename.rsplit("_", 1)
         ct = ContentType.objects.get(
             app_label__iexact=app_label, model__iexact=model_name

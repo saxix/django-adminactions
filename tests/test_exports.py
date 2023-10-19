@@ -2,8 +2,8 @@ import csv
 import io
 import time
 import unittest
+from unittest import mock
 
-import mock
 import xlrd
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
