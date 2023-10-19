@@ -1,12 +1,14 @@
 import csv
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Dict, Optional, Sequence
 
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db.transaction import atomic
 from django.forms import Media
@@ -119,7 +121,7 @@ class BulkUpdateMappingForm(forms.Form):
 def bulk_update(modeladmin, request, queryset):  # noqa
     try:
         opts = modeladmin.model._meta
-        perm = "{0}.{1}".format(
+        perm = "{}.{}".format(
             opts.app_label, get_permission_codename(bulk_update.base_permission, opts)
         )
         bulk_update_form = getattr(modeladmin, "bulk_update_form", BulkUpdateForm)
@@ -177,9 +179,12 @@ def bulk_update(modeladmin, request, queryset):  # noqa
                 # use_celery = form.cleaned_data.get("_async", False)
                 try:
                     f = form.cleaned_data.pop("_file")
+                    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+                    temp_file.write(f.read())
+                    temp_file.close()
                     res = _bulk_update(
                         queryset,
-                        f.file.name,
+                        temp_file.name,
                         mapping=map_form.get_mapping(),
                         header=header,
                         clean=clean,
@@ -201,6 +206,8 @@ def bulk_update(modeladmin, request, queryset):  # noqa
                     return HttpResponseRedirect(request.get_full_path())
                 else:
                     return HttpResponseRedirect(request.get_full_path())
+                finally:
+                    os.unlink(temp_file.name)
         else:
             form = bulk_update_form(initial=form_initial)
             csv_form = CSVConfigForm(initial=csv_initial, prefix="csv")
@@ -267,8 +274,10 @@ def _bulk_update(  # noqa: max-complexity: 18
     try:
         with Path(filename).open("r") as f:
             if header:
-                reader = csv.DictReader(f.readlines(), **(csv_options or {}))
-                for k, v in mapping.items():
+                reader = csv.DictReader(
+                    f.readlines(), skipinitialspace=True, **(csv_options or {})
+                )
+                for _k, v in mapping.items():
                     if v not in reader.fieldnames:
                         raise ValidationError(
                             _("%s column is not present in the file") % v
@@ -293,6 +302,25 @@ def _bulk_update(  # noqa: max-complexity: 18
                                 if i in reverse.keys():
                                     field = reverse[i]
                                     if field not in indexes:
+                                        model_field = queryset.model._meta.get_field(
+                                            field
+                                        )
+                                        if (
+                                            model_field.is_relation
+                                            and model_field.many_to_one
+                                        ):
+                                            related_model = model_field.related_model
+                                            try:
+                                                value = related_model.objects.get(
+                                                    pk=value
+                                                )
+                                            except ObjectDoesNotExist:
+                                                raise ValidationError(
+                                                    "No {} found with id {}".format(
+                                                        related_model._meta.verbose_name,
+                                                        value,
+                                                    )
+                                                )
                                         setattr(obj, field, value)
                         if clean:
                             obj.clean()
