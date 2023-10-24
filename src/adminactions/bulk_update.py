@@ -56,8 +56,11 @@ class BulkUpdateForm(forms.Form):
         required=False,
         help_text=_("if checked use obj.save() instead of manager.bulk_update()"),
     )
-    _dry_run = forms.BooleanField(label="DryRun", required=False,
-                                  help_text="Do not perform updates, just display results")
+    _dry_run = forms.BooleanField(
+        label="DryRun",
+        required=False,
+        help_text="Do not perform updates, just display results",
+    )
 
     @property
     def media(self):
@@ -182,7 +185,7 @@ def bulk_update(modeladmin, request, queryset):  # noqa
                         clean=clean,
                         indexes=map_form.cleaned_data["index_field"],
                         csv_options=csv_options,
-                        dry_run=dry_run
+                        dry_run=dry_run,
                     )
                     c = len(res["updated"])
                     messages.info(request, _("Updated %s records") % c)
@@ -198,12 +201,19 @@ def bulk_update(modeladmin, request, queryset):  # noqa
                     messages.error(request, f"{e.__class__.__name__}: {e}")
                     return HttpResponseRedirect(request.get_full_path())
                 else:
-                    return render(request, "adminactions/bulk_update_results.html",
-                                  context={"results": res,
-                                           "dry_run": dry_run,
-                                           "media": Media(css={"all": ["adminactions/css/bulkupdate.css"]}),
-                                           "action_short_description": bulk_update.short_description,
-                                           "opts": queryset.model._meta})
+                    return render(
+                        request,
+                        "adminactions/bulk_update_results.html",
+                        context={
+                            "results": res,
+                            "dry_run": dry_run,
+                            "media": Media(
+                                css={"all": ["adminactions/css/bulkupdate.css"]}
+                            ),
+                            "action_short_description": bulk_update.short_description,
+                            "opts": queryset.model._meta,
+                        },
+                    )
         else:
             form = bulk_update_form(initial=form_initial)
             csv_form = CSVConfigForm(initial=csv_initial, prefix="csv")
@@ -221,10 +231,10 @@ def bulk_update(modeladmin, request, queryset):  # noqa
             "map_form": map_form,
             "action_short_description": bulk_update.short_description,
             "title": "%s (%s)"
-                     % (
-                         bulk_update.short_description.capitalize(),
-                         smart_str(modeladmin.opts.verbose_name_plural),
-                     ),
+            % (
+                bulk_update.short_description.capitalize(),
+                smart_str(modeladmin.opts.verbose_name_plural),
+            ),
             "change": True,
             "is_popup": False,
             "save_as": False,
@@ -257,14 +267,14 @@ def _bulk_update(  # noqa: max-complexity: 18
     header: bool = True,
     csv_options: Optional[Dict] = None,
     request=None,
-    dry_run: bool = False
+    dry_run: bool = False,
 ):
     results = {
         "updated": [],
         "errors": [],
         "missing": [],
         "duplicates": [],
-        "changes": {}
+        "changes": {},
     }
     adminaction_start.send(
         sender=queryset.model, action="bulk_update", request=request, queryset=queryset
@@ -276,14 +286,14 @@ def _bulk_update(  # noqa: max-complexity: 18
             f = Path(file_name_or_object).open("rb")
 
         if header:
-            reader = csv.DictReader(codecs.iterdecode(f, 'utf-8'), **(csv_options or {}))
+            reader = csv.DictReader(
+                codecs.iterdecode(f, "utf-8"), **(csv_options or {})
+            )
             for k, v in mapping.items():
                 if v not in reader.fieldnames:
-                    raise ValidationError(
-                        _("%s column is not present in the file") % v
-                    )
+                    raise ValidationError(_("%s column is not present in the file") % v)
         else:
-            reader = csv.reader(codecs.iterdecode(f, 'utf-8'), **(csv_options or {}))
+            reader = csv.reader(codecs.iterdecode(f, "utf-8"), **(csv_options or {}))
             mapping = {k: int(v) - 1 for k, v in mapping.items()}
 
         reverse = {v: k for k, v in mapping.items()}
