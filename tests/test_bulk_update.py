@@ -1,4 +1,6 @@
 import csv
+import pytest
+from django.conf import settings
 from pathlib import Path
 
 from demo.models import DemoModel
@@ -11,11 +13,13 @@ from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 from webtest import Upload
 
 __all__ = [
-    "BulkUpdateTest",
+    "BulkUpdateMemoryFileUploadHandlerTest",
+    "BulkUpdateTemporaryFileUploadHandlerTest",
 ]
 
 
-class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase):
+
+class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
     fixtures = ["adminactions", "demoproject"]
     urls = "demo.urls"
     csrf_checks = True
@@ -29,6 +33,9 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         super().setUp()
         self._url = reverse("admin:demo_demomodel_changelist")
         self.user = G(User, username="user", is_staff=True, is_active=True)
+        settings.FILE_UPLOAD_HANDLERS = [self.handler]
+        # settings.FILE_UPLOAD_HANDLERS = []
+
 
     def _run_action(self, steps=2, **kwargs):
         selected_rows = kwargs.pop("selected_rows", self._selected_rows)
@@ -61,6 +68,29 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
                     res.forms["bulk-update"][k] = v
                 res = res.forms["bulk-update"].submit("apply")
         return res
+
+    def test_simulate(self):
+        res = self._run_action(
+            **{
+                "_clean": 1,
+                "_validate": 1,
+                "select_across": 1,
+                "csv-header": False,
+                "_file": Upload(
+                    "data.csv",
+                    b"1,aaa,111\n2,bbb,222\n3,ccc,333",
+                    "text/csv",
+                ),
+                "_dry_run": True,
+                "fld-id": "1",
+                "fld-char": "2",
+                "fld-integer": "3",
+            }
+        )
+        # no changes saved on the DB
+        assert not DemoModel.objects.filter(char="aaa", integer=111).exists()
+        assert not DemoModel.objects.filter(char="bbb", integer=222).exists()
+        assert res.status_code == 200
 
     def test_no_permission(self):
         with user_grant_permission(self.user, ["demo.change_demomodel"]):
@@ -130,13 +160,12 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
                     "fld-integer": "number",
                 }
             )
-            res = res.follow()
             messages = [m.message for m in list(res.context["messages"])]
 
             self.assertTrue(messages)
             assert "Updated" in messages[0]
 
-            res = self._run_action(selected_rows=[1]).follow()
+            res = self._run_action(selected_rows=[1])
             messages = [m.message for m in list(res.context["messages"])]
             self.assertTrue(messages)
             assert "Updated" in messages[0]
@@ -164,54 +193,8 @@ class BulkUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         messages = [m.message for m in list(res.context["messages"])]
         assert messages[0] == "['miss column is not present in the file']"
 
-    # def test_async_qs(self):
-    #     # Create handler
-    #     G(DemoModel, id=1, char="char1", integer=100)
-    #     G(DemoModel, id=2, char="char2", integer=101)
-    #     G(DemoModel, id=3, char="char3", integer=102)
-    #
-    #     res = self._run_action(
-    #         **{
-    #             "_async": 1,
-    #             "_validate": 0,
-    #             "_file": Upload(
-    #                 "data.csv",
-    #                 b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
-    #                 "text/csv",
-    #             ),
-    #             "fld-index_field": ["id"],
-    #             "fld-id": "pk",
-    #             "fld-char": "name",
-    #             "fld-integer": "number",
-    #         }
-    #     )
-    #     assert res.status_code == 302, res.showbrowser()
-    #     assert DemoModel.objects.filter(id=1, char="char1").exists()
-    #
-    # @patch("adminactions.bulk_update.adminaction_end.send")
-    # @patch("adminactions.bulk_update.adminaction_start.send")
-    # @patch("adminactions.bulk_update.adminaction_requested.send")
-    # def test_async_single(self, req, start, end):
-    #     G(DemoModel, id=1, char="char1", integer=100)
-    #     G(DemoModel, id=2, char="char2", integer=101)
-    #     G(DemoModel, id=3, char="char3", integer=102)
-    #     res = self._run_action(
-    #         **{
-    #             "_async": 1,
-    #             "_validate": 1,
-    #             "select_across": 1,
-    #             "_file": Upload(
-    #                 "data.csv",
-    #                 b"pk,name,number\n1,aaa,111\n2,bbb,222\n3,ccc,333",
-    #                 "text/csv",
-    #             ),
-    #             "fld-char": "name",
-    #             "fld-integer": "number",
-    #         }
-    #     )
-    #     assert res.status_code == 302
-    #     assert req.called
-    #     assert start.called
-    #     assert end.called
-    #     assert DemoModel.objects.filter(char="aaa").exists()
-    #     assert DemoModel.objects.filter(char="bbb").exists()
+class BulkUpdateMemoryFileUploadHandlerTest(BulkUpdate, TestCase):
+    handler = "django.core.files.uploadhandler.MemoryFileUploadHandler"
+
+class BulkUpdateTemporaryFileUploadHandlerTest(BulkUpdate, TestCase):
+    handler = "django.core.files.uploadhandler.TemporaryFileUploadHandler"

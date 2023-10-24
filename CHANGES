@@ -3,6 +3,9 @@ Release <dev>
 * new `MassUpdateForm.sort_fields`. Make optional MassUpdateForm fields sorting
 * make possible globally customize MassUpdateForm
 * removes async feature from Bulk update
+* fixes support for 'MemoryFileUploadHandler' in bulk_update
+* add `dry_run` option to bulk_update
+* bulk_update now returns a page with pre/post action field values
 
 
 Release 2.1

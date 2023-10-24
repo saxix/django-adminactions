@@ -1,3 +1,7 @@
+import tempfile
+
+import shutil
+
 import logging
 import os
 
@@ -62,6 +66,7 @@ def pytest_configure(config):
     # import warnings
     # enable this to remove deprecations
     # warnings.simplefilter('once', DeprecationWarning)
+    from django.conf import settings
 
     if (
         config.option.markexpr.find("selenium") < 0
@@ -71,6 +76,10 @@ def pytest_configure(config):
         if not config.option.selenium_enable:
             setattr(config.option, "markexpr", "not selenium")
     os.environ["CELERY_ALWAYS_EAGER"] = "1"
+    os.environ["MEDIA_ROOT"] = "/tmp/media/"
+    settings.MEDIA_ROOT = tempfile.TemporaryDirectory().name
+    original_media = os.path.join(settings.DEMO_DIR, "media")
+    shutil.copytree(original_media, settings.MEDIA_ROOT)
 
     if config.option.log_level:
         import logging

@@ -1,0 +1,46 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify actions massupdate static %}
+{% block extrahead %}{{ block.super }}
+  <meta name="opts.label" content="{{ opts.label }}">
+  {{ media }}
+{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+  <div class="breadcrumbs">
+    <a href="../../">{% trans "Home" %}</a> &rsaquo;
+    <a href="../">{{ opts.app_label|capfirst|escape }}</a> &rsaquo;
+    <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+    {{ action_short_description|capfirst }} &rsaquo; Simulate
+  </div>
+{% endif %}{% endblock %}
+
+{% block content %}
+  {#  {'updated': [{'char': 'AAAA', 'id': '3'}], 'errors': [], 'missing': [], 'duplicates': [], 'changes': {<DemoModel: DemoModel object (3)>: <DemoModel: DemoModel object (3)>}}#}
+  {#  {{ results }}#}
+  <h1>Bulk Update results {% if dry_run %}(simulated) {% endif %}</h1>
+  <table class="bulk-update-results">
+    <thead>
+    <tr>
+      <th>Key</th>
+      <th>Changes
+      </th>
+    </tr>
+    </thead>
+    {% for key, changes in results.changes.items %}
+      <tr>
+        <td>{{ key }}</td>
+        <td>
+          <table>
+            {% for fld, values in changes.items %}
+              <tr>
+                <td>{{ fld }}</td>
+                <td>{{ values.0 }}</td>
+                <td>{{ values.1 }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

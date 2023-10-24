@@ -8,13 +8,13 @@ env = Env(
     CELERY_ALWAYS_EAGER=(bool, "true"), CELERY_BROKER_URL=(str, "redis://127.0.0.1")
 )
 
-here = os.path.dirname(__file__)
+DEMO_DIR = os.path.dirname(__file__)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 AUTHENTICATION_BACKENDS = ("demo.backends.AnyUserAuthBackend",)
 FILE_UPLOAD_HANDLERS = [
-    # "django.core.files.uploadhandler.MemoryFileUploadHandler",
+    "django.core.files.uploadhandler.MemoryFileUploadHandler",
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 ]
 
@@ -90,9 +90,9 @@ SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-MEDIA_ROOT = os.path.join(here, "media")
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT", os.path.join(DEMO_DIR, "media"))
 MEDIA_URL = ""
-STATIC_ROOT = os.path.join(here, "static")
+STATIC_ROOT = os.path.join(DEMO_DIR, "static")
 STATIC_URL = "/static/"
 SECRET_KEY = "c73*n!y=)tziu^2)y*@5i2^)$8z$tx#b9*_r3i6o1ohxo%*2^a"
 
