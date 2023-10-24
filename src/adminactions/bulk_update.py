@@ -1,11 +1,6 @@
 import codecs
-
-import io
-
 import csv
 import logging
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.files.utils import FileProxyMixin
 from pathlib import Path
 from typing import Dict, Optional, Sequence
 
@@ -13,10 +8,11 @@ from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator
+from django.core.files.utils import FileProxyMixin
+from django.core.validators import FileExtensionValidator
 from django.db.transaction import atomic
 from django.forms import Media
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe

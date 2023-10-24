@@ -1,9 +1,8 @@
 import csv
-import pytest
-from django.conf import settings
 from pathlib import Path
 
 from demo.models import DemoModel
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
@@ -16,7 +15,6 @@ __all__ = [
     "BulkUpdateMemoryFileUploadHandlerTest",
     "BulkUpdateTemporaryFileUploadHandlerTest",
 ]
-
 
 
 class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
@@ -35,7 +33,6 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
         self.user = G(User, username="user", is_staff=True, is_active=True)
         settings.FILE_UPLOAD_HANDLERS = [self.handler]
         # settings.FILE_UPLOAD_HANDLERS = []
-
 
     def _run_action(self, steps=2, **kwargs):
         selected_rows = kwargs.pop("selected_rows", self._selected_rows)
@@ -193,8 +190,10 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
         messages = [m.message for m in list(res.context["messages"])]
         assert messages[0] == "['miss column is not present in the file']"
 
+
 class BulkUpdateMemoryFileUploadHandlerTest(BulkUpdate, TestCase):
     handler = "django.core.files.uploadhandler.MemoryFileUploadHandler"
+
 
 class BulkUpdateTemporaryFileUploadHandlerTest(BulkUpdate, TestCase):
     handler = "django.core.files.uploadhandler.TemporaryFileUploadHandler"

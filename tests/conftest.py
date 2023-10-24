@@ -1,9 +1,7 @@
-import tempfile
-
-import shutil
-
 import logging
 import os
+import shutil
+import tempfile
 
 import django_webtest
 import pytest
