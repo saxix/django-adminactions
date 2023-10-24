@@ -15,9 +15,7 @@ class ImportFixtureForm(forms.Form):
     use_natural_primary_keys = forms.BooleanField(required=False)
 
     def clean(self):
-        if not (
-            self.cleaned_data["fixture_file"] or self.cleaned_data["fixture_content"]
-        ):
+        if not (self.cleaned_data["fixture_file"] or self.cleaned_data["fixture_content"]):
             raise ValidationError("You must provide file or content")
 
 
@@ -49,17 +47,13 @@ def import_fixture(modeladmin, request):
 
                 modeladmin.message_user(request, imported, messages.SUCCESS)
             except Exception as e:
-                modeladmin.message_user(
-                    request, f"{e.__class__.__name__}: {e}", messages.ERROR
-                )
+                modeladmin.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     else:
         form = ImportFixtureForm()
     context["form"] = form
     context["action"] = "Import fixture"
-    return TemplateResponse(
-        request, "adminactions/helpers/import_fixture.html", context
-    )
+    return TemplateResponse(request, "adminactions/helpers/import_fixture.html", context)
 
 
 class AdminActionPermMixin:

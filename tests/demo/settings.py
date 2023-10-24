@@ -4,9 +4,7 @@ from environ import Env
 
 from adminactions.consts import AA_PERMISSION_CREATE_USE_COMMAND
 
-env = Env(
-    CELERY_ALWAYS_EAGER=(bool, "true"), CELERY_BROKER_URL=(str, "redis://127.0.0.1")
-)
+env = Env(CELERY_ALWAYS_EAGER=(bool, "true"), CELERY_BROKER_URL=(str, "redis://127.0.0.1"))
 
 DEMO_DIR = os.path.dirname(__file__)
 

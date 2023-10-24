@@ -10,12 +10,7 @@ from django.test.utils import override_settings
 from django.utils.encoding import smart_str
 from django_dynamic_fixture import G
 from django_webtest import WebTest
-from utils import (
-    CheckSignalsMixin,
-    SelectRowsMixin,
-    admin_register,
-    user_grant_permission,
-)
+from utils import CheckSignalsMixin, SelectRowsMixin, admin_register, user_grant_permission
 
 __all__ = [
     "ExportAsCsvTest",
@@ -52,9 +47,7 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             assert b"Sorry you do not have rights to execute this action" in res.body
 
     def test_success(self):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             form = res.forms["changelist-form"]
@@ -68,9 +61,7 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             assert res.json[0]["pk"] == 1
 
     def test_add_foreign_keys(self):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             form = res.forms["changelist-form"]
@@ -85,9 +76,7 @@ class ExportAsFixtureTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTe
             assert res.json[0]["pk"] == 1
 
     def _run_action(self, steps=2):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             if steps >= 1:
@@ -116,9 +105,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
             assert b"Sorry you do not have rights to execute this action" in res.body
 
     def test_success(self):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             form = res.forms["changelist-form"]
@@ -130,9 +117,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
             assert res.json[0]["pk"] == 1
 
     def _run_action(self, steps=2):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             if steps >= 1:
@@ -149,9 +134,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
         if the ModelAdmin has `get_export_as_csv_filename()`
         use that method to get the attachment filename
         """
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             with admin_register(User) as md:
                 with mock.patch.object(
@@ -167,9 +150,7 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
                     form["select_across"] = 1
                     res = form.submit()
                     res = res.forms["export-form"].submit("apply")
-                    self.assertEqual(
-                        res.content_disposition, 'attachment;filename="new.test"'
-                    )
+                    self.assertEqual(res.content_disposition, 'attachment;filename="new.test"')
 
 
 class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
@@ -209,9 +190,7 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
         if the ModelAdmin has `get_export_as_csv_filename()` use that method to get the
         attachment filename
         """
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             with admin_register(User) as md:
                 with mock.patch.object(
@@ -227,14 +206,10 @@ class ExportAsCsvTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
                     form["select_across"] = 1
                     res = form.submit()
                     res = res.forms["export-form"].submit("apply")
-                    self.assertEqual(
-                        res.content_disposition, 'attachment;filename="new.test"'
-                    )
+                    self.assertEqual(res.content_disposition, 'attachment;filename="new.test"')
 
     def _run_action(self, steps=2):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             if steps >= 1:
@@ -261,9 +236,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
     _selected_rows = [0, 1]
 
     def _run_action(self, step=3):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             if step >= 1:
@@ -287,9 +260,7 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             assert b"Sorry you do not have rights to execute this action" in res.body
 
     def test_success(self):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             form = res.forms["changelist-form"]
@@ -440,16 +411,12 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
         # generate 3k users
         start = time.time()
         user_count = User.objects.count()
-        User.objects.bulk_create(
-            [User(username="bulk_user_%s" % i) for i in range(3000)]
-        )
+        User.objects.bulk_create([User(username="bulk_user_%s" % i) for i in range(3000)])
         # print('created 3k users in %.1f seconds' % (time.time() - start))
         self.assertEqual(User.objects.count(), 3000 + user_count)
 
         start = time.time()
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_export_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             form = res.forms["changelist-form"]

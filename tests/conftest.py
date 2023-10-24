@@ -148,7 +148,5 @@ def administrator():
     from django.contrib.auth.models import User
     from utils import ADMIN, PWD
 
-    superuser = User._default_manager.create_superuser(
-        username=ADMIN, password=PWD, email="sax@noreply.org"
-    )
+    superuser = User._default_manager.create_superuser(username=ADMIN, password=PWD, email="sax@noreply.org")
     return superuser

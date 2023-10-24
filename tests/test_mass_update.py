@@ -3,12 +3,7 @@ from pathlib import Path
 from unittest import skipIf
 from unittest.mock import patch
 
-from demo.models import (
-    DemoModel,
-    DemoModelAdmin,
-    DemoModelMassUpdateForm,
-    TestMassUpdateForm,
-)
+from demo.models import DemoModel, DemoModelAdmin, DemoModelMassUpdateForm, TestMassUpdateForm
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import fields
@@ -100,9 +95,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             form["action"] = "mass_update"
             form.set("_selected_action", True, 0)
             res = form.submit().follow()
-            assert "Sorry you do not have rights to execute this action" in str(
-                res.body
-            )
+            assert "Sorry you do not have rights to execute this action" in str(res.body)
 
     def test_custom_modeladmin_form(self):
         DemoModelAdmin.mass_update_form = DemoModelMassUpdateForm

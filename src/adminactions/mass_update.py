@@ -158,9 +158,7 @@ class MassUpdateForm(GenericActionForm):
         required=False,
         help_text=_("use Celery to run update in background"),
     )
-    _clean = forms.BooleanField(
-        label="Clean()", required=False, help_text=_("if checked calls obj.clean()")
-    )
+    _clean = forms.BooleanField(label="Clean()", required=False, help_text=_("if checked calls obj.clean()"))
 
     _validate = forms.BooleanField(
         label="Validate",
@@ -177,12 +175,7 @@ class MassUpdateForm(GenericActionForm):
             self.fields["_async"].widget = forms.HiddenInput()
 
         if self.sort_fields:
-            self.fields = {
-                k: v
-                for k, v in sorted(
-                    self.fields.items(), key=lambda item: item[1].label or ""
-                )
-            }
+            self.fields = {k: v for k, v in sorted(self.fields.items(), key=lambda item: item[1].label or "")}
 
     def _get_validation_exclusions(self):
         exclude = list(super()._get_validation_exclusions())
@@ -196,9 +189,7 @@ class MassUpdateForm(GenericActionForm):
         # must be overriden to bypass instance.clean()
         if self.cleaned_data.get("_clean", False):
             opts = self._meta
-            self.instance = construct_instance(
-                self, self.instance, opts.fields, opts.exclude
-            )
+            self.instance = construct_instance(self, self.instance, opts.fields, opts.exclude)
             exclude = self._get_validation_exclusions()
             for f_name, field in list(self.fields.items()):
                 if isinstance(field, InlineForeignKeyField):
@@ -215,9 +206,7 @@ class MassUpdateForm(GenericActionForm):
             return
         for field_name, value in list(self.cleaned_data.items()):
             if isinstance(self.fields.get(field_name, ""), forms.FileField):
-                if self.cleaned_data["_async"] and self.cleaned_data.get(
-                    field_name, None
-                ):
+                if self.cleaned_data["_async"] and self.cleaned_data.get(field_name, None):
                     self.add_error(field_name, _("Cannot use Async with FileField"))
 
         if not self.cleaned_data.get("_validate"):
@@ -225,23 +214,16 @@ class MassUpdateForm(GenericActionForm):
                 self.add_error(None, "Cannot use operators without 'validate'")
             else:
                 for field_name, value in list(self.cleaned_data.items()):
-                    if isinstance(
-                        self.fields.get(field_name, ""), ModelMultipleChoiceField
-                    ):
+                    if isinstance(self.fields.get(field_name, ""), ModelMultipleChoiceField):
                         self.add_error(
                             field_name,
-                            _(
-                                "Unable no mass update ManyToManyField"
-                                " without 'validate'"
-                            ),
+                            _("Unable no mass update ManyToManyField" " without 'validate'"),
                         )
 
     def _clean_fields(self):
         self.update_using_queryset_allowed = True
         for name, field in list(self.fields.items()):
-            raw_value = field.widget.value_from_datadict(
-                self.data, self.files, self.add_prefix(name)
-            )
+            raw_value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             try:
                 value = raw_value
                 initial = self.initial.get(name, field.initial)
@@ -255,14 +237,10 @@ class MassUpdateForm(GenericActionForm):
                     self.cleaned_data["func_id_%s" % name] = function
                     # self.cleaned_data[name] = field.clean(raw_value)
                     if apply:
-                        field_object, model, direct, m2m = get_field_by_name(
-                            self._meta.model, name
-                        )
+                        field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
                         value = field.clean(raw_value)
                         if function:
-                            func, hasparm, __, __ = OPERATIONS.get_for_field(
-                                field_object
-                            )[function]
+                            func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
                             self.update_using_queryset_allowed &= func is None
                             if func is None:
                                 pass
@@ -311,16 +289,11 @@ def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None)
     errors = {}
     updated = 0
     opts = queryset.model._meta
-    adminaction_start.send(
-        sender=queryset.model, action="mass_update", request=request, queryset=queryset
-    )
+    adminaction_start.send(sender=queryset.model, action="mass_update", request=request, queryset=queryset)
     try:
         with atomic():
             if not validate:
-                values = {
-                    field_name: value
-                    for field_name, (func_name, value) in rules.items()
-                }
+                values = {field_name: value for field_name, (func_name, value) in rules.items()}
                 queryset.update(**values)
             else:
                 for record in queryset:
@@ -336,10 +309,7 @@ def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None)
                                 setattr(record, field_name, func(old_value))
                             else:
                                 changed_attr = getattr(record, field_name, None)
-                                if (
-                                    changed_attr.__class__.__name__
-                                    == "ManyRelatedManager"
-                                ):
+                                if changed_attr.__class__.__name__ == "ManyRelatedManager":
                                     changed_attr.set(value)
                                 else:
                                     setattr(record, field_name, value)
@@ -391,9 +361,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 # current resultset
                 filters = {"%s__in" % f.remote_field.name: queryset}
                 # Order by random to get a nice sample
-                query = (
-                    f.related_model.objects.filter(**filters).distinct().order_by("?")
-                )
+                query = f.related_model.objects.filter(**filters).distinct().order_by("?")
                 # Limit the amount of results so we don't accidently query
                 # many thousands of items and kill the database.
                 grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
@@ -416,13 +384,9 @@ def mass_update(modeladmin, request, queryset):  # noqa
         return grouped
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label, get_permission_codename(mass_update.base_permission, opts)
-    )
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(mass_update.base_permission, opts))
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
     if "apply" not in request.POST:
         try:
@@ -442,9 +406,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
     mass_update_fields = getattr(modeladmin, "mass_update_fields", None)
     mass_update_exclude = getattr(modeladmin, "mass_update_exclude", None)
     if mass_update_fields and mass_update_exclude:
-        raise Exception(
-            "Cannot set both 'mass_update_exclude' and 'mass_update_fields'"
-        )
+        raise Exception("Cannot set both 'mass_update_exclude' and 'mass_update_fields'")
 
     if mass_update_exclude is None:
         mass_update_exclude = ["pk"]
@@ -529,9 +491,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
         sample_values = _get_sample()
     else:
         sample_values = None
-    adminForm = helpers.AdminForm(
-        form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin
-    )
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     # dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else str(obj)
     tpl = "adminactions/mass_update.html"

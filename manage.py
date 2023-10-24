@@ -6,8 +6,8 @@ here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rel = lambda *args: os.path.join(here, *args)
 
 sys.path.insert(0, rel(os.pardir))
-sys.path.insert(0, rel('src'))
-sys.path.insert(0, rel('tests'))
+sys.path.insert(0, rel("src"))
+sys.path.insert(0, rel("tests"))
 
 
 if __name__ == "__main__":

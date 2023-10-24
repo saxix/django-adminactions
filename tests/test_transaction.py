@@ -25,9 +25,7 @@ def test_nocommit():
 def test_transaction_merge(users):
     master, other = users
     with atomic():
-        with mock.patch(
-            "django.contrib.auth.models.User.delete", side_effect=IntegrityError
-        ):
+        with mock.patch("django.contrib.auth.models.User.delete", side_effect=IntegrityError):
             with pytest.raises(IntegrityError):
                 merge(master, other, commit=True)
 

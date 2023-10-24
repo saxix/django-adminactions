@@ -43,9 +43,7 @@ class TestExportQuerySetAsCsv(TestCase):
         header = ["Name", "Application"]
         mem = io.StringIO()
         with self.assertNumQueries(1):
-            qs = Permission.objects.filter(codename="add_user").values(
-                "codename", "content_type__app_label"
-            )
+            qs = Permission.objects.filter(codename="add_user").values("codename", "content_type__app_label")
             export_as_csv(queryset=qs, fields=fields, header=header, out=mem)
         mem.seek(0)
         csv_dump = mem.read()
@@ -82,9 +80,7 @@ class TestExportAsCsv(unittest.TestCase):
         export_as_csv(queryset=rows, fields=fields, header=header, out=mem)
         mem.seek(0)
         csv_dump = mem.read()
-        self.assertEqual(
-            csv_dump, '"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n'
-        )
+        self.assertEqual(csv_dump, '"Field 1";"Field 2"\r\n"1";"4"\r\n"2";"5"\r\n"3";"ӼӳӬԖԊ"\r\n')
 
     def test_dialect(self):
         fields = ["field1", "field2"]
@@ -119,9 +115,7 @@ class TestExportAsExcel(TestCase):
         mem.seek(0)
         xls_workbook = xlrd.open_workbook(file_contents=mem.read())
         xls_sheet = xls_workbook.sheet_by_index(0)
-        self.assertEqual(
-            xls_sheet.row_values(0)[:], ["#", "ID", "name", "content type", "codename"]
-        )
+        self.assertEqual(xls_sheet.row_values(0)[:], ["#", "ID", "name", "content type", "codename"])
 
     def test_export_as_xls(self):
         fields = ["field1", "field2"]
@@ -144,9 +138,7 @@ class TestExportQuerySetAsExcel(TestCase):
     def test_queryset_values(self):
         fields = ["codename", "content_type__app_label"]
         header = ["Name", "Application"]
-        qs = Permission.objects.filter(codename="add_user").values(
-            "codename", "content_type__app_label"
-        )
+        qs = Permission.objects.filter(codename="add_user").values("codename", "content_type__app_label")
         mem = io.BytesIO()
         export_as_xls(queryset=qs, fields=fields, header=header, out=mem)
         mem.seek(0)

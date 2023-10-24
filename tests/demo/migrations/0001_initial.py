@@ -44,22 +44,16 @@ class Migration(migrations.Migration):
                 ("blank", models.CharField(blank=True, max_length=255, null=True)),
                 (
                     "not_editable",
-                    models.CharField(
-                        blank=True, editable=False, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, editable=False, max_length=255, null=True),
                 ),
                 (
                     "choices",
-                    models.IntegerField(
-                        choices=[(1, "Choice 1"), (2, "Choice 2"), (3, "Choice 3")]
-                    ),
+                    models.IntegerField(choices=[(1, "Choice 1"), (2, "Choice 2"), (3, "Choice 3")]),
                 ),
                 ("image", models.ImageField(blank=True, null=True, upload_to="")),
                 (
                     "subclassed_image",
-                    demo.models.SubclassedImageField(
-                        blank=True, null=True, upload_to=""
-                    ),
+                    demo.models.SubclassedImageField(blank=True, null=True, upload_to=""),
                 ),
             ],
             options={

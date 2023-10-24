@@ -16,10 +16,10 @@ jobs:
 
             -   name: Install dependencies
                 run: |
-                    python -m pip install --upgrade pip tox
+                    python -m pip install --upgrade pip pre-commit
             -   name: Lint with flake8
                 run: |
-                    tox -e lint
+                    pre-commit run --all
 
     test:
         services:

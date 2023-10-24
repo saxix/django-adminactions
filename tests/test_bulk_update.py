@@ -50,9 +50,7 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
                 self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
-                res.forms["bulk-update"]["_file"] = Upload(
-                    str(Path(__file__).parent / "bulk_update.csv")
-                )
+                res.forms["bulk-update"]["_file"] = Upload(str(Path(__file__).parent / "bulk_update.csv"))
                 res.forms["bulk-update"]["fld-integer"] = "number"
                 res.forms["bulk-update"]["fld-char"] = "name"
                 res.forms["bulk-update"]["fld-id"] = "pk"
@@ -97,9 +95,7 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
             form["action"] = "bulk_update"
             form.set("_selected_action", True, 0)
             res = form.submit().follow()
-            assert "Sorry you do not have rights to execute this action" in str(
-                res.body
-            )
+            assert "Sorry you do not have rights to execute this action" in str(res.body)
 
     def test_no_header(self):
         self._run_action(
@@ -170,9 +166,7 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
     def test_index_required(self):
         res = self._run_action(**{"_validate": 0, "fld-index_field": []})
         assert res.status_code == 200
-        assert res.context["map_form"].errors == {
-            "index_field": ["Please select one or more index fields"]
-        }
+        assert res.context["map_form"].errors == {"index_field": ["Please select one or more index fields"]}
 
     def test_wrong_mapping(self):
         res = self._run_action(

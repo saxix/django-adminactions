@@ -27,9 +27,7 @@ def create_extra_permissions():
 
     perm_suffix = "adminactions_"
     existing_perms = set(
-        Permission.objects.filter(codename__startswith=perm_suffix).values_list(
-            "codename", "content_type_id"
-        )
+        Permission.objects.filter(codename__startswith=perm_suffix).values_list("codename", "content_type_id")
     )
     models = list(apps.get_models())
     content_types = ContentType.objects.get_for_models(*models)
@@ -47,9 +45,7 @@ def create_extra_permissions():
             label = "Can {} {} (adminactions)".format(
                 action.base_permission.replace(perm_suffix, ""), opts.verbose_name_raw
             )
-            permission = Permission(
-                codename=codename, content_type=ct, name=label[:255]
-            )
+            permission = Permission(codename=codename, content_type=ct, name=label[:255])
             new_permissions.append(permission)
 
     Permission.objects.bulk_create(new_permissions, ignore_conflicts=True)

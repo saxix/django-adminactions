@@ -8,11 +8,7 @@ from django.utils.translation import gettext as _
 
 from adminactions.exceptions import ActionInterrupted
 from adminactions.perms import get_permission_codename
-from adminactions.signals import (
-    adminaction_end,
-    adminaction_requested,
-    adminaction_start,
-)
+from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 from adminactions.utils import get_common_context
 
 
@@ -24,9 +20,7 @@ class DuplicatesForm(forms.Form):
         initial=0,
         widget=forms.HiddenInput({"class": "select-across"}),
     )
-    action = forms.CharField(
-        label="", required=True, initial="", widget=forms.HiddenInput()
-    )
+    action = forms.CharField(label="", required=True, initial="", widget=forms.HiddenInput())
     min = forms.IntegerField(required=True, initial=2)
     max = forms.IntegerField(required=False)
 
@@ -73,9 +67,7 @@ def find_duplicates_action(modeladmin, request, queryset):
         get_permission_codename(find_duplicates_action.base_permission, opts),
     )
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
     ctx = get_common_context(
         modeladmin,
@@ -125,9 +117,7 @@ def find_duplicates_action(modeladmin, request, queryset):
             )
             ctx["results"] = qs.all()
             if not ctx["results"]:
-                modeladmin.message_user(
-                    request, _("No duplicated rows found"), messages.WARNING
-                )
+                modeladmin.message_user(request, _("No duplicated rows found"), messages.WARNING)
             ctx["checked"] = checked
             ctx["sql"] = str(qs.query)
             adminaction_end.send(

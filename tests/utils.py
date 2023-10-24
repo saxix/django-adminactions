@@ -13,11 +13,7 @@ from django_dynamic_fixture import G
 from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
 
 from adminactions.exceptions import ActionInterrupted
-from adminactions.signals import (
-    adminaction_end,
-    adminaction_requested,
-    adminaction_start,
-)
+from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 
 
 class admin_register:
@@ -69,9 +65,7 @@ def get_group(name=None, permissions=None):
         except ValueError:
             raise ValueError("Invalid permission name `{0}`".format(permission_name))
         __, model_name = codename.rsplit("_", 1)
-        ct = ContentType.objects.get(
-            app_label__iexact=app_label, model__iexact=model_name
-        )
+        ct = ContentType.objects.get(app_label__iexact=app_label, model__iexact=model_name)
         permission = Permission.objects.get(content_type=ct, codename=codename)
         group.permissions.add(permission)
     return group
@@ -244,18 +238,12 @@ def ipaddress(not_valid=None):
     )
 
 
-class DataFixtureClass(
-    RandomDataFixture
-):  # it can inherit of SequentialDataFixture, RandomDataFixture etc.
-    def genericipaddressfield_config(
-        self, field, key
-    ):  # method name must have the format: FIELDNAME_config
+class DataFixtureClass(RandomDataFixture):  # it can inherit of SequentialDataFixture, RandomDataFixture etc.
+    def genericipaddressfield_config(self, field, key):  # method name must have the format: FIELDNAME_config
         return ipaddress()
 
 
-TEST_TEMPLATES_DIR = os.path.join(
-    os.path.dirname(__file__), os.pardir, "tests", "templates"
-)
+TEST_TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), os.pardir, "tests", "templates")
 
 SETTINGS = {
     "TEMPLATE_DIRS": [TEST_TEMPLATES_DIR],
@@ -318,9 +306,7 @@ class BaseTestCaseMixin:
             if code == "*":
                 perms = Permission.objects.filter(content_type__app_label=app_label)
             else:
-                perms = Permission.objects.filter(
-                    codename=code, content_type__app_label=app_label
-                )
+                perms = Permission.objects.filter(codename=code, content_type__app_label=app_label)
             target.user_permissions.add(*perms)
 
         target.save()

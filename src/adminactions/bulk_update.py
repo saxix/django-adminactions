@@ -21,11 +21,7 @@ from django.utils.translation import gettext as _
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVConfigForm
 from adminactions.perms import get_permission_codename
-from adminactions.signals import (
-    adminaction_end,
-    adminaction_requested,
-    adminaction_start,
-)
+from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 
 logger = logging.getLogger(__name__)
 
@@ -38,18 +34,14 @@ class BulkUpdateForm(forms.Form):
         initial=0,
         widget=forms.HiddenInput({"class": "select-across"}),
     )
-    action = forms.CharField(
-        label="", required=True, initial="", widget=forms.HiddenInput()
-    )
+    action = forms.CharField(label="", required=True, initial="", widget=forms.HiddenInput())
     _file = forms.FileField(
         label="CSV File",
         required=True,
         help_text=_("CSV file"),
         validators=[FileExtensionValidator(allowed_extensions=["csv", "txt"])],
     )
-    _clean = forms.BooleanField(
-        label="Clean()", required=False, help_text=_("if checked calls obj.clean()")
-    )
+    _clean = forms.BooleanField(label="Clean()", required=False, help_text=_("if checked calls obj.clean()"))
 
     _validate = forms.BooleanField(
         label="Validate",
@@ -75,9 +67,7 @@ class BulkUpdateForm(forms.Form):
 
 
 class BulkUpdateMappingForm(forms.Form):
-    index_field = forms.MultipleChoiceField(
-        choices=[], widget=forms.CheckboxSelectMultiple
-    )
+    index_field = forms.MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple)
 
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop("model")
@@ -85,10 +75,7 @@ class BulkUpdateMappingForm(forms.Form):
         # self._errors = None
         # self.update_using_queryset_allowed = True
         for f in sorted(
-            [
-                (f.name, getattr(f, "verbose_name", f.name))
-                for f in self.model._meta.get_fields()
-            ],
+            [(f.name, getattr(f, "verbose_name", f.name)) for f in self.model._meta.get_fields()],
             key=lambda item: item[1].casefold(),
         ):
             self.fields[f[0]] = forms.CharField(label=f[1].title(), required=False)
@@ -97,9 +84,7 @@ class BulkUpdateMappingForm(forms.Form):
 
     def _clean_fields(self):
         for name, field in self.fields.items():
-            value = field.widget.value_from_datadict(
-                self.data, self.files, self.add_prefix(name)
-            )
+            value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             self.cleaned_data[name] = value
         if not self.cleaned_data["index_field"]:
             self.add_error(
@@ -119,9 +104,7 @@ class BulkUpdateMappingForm(forms.Form):
 def bulk_update(modeladmin, request, queryset):  # noqa
     try:
         opts = modeladmin.model._meta
-        perm = "{0}.{1}".format(
-            opts.app_label, get_permission_codename(bulk_update.base_permission, opts)
-        )
+        perm = "{0}.{1}".format(opts.app_label, get_permission_codename(bulk_update.base_permission, opts))
         bulk_update_form = getattr(modeladmin, "bulk_update_form", BulkUpdateForm)
         bulk_update_fields = getattr(modeladmin, "bulk_update_fields", None)
         bulk_update_exclude = getattr(modeladmin, "bulk_update_exclude", None)
@@ -129,13 +112,9 @@ def bulk_update(modeladmin, request, queryset):  # noqa
             bulk_update_exclude = []
 
         if bulk_update_fields and bulk_update_exclude:
-            raise Exception(
-                "Cannot set both 'bulk_update_exclude' and 'bulk_update_fields'"
-            )
+            raise Exception("Cannot set both 'bulk_update_exclude' and 'bulk_update_fields'")
         if not request.user.has_perm(perm):
-            messages.error(
-                request, _("Sorry you do not have rights to execute this action")
-            )
+            messages.error(request, _("Sorry you do not have rights to execute this action"))
             return
         if "apply" not in request.POST:
             try:
@@ -207,9 +186,7 @@ def bulk_update(modeladmin, request, queryset):  # noqa
                         context={
                             "results": res,
                             "dry_run": dry_run,
-                            "media": Media(
-                                css={"all": ["adminactions/css/bulkupdate.css"]}
-                            ),
+                            "media": Media(css={"all": ["adminactions/css/bulkupdate.css"]}),
                             "action_short_description": bulk_update.short_description,
                             "opts": queryset.model._meta,
                         },
@@ -219,9 +196,7 @@ def bulk_update(modeladmin, request, queryset):  # noqa
             csv_form = CSVConfigForm(initial=csv_initial, prefix="csv")
             map_form = BulkUpdateMappingForm(prefix="fld", model=modeladmin.model)
 
-        adminForm = helpers.AdminForm(
-            form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin
-        )
+        adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
         media = modeladmin.media + adminForm.media
         tpl = "adminactions/bulk_update.html"
         ctx = {
@@ -276,9 +251,7 @@ def _bulk_update(  # noqa: max-complexity: 18
         "duplicates": [],
         "changes": {},
     }
-    adminaction_start.send(
-        sender=queryset.model, action="bulk_update", request=request, queryset=queryset
-    )
+    adminaction_start.send(sender=queryset.model, action="bulk_update", request=request, queryset=queryset)
     try:
         if isinstance(file_name_or_object, FileProxyMixin):
             f = file_name_or_object
@@ -286,9 +259,7 @@ def _bulk_update(  # noqa: max-complexity: 18
             f = Path(file_name_or_object).open("rb")
 
         if header:
-            reader = csv.DictReader(
-                codecs.iterdecode(f, "utf-8"), **(csv_options or {})
-            )
+            reader = csv.DictReader(codecs.iterdecode(f, "utf-8"), **(csv_options or {}))
             for k, v in mapping.items():
                 if v not in reader.fieldnames:
                     raise ValidationError(_("%s column is not present in the file") % v)

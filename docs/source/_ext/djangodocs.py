@@ -4,49 +4,50 @@ Sphinx plugins for Django documentation.
 import json
 import os
 import re
-from docutils import nodes, transforms
-from sphinx import __version__ as sphinx_ver, addnodes, roles
+
+from sphinx import __version__ as sphinx_ver
+from sphinx import addnodes
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util.compat import Directive
 from sphinx.util.console import bold
 from sphinx.writers.html import SmartyPantsHTMLTranslator
 
 # RE for option descriptions without a '--' prefix
-simple_option_desc_re = re.compile(
-    r'([-_a-zA-Z0-9]+)(\s*.*?)(?=,\s+(?:/|-|--)|$)')
+simple_option_desc_re = re.compile(r"([-_a-zA-Z0-9]+)(\s*.*?)(?=,\s+(?:/|-|--)|$)")
+
 
 def setup(app):
     app.add_crossref_type(
-        directivename = "setting",
-        rolename      = "setting",
-        indextemplate = "pair: %s; setting",
+        directivename="setting",
+        rolename="setting",
+        indextemplate="pair: %s; setting",
     )
     app.add_crossref_type(
-        directivename = "templatetag",
-        rolename      = "ttag",
-        indextemplate = "pair: %s; template tag"
+        directivename="templatetag",
+        rolename="ttag",
+        indextemplate="pair: %s; template tag",
     )
     app.add_crossref_type(
-        directivename = "templatefilter",
-        rolename      = "tfilter",
-        indextemplate = "pair: %s; template filter"
+        directivename="templatefilter",
+        rolename="tfilter",
+        indextemplate="pair: %s; template filter",
     )
     app.add_crossref_type(
-        directivename = "fieldlookup",
-        rolename      = "lookup",
-        indextemplate = "pair: %s; field lookup type",
+        directivename="fieldlookup",
+        rolename="lookup",
+        indextemplate="pair: %s; field lookup type",
     )
     app.add_description_unit(
-        directivename = "django-admin",
-        rolename      = "djadmin",
-        indextemplate = "pair: %s; django-admin command",
-        parse_node    = parse_django_admin_node,
+        directivename="django-admin",
+        rolename="djadmin",
+        indextemplate="pair: %s; django-admin command",
+        parse_node=parse_django_admin_node,
     )
     app.add_description_unit(
-        directivename = "django-admin-option",
-        rolename      = "djadminopt",
-        indextemplate = "pair: %s; django-admin command-line option",
-        parse_node    = parse_django_adminopt_node,
+        directivename="django-admin-option",
+        rolename="djadminopt",
+        indextemplate="pair: %s; django-admin command-line option",
+        parse_node=parse_django_adminopt_node,
     )
     # app.add_config_value('django_next_version', '0.0', True)
     # app.add_directive('versionadded', VersionDirective)
@@ -67,17 +68,17 @@ class VersionDirective(Directive):
         node = addnodes.versionmodified()
         ret.append(node)
         if self.arguments[0] == env.config.django_next_version:
-            node['version'] = "Development version"
+            node["version"] = "Development version"
         else:
-            node['version'] = self.arguments[0]
-        node['type'] = self.name
+            node["version"] = self.arguments[0]
+        node["type"] = self.name
         if len(self.arguments) == 2:
-            inodes, messages = self.state.inline_text(self.arguments[1], self.lineno+1)
+            inodes, messages = self.state.inline_text(self.arguments[1], self.lineno + 1)
             node.extend(inodes)
             if self.content:
                 self.state.nested_parse(self.content, self.content_offset, node)
             ret = ret + messages
-        env.note_versionchange(node['type'], node['version'], node, self.lineno)
+        env.note_versionchange(node["type"], node["version"], node, self.lineno)
         return ret
 
 
@@ -88,19 +89,19 @@ class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
 
     # Don't use border=1, which docutils does by default.
     def visit_table(self, node):
-        self._table_row_index = 0 # Needed by Sphinx
-        self.body.append(self.starttag(node, 'table', CLASS='docutils'))
+        self._table_row_index = 0  # Needed by Sphinx
+        self.body.append(self.starttag(node, "table", CLASS="docutils"))
 
     # <big>? Really?
     def visit_desc_parameterlist(self, node):
-        self.body.append('(')
+        self.body.append("(")
         self.first_param = 1
         self.param_separator = node.child_text_separator
 
     def depart_desc_parameterlist(self, node):
-        self.body.append(')')
+        self.body.append(")")
 
-    if sphinx_ver < '1.0.8':
+    if sphinx_ver < "1.0.8":
         #
         # Don't apply smartypants to literal blocks
         #
@@ -122,18 +123,16 @@ class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
     # that work.
     #
     version_text = {
-        'deprecated':       'Deprecated in Django %s',
-        'versionchanged':   'Changed in Django %s',
-        'versionadded':     'New in Django %s',
+        "deprecated": "Deprecated in Django %s",
+        "versionchanged": "Changed in Django %s",
+        "versionadded": "New in Django %s",
     }
 
     def visit_versionmodified(self, node):
-        self.body.append(
-            self.starttag(node, 'div', CLASS=node['type'])
-        )
+        self.body.append(self.starttag(node, "div", CLASS=node["type"]))
         title = "%s%s" % (
-            self.version_text[node['type']] % node['version'],
-            len(node) and ":" or "."
+            self.version_text[node["type"]] % node["version"],
+            len(node) and ":" or ".",
         )
         self.body.append('<span class="title">%s</span> ' % title)
 
@@ -142,28 +141,31 @@ class DjangoHTMLTranslator(SmartyPantsHTMLTranslator):
 
     # Give each section a unique ID -- nice for custom CSS hooks
     def visit_section(self, node):
-        old_ids = node.get('ids', [])
-        node['ids'] = ['s-' + i for i in old_ids]
-        node['ids'].extend(old_ids)
+        old_ids = node.get("ids", [])
+        node["ids"] = ["s-" + i for i in old_ids]
+        node["ids"].extend(old_ids)
         SmartyPantsHTMLTranslator.visit_section(self, node)
-        node['ids'] = old_ids
+        node["ids"] = old_ids
+
 
 def parse_django_admin_node(env, sig, signode):
-    command = sig.split(' ')[0]
+    command = sig.split(" ")[0]
     env._django_curr_admin_command = command
     title = "django-admin.py %s" % sig
     signode += addnodes.desc_name(title, title)
     return sig
 
+
 def parse_django_adminopt_node(env, sig, signode):
     """A copy of sphinx.directives.CmdoptionDesc.parse_signature()"""
     from sphinx.domains.std import option_desc_re
+
     count = 0
-    firstname = ''
+    firstname = ""
     for m in option_desc_re.finditer(sig):
         optname, args = m.groups()
         if count:
-            signode += addnodes.desc_addname(', ', ', ')
+            signode += addnodes.desc_addname(", ", ", ")
         signode += addnodes.desc_name(optname, optname)
         signode += addnodes.desc_addname(args, args)
         if not count:
@@ -173,7 +175,7 @@ def parse_django_adminopt_node(env, sig, signode):
         for m in simple_option_desc_re.finditer(sig):
             optname, args = m.groups()
             if count:
-                signode += addnodes.desc_addname(', ', ', ')
+                signode += addnodes.desc_addname(", ", ", ")
             signode += addnodes.desc_name(optname, optname)
             signode += addnodes.desc_addname(args, args)
             if not count:
@@ -189,20 +191,26 @@ class DjangoStandaloneHTMLBuilder(StandaloneHTMLBuilder):
     Subclass to add some extra things we need.
     """
 
-    name = 'djangohtml'
+    name = "djangohtml"
 
     def finish(self):
         super().finish()
         self.info(bold("writing templatebuiltins.js..."))
         xrefs = self.env.domaindata["std"]["objects"]
         templatebuiltins = {
-            "ttags": [n for ((t, n), (l, a)) in xrefs.items()
-                        if t == "templatetag" and l == "ref/templates/builtins"],
-            "tfilters": [n for ((t, n), (l, a)) in xrefs.items()
-                        if t == "templatefilter" and l == "ref/templates/builtins"],
+            "ttags": [
+                n
+                for ((t, n), (l, a)) in xrefs.items()
+                if t == "templatetag" and l == "ref/templates/builtins"
+            ],
+            "tfilters": [
+                n
+                for ((t, n), (l, a)) in xrefs.items()
+                if t == "templatefilter" and l == "ref/templates/builtins"
+            ],
         }
         outfilename = os.path.join(self.outdir, "templatebuiltins.js")
-        with open(outfilename, 'wb') as fp:
-            fp.write('var django_template_builtins = ')
+        with open(outfilename, "wb") as fp:
+            fp.write("var django_template_builtins = ")
             json.dump(templatebuiltins, fp)
-            fp.write(';\n')
+            fp.write(";\n")

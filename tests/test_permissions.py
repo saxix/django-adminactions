@@ -64,6 +64,4 @@ def test_permissions(admin):
     assert Permission.objects.filter(codename__startswith="adminactions").count() == 63
 
     with user_grant_permission(admin, ["demo.adminactions_export_demomodel"]):
-        assert admin.get_all_permissions() == set(
-            ["demo.adminactions_export_demomodel"]
-        )
+        assert admin.get_all_permissions() == set(["demo.adminactions_export_demomodel"])
