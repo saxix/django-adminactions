@@ -14,7 +14,6 @@ pytest-cache
 pytest-cov
 pytest-django
 pytest-echo
-pytest-pythonpath
 redis
 readme
 selenium>=2.42.0
