@@ -6,6 +6,7 @@ Release <dev>
 * fixes support for 'MemoryFileUploadHandler' in bulk_update
 * add `dry_run` option to bulk_update
 * bulk_update now returns a page with pre/post action field values
+* renamed `get_export_form` as `get_aa_export_form` ( @see https://github.com/saxix/django-adminactions/issues/217)
 
 
 Release 2.1

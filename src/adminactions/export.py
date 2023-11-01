@@ -149,8 +149,8 @@ base_export.base_permission = "adminactions_export"
 
 
 def export_as_csv(modeladmin, request, queryset):
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "csv") or CSVOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "csv") or CSVOptions
     else:
         form_class = CSVOptions
     return base_export(
@@ -175,8 +175,8 @@ export_as_csv.base_permission = "adminactions_export"
 
 
 def export_as_xls(modeladmin, request, queryset):
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "xls") or XLSOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "xls") or XLSOptions
     else:
         form_class = XLSOptions
     return base_export(
@@ -292,8 +292,8 @@ def export_as_fixture(modeladmin, request, queryset):
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "fixture") or FixtureOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "fixture") or FixtureOptions
     else:
         form_class = FixtureOptions
 
@@ -401,8 +401,8 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
         "indent": 4,
     }
 
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "delete") or FixtureOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "delete") or FixtureOptions
     else:
         form_class = FixtureOptions
 
