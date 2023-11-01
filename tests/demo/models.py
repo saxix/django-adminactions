@@ -63,15 +63,25 @@ class UserDetailModelAdmin(ExtraUrlMixin, ModelAdmin):
     list_display = [f.name for f in UserDetail._meta.fields]
 
 
+def export_one(_modeladmin, _request, queryset):
+    from adminactions.api import export_as_csv
+
+    return export_as_csv(queryset, fields=["get_custom_field"], modeladmin=_modeladmin)
+
+
 class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
     # list_display = ('char', 'integer', 'logic', 'null_logic',)
     list_display = [f.name for f in DemoModel._meta.fields]
+    actions = (export_one,)
 
     @button()
     def import_fixture(self, request):
         from adminactions.helpers import import_fixture as _import_fixture
 
         return _import_fixture(self, request)
+
+    def get_custom_field(self, instance):
+        return f"model-attribute-{instance.pk}"
 
 
 class DemoOneToOneAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):

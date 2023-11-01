@@ -1,7 +1,9 @@
 import logging
 import os
 import shutil
+import sys
 import tempfile
+from pathlib import Path
 
 import django_webtest
 import pytest
@@ -61,9 +63,11 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    # import warnings
-    # enable this to remove deprecations
-    # warnings.simplefilter('once', DeprecationWarning)
+    here = Path(__file__).parent
+    sys.path.insert(0, here)
+    sys.path.insert(0, here.parent / "src")
+    os.environ["DJANGO_SETTINGS_MODULE"] = "demo.settings"
+
     from django.conf import settings
 
     if (

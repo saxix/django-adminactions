@@ -92,7 +92,7 @@ def getattr_or_item(obj, name):
     return ret
 
 
-def get_field_value(obj, field, usedisplay=True, raw_callable=False):
+def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=None):
     """
     returns the field value or field representation if get_FIELD_display exists
 
@@ -117,7 +117,9 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     else:
         raise ValueError("Invalid value for parameter `field`: Should be a field name or a Field instance")
 
-    if usedisplay and hasattr(obj, "get_%s_display" % fieldname):
+    if modeladmin and hasattr(modeladmin, fieldname):
+        value = getattr(modeladmin, fieldname)(obj)
+    elif usedisplay and hasattr(obj, "get_%s_display" % fieldname):
         value = getattr(obj, "get_%s_display" % fieldname)()
     else:
         value = getattr_or_item(obj, fieldname)

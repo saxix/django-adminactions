@@ -105,6 +105,7 @@ def base_export(
                     header=form.cleaned_data.get("header", False),
                     filename=filename,
                     options=form.cleaned_data,
+                    modeladmin=modeladmin,
                 )
             except Exception as e:
                 logger.exception(e)

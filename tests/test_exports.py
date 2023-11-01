@@ -2,6 +2,7 @@ import csv
 import io
 import time
 import unittest
+from unittest.mock import Mock
 
 import mock
 import xlrd
@@ -442,3 +443,16 @@ class ExportAsXlsTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebTest):
             6.5,
             "Response should return under 6.5 " "seconds, was %.2f" % res_time,
         )
+
+    def test_modeladmin_attributes(self):
+        from demo.models import DemoModel
+        from django.contrib.admin import site
+
+        from adminactions.api import export_as_csv
+
+        def export_model_admin_attr(_modeladmin, _request, queryset):
+            return export_as_csv(queryset, fields=["get_custom_field"], modeladmin=_modeladmin)
+
+        recs = DemoModel.objects.order_by("pk")[:1]
+        res = export_model_admin_attr(site._registry[DemoModel], Mock(), recs)
+        assert res.content.decode() == f'"model-attribute-{recs[0].pk}"\r\n'

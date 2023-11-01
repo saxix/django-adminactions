@@ -131,7 +131,13 @@ class Echo:
 
 
 def export_as_csv(  # noqa: max-complexity: 20
-    queryset, fields=None, header=None, filename=None, options=None, out=None
+    queryset,
+    fields=None,
+    header=None,
+    filename=None,
+    options=None,
+    out=None,
+    modeladmin=None,
 ):  # noqa
     """
         Exports a queryset as csv from a queryset with the given fields.
@@ -169,7 +175,6 @@ def export_as_csv(  # noqa: max-complexity: 20
         config.update(options)
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
-
     if streaming_enabled:
         buffer_object = Echo()
     else:
@@ -201,7 +206,7 @@ def export_as_csv(  # noqa: max-complexity: 20
         for obj in queryset:
             row = []
             for fieldname in fields:
-                value = get_field_value(obj, fieldname)
+                value = get_field_value(obj, fieldname, modeladmin=modeladmin)
                 if isinstance(value, datetime.datetime):
                     try:
                         value = dateformat.format(
@@ -249,7 +254,7 @@ xls_options_default = {
 
 
 def export_as_xls2(  # noqa: max-complexity: 24
-    queryset, fields=None, header=None, filename=None, options=None, out=None  # noqa
+    queryset, fields=None, header=None, filename=None, options=None, out=None, modeladmin=None  # noqa
 ):
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
@@ -334,7 +339,9 @@ def export_as_xls2(  # noqa: max-complexity: 24
         for col_idx, fieldname in enumerate(fields):
             fmt = formats.get(col_idx, "general")
             try:
-                value = get_field_value(row, fieldname, usedisplay=use_display, raw_callable=False)
+                value = get_field_value(
+                    row, fieldname, usedisplay=use_display, raw_callable=False, modeladmin=modeladmin
+                )
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))
                 if hash(fmt) not in _styles:
@@ -382,7 +389,7 @@ xlsxwriter_options = {
 
 
 def export_as_xls3(  # noqa: max-complexity: 23
-    queryset, fields=None, header=None, filename=None, options=None, out=None  # noqa
+    queryset, fields=None, header=None, filename=None, options=None, out=None, modeladmin=None  # noqa
 ):  # pragma: no cover
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
@@ -457,7 +464,9 @@ def export_as_xls3(  # noqa: max-complexity: 23
         for idx, fieldname in enumerate(fields):
             fmt = formats.get(fieldname, formats["_general_"])
             try:
-                value = get_field_value(row, fieldname, usedisplay=use_display, raw_callable=False)
+                value = get_field_value(
+                    row, fieldname, usedisplay=use_display, raw_callable=False, modeladmin=modeladmin
+                )
                 if callable(fmt):
                     value = fmt(value)
                 if isinstance(value, (list, tuple)):
