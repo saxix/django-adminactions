@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 
-from demo.models import DemoModel
+from demo.models import DemoModel, DemoOneToOne
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -183,6 +183,24 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
         assert res.status_code == 200
         messages = [m.message for m in list(res.context["messages"])]
         assert messages[0] == "['miss column is not present in the file']"
+
+    def test_bulk_update_with_one_to_one_field(self):
+        demo_model_instance = G(DemoModel, char='InitialValue', integer=123)
+        demo_one_to_one_instance = G(DemoOneToOne, demo=demo_model_instance)
+        csv_data = f"pk,one_to_one_id\n{demo_model_instance.pk},{demo_one_to_one_instance.pk}"
+        res = self._run_action(
+            **{
+                "_file": Upload(
+                    "data.csv",
+                    csv_data.encode(),
+                    "text/csv",
+                ),
+                "fld-onetoone": "one_to_one_id",
+            }
+        )
+        self.assertTrue(DemoModel.objects.filter(pk=demo_model_instance.pk, onetoone=demo_one_to_one_instance).exists())
+        self.assertEqual(res.status_code, 200)
+
 
 
 class BulkUpdateMemoryFileUploadHandlerTest(BulkUpdate, TestCase):
