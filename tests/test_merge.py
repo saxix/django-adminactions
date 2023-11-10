@@ -128,9 +128,7 @@ class MergeTestApi(BaseTestCaseMixin, TestCase):
         other = User.objects.get(pk=self.other_pk)
         profile = get_profile(other)
         if profile:
-            entry = other.logentry_set.get_or_create(object_repr="test", action_flag=1)[
-                0
-            ]
+            entry = other.logentry_set.get_or_create(object_repr="test", action_flag=1)[0]
 
             result = merge(master, other, commit=True, related=ALL_FIELDS)
 
@@ -188,9 +186,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         self.user = G(User, username="user", is_staff=True, is_active=True)
 
     def _run_action(self, steps=3, page_start=None):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_merge_user"]):
             if isinstance(steps, int):
                 steps = list(range(1, steps + 1))
                 res = self.app.get("/", user="user")
@@ -205,18 +201,10 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
                 assert not hasattr(res.forms["merge-form"], "errors")
 
             if 2 in steps:
-                res.forms["merge-form"]["username"] = res.forms["merge-form"][
-                    "form-1-username"
-                ].value
-                res.forms["merge-form"]["email"] = res.forms["merge-form"][
-                    "form-1-email"
-                ].value
-                res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
-                    "form-1-last_login"
-                ].value
-                res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
-                    "form-1-date_joined"
-                ].value
+                res.forms["merge-form"]["username"] = res.forms["merge-form"]["form-1-username"].value
+                res.forms["merge-form"]["email"] = res.forms["merge-form"]["form-1-email"].value
+                res.forms["merge-form"]["last_login"] = res.forms["merge-form"]["form-1-last_login"].value
+                res.forms["merge-form"]["date_joined"] = res.forms["merge-form"]["form-1-date_joined"].value
                 res = res.forms["merge-form"].submit("preview")
                 assert not hasattr(res.forms["merge-form"], "errors")
 
@@ -232,9 +220,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             form["action"] = "merge"
             self._select_rows(form)
             res = form.submit().follow()
-            assert "Sorry you do not have rights to execute this action" in str(
-                res.body
-            )
+            assert "Sorry you do not have rights to execute this action" in str(res.body)
 
     # noinspection PyTypeChecker
     def test_success(self):
@@ -254,9 +240,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
         self.assertFalse(LogEntry.objects.filter(pk=removed.pk).exists())
 
     def test_error_if_too_many_records(self):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_merge_user"]):
             res = self.app.get("/", user="user")
             res = res.click("Users")
             form = res.forms["changelist-form"]
@@ -266,9 +250,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             self.assertContains(res, "Please select exactly 2 records")
 
     def test_swap(self):
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_merge_user"]):
             # removed = User.objects.get(pk=self._selected_rows[0])
             # preserved = User.objects.get(pk=self._selected_rows[1])
 
@@ -285,18 +267,10 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             res.forms["merge-form"]["master_pk"] = self._selected_values[1]
             res.forms["merge-form"]["other_pk"] = self._selected_values[0]
 
-            res.forms["merge-form"]["username"] = res.forms["merge-form"][
-                "form-0-username"
-            ].value
-            res.forms["merge-form"]["email"] = res.forms["merge-form"][
-                "form-0-email"
-            ].value
-            res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
-                "form-1-last_login"
-            ].value
-            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
-                "form-1-date_joined"
-            ].value
+            res.forms["merge-form"]["username"] = res.forms["merge-form"]["form-0-username"].value
+            res.forms["merge-form"]["email"] = res.forms["merge-form"]["form-0-email"].value
+            res.forms["merge-form"]["last_login"] = res.forms["merge-form"]["form-1-last_login"].value
+            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"]["form-1-date_joined"].value
 
             # res.form['field_names'] = 'username,email'
 
@@ -314,9 +288,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
     def test_merge_move_detail(self):
         from adminactions.merge import MergeForm
 
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_merge_user"]):
             # removed = User.objects.get(pk=self._selected_rows[0])
             # preserved = User.objects.get(pk=self._selected_rows[1])
 
@@ -336,18 +308,10 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             res.forms["merge-form"]["master_pk"] = self._selected_values[1]
             res.forms["merge-form"]["other_pk"] = self._selected_values[0]
 
-            res.forms["merge-form"]["username"] = res.forms["merge-form"][
-                "form-0-username"
-            ].value
-            res.forms["merge-form"]["email"] = res.forms["merge-form"][
-                "form-0-email"
-            ].value
-            res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
-                "form-1-last_login"
-            ].value
-            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
-                "form-1-date_joined"
-            ].value
+            res.forms["merge-form"]["username"] = res.forms["merge-form"]["form-0-username"].value
+            res.forms["merge-form"]["email"] = res.forms["merge-form"]["form-0-email"].value
+            res.forms["merge-form"]["last_login"] = res.forms["merge-form"]["form-1-last_login"].value
+            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"]["form-1-date_joined"].value
             res.forms["merge-form"]["dependencies"] = MergeForm.DEP_MOVE
             res = res.forms["merge-form"].submit("preview")
             # steps = 3:
@@ -360,9 +324,7 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
     def test_merge_delete_detail(self):
         from adminactions.merge import MergeForm
 
-        with user_grant_permission(
-            self.user, ["auth.change_user", "auth.adminactions_merge_user"]
-        ):
+        with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_merge_user"]):
             # removed = User.objects.get(pk=self._selected_rows[0])
             # preserved = User.objects.get(pk=self._selected_rows[1])
 
@@ -382,18 +344,10 @@ class TestMergeAction(SelectRowsMixin, WebTestMixin, TestCase):
             res.forms["merge-form"]["master_pk"] = self._selected_values[1]
             res.forms["merge-form"]["other_pk"] = self._selected_values[0]
 
-            res.forms["merge-form"]["username"] = res.forms["merge-form"][
-                "form-0-username"
-            ].value
-            res.forms["merge-form"]["email"] = res.forms["merge-form"][
-                "form-0-email"
-            ].value
-            res.forms["merge-form"]["last_login"] = res.forms["merge-form"][
-                "form-1-last_login"
-            ].value
-            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"][
-                "form-1-date_joined"
-            ].value
+            res.forms["merge-form"]["username"] = res.forms["merge-form"]["form-0-username"].value
+            res.forms["merge-form"]["email"] = res.forms["merge-form"]["form-0-email"].value
+            res.forms["merge-form"]["last_login"] = res.forms["merge-form"]["form-1-last_login"].value
+            res.forms["merge-form"]["date_joined"] = res.forms["merge-form"]["form-1-date_joined"].value
             res.forms["merge-form"]["dependencies"] = MergeForm.DEP_DELETE
             res = res.forms["merge-form"].submit("preview")
             # steps = 3:
@@ -418,9 +372,7 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
         self.user = G(User, username="user", is_staff=True, is_active=True)
 
     def _run_action(self, steps=3, page_start=None):
-        with user_grant_permission(
-            self.user, ["demo.change_demomodel", "demo.adminactions_merge_demomodel"]
-        ):
+        with user_grant_permission(self.user, ["demo.change_demomodel", "demo.adminactions_merge_demomodel"]):
             if isinstance(steps, int):
                 steps = list(range(1, steps + 1))
                 res = self.app.get("/", user="user")
@@ -436,9 +388,7 @@ class TestMergeImageAction(SelectRowsMixin, WebTestMixin, TestCase):
                 assert not hasattr(res.forms["merge-form"], "errors")
 
             if 2 in steps:
-                res.forms["merge-form"]["image"] = res.forms["merge-form"][
-                    "form-1-image"
-                ].value
+                res.forms["merge-form"]["image"] = res.forms["merge-form"]["form-1-image"].value
                 res.forms["merge-form"]["field_names"] = "image,subclassed_image"
                 res = res.forms["merge-form"].submit("preview")
                 assert not hasattr(res.forms["merge-form"], "errors")

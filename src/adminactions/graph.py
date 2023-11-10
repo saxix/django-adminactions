@@ -21,11 +21,7 @@ def graph_form_factory(model):
     app_name = model._meta.app_label
     model_name = model.__name__
 
-    model_fields = [
-        (str(f.name), str(f.verbose_name))
-        for f in model._meta.fields
-        if not f.primary_key
-    ]
+    model_fields = [(str(f.name), str(f.verbose_name)) for f in model._meta.fields if not f.primary_key]
     graphs = [("PieChart", "PieChart"), ("BarChart", "BarChart")]
     model_fields.insert(0, ("", "N/A"))
     class_name = "%s%sGraphForm" % (app_name, model_name)
@@ -36,9 +32,7 @@ def graph_form_factory(model):
         "app": CharField(initial=app_name, widget=HiddenInput),
         "model": CharField(initial=model_name, widget=HiddenInput),
         "graph_type": ChoiceField(label=_("Graph type"), choices=graphs, required=True),
-        "axes_x": ChoiceField(
-            label=_("Group by and count by"), choices=model_fields, required=True
-        ),
+        "axes_x": ChoiceField(label=_("Group by and count by"), choices=model_fields, required=True),
     }
 
     return DeclarativeFieldsMetaclass(str(class_name), (Form,), attrs)
@@ -51,9 +45,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
         get_permission_codename(graph_queryset.base_permission, opts),
     )
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
 
     MForm = graph_form_factory(modeladmin.model)
@@ -131,9 +123,7 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                         json.dumps(data_labels),
                     )
                 elif graph_type == "PieChart":
-                    table = [
-                        list(zip(list(map(str, data_labels)), list(map(str, data))))
-                    ]
+                    table = [list(zip(list(map(str, data_labels)), list(map(str, data))))]
                     extra = """{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,
                                                 rendererOptions: {fill: true,
                                                                     showDataLabels: true,
@@ -154,24 +144,18 @@ def graph_queryset(modeladmin, request, queryset):  # noqa
                 )
     elif request.method == "POST":
         initial = {
-            helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(
-                helpers.ACTION_CHECKBOX_NAME
-            ),
+            helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
             "select_across": request.POST.get("select_across", 0),
         }
         form = MForm(initial=initial)
     else:
         initial = {
-            helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(
-                helpers.ACTION_CHECKBOX_NAME
-            ),
+            helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
             "select_across": request.POST.get("select_across", 0),
         }
         form = MForm(initial=initial)
 
-    adminForm = helpers.AdminForm(
-        form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin
-    )
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
 
     ctx = {

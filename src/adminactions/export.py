@@ -46,13 +46,9 @@ def base_export(
     export a queryset to csv file
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label, get_permission_codename(base_export.base_permission, opts)
-    )
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(base_export.base_permission, opts))
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
 
     try:
@@ -70,8 +66,7 @@ def base_export(
         cols = modeladmin.get_exportable_columns(request, form_class)
     else:
         cols = [
-            (f.name, f.verbose_name)
-            for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+            (f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
         ]
     initial = {
         "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
@@ -110,6 +105,7 @@ def base_export(
                     header=form.cleaned_data.get("header", False),
                     filename=filename,
                     options=form.cleaned_data,
+                    modeladmin=modeladmin,
                 )
             except Exception as e:
                 logger.exception(e)
@@ -128,9 +124,7 @@ def base_export(
         form = form_class(initial=initial)
         form.fields["columns"].choices = cols
 
-    adminForm = helpers.AdminForm(
-        form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin
-    )
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     # tpl = 'adminactions/export_csv.html'
     ctx = {
@@ -156,8 +150,8 @@ base_export.base_permission = "adminactions_export"
 
 
 def export_as_csv(modeladmin, request, queryset):
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "csv") or CSVOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "csv") or CSVOptions
     else:
         form_class = CSVOptions
     return base_export(
@@ -182,8 +176,8 @@ export_as_csv.base_permission = "adminactions_export"
 
 
 def export_as_xls(modeladmin, request, queryset):
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "xls") or XLSOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "xls") or XLSOptions
     else:
         form_class = XLSOptions
     return base_export(
@@ -267,9 +261,9 @@ def _dump_qs(form, queryset, data, filename):
             queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"),
             fmt,
         )
-        response["Content-Disposition"] = (
-            'attachment;filename="%s"' % filename
-        ).encode("us-ascii", "replace")
+        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode(
+            "us-ascii", "replace"
+        )
     response.content = ret
     return response
 
@@ -283,13 +277,9 @@ def export_as_fixture(modeladmin, request, queryset):
         "indent": 4,
     }
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label, get_permission_codename(export_as_fixture.base_permission, opts)
-    )
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(export_as_fixture.base_permission, opts))
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
 
     try:
@@ -303,8 +293,8 @@ def export_as_fixture(modeladmin, request, queryset):
     except ActionInterrupted as e:
         messages.error(request, str(e))
         return
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "fixture") or FixtureOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "fixture") or FixtureOptions
     else:
         form_class = FixtureOptions
 
@@ -325,9 +315,7 @@ def export_as_fixture(modeladmin, request, queryset):
                 return
             try:
                 _collector = (
-                    ForeignKeysCollector
-                    if form.cleaned_data.get("add_foreign_keys")
-                    else FlatCollector
+                    ForeignKeysCollector if form.cleaned_data.get("add_foreign_keys") else FlatCollector
                 )
                 c = _collector(None)
                 c.collect(queryset)
@@ -341,9 +329,7 @@ def export_as_fixture(modeladmin, request, queryset):
                 )
 
                 if hasattr(modeladmin, "get_export_as_fixture_filename"):
-                    filename = modeladmin.get_export_as_fixture_filename(
-                        request, queryset
-                    )
+                    filename = modeladmin.get_export_as_fixture_filename(request, queryset)
                 else:
                     filename = None
                 return _dump_qs(form, queryset, c.data, filename)
@@ -353,9 +339,7 @@ def export_as_fixture(modeladmin, request, queryset):
     else:
         form = form_class(initial=initial)
 
-    adminForm = helpers.AdminForm(
-        form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin
-    )
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     tpl = "adminactions/export_fixture.html"
     ctx = {
@@ -396,9 +380,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
         get_permission_codename(export_delete_tree.base_permission, opts),
     )
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
     try:
         adminaction_requested.send(
@@ -420,8 +402,8 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
         "indent": 4,
     }
 
-    if hasattr(modeladmin, "get_export_form"):
-        form_class = modeladmin.get_export_form(request, "delete") or FixtureOptions
+    if hasattr(modeladmin, "get_aa_export_form"):
+        form_class = modeladmin.get_aa_export_form(request, "delete") or FixtureOptions
     else:
         form_class = FixtureOptions
 
@@ -458,9 +440,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
                     form=form,
                 )
                 if hasattr(modeladmin, "get_export_delete_tree_filename"):
-                    filename = modeladmin.get_export_delete_tree_filename(
-                        request, queryset
-                    )
+                    filename = modeladmin.get_export_delete_tree_filename(request, queryset)
                 else:
                     filename = None
                 return _dump_qs(form, queryset, data, filename)
@@ -470,9 +450,7 @@ def export_delete_tree(modeladmin, request, queryset):  # noqa
     else:
         form = form_class(initial=initial)
 
-    adminForm = helpers.AdminForm(
-        form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin
-    )
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     tpl = "adminactions/export_fixture.html"
     ctx = {

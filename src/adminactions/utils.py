@@ -11,9 +11,7 @@ def get_ignored_fields(model, setting_var_name):
     returns list of ignored fields which must not be modified
     """
     return (
-        getattr(settings, setting_var_name, {})
-        .get(model._meta.app_label, {})
-        .get(model._meta.model_name, ())
+        getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
     )
 
 
@@ -90,13 +88,11 @@ def getattr_or_item(obj, name):
         try:
             ret = obj[name]
         except (KeyError, TypeError):
-            raise AttributeError(
-                "%s object has no attribute/item '%s'" % (obj.__class__.__name__, name)
-            )
+            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
     return ret
 
 
-def get_field_value(obj, field, usedisplay=True, raw_callable=False):
+def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=None):
     """
     returns the field value or field representation if get_FIELD_display exists
 
@@ -119,11 +115,11 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False):
     elif isinstance(field, models.Field):
         fieldname = field.name
     else:
-        raise ValueError(
-            "Invalid value for parameter `field`: Should be a field name or a Field instance"
-        )
+        raise ValueError("Invalid value for parameter `field`: Should be a field name or a Field instance")
 
-    if usedisplay and hasattr(obj, "get_%s_display" % fieldname):
+    if modeladmin and hasattr(modeladmin, fieldname):
+        value = getattr(modeladmin, fieldname)(obj)
+    elif usedisplay and hasattr(obj, "get_%s_display" % fieldname):
         value = getattr(obj, "get_%s_display" % fieldname)()
     else:
         value = getattr_or_item(obj, fieldname)
@@ -166,9 +162,7 @@ def get_field_by_path(model, field_path):
         field_object, model, direct, m2m = get_field_by_name(model, target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
-                return get_field_by_path(
-                    field_object.related_model, ".".join(parts[1:])
-                )
+                return get_field_by_path(field_object.related_model, ".".join(parts[1:]))
             else:
                 return field_object
         else:
@@ -274,11 +268,7 @@ def model_has_field(model, field_name):
 
 
 def get_all_related_objects(model):
-    return [
-        f
-        for f in model._meta.get_fields()
-        if (f.one_to_many or f.one_to_one) and f.auto_created
-    ]
+    return [f for f in model._meta.get_fields() if (f.one_to_many or f.one_to_one) and f.auto_created]
 
 
 def get_all_field_names(model):
@@ -287,9 +277,7 @@ def get_all_field_names(model):
     return list(
         set(
             chain.from_iterable(
-                (field.name, field.attname)
-                if hasattr(field, "attname")
-                else (field.name,)
+                (field.name, field.attname) if hasattr(field, "attname") else (field.name,)
                 for field in model._meta.get_fields()
                 if not (field.many_to_one and field.related_model is None)
             )

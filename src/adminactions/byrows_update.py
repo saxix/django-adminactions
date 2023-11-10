@@ -26,9 +26,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         get_permission_codename(byrows_update.base_permission, opts),
     )
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
 
     class modelform(modeladmin.form):
@@ -112,23 +110,13 @@ def byrows_update_get_fields(modeladmin):
     - adminactions_byrows_update_fields
     - adminactions_byrows_update_exclude
     """
-    ignored_fields = get_ignored_fields(
-        modeladmin.model, "UPDATE_ACTION_IGNORED_FIELDS"
-    )
+    ignored_fields = get_ignored_fields(modeladmin.model, "UPDATE_ACTION_IGNORED_FIELDS")
     out = getattr(
         modeladmin,
         "adminactions_byrows_update_fields",
-        [
-            f.name
-            for f in modeladmin.model._meta.fields
-            if f.editable and f.name not in ignored_fields
-        ],
+        [f.name for f in modeladmin.model._meta.fields if f.editable and f.name not in ignored_fields],
     )
     if hasattr(modeladmin, "adminactions_byrows_update_exclude"):
         fields = modeladmin.adminactions_byrows_update_exclude
-        out = [
-            fname
-            for fname in fields
-            if fname not in modeladmin.adminactions_byrows_update_exclude
-        ]
+        out = [fname for fname in fields if fname not in modeladmin.adminactions_byrows_update_exclude]
     return out

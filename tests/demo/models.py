@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from adminactions.helpers import AdminActionPermMixin
+from adminactions.mass_update import MassUpdateForm
 
 
 class SubclassedImageField(models.ImageField):
@@ -32,12 +33,8 @@ class DemoModel(models.Model):
     unique = models.CharField(max_length=255, unique=True)
     nullable = models.CharField(max_length=255, null=True)
     blank = models.CharField(max_length=255, blank=True, null=True)
-    not_editable = models.CharField(
-        max_length=255, editable=False, blank=True, null=True
-    )
-    choices = models.IntegerField(
-        choices=((1, "Choice 1"), (2, "Choice 2"), (3, "Choice 3"))
-    )
+    not_editable = models.CharField(max_length=255, editable=False, blank=True, null=True)
+    choices = models.IntegerField(choices=((1, "Choice 1"), (2, "Choice 2"), (3, "Choice 3")))
 
     image = models.ImageField(blank=True, null=True)
     subclassed_image = SubclassedImageField(blank=True, null=True)
@@ -56,9 +53,7 @@ class UserDetail(models.Model):
 
 
 class DemoOneToOne(models.Model):
-    demo = models.OneToOneField(
-        DemoModel, on_delete=models.CASCADE, related_name="onetoone"
-    )
+    demo = models.OneToOneField(DemoModel, on_delete=models.CASCADE, related_name="onetoone")
 
     class Meta:
         app_label = "demo"
@@ -68,9 +63,16 @@ class UserDetailModelAdmin(ExtraUrlMixin, ModelAdmin):
     list_display = [f.name for f in UserDetail._meta.fields]
 
 
+def export_one(_modeladmin, _request, queryset):
+    from adminactions.api import export_as_csv
+
+    return export_as_csv(queryset, fields=["get_custom_field"], modeladmin=_modeladmin)
+
+
 class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
     # list_display = ('char', 'integer', 'logic', 'null_logic',)
     list_display = [f.name for f in DemoModel._meta.fields]
+    actions = (export_one,)
 
     @button()
     def import_fixture(self, request):
@@ -78,9 +80,20 @@ class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
 
         return _import_fixture(self, request)
 
+    def get_custom_field(self, instance):
+        return f"model-attribute-{instance.pk}"
+
 
 class DemoOneToOneAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):
     pass
+
+
+class TestMassUpdateForm(MassUpdateForm):
+    pass
+
+
+class DemoModelMassUpdateForm(MassUpdateForm):
+    sort_fields = False
 
 
 site.register(DemoModel, DemoModelAdmin)

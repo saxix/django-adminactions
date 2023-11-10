@@ -23,9 +23,7 @@ def test_export_as_csv(admin_site):
     browser, administrator = admin_site
     browser.find_element_by_link_text("Demo models").click()
     browser.find_element_by_id("action-toggle").click()
-    Select(browser.find_element_by_name("action")).select_by_visible_text(
-        "Export as CSV"
-    )
+    Select(browser.find_element_by_name("action")).select_by_visible_text("Export as CSV")
     browser.find_element_by_name("index").click()
     browser.find_element_by_name("apply").click()
 
@@ -36,9 +34,7 @@ def export_csv_page(admin_site):
     browser.go("/admin/")
     browser.find_element_by_link_text("Demo models").click()
     browser.find_element_by_id("action-toggle").click()
-    Select(browser.find_element_by_name("action")).select_by_visible_text(
-        "Export as CSV"
-    )
+    Select(browser.find_element_by_name("action")).select_by_visible_text("Export as CSV")
     browser.find_element_by_name("index").click()
     return browser, administrator
 

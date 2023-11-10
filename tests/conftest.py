@@ -1,5 +1,9 @@
 import logging
 import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
 
 import django_webtest
 import pytest
@@ -59,9 +63,12 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    # import warnings
-    # enable this to remove deprecations
-    # warnings.simplefilter('once', DeprecationWarning)
+    here = Path(__file__).parent
+    sys.path.insert(0, here)
+    sys.path.insert(0, here.parent / "src")
+    os.environ["DJANGO_SETTINGS_MODULE"] = "demo.settings"
+
+    from django.conf import settings
 
     if (
         config.option.markexpr.find("selenium") < 0
@@ -71,6 +78,10 @@ def pytest_configure(config):
         if not config.option.selenium_enable:
             setattr(config.option, "markexpr", "not selenium")
     os.environ["CELERY_ALWAYS_EAGER"] = "1"
+    os.environ["MEDIA_ROOT"] = "/tmp/media/"
+    settings.MEDIA_ROOT = tempfile.TemporaryDirectory().name
+    original_media = os.path.join(settings.DEMO_DIR, "media")
+    shutil.copytree(original_media, settings.MEDIA_ROOT)
 
     if config.option.log_level:
         import logging
@@ -141,7 +152,5 @@ def administrator():
     from django.contrib.auth.models import User
     from utils import ADMIN, PWD
 
-    superuser = User._default_manager.create_superuser(
-        username=ADMIN, password=PWD, email="sax@noreply.org"
-    )
+    superuser = User._default_manager.create_superuser(username=ADMIN, password=PWD, email="sax@noreply.org")
     return superuser

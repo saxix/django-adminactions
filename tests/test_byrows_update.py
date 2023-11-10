@@ -49,9 +49,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
             form["action"] = "byrows_update"
             self._select_rows(form, selected_rows=self._selected_rows)
             res = form.submit().follow()
-            assert "Sorry you do not have rights to execute this action" in str(
-                res.body
-            )
+            assert "Sorry you do not have rights to execute this action" in str(res.body)
 
     def test_form_rows_count(self):
         """

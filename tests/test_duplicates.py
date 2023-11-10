@@ -59,9 +59,7 @@ class FindDuplicatesTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestC
             form["action"] = "find_duplicates_action"
             form.set("_selected_action", True, 0)
             res = form.submit().follow()
-            assert "Sorry you do not have rights to execute this action" in str(
-                res.body
-            )
+            assert "Sorry you do not have rights to execute this action" in str(res.body)
 
     def test_validate_on(self):
         self._run_action()

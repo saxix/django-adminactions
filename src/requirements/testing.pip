@@ -14,11 +14,11 @@ pytest-cache
 pytest-cov
 pytest-django
 pytest-echo
-pytest-pythonpath
 redis
 readme
 selenium>=2.42.0
 setuptools>=15.0
 tox<4
-#WebTest==2.0.7
+isort
+black
 

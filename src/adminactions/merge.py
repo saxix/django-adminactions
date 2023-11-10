@@ -83,13 +83,9 @@ def merge(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label, get_permission_codename(merge.base_permission, opts)
-    )
+    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(merge.base_permission, opts))
     if not request.user.has_perm(perm):
-        messages.error(
-            request, _("Sorry you do not have rights to execute this action")
-        )
+        messages.error(request, _("Sorry you do not have rights to execute this action"))
         return
 
     def raw_widget(field, **kwargs):
@@ -107,9 +103,7 @@ def merge(modeladmin, request, queryset):  # noqa
         exclude=("pk",),
         formfield_callback=raw_widget,
     )
-    OForm = modelform_factory(
-        modeladmin.model, exclude=("pk",), formfield_callback=raw_widget
-    )
+    OForm = modelform_factory(modeladmin.model, exclude=("pk",), formfield_callback=raw_widget)
 
     def validate(v_request, v_master, v_other):
         """Validate the model is still valid after the merge"""
@@ -169,9 +163,7 @@ def merge(modeladmin, request, queryset):  # noqa
         master = queryset.get(pk=request.POST.get("master_pk"))
         original = clone_instance(master)
         other = queryset.get(pk=request.POST.get("other_pk"))
-        formset = formset_factory(OForm)(
-            initial=[model_to_dict(master), model_to_dict(other)]
-        )
+        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
         is_valid, form, merge_kwargs = validate(request, master, other)
         if is_valid:
             ctx.update({"original": original})
@@ -184,9 +176,7 @@ def merge(modeladmin, request, queryset):  # noqa
     elif "apply" in request.POST:
         master = queryset.get(pk=request.POST.get("master_pk"))
         other = queryset.get(pk=request.POST.get("other_pk"))
-        formset = formset_factory(OForm)(
-            initial=[model_to_dict(master), model_to_dict(other)]
-        )
+        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
         ok, form, merge_kwargs = validate(request, master, other)
         if ok:
             adminaction_start.send(
@@ -241,14 +231,10 @@ def merge(modeladmin, request, queryset):  # noqa
             "master_pk": master.pk,
             "other_pk": other.pk,
         }
-        formset = formset_factory(OForm)(
-            initial=[model_to_dict(master), model_to_dict(other)]
-        )
+        formset = formset_factory(OForm)(initial=[model_to_dict(master), model_to_dict(other)])
         form = MForm(initial=initial, instance=master)
 
-    adminForm = helpers.AdminForm(
-        form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin
-    )
+    adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
     ctx.update(
         {

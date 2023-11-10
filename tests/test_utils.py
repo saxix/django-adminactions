@@ -16,10 +16,7 @@ def test_get_verbose_name():
 
     assert get_verbose_name(User.objects, "username") == "username"
 
-    assert (
-        get_verbose_name(User.objects, get_field_by_name(user, "username")[0])
-        == "username"
-    )
+    assert get_verbose_name(User.objects, get_field_by_name(user, "username")[0]) == "username"
 
     assert get_verbose_name(p, "content_type.model") == "python model class name"
 
