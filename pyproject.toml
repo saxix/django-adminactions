@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 110
+target-version = ['py39']
+
+
+[tool.isort]
+profile = "black"
+line_length = 110
+lines_between_sections = 1
+known_first_party = "adminactions"
+skip = "migrations"

@@ -16,7 +16,7 @@ jobs:
 
             -   name: Install dependencies
                 run: |
-                    python -m pip install --upgrade pip pre-commit
+                    python -m pip install --upgrade pip pre-commit black isort flake8
             -   name: Lint with flake8
                 run: |
                     pre-commit run --all
