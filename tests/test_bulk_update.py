@@ -1,7 +1,6 @@
 import csv
 from pathlib import Path
 
-from demo.models import DemoModel, DemoOneToOne
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -10,6 +9,8 @@ from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 from webtest import Upload
+
+from demo.models import DemoModel, DemoOneToOne, DemoRelated
 
 __all__ = [
     "BulkUpdateMemoryFileUploadHandlerTest",
@@ -23,6 +24,7 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
     csrf_checks = True
 
     _selected_rows = [0, 1]
+    _selectedr_rows = [0,]
 
     action_name = "bulk_update"
     sender_model = DemoModel
@@ -56,6 +58,35 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
                 res.forms["bulk-update"]["fld-id"] = "pk"
                 res.forms["bulk-update"]["fld-index_field"] = ["id"]
                 res.forms["bulk-update"]["fld-id"] = "pk"
+                res.forms["bulk-update"]["csv-delimiter"] = ","
+                res.forms["bulk-update"]["csv-quoting"] = csv.QUOTE_NONE
+
+                for k, v in kwargs.items():
+                    res.forms["bulk-update"][k] = v
+                res = res.forms["bulk-update"].submit("apply")
+        return res
+
+    def _run_action_related_model(self, steps=2, **kwargs):
+        selected_rows = kwargs.pop("selected_rows", self._selectedr_rows)
+        select_across = kwargs.pop("select_across", False)
+        with user_grant_permission(
+            self.user,
+            ["demo.change_demorelated", "demo.adminactions_bulkupdate_demorelated"],
+        ):
+            res = self.app.get("/", user="user", auto_follow=False)
+            res = res.click("Demo related")
+            # print(res)
+            if steps >= 1:
+                form = res.forms["changelist-form"]
+                form["action"] = "bulk_update"
+                form["select_across"] = select_across
+                self._select_rows(form, selected_rows)
+                res = form.submit()
+            if steps >= 2:
+                res.forms["bulk-update"]["_file"] = Upload(str(Path(__file__).parent / "related_model_bulk_update.csv"))
+                res.forms["bulk-update"]["fld-id"] = "id"
+                res.forms["bulk-update"]["fld-index_field"] = ["id"]
+                res.forms["bulk-update"]["fld-demo"] = "demo_uuid"
                 res.forms["bulk-update"]["csv-delimiter"] = ","
                 res.forms["bulk-update"]["csv-quoting"] = csv.QUOTE_NONE
 
@@ -185,7 +216,7 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
         assert messages[0] == "['miss column is not present in the file']"
 
     def test_bulk_update_with_one_to_one_field(self):
-        demo_model_instance = G(DemoModel, char='InitialValue', integer=123)
+        demo_model_instance = G(DemoModel, char="InitialValue", integer=123)
         demo_one_to_one_instance = G(DemoOneToOne, demo=demo_model_instance)
         csv_data = f"pk,one_to_one_id\n{demo_model_instance.pk},{demo_one_to_one_instance.pk}"
         res = self._run_action(
@@ -201,6 +232,25 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
         self.assertTrue(DemoModel.objects.filter(pk=demo_model_instance.pk, onetoone=demo_one_to_one_instance).exists())
         self.assertEqual(res.status_code, 200)
 
+    def test_bulk_update_with_foreign_key(self):
+        demo_model_instance = G(DemoModel, char="InitialValue", integer=123)
+        demo_related_instance = G(DemoRelated, demo=demo_model_instance)
+        new_demo_model_instance = G(DemoModel, char="NewValue", integer=456)
+        csv_data = f"id,demo_uuid\n{demo_related_instance.pk},{new_demo_model_instance.uuid}"
+
+        res = self._run_action_related_model(
+            **{
+                "_file": Upload(
+                    "data.csv",
+                    csv_data.encode(),
+                    "text/csv",
+                ),
+                "fld-demo": "demo_uuid",
+            }
+        )
+
+        self.assertTrue(DemoRelated.objects.filter(pk=demo_related_instance.pk, demo=new_demo_model_instance).exists())
+        self.assertEqual(res.status_code, 200)
 
 
 class BulkUpdateMemoryFileUploadHandlerTest(BulkUpdate, TestCase):

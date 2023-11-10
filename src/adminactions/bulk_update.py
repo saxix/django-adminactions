@@ -7,9 +7,10 @@ from typing import Dict, Optional, Sequence
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.files.utils import FileProxyMixin
 from django.core.validators import FileExtensionValidator
+from django.db import models
 from django.db.transaction import atomic
 from django.forms import Media
 from django.http import HttpResponseRedirect
@@ -21,7 +22,8 @@ from django.utils.translation import gettext as _
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVConfigForm
 from adminactions.perms import get_permission_codename
-from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
+from adminactions.signals import (adminaction_end, adminaction_requested,
+                                  adminaction_start,)
 
 logger = logging.getLogger(__name__)
 
@@ -264,7 +266,6 @@ def _bulk_update(  # noqa: max-complexity: 18
         else:
             reader = csv.reader(codecs.iterdecode(f, "utf-8"), **(csv_options or {}))
             mapping = {k: int(v) - 1 for k, v in mapping.items()}
-
         reverse = {v: k for k, v in mapping.items()}
         with atomic():
             for i, row in enumerate(reader, 1):
@@ -279,12 +280,16 @@ def _bulk_update(  # noqa: max-complexity: 18
                                 model_field = queryset.model._meta.get_field(field)
                                 if model_field.is_relation and model_field.many_to_one:
                                     related_model = model_field.related_model
-                                    try:
-                                        value = related_model.objects.get(pk=value)
-                                    except ObjectDoesNotExist:
-                                        raise ValidationError(
-                                            "No {} found with id {}".format(related_model._meta.verbose_name, value)
-                                        )
+                                    related_field_name = model_field.to_fields[0] if model_field.to_fields else "pk"
+                                    related_field = related_model._meta.get_field(related_field_name)
+
+                                    if isinstance(related_field, models.UUIDField):
+                                        try:
+                                            value = related_model.objects.get(**{related_field_name: value})
+                                        except related_model.DoesNotExist:
+                                            raise ValidationError(
+                                                f"No instance of {related_model._meta.verbose_name} found with {related_field_name} = {value}"
+                                            )
                                 setattr(obj, field, value)
                     else:
                         for i, value in enumerate(row):
