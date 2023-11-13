@@ -200,13 +200,13 @@ class DjangoStandaloneHTMLBuilder(StandaloneHTMLBuilder):
         templatebuiltins = {
             "ttags": [
                 n
-                for ((t, n), (l, a)) in xrefs.items()
-                if t == "templatetag" and l == "ref/templates/builtins"
+                for ((t, n), (l, a)) in xrefs.items()  # noqa
+                if t == "templatetag" and l == "ref/templates/builtins"  # noqa
             ],
             "tfilters": [
                 n
-                for ((t, n), (l, a)) in xrefs.items()
-                if t == "templatefilter" and l == "ref/templates/builtins"
+                for ((t, n), (l, a)) in xrefs.items()  # noqa
+                if t == "templatefilter" and l == "ref/templates/builtins"  # noqa
             ],
         }
         outfilename = os.path.join(self.outdir, "templatebuiltins.js")
