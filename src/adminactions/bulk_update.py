@@ -22,8 +22,7 @@ from django.utils.translation import gettext as _
 from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVConfigForm
 from adminactions.perms import get_permission_codename
-from adminactions.signals import (adminaction_end, adminaction_requested,
-                                  adminaction_start,)
+from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +146,9 @@ def bulk_update(modeladmin, request, queryset):  # noqa
         if "apply" in request.POST:
             form = bulk_update_form(request.POST, request.FILES, initial=form_initial)
             csv_form = CSVConfigForm(request.POST, initial=csv_initial, prefix="csv")
-            map_form = BulkUpdateMappingForm(request.POST, initial=map_initial, model=modeladmin.model, prefix="fld")
+            map_form = BulkUpdateMappingForm(
+                request.POST, initial=map_initial, model=modeladmin.model, prefix="fld"
+            )
 
             if form.is_valid() and csv_form.is_valid() and map_form.is_valid():
                 header = csv_form.cleaned_data.pop("header")
@@ -280,7 +281,9 @@ def _bulk_update(  # noqa: max-complexity: 18
                                 model_field = queryset.model._meta.get_field(field)
                                 if model_field.is_relation and model_field.many_to_one:
                                     related_model = model_field.related_model
-                                    related_field_name = model_field.to_fields[0] if model_field.to_fields else "pk"
+                                    related_field_name = (
+                                        model_field.to_fields[0] if model_field.to_fields else "pk"
+                                    )
                                     related_field = related_model._meta.get_field(related_field_name)
 
                                     if isinstance(related_field, models.UUIDField):

@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
 
+from demo.models import DemoModel, DemoOneToOne, DemoRelated
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -9,8 +10,6 @@ from django_dynamic_fixture import G
 from django_webtest import WebTestMixin
 from utils import CheckSignalsMixin, SelectRowsMixin, user_grant_permission
 from webtest import Upload
-
-from demo.models import DemoModel, DemoOneToOne, DemoRelated
 
 __all__ = [
     "BulkUpdateMemoryFileUploadHandlerTest",
@@ -24,7 +23,9 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
     csrf_checks = True
 
     _selected_rows = [0, 1]
-    _selectedr_rows = [0,]
+    _selectedr_rows = [
+        0,
+    ]
 
     action_name = "bulk_update"
     sender_model = DemoModel
@@ -83,7 +84,9 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
                 self._select_rows(form, selected_rows)
                 res = form.submit()
             if steps >= 2:
-                res.forms["bulk-update"]["_file"] = Upload(str(Path(__file__).parent / "related_model_bulk_update.csv"))
+                res.forms["bulk-update"]["_file"] = Upload(
+                    str(Path(__file__).parent / "related_model_bulk_update.csv")
+                )
                 res.forms["bulk-update"]["fld-id"] = "id"
                 res.forms["bulk-update"]["fld-index_field"] = ["id"]
                 res.forms["bulk-update"]["fld-demo"] = "demo_uuid"
@@ -229,7 +232,9 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
                 "fld-onetoone": "one_to_one_id",
             }
         )
-        self.assertTrue(DemoModel.objects.filter(pk=demo_model_instance.pk, onetoone=demo_one_to_one_instance).exists())
+        self.assertTrue(
+            DemoModel.objects.filter(pk=demo_model_instance.pk, onetoone=demo_one_to_one_instance).exists()
+        )
         self.assertEqual(res.status_code, 200)
 
     def test_bulk_update_with_foreign_key(self):
@@ -249,7 +254,9 @@ class BulkUpdate(SelectRowsMixin, CheckSignalsMixin, WebTestMixin):
             }
         )
 
-        self.assertTrue(DemoRelated.objects.filter(pk=demo_related_instance.pk, demo=new_demo_model_instance).exists())
+        self.assertTrue(
+            DemoRelated.objects.filter(pk=demo_related_instance.pk, demo=new_demo_model_instance).exists()
+        )
         self.assertEqual(res.status_code, 200)
 
 
