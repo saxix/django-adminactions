@@ -1,3 +1,5 @@
+import uuid
+
 from admin_extra_urls.api import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from django.contrib.admin import ModelAdmin, site
@@ -29,6 +31,7 @@ class DemoModel(models.Model):
     generic_ip = models.GenericIPAddressField()
     url = models.URLField()
     text = models.TextField()
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     unique = models.CharField(max_length=255, unique=True)
     nullable = models.CharField(max_length=255, null=True)
@@ -54,6 +57,13 @@ class UserDetail(models.Model):
 
 class DemoOneToOne(models.Model):
     demo = models.OneToOneField(DemoModel, on_delete=models.CASCADE, related_name="onetoone")
+
+    class Meta:
+        app_label = "demo"
+
+
+class DemoRelated(models.Model):
+    demo = models.ForeignKey(DemoModel, on_delete=models.CASCADE, related_name="related", to_field="uuid")
 
     class Meta:
         app_label = "demo"
@@ -88,6 +98,10 @@ class DemoOneToOneAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):
     pass
 
 
+class DemoRelatedAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):
+    pass
+
+
 class TestMassUpdateForm(MassUpdateForm):
     pass
 
@@ -98,4 +112,5 @@ class DemoModelMassUpdateForm(MassUpdateForm):
 
 site.register(DemoModel, DemoModelAdmin)
 site.register(DemoOneToOne, DemoOneToOneAdmin)
+site.register(DemoRelated, DemoRelatedAdmin)
 site.register(UserDetail, UserDetailModelAdmin)

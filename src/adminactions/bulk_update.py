@@ -10,6 +10,7 @@ from django.contrib.admin import helpers
 from django.core.exceptions import ValidationError
 from django.core.files.utils import FileProxyMixin
 from django.core.validators import FileExtensionValidator
+from django.db import models
 from django.db.transaction import atomic
 from django.forms import Media
 from django.http import HttpResponseRedirect
@@ -260,13 +261,12 @@ def _bulk_update(  # noqa: max-complexity: 18
 
         if header:
             reader = csv.DictReader(codecs.iterdecode(f, "utf-8"), **(csv_options or {}))
-            for k, v in mapping.items():
+            for _k, v in mapping.items():
                 if v not in reader.fieldnames:
                     raise ValidationError(_("%s column is not present in the file") % v)
         else:
             reader = csv.reader(codecs.iterdecode(f, "utf-8"), **(csv_options or {}))
             mapping = {k: int(v) - 1 for k, v in mapping.items()}
-
         reverse = {v: k for k, v in mapping.items()}
         with atomic():
             for i, row in enumerate(reader, 1):
@@ -278,7 +278,21 @@ def _bulk_update(  # noqa: max-complexity: 18
                         for colname, value in row.items():
                             field = reverse[colname]
                             if field not in indexes:
-                                changes[field] = [getattr(obj, field), value]
+                                model_field = queryset.model._meta.get_field(field)
+                                if model_field.is_relation and model_field.many_to_one:
+                                    related_model = model_field.related_model
+                                    related_field_name = (
+                                        model_field.to_fields[0] if model_field.to_fields else "pk"
+                                    )
+                                    related_field = related_model._meta.get_field(related_field_name)
+
+                                    if isinstance(related_field, models.UUIDField):
+                                        try:
+                                            value = related_model.objects.get(**{related_field_name: value})
+                                        except related_model.DoesNotExist:
+                                            raise ValidationError(
+                                                f"No instance of {related_model._meta.verbose_name} found with {related_field_name} = {value}"
+                                            )
                                 setattr(obj, field, value)
                     else:
                         for i, value in enumerate(row):

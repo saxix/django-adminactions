@@ -1,3 +1,8 @@
+Release 2.3
+===========
+* Add support to foreignkeys to bulk updates ( @see https://github.com/saxix/django-adminactions/pull/224/files)
+
+
 Release 2.2
 ===========
 * new `MassUpdateForm.sort_fields`. Make optional MassUpdateForm fields sorting
