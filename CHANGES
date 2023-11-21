@@ -1,4 +1,4 @@
-Release 2.3 (dev)
+Release 2.3
 ===========
 * Add support to foreignkeys to bulk updates ( @see https://github.com/saxix/django-adminactions/pull/224/files)
 
