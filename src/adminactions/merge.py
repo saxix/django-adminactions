@@ -68,7 +68,7 @@ class MergeFormBase(forms.Form):
             "admin/js/jquery.init.js",
             "adminactions/js/merge.min.js",
         ]
-        css = {"all": ["adminactions/css/adminactions.min.css"]}
+        css = {"all": ["adminactions/css/adminactions.css"]}
 
 
 class MergeForm(GenericActionForm, MergeFormBase):
