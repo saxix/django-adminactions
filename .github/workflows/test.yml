@@ -63,9 +63,9 @@ jobs:
                 run: tox run -vv --notest --skip-missing-interpreters false -e d${{ env.DJ_VER }}-py${{ env.PY_VER }}
 
             -   name: Run test suite
+#                    COV_CMD=$(if [ ${{ env.DJ_VER }}-${{ env.PY_VER }} == 51-312 ]; then echo "--cov=pytest_echo --cov-report=xml"; else echo ; fi)
                 run: |
-                    COV_CMD=$(if [ ${{ env.DJ_VER }}-${{ env.PY_VER }} == 51-312 ]; then echo "--cov=pytest_echo --cov-report=xml"; else echo ; fi)
-                    tox run --skip-pkg-install -e d${{ env.DJ_VER }}-py${{ env.PY_VER }} $COV_CMD
+                    tox run --skip-pkg-install -e d${{ env.DJ_VER }}-py${{ env.PY_VER }}
                 env:
                     PYTEST_ADDOPTS: "-vv --durations=20"
                     DIFF_AGAINST: HEAD
