@@ -34,13 +34,17 @@
     });
   })(django.jQuery);
 </script>
-{% endif %} {% endblock extrahead %} {% block breadcrumbs %}{% if not is_popup %}
+{% endif %} {% endblock extrahead %}
+
+{% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
   <a href="{% url 'admin:index' %}">{% translate "Home" %}</a> &rsaquo;
   <a href="{% url 'admin:index' %}{{ app_label }}">{{ app_label|capfirst }}</a>
   &rsaquo; {% if has_change_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %} &rsaquo; {{ action_short_description|capfirst }}
 </div>
-{% endif %}{% endblock breadcrumbs %} {% block content %} {% if adminform.form.subject.errors %}
+{% endif %}{% endblock breadcrumbs %}
+
+{% block content %} {% if adminform.form.subject.errors %}
 <ol>
   {% for error in adminform.form.subject.errors %}
   <li><strong>{{ error|escape }}</strong></li>
@@ -122,7 +126,7 @@
 
       <tr>
         <td align="left">
-          <i>1</i>{% translate "for Monday through" %}<i>7</i>{% translate "for Sunday"%}
+          <i>1</i>{% translate "for Monday through" %}<i>7</i>{% translate "for Sunday" %}
         </td>
       </tr>
 
@@ -163,7 +167,7 @@
       <tr valign="middle">
         <td align="left"><i>W</i></td>
         <td align="left">
-          {% translate "ISO-8601 week number of year, weeks starting on Monday (added in PHP 4.1.0)"%}
+          {% translate "ISO-8601 week number of year, weeks starting on Monday (added in PHP 4.1.0)" %}
         </td>
         <td align="left">
           {% translate "Example:" %} <i>42</i> {% translate "(the 42nd week in the year)" %}
@@ -236,7 +240,7 @@
         <td align="left"><i>L</i></td>
         <td align="left">{% translate "Whether it's a leap year" %}</td>
         <td align="left">
-          <i>1</i>{% translate " if it is a leap year, " %}<i>0</i> {% translate "otherwise."%}
+          <i>1</i>{% translate " if it is a leap year, " %}<i>0</i> {% translate "otherwise." %}
         </td>
       </tr>
 

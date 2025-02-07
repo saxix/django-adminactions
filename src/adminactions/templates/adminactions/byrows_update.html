@@ -20,16 +20,20 @@
   type="text/javascript"
   src="{% static 'admin/js/jquery.init.js' %}"
 ></script>
-{% endblock extrahead %} {% block breadcrumbs %}{% if not is_popup %}
+{% endblock extrahead %}
+
+{% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
   <a href="../../">{% translate "Home" %}</a> &rsaquo;
   <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
   <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-  {{action_short_description|capfirst }}
+  {{ action_short_description|capfirst }}
 </div>
-{% endif %}{% endblock breadcrumbs %} {% block content %} {% if formset.errors %}
+{% endif %}{% endblock breadcrumbs %}
+
+{% block content %} {% if formset.errors %}
 <p class="errornote">
-  {% if formset.errors|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{%endif %}
+  {% if formset.errors|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
 </p>
 {{ adminform.form.non_field_errors }} {% endif %}
 <form action="" method="post" id="update-form">
@@ -52,7 +56,7 @@
       <tr class="row {% cycle 'row1' 'row2' %}">
         {% for field in form.visible_fields %}
         <td>
-          {% if forloop.first %} {% for hidden in form.hidden_fields %} {{hidden}} {% endfor %} {% endif %} {{ field.errors.as_ul }} {{ field}}
+          {% if forloop.first %} {% for hidden in form.hidden_fields %} {{ hidden }} {% endfor %} {% endif %} {{ field.errors.as_ul }} {{ field }}
         </td>
         {% endfor %}
       </tr>
@@ -60,7 +64,7 @@
     </table>
   </div>
   {{ formset.management_form }} {% for hidden in actionform.hidden_fields %}
-  {{hidden }} {% endfor %}
+  {{ hidden }} {% endfor %}
   <input type="submit" name="apply" value="{% translate 'Update records' %}" />
 </form>
 {% endblock content %}

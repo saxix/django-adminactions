@@ -4,7 +4,9 @@
   <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
   <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo; {{ action_short_description|capfirst }}
 </div>
-{% endif %}{% endblock breadcrumbs %} {% block content %} {% if form.subject.errors %}
+{% endif %}{% endblock breadcrumbs %}
+
+{% block content %} {% if form.subject.errors %}
 <ol>
   {% for error in form.subject.errors %}
   <li><strong>{{ error|escape }}</strong></li>

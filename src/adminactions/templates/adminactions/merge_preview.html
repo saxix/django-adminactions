@@ -1,4 +1,4 @@
-{% extends "admin/change_form.html" %} {% load i18n actions static merge %} {% block breadcrumbs %}{% if not is_popup %}
+{% extends "admin/change_form.html" %} {% load actions i18n merge static %} {% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
   <a href="../../">{% translate "Home" %}</a> &rsaquo;
   <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
@@ -6,9 +6,11 @@
   <a href="javascript:history.back();">{% translate "Merge records" %}</a>
   &rsaquo; {% translate "Preview" %}
 </div>
-{% endif %}{% endblock %} {% block content %}
+{% endif %}{% endblock breadcrumbs %}
+
+{% block content %}
 <form method="post" id="merge-form">
-  {% csrf_token %} {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor%}
+  {% csrf_token %} {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
   {% for f in adminform.form.action_fields %}{{ f }}{% endfor %}
   <table class="mergetable">
     <tr class="row1">
@@ -35,4 +37,4 @@
   </table>
   <input type="submit" value="{% translate 'Merge' %}" name="apply" />
 </form>
-{% endblock %}
+{% endblock content %}

@@ -1,15 +1,11 @@
-include README.rst
+include README.md
 include MANIFEST.in
 include AUTHORS.rst
 include CHANGES
 include LICENSE
-include setup.py
-include setup.cfg
 include tox.ini
 include *.py
-include Makefile
 
-exclude .bumpversion.cfg
 exclude .editorconfig
 exclude manage.py
 exclude .*

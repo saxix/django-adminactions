@@ -1,12 +1,18 @@
-{% extends "admin/change_form.html" %}{% load actions admin_modify i18n static%}
-{% block extrahead %}{{ block.super }}{{ form.media }}{% endblock %} {% block breadcrumbs %}{% if not is_popup %}
+{% extends "admin/change_form.html" %}{% load actions admin_modify i18n static %}
+{% block extrahead %}{{ block.super }}{{ form.media }}{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
   <a href="../../">{% translate "Home" %}</a> &rsaquo;
   <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
   <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-  {{action_short_description|capfirst }}
+  {{ action_short_description|capfirst }}
 </div>
-{% endif %} {% endblock %} {% block coltype %}{% endblock %} {% block content %}
+{% endif %} {% endblock breadcrumbs %}
+
+{% block coltype %}{% endblock %}
+
+{% block content %}
 <div class="duplicates">
   <div class="left">
     {% if form %}

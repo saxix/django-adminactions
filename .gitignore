@@ -5,15 +5,12 @@
 *.pyc
 *.egg-info
 *.sqlite
+src/adminactions/version.py
 /dist
 /build
 /docs/build
 /MANIFEST
 coverage.xml
 sonar-project.properties
-.scannerwork
-Pipfile
-Pipfile.lock
-poetry.lock
 .venv/
-pdm.lock
+uv.lock

@@ -30,31 +30,47 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: [ "3.10", "3.11", "3.12" ]
-                django-version: [ "3.2", "4.2", "5.0" ]
+#                python-version: [ "3.10", "3.11", "3.12" ]
+#                django-version: [ "3.2", "4.2", "5.0" ]
+                python-version: [  "312" ]
+                django-version: [ "51" ]
         env:
             PY_VER: ${{ matrix.python-version}}
             DJ_VER: ${{ matrix.django-version}}
             CELERY_BROKER_URL: redis://redis:6379/0
             CELERY_ALWAYS_EAGER: true
         steps:
-            -   uses: actions/checkout@v2
+          - uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
+          - name: Install the latest version of uv
+            uses: astral-sh/setup-uv@v5
+            with:
+              enable-cache: true
+              cache-dependency-glob: "pyproject.toml"
+              github-token: ${{ secrets.GITHUB_TOKEN }}
 
-            -   name: Set up Python ${{ matrix.python-version }}
-                uses: actions/setup-python@v2
-                with:
-                    python-version: ${{ matrix.python-version }}
+          - name: Install tox
+            run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv
 
-            -   name: Install dependencies
-                run: python -m pip install --upgrade pip .[test] "django==${DJ_VER}.*"
+          - name: Install Python
+            if: matrix.python-version != '3.13'
+            run: uv python install --python-preference only-managed ${{ matrix.python-version}}
 
-            -   name: Test with
-                run: py.test tests/ -v
+          - name: Setup test suite ${{ env.DJ_VER }}-${{ env.PY_VER }}
+            run: tox run -vv --notest --skip-missing-interpreters false -e d${{ env.DJ_VER }}-py${{ env.PY_VER }}
 
-            -   uses: codecov/codecov-action@v1
-                with:
-#                    files: ./coverage1.xml,./coverage2.xml # optional
-#                    flags: unittests # optional
-#                    name: codecov-umbrella # optional
-#                    fail_ci_if_error: true # optional (default = false)
-                    verbose: true # optional (default = false)
+          - name: Run test suite
+            run:
+              COV_CMD=$(if [${{ env.DJ_VER }}-${{ env.PY_VER }}} == 51-312 ]; then echo "--cov=pytest_echo --cov-report=xml"; else echo ; fi)
+              tox run --skip-pkg-install -e d${{ env.DJ_VER }}-py${{ env.PY_VER }} $COV_CMD
+            env:
+              PYTEST_ADDOPTS: "-vv --durations=20"
+              DIFF_AGAINST: HEAD
+          - name: Upload coverage to Codecov
+            uses: codecov/codecov-action@v5
+            if: ${{ success() && matrix.python-version == 3.13 }}
+            with:
+              env_vars: OS
+              name: codecov-pytest-order
+              token: ${{ secrets.CODECOV_TOKEN }}

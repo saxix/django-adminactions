@@ -26,14 +26,18 @@
   src="{% static 'adminactions/js/jqplot/plugins/jqplot.categoryAxisRenderer.min.js' %}"
 ></script>
 
-{% endblock extrahead %} {% block breadcrumbs %}{% if not is_popup %}
+{% endblock extrahead %}
+
+{% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
   <a href="../../">{% translate "Home" %}</a> &rsaquo;
   <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
   <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-  {{action_short_description|capfirst }}
+  {{ action_short_description|capfirst }}
 </div>
-{% endif %} {% endblock breadcrumbs %} {% block content %}
+{% endif %} {% endblock breadcrumbs %}
+
+{% block content %}
 <div class="left">
   <form action="." method="post" id="charts-form">
     -{% csrf_token %}=
