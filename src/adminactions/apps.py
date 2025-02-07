@@ -6,7 +6,7 @@ from adminactions import config
 class Config(AppConfig):
     name = "adminactions"
 
-    def ready(self):
+    def ready(self) -> None:
         from adminactions import consts
 
         from . import checks  # noqa

@@ -1,8 +1,10 @@
 import json
+from typing import TYPE_CHECKING
 
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.db.models.aggregates import Count
+from django.db.models.base import Model
 from django.db.models.fields.related import ForeignKey
 from django.forms.fields import BooleanField, CharField, ChoiceField
 from django.forms.forms import DeclarativeFieldsMetaclass, Form
@@ -16,8 +18,13 @@ from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import get_field_by_name
 
+if TYPE_CHECKING:
+    from django.contrib.admin import ModelAdmin
+    from django.http.request import HttpRequest
+    from django.http.response import HttpResponse
 
-def graph_form_factory(model):
+
+def graph_form_factory(model: Model) -> Form:
     app_name = model._meta.app_label
     model_name = model.__name__
 
@@ -38,7 +45,7 @@ def graph_form_factory(model):
     return DeclarativeFieldsMetaclass(str(class_name), (Form,), attrs)
 
 
-def graph_queryset(modeladmin, request, queryset):  # noqa
+def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> "HTTPResponse":  # noqa
     opts = modeladmin.model._meta
     perm = "{0}.{1}".format(
         opts.app_label.lower(),

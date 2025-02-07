@@ -1,8 +1,10 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         from adminactions.perms import create_extra_permissions
 
         create_extra_permissions()

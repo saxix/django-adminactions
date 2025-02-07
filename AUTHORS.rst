@@ -44,4 +44,3 @@ Contributors
 .. _`@asfaltboy`: https://github.com/asfaltboy
 .. _`@int-ua`: https://github.com/int-ua
 .. _`@Djailla`: https://github.com/Djailla
-

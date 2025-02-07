@@ -1,21 +1,27 @@
+from __future__ import annotations
+
 from functools import partial
+from typing import TYPE_CHECKING, Any, Iterable, Union
 
 from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
 
+if TYPE_CHECKING:
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models.base import Model
+    from django.db.models.fields import Field
 
-def get_ignored_fields(model, setting_var_name):
+
+def get_ignored_fields(model: Model, setting_var_name: str) -> Iterable[str]:
     """
     returns list of ignored fields which must not be modified
     """
-    return (
-        getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
-    )
+    return getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
 
 
-def clone_instance(instance, fieldnames=None):
+def clone_instance(instance: Model, fieldnames: list[str] = None) -> Model:
     """
         returns a copy of the passed instance.
 
@@ -35,19 +41,20 @@ def clone_instance(instance, fieldnames=None):
 # return instance.__class__.objects.get(pk=instance.pk)
 
 
-def get_attr(obj, attr, default=None):
+def get_attr(obj: Any, attr: str, default: Any | None = None) -> Any:
     """Recursive get object's attribute. May use dot notation.
 
-    >>> class C: pass
+    >>> class C:
+    ...     pass
     >>> a = C()
     >>> a.b = C()
     >>> a.b.c = 4
-    >>> get_attr(a, 'b.c')
+    >>> get_attr(a, "b.c")
     4
 
-    >>> get_attr(a, 'b.c.y', None)
+    >>> get_attr(a, "b.c.y", None)
 
-    >>> get_attr(a, 'b.c.y', 1)
+    >>> get_attr(a, "b.c.y", 1)
     1
     """
     if "." not in attr:
@@ -61,7 +68,7 @@ def get_attr(obj, attr, default=None):
     return ret
 
 
-def getattr_or_item(obj, name):
+def getattr_or_item(obj: Any, name: str) -> Any:
     """
     works indifferently on dict or objects, retrieving the
     'name' attribute or item
@@ -70,11 +77,11 @@ def getattr_or_item(obj, name):
     :param name: attribute or item name
     :return:
     >>> from django.contrib.auth.models import Permission
-    >>> p = Permission(name='perm')
-    >>> d ={'one': 1, 'two': 2}
-    >>> getattr_or_item(d, 'one')
+    >>> p = Permission(name="perm")
+    >>> d = {"one": 1, "two": 2}
+    >>> getattr_or_item(d, "one")
     1
-    >>> print(getattr_or_item(p, 'name'))
+    >>> print(getattr_or_item(p, "name"))
     perm
     """
     # this change type from type to dict in python3.9
@@ -92,7 +99,9 @@ def getattr_or_item(obj, name):
     return ret
 
 
-def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=None):
+def get_field_value(
+    obj: Model, field: Field, usedisplay: bool = True, raw_callable: bool = False, modeladmin: ModelAdmin = None
+) -> Any:
     """
     returns the field value or field representation if get_FIELD_display exists
 
@@ -102,8 +111,8 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=
     :return: field value
 
     >>> from django.contrib.auth.models import Permission
-    >>> p = Permission(name='perm')
-    >>> get_field_value(p, 'name') == 'perm'
+    >>> p = Permission(name="perm")
+    >>> get_field_value(p, "name") == "perm"
     True
     >>> get_field_value(p, None)
     Traceback (most recent call last):
@@ -138,7 +147,7 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=
     return value
 
 
-def get_field_by_path(model, field_path):
+def get_field_by_path(model: Model, field_path: str) -> Field:
     """
     get a Model class or instance and a path to a attribute, returns the field object
 
@@ -149,11 +158,11 @@ def get_field_by_path(model, field_path):
 
     >>> from django.contrib.auth.models import Permission
 
-    >>> p = Permission(name='perm')
-    >>> get_field_by_path(Permission, 'content_type').name
+    >>> p = Permission(name="perm")
+    >>> get_field_by_path(Permission, "content_type").name
     'content_type'
-    >>> p = Permission(name='perm')
-    >>> get_field_by_path(p, 'content_type.app_label').name
+    >>> p = Permission(name="perm")
+    >>> get_field_by_path(p, "content_type.app_label").name
     'app_label'
     """
     parts = field_path.split(".")
@@ -170,7 +179,7 @@ def get_field_by_path(model, field_path):
     return None
 
 
-def get_verbose_name(model_or_queryset, field):
+def get_verbose_name(model_or_queryset: Union[Model, QuerySet], field: Field) -> str:
     """
     returns the value of the ``verbose_name`` of a field
 
@@ -190,17 +199,17 @@ def get_verbose_name(model_or_queryset, field):
     >>> from django.contrib.auth.models import User, Permission
     >>> user = User()
     >>> p = Permission()
-    >>> get_verbose_name(user, 'username') == 'username'
+    >>> get_verbose_name(user, "username") == "username"
     True
-    >>> get_verbose_name(User, 'username') == 'username'
+    >>> get_verbose_name(User, "username") == "username"
     True
-    >>> get_verbose_name(User.objects.all(), 'username') == 'username'
+    >>> get_verbose_name(User.objects.all(), "username") == "username"
     True
-    >>> get_verbose_name(User.objects, 'username') == 'username'
+    >>> get_verbose_name(User.objects, "username") == "username"
     True
-    >>> get_verbose_name(User.objects, user._meta.fields[0]) == 'ID'
+    >>> get_verbose_name(User.objects, user._meta.fields[0]) == "ID"
     True
-    >>> get_verbose_name(p, 'content_type.model') == 'python model class name'
+    >>> get_verbose_name(p, "content_type.model") == "python model class name"
     True
     """
 
@@ -228,7 +237,7 @@ def get_verbose_name(model_or_queryset, field):
     return field.verbose_name
 
 
-def flatten(iterable):
+def flatten(iterable: Iterable) -> list[Any]:
     """
     flatten(sequence) -> list
 
@@ -242,10 +251,10 @@ def flatten(iterable):
     Examples:
 
     >>> from adminactions.utils import flatten
-    >>> [1, 2, [3,4], (5,6)]
+    >>> [1, 2, [3, 4], (5, 6)]
     [1, 2, [3, 4], (5, 6)]
 
-    >>> flatten([[[1,2,3], (42,None)], [4,5], [6], 7, (8,9,10)])
+    >>> flatten([[[1, 2, 3], (42, None)], [4, 5], [6], 7, (8, 9, 10)])
     [1, 2, 3, 42, None, 4, 5, 6, 7, 8, 9, 10]"""
 
     result = list()
@@ -257,21 +266,21 @@ def flatten(iterable):
     return list(result)
 
 
-def get_field_by_name(model, name):
+def get_field_by_name(model: Model, name: str) -> (Field, Model, bool, bool):
     field = model._meta.get_field(name)
     direct = not field.auto_created or field.concrete
     return field, field.model, direct, field.many_to_many
 
 
-def model_has_field(model, field_name):
+def model_has_field(model: Model, field_name: str) -> bool:
     return field_name in [f.name for f in model._meta.get_fields()]
 
 
-def get_all_related_objects(model):
+def get_all_related_objects(model: Model) -> list[str]:
     return [f for f in model._meta.get_fields() if (f.one_to_many or f.one_to_one) and f.auto_created]
 
 
-def get_all_field_names(model):
+def get_all_field_names(model: Model) -> list[str]:
     from itertools import chain
 
     return list(
@@ -285,11 +294,11 @@ def get_all_field_names(model):
     )
 
 
-def curry(func, *a, **kw):
+def curry(func: callable, *a: Any, **kw: Any) -> callable:
     return partial(func, *a, **kw)
 
 
-def get_common_context(modeladmin, **kwargs):
+def get_common_context(modeladmin: ModelAdmin, **kwargs: Any) -> dict[str, Any]:
     ctx = {
         "change": True,
         "is_popup": False,

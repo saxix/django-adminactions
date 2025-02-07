@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import logging
 import re
 from collections import OrderedDict as SortedDict
 from collections import defaultdict
+from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.conf import settings
@@ -33,6 +36,11 @@ from .forms import GenericActionForm
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import curry, get_field_by_name
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+    from django.http.request import HttpRequest
+
 
 logger = logging.getLogger(__name__)
 
@@ -74,82 +82,80 @@ class OperationManager:
         ("set null", (lambda old_value: None, False, disable_if_not_nullable, "")),
     ]
 
-    def __init__(self, _dict):
+    def __init__(self, _dict: dict[type[df.Field], tuple[str, Any]]) -> None:
         self._dict = defaultdict(SortedDict)
         self.operations = dict()
         self.register_operations(df.Field, self.COMMON)
         for field_class, args in _dict.items():
             self.register_operations(field_class, args)
 
-    def register_operations(self, field_class, operations):
+    def register_operations(
+        self, field_class: type[df.Field], operations: list[tuple[str, tuple[Any, bool, callable, str]]]
+    ) -> None:
         for label, operation in operations:
             self._dict[field_class][label] = operation
             if operation:
                 self.operations[label] = operation[0]
 
-    def get_function(self, name):
+    def get_function(self, name: str) -> callable:
         return self.operations.get(name, None)
 
-    def get(self, field_class: type):
+    def get(self, field_class: type[df.Field]) -> dict[type[df.Field]]:
         data = SortedDict()
         # reversed to make the most specific overrule the more general ones
         for typ in reversed(field_class.__mro__):
             data |= self._dict.get(typ, ())
         return data
 
-    def operation_enabled(self, field, operation):
+    def operation_enabled(self, field: df.Field, operation: tuple[Any, Any, Any]) -> bool:
         if operation:
             enabler = operation[2]
             return enabler is True or (callable(enabler) and enabler(field))
         return False
 
-    def get_for_field(self, field):
+    def get_for_field(self, field: df.Field) -> dict[str, callable]:
         """returns valid functions for passed field
         :param field Field django Model Field
         :return list of (label, (__, param, enabler, help))
         """
-        return SortedDict(
-            [
-                (label, operation)
-                for label, operation in self.get(field.__class__).items()
-                if self.operation_enabled(field, operation)
-            ]
-        )
+        return SortedDict([
+            (label, operation)
+            for label, operation in self.get(field.__class__).items()
+            if self.operation_enabled(field, operation)
+        ])
 
-    def __getitem__(self, field_class):
+    def __getitem__(self, field_class: type[df.Field]) -> dict[type[df.Field]]:
         return self.get(field_class)
 
 
-OPERATIONS = OperationManager(
-    {
-        df.CharField: [
-            ("upper", (str.upper, False, True, _("convert to uppercase"))),
-            ("lower", (str.lower, False, True, _("convert to lowercase"))),
-            (
-                "capitalize",
-                (str.capitalize, False, True, _("capitalize first character")),
-            ),
-            ("trim", (str.strip, False, True, _("leading and trailing whitespace"))),
-        ],
-        df.IntegerField: [
-            (
-                "add percent",
-                (add_percent, True, True, _("add <arg> percent to existing value")),
-            ),
-            ("sub percent", (sub_percent, True, True, "")),
-            ("sub", (sub_percent, True, True, "")),
-            ("add", (add, True, True, "")),
-        ],
-        df.BooleanField: [("toggle", (negate, False, True, ""))],
-        # df.NullBooleanField: [("toggle", (negate, False, True, ""))],
-        df.EmailField: [
-            ("change domain", (change_domain, True, True, "")),
-            ("upper", (str.upper, False, True, _("convert to uppercase"))),
-            ("lower", (str.lower, False, True, _("convert to lowercase"))),
-        ],
-        df.URLField: [("change protocol", (change_protocol, True, True, ""))],
-    }
-)
+OPERATIONS = OperationManager({
+    df.CharField: [
+        ("upper", (str.upper, False, True, _("convert to uppercase"))),
+        ("lower", (str.lower, False, True, _("convert to lowercase"))),
+        (
+            "capitalize",
+            (str.capitalize, False, True, _("capitalize first character")),
+        ),
+        ("trim", (str.strip, False, True, _("leading and trailing whitespace"))),
+    ],
+    df.IntegerField: [
+        (
+            "add percent",
+            (add_percent, True, True, _("add <arg> percent to existing value")),
+        ),
+        ("sub percent", (sub_percent, True, True, "")),
+        ("sub", (sub_percent, True, True, "")),
+        ("add", (add, True, True, "")),
+    ],
+    df.BooleanField: [("toggle", (negate, False, True, ""))],
+    # df.NullBooleanField: [("toggle", (negate, False, True, ""))],
+    df.EmailField: [
+        ("change domain", (change_domain, True, True, "")),
+        ("upper", (str.upper, False, True, _("convert to uppercase"))),
+        ("lower", (str.lower, False, True, _("convert to lowercase"))),
+    ],
+    df.URLField: [("change protocol", (change_protocol, True, True, ""))],
+})
 
 
 class MassUpdateForm(GenericActionForm):
@@ -167,7 +173,7 @@ class MassUpdateForm(GenericActionForm):
     )
     sort_fields = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._errors = None
         self.update_using_queryset_allowed = True
@@ -177,7 +183,7 @@ class MassUpdateForm(GenericActionForm):
         if self.sort_fields:
             self.fields = {k: v for k, v in sorted(self.fields.items(), key=lambda item: item[1].label or "")}
 
-    def _get_validation_exclusions(self):
+    def _get_validation_exclusions(self) -> list[str]:
         exclude = list(super()._get_validation_exclusions())
         for name, field in list(self.fields.items()):
             function = self.data.get("func_id_%s" % name, False)
@@ -185,7 +191,7 @@ class MassUpdateForm(GenericActionForm):
                 exclude.append(name)
         return exclude
 
-    def _post_clean(self):
+    def _post_clean(self) -> None:
         # must be overriden to bypass instance.clean()
         if self.cleaned_data.get("_clean", False):
             opts = self._meta
@@ -200,7 +206,7 @@ class MassUpdateForm(GenericActionForm):
             except ValidationError as e:
                 self._update_errors(e.message_dict)
 
-    def full_clean(self):
+    def full_clean(self) -> None:
         super().full_clean()
         if not self.is_bound:  # Stop further processing.
             return
@@ -217,10 +223,10 @@ class MassUpdateForm(GenericActionForm):
                     if isinstance(self.fields.get(field_name, ""), ModelMultipleChoiceField):
                         self.add_error(
                             field_name,
-                            _("Unable no mass update ManyToManyField" " without 'validate'"),
+                            _("Unable no mass update ManyToManyField without 'validate'"),
                         )
 
-    def _clean_fields(self):
+    def _clean_fields(self) -> None:
         self.update_using_queryset_allowed = True
         for name, field in list(self.fields.items()):
             raw_value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
@@ -257,17 +263,17 @@ class MassUpdateForm(GenericActionForm):
                 if name in self.cleaned_data:
                     del self.cleaned_data[name]
 
-    def clean__validate(self):
+    def clean__validate(self) -> bool:
         return bool(self.data.get("_validate", 0))
 
-    def clean__async(self):
+    def clean__async(self) -> bool:
         return bool(self.data.get("_async", 0))
 
-    def clean__clean(self):
+    def clean__clean(self) -> bool:
         return bool(self.data.get("_clean", 0))
 
     @property
-    def media(self):
+    def media(self) -> forms.Media:
         extra = "" if settings.DEBUG else ".min"
         return super().media + forms.Media(
             js=(
@@ -279,13 +285,20 @@ class MassUpdateForm(GenericActionForm):
             },
         )
 
-    def fix_json(self):
+    def fix_json(self) -> None:
         for label, field in self.fields.items():
             if isinstance(field, forms.JSONField):
                 field.disabled = label not in self.data
 
 
-def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None):
+def mass_update_execute(
+    queryset: "QuerySet",
+    rules: dict[str, tuple[callable, Any]],
+    validate: bool,
+    clean: bool,
+    user_pk: Any,
+    request: "HttpRequest" | None = None,
+) -> tuple[int, list[str]]:
     errors = {}
     updated = 0
     opts = queryset.model._meta
@@ -347,14 +360,14 @@ def mass_update(modeladmin, request, queryset):  # noqa
     mass update queryset
     """
 
-    def not_required(field, **kwargs):
+    def not_required(field: df.Field, **kwargs: Any) -> forms.Field:
         """force all fields as not required"""
         kwargs["required"] = False
         kwargs["request"] = request
         return modeladmin.formfield_for_dbfield(field, **kwargs)
 
-    def _get_sample():
-        grouped = defaultdict(lambda: [])
+    def _get_sample() -> dict[str, list[tuple[Any, str] | dict[str, Any]]]:
+        grouped = defaultdict(list)
         for f in mass_update_hints:
             if isinstance(f, ForeignKey):
                 # Filter by queryset so we only get results without our

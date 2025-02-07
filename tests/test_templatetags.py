@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from adminactions.templatetags.massupdate import fields_values, link_fields_values
@@ -12,11 +14,11 @@ from adminactions.templatetags.massupdate import fields_values, link_fields_valu
     ],
     ids=("list", "str", "int"),
 )
-def test_link_fields_values(data):
+def test_link_fields_values(data) -> None:
     assert link_fields_values(data, "field1")
 
 
-def test_fields_values():
+def test_fields_values() -> None:
     data = {
         "name1": ["value1.1", "value1.2"],
         "name2": ["value2.1", "value2.2"],

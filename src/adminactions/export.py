@@ -1,5 +1,6 @@
 import logging
 from itertools import chain
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.contrib import messages
@@ -7,8 +8,12 @@ from django.contrib.admin import helpers
 from django.core import serializers as ser
 from django.db import router
 from django.db.models import ForeignKey, ManyToManyField
+from django.db.models.base import Model
 from django.db.models.deletion import Collector
+from django.db.models.query import QuerySet
+from django.forms.forms import Form
 from django.http import HttpResponse, HttpResponseRedirect
+from django.http.request import HttpRequest
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -20,10 +25,13 @@ from .forms import CSVOptions, FixtureOptions, XLSOptions
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
+if TYPE_CHECKING:
+    from django.contrib.admin import ModelAdmin
+
 logger = logging.getLogger(__name__)
 
 
-def get_action(request):
+def get_action(request: HttpRequest) -> list[str]:
     try:
         action_index = int(request.POST.get("index", 0))
     except ValueError:
@@ -32,16 +40,16 @@ def get_action(request):
 
 
 def base_export(
-    modeladmin,
-    request,
-    queryset,
-    title,
-    impl,  # noqa
-    name,
-    action_short_description,
-    template,
-    form_class,
-):
+    modeladmin: "ModelAdmin",
+    request: "HttpRequest",
+    queryset: QuerySet,
+    title: str,
+    impl: callable,  # noqa
+    name: str,
+    action_short_description: str,
+    template: str,
+    form_class: type[Form],
+) -> "HttpResponse":
     """
     export a queryset to csv file
     """
@@ -65,9 +73,7 @@ def base_export(
     if hasattr(modeladmin, "get_exportable_columns"):
         cols = modeladmin.get_exportable_columns(request, form_class)
     else:
-        cols = [
-            (f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
-        ]
+        cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
     initial = {
         "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
         "select_across": request.POST.get("select_across") == "1",
@@ -149,7 +155,7 @@ def base_export(
 base_export.base_permission = "adminactions_export"
 
 
-def export_as_csv(modeladmin, request, queryset):
+def export_as_csv(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> HttpResponse:
     if hasattr(modeladmin, "get_aa_export_form"):
         form_class = modeladmin.get_aa_export_form(request, "csv") or CSVOptions
     else:
@@ -175,7 +181,7 @@ export_as_csv.short_description = _("Export as CSV")
 export_as_csv.base_permission = "adminactions_export"
 
 
-def export_as_xls(modeladmin, request, queryset):
+def export_as_xls(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> HttpResponse:
     if hasattr(modeladmin, "get_aa_export_form"):
         form_class = modeladmin.get_aa_export_form(request, "xls") or XLSOptions
     else:
@@ -202,21 +208,21 @@ export_as_xls.base_permission = "adminactions_export"
 
 
 class FlatCollector:
-    def __init__(self, using):
+    def __init__(self, using: str) -> None:
         self._visited = []
         super().__init__()
 
-    def collect(self, objs):
+    def collect(self, objs: list[Model]) -> None:
         self.data = objs
         self.models = set([o.__class__ for o in self.data])
 
 
 class ForeignKeysCollector:
-    def __init__(self, using):
+    def __init__(self, using: str) -> None:
         self._visited = []
         super().__init__()
 
-    def _collect(self, objs):
+    def _collect(self, objs: list[Model]) -> None:
         objects = []
         for obj in objs:
             if obj and obj not in self._visited:
@@ -235,16 +241,16 @@ class ForeignKeysCollector:
                         objects.extend(self._collect([target]))
         return objects
 
-    def collect(self, objs):
+    def collect(self, objs: list[Model]) -> None:
         self._visited = []
         self.data = self._collect(objs)
         self.models = set([o.__class__ for o in self.data])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return mark_safe(self.data)
 
 
-def _dump_qs(form, queryset, data, filename):
+def _dump_qs(form: Form, queryset: QuerySet, data: dict[str, Any], filename: str) -> None:
     fmt = form.cleaned_data.get("serializer")
 
     json = ser.get_serializer(fmt)()
@@ -261,14 +267,12 @@ def _dump_qs(form, queryset, data, filename):
             queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"),
             fmt,
         )
-        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode(
-            "us-ascii", "replace"
-        )
+        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode("us-ascii", "replace")
     response.content = ret
     return response
 
 
-def export_as_fixture(modeladmin, request, queryset):
+def export_as_fixture(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse":
     initial = {
         "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
         "select_across": request.POST.get("select_across") == "1",
@@ -314,9 +318,7 @@ def export_as_fixture(modeladmin, request, queryset):
                 messages.error(request, str(e))
                 return
             try:
-                _collector = (
-                    ForeignKeysCollector if form.cleaned_data.get("add_foreign_keys") else FlatCollector
-                )
+                _collector = ForeignKeysCollector if form.cleaned_data.get("add_foreign_keys") else FlatCollector
                 c = _collector(None)
                 c.collect(queryset)
                 adminaction_end.send(
@@ -369,7 +371,7 @@ export_as_fixture.short_description = _("Export as fixture")
 export_as_fixture.base_permission = "adminactions_export"
 
 
-def export_delete_tree(modeladmin, request, queryset):  # noqa
+def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse":  # noqa
     """
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted

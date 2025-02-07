@@ -1,5 +1,10 @@
+from typing import Any
+
+from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
+from django.contrib.admin.options import ModelAdmin
+from django.db.models import fields as django_fields
 from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -30,12 +35,10 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         return
 
     class modelform(modeladmin.form):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             super().__init__(*args, **kwargs)
             if self.instance:
-                readonly_fields = (modeladmin.model._meta.pk.name,) + tuple(
-                    modeladmin.get_readonly_fields(request)
-                )
+                readonly_fields = (modeladmin.model._meta.pk.name,) + tuple(modeladmin.get_readonly_fields(request))
                 for fname in readonly_fields:
                     if fname in self.fields:
                         self.fields[fname].widget.attrs["readonly"] = "readonly"
@@ -43,7 +46,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     fields = byrows_update_get_fields(modeladmin)
 
-    def formfield_callback(field, **kwargs):
+    def formfield_callback(field: django_fields.Field, **kwargs: Any) -> forms.Field:
         return modeladmin.formfield_for_dbfield(field, request=request, **kwargs)
 
     ActionForm = modelform_factory(
@@ -77,9 +80,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         actionform = ActionForm(initial=action_form_initial, instance=None)
         formset = MFormSet(queryset=queryset)
 
-    adminform = helpers.AdminForm(
-        actionform, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin
-    )
+    adminform = helpers.AdminForm(actionform, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
 
     tpl = "adminactions/byrows_update.html"
     ctx = {
@@ -103,7 +104,7 @@ byrows_update.short_description = _("By rows update")
 byrows_update.base_permission = "adminactions_byrowsupdate"
 
 
-def byrows_update_get_fields(modeladmin):
+def byrows_update_get_fields(modeladmin: ModelAdmin) -> list[str]:
     """
     Get fields names to be shown of the model rows formset considering the
     admin option:

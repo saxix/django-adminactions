@@ -1,14 +1,10 @@
-.DS_Store
+.*
 ~*
 *.log
 *.pot
 *.pyc
 *.egg-info
 *.sqlite
-.idea
-.tox
-.cache
-.coverage
 /dist
 /build
 /docs/build
@@ -20,3 +16,4 @@ Pipfile
 Pipfile.lock
 poetry.lock
 .venv/
+pdm.lock

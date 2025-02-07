@@ -1,28 +1,34 @@
-import mock
+from __future__ import annotations
+
+from typing import NoReturn
+from unittest import mock
+
 import pytest
 from django.contrib.auth.models import Group, User
 from django.db import IntegrityError
 from django.db.transaction import atomic
 from django.test import TransactionTestCase
+from django.urls.base import reverse
 from django_dynamic_fixture import G
 
 from adminactions import compat
 from adminactions.api import merge
+from adminactions.compat import nocommit
 from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_end
 
 pytestmarker = pytest.mark.skip
 
 
-@pytest.mark.django_db()
-def test_nocommit():
-    with compat.nocommit():
+@pytest.mark.django_db
+def test_nocommit() -> None:
+    with nocommit():
         G(Group, name="name")
     assert not Group.objects.filter(name="name").exists()
 
 
-@pytest.mark.django_db()
-def test_transaction_merge(users):
+@pytest.mark.django_db
+def test_transaction_merge(users) -> None:
     master, other = users
     with atomic():
         with mock.patch("django.contrib.auth.models.User.delete", side_effect=IntegrityError):
@@ -35,15 +41,15 @@ def test_transaction_merge(users):
         assert master.first_name != other.first_name
 
 
-@pytest.mark.django_db()
-def test_transaction_mass_update(app, users, administrator):
+@pytest.mark.django_db
+def test_transaction_mass_update(app, users, administrator) -> None:
     assert User.objects.filter(is_staff=True).count() == 1  # sanity check
 
-    def _handler(*args, **kwargs):
-        raise ActionInterrupted()
+    def _handler(*args, **kwargs) -> NoReturn:
+        raise ActionInterrupted
 
     with atomic():
-        res = app.get("/admin/", user=administrator.username)
+        res = app.get(reverse("admin:index"), user=administrator.username)
         res = res.click("Users")
         form = res.forms["changelist-form"]
         form["action"] = "mass_update"
@@ -69,5 +75,5 @@ def test_transaction_mass_update(app, users, administrator):
 
 
 class TestIsLibero(TransactionTestCase):
-    def test_true(self):
-        self.assertTrue(True)
+    def test_true(self) -> None:
+        assert True

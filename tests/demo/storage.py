@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 from django.conf import settings
@@ -60,7 +62,7 @@ class PlainCookieStorage(BaseStorage):
     not_finished = "__messagesnotfinished__"
     key_salt = "django.contrib.messages"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.signer = signing.get_cookie_signer(salt=self.key_salt)
 
@@ -79,7 +81,7 @@ class PlainCookieStorage(BaseStorage):
             messages.pop()
         return messages, all_retrieved
 
-    def _update_cookie(self, encoded_data, response):
+    def _update_cookie(self, encoded_data, response) -> None:
         """
         Either set the cookie with the encoded data if there is any data to
         store, or delete the cookie.
@@ -119,7 +121,7 @@ class PlainCookieStorage(BaseStorage):
                     unstored_messages.append(messages.pop(0))
                 else:
                     unstored_messages.insert(0, messages.pop())
-                encoded_data = self._encode(messages + [self.not_finished], encode_empty=unstored_messages)
+                encoded_data = self._encode([*messages, self.not_finished], encode_empty=unstored_messages)
         self._update_cookie(encoded_data, response)
         return unstored_messages
 
@@ -147,6 +149,7 @@ class PlainCookieStorage(BaseStorage):
             encoder = MessageEncoder(separators=(",", ":"))
             value = encoder.encode(messages)
             return self.signer.sign(value)
+        return None
 
     def _decode(self, data):
         """

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import pytest
 
 from adminactions.utils import get_field_by_name, get_verbose_name
 
 
-def test_get_verbose_name():
+def test_get_verbose_name() -> None:
     from django.contrib.auth.models import Permission, User
 
     user = User()
@@ -27,7 +29,7 @@ def test_get_verbose_name():
         get_verbose_name(p, None)
 
 
-def test_flatten():
+def test_flatten() -> None:
     from adminactions.utils import flatten
 
     assert flatten([[[1, 2, 3], (42, None)], [4, 5], [6], 7, (8, 9, 10)]) == [

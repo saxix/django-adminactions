@@ -1,4 +1,6 @@
 # from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
+from __future__ import annotations
+
 from demo.models import DemoModel
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -22,7 +24,7 @@ class FindDuplicatesTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestC
     action_name = "find_duplicates_action"
     sender_model = DemoModel
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         self._url = reverse("admin:demo_demomodel_changelist")
         self.user = G(User, username="user", is_staff=True, is_active=True)
@@ -51,7 +53,7 @@ class FindDuplicatesTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestC
                 res = res.form.submit("apply")
         return res
 
-    def test_no_permission(self):
+    def test_no_permission(self) -> None:
         with user_grant_permission(self.user, ["demo.change_demomodel"]):
             res = self.app.get("/", user="user")
             res = res.click("Demo models")
@@ -61,7 +63,7 @@ class FindDuplicatesTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestC
             res = form.submit().follow()
             assert "Sorry you do not have rights to execute this action" in str(res.body)
 
-    def test_validate_on(self):
+    def test_validate_on(self) -> None:
         self._run_action()
 
     #

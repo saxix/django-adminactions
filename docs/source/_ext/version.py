@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from sphinx import addnodes, roles
@@ -6,7 +8,7 @@ from sphinx.util.compat import Directive
 simple_option_desc_re = re.compile(r"([-_a-zA-Z0-9]+)(\s*.*?)(?=,\s+(?:/|-|--)|$)")
 
 
-def setup(app):
+def setup(app) -> None:
     app.add_crossref_type(
         directivename="setting",
         rolename="setting",
@@ -62,13 +64,13 @@ class VersionDirective(Directive):
             link = None
         else:
             version = arg0
-            link = "release-%s" % arg0
+            link = f"release-{arg0}"
 
         node["version"] = version
         # inodes, messages = self.state.inline_text(self.version_text[self.name] % version, self.lineno+1)
         # node.extend(inodes)
         if link:
-            text = " Please see the changelog <%s>" % link
+            text = f" Please see the changelog <{link}>"
             xrefs = roles.XRefRole()("std:ref", text, text, self.lineno, self.state)
             node.extend(xrefs[0])
         env.note_versionchange(node["type"], node["version"], node, self.lineno)

@@ -1,5 +1,8 @@
+from django.db.models.base import Model
 from django.forms import widgets
+from django.forms.fields import Field
 from django.template import Library
+from django.template.context import Context
 from django.utils.safestring import mark_safe
 
 from adminactions.utils import get_field_by_name
@@ -8,10 +11,13 @@ register = Library()
 
 
 @register.simple_tag
-def fields_values(d, k):
+def fields_values(d: dict[str, list[str]], k: str) -> str:
     """
-    >>> data = {'name1': ['value1.1', 'value1.2'], 'name2': ['value2.1', 'value2.2'], }
-    >>> print(fields_values(data, 'name1'))
+    >>> data = {
+    ...     "name1": ["value1.1", "value1.2"],
+    ...     "name2": ["value2.1", "value2.2"],
+    ... }
+    >>> print(fields_values(data, "name1"))
     value1.1,value1.2
     """
     values = d.get(k, [])
@@ -19,7 +25,7 @@ def fields_values(d, k):
 
 
 @register.simple_tag
-def link_fields_values(d, field_name):
+def link_fields_values(d: dict[str, list[tuple[int, str]]], field_name: str) -> str:
     """
     >>> data = {'name1': [(1, 'value1.1'), (11, 'value1.2')],
     ...         'name2': [(2, 'value2.1'), (22, 'value2.2')], }
@@ -51,7 +57,7 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
 
 
 @register.simple_tag(takes_context=True)
-def checkbox_enabler(context, field):
+def checkbox_enabler(context: Context, field: Field) -> str:
     form = context["adminform"].form
     name = "chk_id_%s" % field.name
     checked = ""
@@ -62,7 +68,7 @@ def checkbox_enabler(context, field):
 
 
 @register.simple_tag(takes_context=True)
-def field_function(context, model, form_field):
+def field_function(context: Context, model: Model, form_field: Field) -> widgets.Select:
     from adminactions.mass_update import OPERATIONS
 
     model_field, model, direct, m2m = get_field_by_name(model, form_field.name)

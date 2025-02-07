@@ -1,8 +1,11 @@
+from typing import Any
+
+from django.apps.config import AppConfig
 from django.core.checks import Error, register
 
 
 @register()
-def check_adminactions_settings(app_configs, **kwargs):
+def check_adminactions_settings(app_configs: AppConfig, **kwargs: Any) -> None:
     errors = []
     from .config import AA_PERMISSION_HANDLER
     from .consts import (

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 
 from admin_extra_urls.api import button
@@ -90,7 +92,7 @@ class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
 
         return _import_fixture(self, request)
 
-    def get_custom_field(self, instance):
+    def get_custom_field(self, instance) -> str:
         return f"model-attribute-{instance.pk}"
 
 

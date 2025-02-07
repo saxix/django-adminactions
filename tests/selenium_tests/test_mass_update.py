@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 from django.contrib.auth.models import User
 from selenium.webdriver.support.select import Select
@@ -5,19 +7,17 @@ from selenium.webdriver.support.select import Select
 pytestmark = pytest.mark.selenium
 
 
-def test_mass_update_1(admin_site):
+def test_mass_update_1(admin_site) -> None:
     """
     Check Boolean Field.
     Common values are not filled in boolean fields ( there is no reason to do that ).
     """
     assert User.objects.filter(is_active=True).count() > 1  # sanity check
     sax = User.objects.get(username="sax")
-    browser, administrator = admin_site
+    browser, _administrator = admin_site
     browser.find_element_by_link_text("Users").click()
     browser.find_element_by_id("action-toggle").click()
-    browser.find_element_by_xpath(
-        "//input[@name='_selected_action' and @value='%s']" % sax.pk
-    ).click()  # unselect sax
+    browser.find_element_by_xpath(f"//input[@name='_selected_action' and @value='{sax.pk}']").click()  # unselect sax
 
     Select(browser.find_element_by_name("action")).select_by_visible_text("Mass update")
     browser.find_element_by_name("index").click()  # execute

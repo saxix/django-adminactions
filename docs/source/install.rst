@@ -68,7 +68,7 @@ Add defaults for the Export to CSV to the Django Config.
 See all available settings at :ref:`_export_as_csv`.::
 
     import csv
-    
+
     ADMINACTIONS_CSV_OPTIONS_DEFAULT = {
         'date_format': 'Y-m-d',
         'datetime_format': 'Y-m-d G:i:s O',

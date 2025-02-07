@@ -1,6 +1,4 @@
-django-adminactions
-===================
-
+# django-adminactions
 
 [![Pypi](https://badge.fury.io/py/django-adminactions.svg)](https://badge.fury.io/py/django-adminactions)
 [![coverage](https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=develop)](https://codecov.io/github/saxix/django-adminactions?branch=develop)
@@ -14,21 +12,19 @@ Please see the changelog at http://django-adminactions.readthedocs.org/en/latest
 
 #### Actions
 
-* Export as CSV
-* Export as Excel
-* Export as fixture
-* Export delete tree
-* Mass update records
-* Graph queryset
-* Merge records
-* Find Duplicates
-* Bulk Update
-
+-   Export as CSV
+-   Export as Excel
+-   Export as fixture
+-   Export delete tree
+-   Mass update records
+-   Graph queryset
+-   Merge records
+-   Find Duplicates
+-   Bulk Update
 
 #### Project Links
 
-
-- Code: https://github.com/saxix/django-adminactions
-- Documentation: https://django-adminactions.readthedocs.org/en/latest/
-- Issue Tracker: https://github.com/saxix/django-adminactions/issues?sort
-- Download Package: https://pypi.org/project/django-adminactions/
+-   Code: https://github.com/saxix/django-adminactions
+-   Documentation: https://django-adminactions.readthedocs.org/en/latest/
+-   Issue Tracker: https://github.com/saxix/django-adminactions/issues?sort
+-   Download Package: https://pypi.org/project/django-adminactions/

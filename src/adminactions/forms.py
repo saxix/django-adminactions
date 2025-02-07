@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import csv
 
 from django import forms
@@ -22,11 +24,11 @@ class GenericActionForm(ModelForm):
     )
     action = forms.CharField(label="", required=True, initial="", widget=forms.HiddenInput())
 
-    def configured_fields(self):
+    def configured_fields(self) -> list[forms.Field]:
         return [field for field in self if not field.is_hidden and field.name.startswith("_")]
 
     @cached_property
-    def model_field_names(self):
+    def model_field_names(self) -> list[str]:
         ignored_fields = {
             "select_accross",
             "action",
@@ -34,16 +36,14 @@ class GenericActionForm(ModelForm):
         }
         return [f.name for f in self._meta.model._meta.get_fields() if f.name not in ignored_fields]
 
-    def model_fields(self):
+    def model_fields(self) -> list[forms.Field]:
         # field_names = [f.name for f in self._meta.model._meta.get_fields() if f.name not in self.model_field_names]
         return [field for field in self if field.name in self.model_field_names]
 
 
 class CSVConfigForm(forms.Form):
     header = forms.BooleanField(label=_("Header"), required=False)
-    delimiter = forms.ChoiceField(
-        label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=","
-    )
+    delimiter = forms.ChoiceField(label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=",")
     quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes)), initial="'")
     quoting = forms.TypedChoiceField(
         coerce=int,
@@ -59,10 +59,10 @@ class CSVConfigForm(forms.Form):
 
     escapechar = forms.ChoiceField(label=_("Escapechar"), choices=(("", ""), ("\\", "\\")), required=False)
 
-    def clean_escapechar(self):
+    def clean_escapechar(self) -> str | None:
         return self.cleaned_data["escapechar"] or None
 
-    def csv_fields(self):
+    def csv_fields(self) -> list[forms.Field]:
         return [
             field
             for field in self
@@ -87,9 +87,7 @@ class CSVOptions(CSVConfigForm):
     )
     action = forms.CharField(label="", required=True, initial="", widget=forms.HiddenInput())
 
-    datetime_format = forms.CharField(
-        label=_("Datetime format"), initial=formats.get_format("DATETIME_FORMAT")
-    )
+    datetime_format = forms.CharField(label=_("Datetime format"), initial=formats.get_format("DATETIME_FORMAT"))
     date_format = forms.CharField(label=_("Date format"), initial=formats.get_format("DATE_FORMAT"))
     time_format = forms.CharField(label=_("Time format"), initial=formats.get_format("TIME_FORMAT"))
     columns = forms.MultipleChoiceField(label=_("Columns"), widget=SelectMultiple(attrs={"size": 20}))

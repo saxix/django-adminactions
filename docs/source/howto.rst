@@ -92,4 +92,3 @@ Limit Massupdate hints to certain fields
         mass_update_hints = ['name']
 
     admin.register(MyModel, MyModelAdmin)
-

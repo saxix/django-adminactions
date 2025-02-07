@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 import collections
 import csv
 import datetime
 import itertools
 from io import BytesIO
+from typing import TYPE_CHECKING, Any, Generator
 
 import xlwt
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
-from django.db.models import FileField
+from django.db.models import FileField, Model
 from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.db.transaction import atomic
 from django.http import HttpResponse, StreamingHttpResponse
@@ -18,6 +21,15 @@ from django.utils.timezone import get_default_timezone
 from adminactions import utils
 
 from .utils import clone_instance, get_field_by_path, get_field_value, get_ignored_fields
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from django.contrib.admin.options import ModelAdmin
+    from django.core.files.base import File
+    from django.db.models.query import QuerySet
+
+    from .forms import CSVOptions, XLSOptions
 
 csv_options_default = {
     "date_format": "d/m/Y",
@@ -36,7 +48,14 @@ escapechars = " \\"
 ALL_FIELDS = -999
 
 
-def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # noqa
+def merge(
+    master: Model,
+    other: Model,
+    fields: Iterable[str] | None = None,
+    commit: bool = False,
+    m2m: Iterable[str] | None = None,
+    related: Iterable[str] | None = None,
+) -> Model:
     """
         Merge 'other' into master.
 
@@ -62,10 +81,10 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
 
     if m2m == ALL_FIELDS:
         m2m = set()
-        for field in master._meta.get_fields():
+        for field in master._meta.get_fields():  # noqa: SLF001
             if getattr(field, "many_to_many", None):
                 if isinstance(field, ManyToManyField):
-                    if not field.remote_field.through._meta.auto_created:
+                    if not field.remote_field.through._meta.auto_created:  # noqa: SLF001
                         continue
                     m2m.add(field.name)
                 else:
@@ -109,9 +128,9 @@ def merge(master, other, fields=None, commit=False, m2m=None, related=None):  # 
                     setattr(element, rel_fieldname, master)
                     element.save()
             other.delete()
-            ignored_fields = get_ignored_fields(result._meta.model, "MERGE_ACTION_IGNORED_FIELDS")
+            ignored_fields = get_ignored_fields(result._meta.model, "MERGE_ACTION_IGNORED_FIELDS")  # noqa: SLF001
             for ig_field in ignored_fields:
-                setattr(result, ig_field, result._meta.get_field(ig_field).get_default())
+                setattr(result, ig_field, result._meta.get_field(ig_field).get_default())  # noqa: SLF001
             result.save()
             for fieldname, elements in list(all_m2m.items()):
                 dest_m2m = getattr(result, fieldname)
@@ -125,20 +144,20 @@ class Echo:
     interface.
     """
 
-    def write(self, value):
+    def write(self, value: Any) -> Any:
         """Write the value by returning it, instead of storing in a buffer."""
         return value
 
 
-def export_as_csv(  # noqa: max-complexity: 20
-    queryset,
-    fields=None,
-    header=None,
-    filename=None,
-    options=None,
-    out=None,
-    modeladmin=None,
-):  # noqa
+def export_as_csv(
+    queryset: QuerySet,
+    fields: list[str] | None = None,
+    header: bool = False,
+    filename: str | None = None,
+    options: CSVOptions | None = None,
+    out: File | None = None,
+    modeladmin: ModelAdmin = None,
+) -> HttpResponse:
     """
         Exports a queryset as csv from a queryset with the given fields.
 
@@ -162,9 +181,7 @@ def export_as_csv(  # noqa: max-complexity: 20
             filename = "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
 
         response = response_class(content_type="text/csv")
-        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode(
-            "us-ascii", "replace"
-        )
+        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode("us-ascii", "replace")
     else:
         response = out
 
@@ -194,7 +211,7 @@ def export_as_csv(  # noqa: max-complexity: 20
 
     settingstime_zone = get_default_timezone()
 
-    def yield_header():
+    def yield_header() -> Generator[str, None, None]:
         if bool(header):
             if isinstance(header, (list, tuple)):
                 yield writer.writerow(header)
@@ -202,7 +219,7 @@ def export_as_csv(  # noqa: max-complexity: 20
                 yield writer.writerow([f for f in fields])
         yield ""
 
-    def yield_rows():
+    def yield_rows() -> Generator[str, None, None]:
         for obj in queryset:
             row = []
             for fieldname in fields:
@@ -253,9 +270,15 @@ xls_options_default = {
 }
 
 
-def export_as_xls2(  # noqa: max-complexity: 24
-    queryset, fields=None, header=None, filename=None, options=None, out=None, modeladmin=None  # noqa
-):
+def export_as_xls2(
+    queryset: "QuerySet",
+    fields: list[str] = None,
+    header: bool = False,
+    filename: str | None = None,
+    options: "XLSOptions" | None = None,
+    out: File | None = None,
+    modeladmin: ModelAdmin | None = None,  # noqa
+) -> HttpResponse:
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """
@@ -270,7 +293,7 @@ def export_as_xls2(  # noqa: max-complexity: 24
     :return: HttpResponse instance if out not supplied, otherwise out
     """
 
-    def _get_qs_formats(queryset):
+    def _get_qs_formats(queryset: "QuerySet") -> HttpResponse:
         formats = {}
         if hasattr(queryset, "model"):
             for i, fieldname in enumerate(fields):
@@ -281,9 +304,7 @@ def export_as_xls2(  # noqa: max-complexity: 24
                         __,
                         __,
                     ) = utils.get_field_by_name(queryset.model, fieldname)
-                    fmt = xls_options_default.get(
-                        f.name, xls_options_default.get(f.__class__.__name__, "general")
-                    )
+                    fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, "general"))
                     formats[i] = fmt
                 except FieldDoesNotExist:
                     pass
@@ -295,9 +316,7 @@ def export_as_xls2(  # noqa: max-complexity: 24
             filename = "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
 
         response = HttpResponse(content_type="application/vnd.ms-excel")
-        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode(
-            "us-ascii", "replace"
-        )
+        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode("us-ascii", "replace")
     else:
         response = out
 
@@ -306,7 +325,7 @@ def export_as_xls2(  # noqa: max-complexity: 24
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]  # noqa: SLF001
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=2)
     sheet_name = config.pop("sheet_name")
@@ -321,7 +340,7 @@ def export_as_xls2(  # noqa: max-complexity: 24
         if not isinstance(header, (list, tuple)):
             header = [
                 force_str(f.verbose_name)
-                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many  # noqa: SLF001
                 if f.name in fields
             ]
 
@@ -332,7 +351,7 @@ def export_as_xls2(  # noqa: max-complexity: 24
     sheet.row(row).height = 500
     formats = _get_qs_formats(queryset)
 
-    _styles = {}
+    styles_ = {}
 
     for rownum, row in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
@@ -344,24 +363,24 @@ def export_as_xls2(  # noqa: max-complexity: 24
                 )
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))
-                if hash(fmt) not in _styles:
+                if hash(fmt) not in styles_:
                     if callable(fmt):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str="formula")
+                        styles_[hash(fmt)] = xlwt.easyxf(num_format_str="formula")
                     elif isinstance(value, datetime.datetime):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config["datetime_format"])
+                        styles_[hash(fmt)] = xlwt.easyxf(num_format_str=config["datetime_format"])
                     elif isinstance(value, datetime.date):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config["date_format"])
+                        styles_[hash(fmt)] = xlwt.easyxf(num_format_str=config["date_format"])
                     elif isinstance(value, datetime.datetime):
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=config["time_format"])
+                        styles_[hash(fmt)] = xlwt.easyxf(num_format_str=config["time_format"])
                     else:
-                        _styles[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
+                        styles_[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
 
                 if isinstance(value, (list, tuple)):
                     value = "".join(value)
 
-                sheet.write(rownum + 1, col_idx + 1, value, _styles[hash(fmt)])
+                sheet.write(rownum + 1, col_idx + 1, value, styles_[hash(fmt)])
             except Exception as e:
-                sheet.write(rownum + 1, col_idx + 1, smart_str(e), _styles[hash(fmt)])
+                sheet.write(rownum + 1, col_idx + 1, smart_str(e), styles_[hash(fmt)])
 
     book.save(response)
     return response
@@ -388,9 +407,15 @@ xlsxwriter_options = {
 }
 
 
-def export_as_xls3(  # noqa: max-complexity: 23
-    queryset, fields=None, header=None, filename=None, options=None, out=None, modeladmin=None  # noqa
-):  # pragma: no cover
+def export_as_xls3(
+    queryset: "QuerySet",
+    fields: list[str] | None = None,
+    header: bool = False,
+    filename: str | None = None,
+    options: "XLSOptions | None" = None,
+    out: File | None = None,
+    modeladmin: ModelAdmin | None = None,  # noqa
+) -> HttpResponse:  # pragma: no cover
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """
@@ -406,7 +431,7 @@ def export_as_xls3(  # noqa: max-complexity: 23
     """
     import xlsxwriter
 
-    def _get_qs_formats(queryset):
+    def _get_qs_formats(queryset: "QuerySet") -> HttpResponse:
         formats = {"_general_": book.add_format()}
         if hasattr(queryset, "model"):
             for i, fieldname in enumerate(fields):
@@ -416,10 +441,8 @@ def export_as_xls3(  # noqa: max-complexity: 23
                         __,
                         __,
                         __,
-                    ) = queryset.model._meta.get_field_by_name(fieldname)
-                    pattern = xlsxwriter_options.get(
-                        f.name, xlsxwriter_options.get(f.__class__.__name__, "general")
-                    )
+                    ) = queryset.model._meta.get_field_by_name(fieldname)  # noqa: SLF001
+                    pattern = xlsxwriter_options.get(f.name, xlsxwriter_options.get(f.__class__.__name__, "general"))
                     fmt = book.add_format({"num_format": pattern})
                     formats[fieldname] = fmt
                 except FieldDoesNotExist:
@@ -435,7 +458,7 @@ def export_as_xls3(  # noqa: max-complexity: 23
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]  # noqa: SLF001
 
     book = xlsxwriter.Workbook(out, {"in_memory": True})
     sheet_name = config.pop("sheet_name")
@@ -450,7 +473,7 @@ def export_as_xls3(  # noqa: max-complexity: 23
         if not isinstance(header, (list, tuple)):
             header = [
                 force_str(f.verbose_name)
-                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
+                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many  # noqa: SLF001
                 if f.name in fields
             ]
 
@@ -491,7 +514,7 @@ def export_as_xls3(  # noqa: max-complexity: 23
     out.seek(0)
     if http_response:
         if filename is None:
-            filename = "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+            filename = "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")  # noqa: SLF001
         response = HttpResponse(
             out.read(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

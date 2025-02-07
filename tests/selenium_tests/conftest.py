@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import types
 
@@ -33,9 +35,9 @@ def browser(live_server, driver):
         self._last_url = url
         return self.get(self.live_server.url + url)
 
-    def dump(self, filename=None):
+    def dump(self, filename=None) -> None:
         dest = filename or self._last_url.replace("/", "_").replace("#", "~")
-        self.get_screenshot_as_file("./{}.jpg".format(dest))
+        self.get_screenshot_as_file(f"./{dest}.jpg")
 
     b = driver
     b.live_server = live_server
@@ -64,7 +66,7 @@ def login(browser):
     return browser
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def admin_site(browser, administrator):
     from demo.models import DemoModel, UserDetail
 

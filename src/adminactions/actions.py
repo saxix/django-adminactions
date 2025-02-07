@@ -1,3 +1,7 @@
+from typing import Optional
+
+from django.contrib.admin import AdminSite
+
 from .bulk_update import bulk_update
 from .byrows_update import byrows_update
 from .duplicates import find_duplicates_action
@@ -20,7 +24,7 @@ actions = [
 ]
 
 
-def add_to_site(site, exclude=None, include=None):
+def add_to_site(site: AdminSite, exclude: Optional[list[str]] = None, include: Optional[list[str]] = None) -> None:
     """
     Register all the adminactions into passed site
 
@@ -37,7 +41,7 @@ def add_to_site(site, exclude=None, include=None):
     >>> add_to_site(site)
 
     >>> from django.contrib.admin import site
-    >>> add_to_site(site, exclude=['merge'])
+    >>> add_to_site(site, exclude=["merge"])
 
     """
     exclude = exclude or []

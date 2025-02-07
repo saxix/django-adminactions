@@ -1,13 +1,21 @@
+from typing import TYPE_CHECKING
+
 from django.apps import apps
+from django.db.models.options import Options
+
+if TYPE_CHECKING:
+    from django.contrib.contenttypes.models import ContentType
 
 __all__ = ["create_extra_permissions", "get_permission_codename"]
 
+from django.db.models.base import Model
 
-def get_permission_codename(action, opts):
+
+def get_permission_codename(action: str, opts: Options) -> str:
     return "%s_%s" % (action, opts.object_name.lower())
 
 
-def get_contenttype_for_model(model):
+def get_contenttype_for_model(model: Model) -> "ContentType":
     from django.contrib.contenttypes.models import ContentType
 
     model = model._meta.concrete_model
@@ -19,7 +27,7 @@ def get_contenttype_for_model(model):
     return ct
 
 
-def create_extra_permissions():
+def create_extra_permissions() -> None:
     from django.contrib.auth.models import Permission
     from django.contrib.contenttypes.models import ContentType
 

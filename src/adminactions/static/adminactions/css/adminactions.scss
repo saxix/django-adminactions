@@ -21,10 +21,11 @@ p.display {
 }
 
 .mergetable .column {
-     /*width: 30%;*/
+    /*width: 30%;*/
 }
 
-.mergetable .origin *, .mergetable .result * {
+.mergetable .origin *,
+.mergetable .result * {
     /*width: 30%;*/
     /*word-wrap: break-word;*/
     /*white-space:pre-line;*/
@@ -50,18 +51,18 @@ p.display {
     display: none;
 }
 
-div.duplicates{
-    table{
+div.duplicates {
+    table {
         width: 100%;
         tr th {
             white-space: nowrap;
         }
     }
     display: flex;
-    .left{
+    .left {
         flex-shrink: initial;
     }
-    .right{
+    .right {
         border: 1px solid #c9c9c9;
         margin-left: 40px;
         padding: 5px;

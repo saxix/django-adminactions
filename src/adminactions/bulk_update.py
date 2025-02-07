@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import codecs
 import csv
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence
 
 from django import forms
 from django.contrib import messages
@@ -14,6 +16,7 @@ from django.db import models
 from django.db.transaction import atomic
 from django.forms import Media
 from django.http import HttpResponseRedirect
+from django.http.request import HttpRequest
 from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
@@ -23,6 +26,13 @@ from adminactions.exceptions import ActionInterrupted
 from adminactions.forms import CSVConfigForm
 from adminactions.perms import get_permission_codename
 from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
+
+if TYPE_CHECKING:
+    from django.contrib.admin import ModelAdmin
+    from django.db.models import QuerySet
+    from django.db.models.fields import Field
+    from django.http.request import HttpRequest
+    from django.http.response import HttpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +66,7 @@ class BulkUpdateForm(forms.Form):
     )
 
     @property
-    def media(self):
+    def media(self) -> Media:
         """Return all media required to render the widgets on this form."""
         media = Media(
             js=["adminactions/js/bulkupdate.js"],
@@ -70,7 +80,7 @@ class BulkUpdateForm(forms.Form):
 class BulkUpdateMappingForm(forms.Form):
     index_field = forms.MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.model = kwargs.pop("model")
         super().__init__(*args, **kwargs)
         # self._errors = None
@@ -83,7 +93,7 @@ class BulkUpdateMappingForm(forms.Form):
             # self.initial[f[0]] = f[0]
             # self.fields[f[0]].widget.initial = f[0]
 
-    def _clean_fields(self):
+    def _clean_fields(self) -> None:
         for name, field in self.fields.items():
             value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             self.cleaned_data[name] = value
@@ -93,10 +103,10 @@ class BulkUpdateMappingForm(forms.Form):
                 ValidationError(_("Please select one or more index fields")),
             )
 
-    def _post_clean(self):
+    def _post_clean(self) -> None:
         pass
 
-    def get_mapping(self):
+    def get_mapping(self) -> dict[str, str]:
         mapping = self.cleaned_data.copy()
         mapping.pop("index_field")
         return {k: v for k, v in mapping.items() if v.strip()}
@@ -146,9 +156,7 @@ def bulk_update(modeladmin, request, queryset):  # noqa
         if "apply" in request.POST:
             form = bulk_update_form(request.POST, request.FILES, initial=form_initial)
             csv_form = CSVConfigForm(request.POST, initial=csv_initial, prefix="csv")
-            map_form = BulkUpdateMappingForm(
-                request.POST, initial=map_initial, model=modeladmin.model, prefix="fld"
-            )
+            map_form = BulkUpdateMappingForm(request.POST, initial=map_initial, model=modeladmin.model, prefix="fld")
 
             if form.is_valid() and csv_form.is_valid() and map_form.is_valid():
                 header = csv_form.cleaned_data.pop("header")
@@ -233,18 +241,18 @@ bulk_update.short_description = _("Bulk update")
 bulk_update.base_permission = "adminactions_bulkupdate"
 
 
-def _bulk_update(  # noqa: max-complexity: 18
-    queryset,
-    file_name_or_object,
+def _bulk_update(
+    queryset: "QuerySet",
+    file_name_or_object: str | Field,
     *,
-    mapping: Dict,
+    mapping: dict,
     indexes: Sequence[str],
-    clean=False,
+    clean: bool = False,
     header: bool = True,
     csv_options: Optional[Dict] = None,
-    request=None,
+    request: HttpRequest | None = None,
     dry_run: bool = False,
-):
+) -> dict[str, list[str]]:
     results = {
         "updated": [],
         "errors": [],
@@ -281,9 +289,7 @@ def _bulk_update(  # noqa: max-complexity: 18
                                 model_field = queryset.model._meta.get_field(field)
                                 if model_field.is_relation and model_field.many_to_one:
                                     related_model = model_field.related_model
-                                    related_field_name = (
-                                        model_field.to_fields[0] if model_field.to_fields else "pk"
-                                    )
+                                    related_field_name = model_field.to_fields[0] if model_field.to_fields else "pk"
                                     related_field = related_model._meta.get_field(related_field_name)
 
                                     if isinstance(related_field, models.UUIDField):

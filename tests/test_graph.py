@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django_dynamic_fixture import G
@@ -12,7 +14,7 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
     action_name = "graph_queryset"
     _selected_rows = [0, 1]
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         self.user = G(User, username="user", is_staff=True, is_active=True)
 
@@ -33,24 +35,24 @@ class TestGraph(SelectRowsMixin, CheckSignalsMixin, WebTest):
 
             return res
 
-    def test_graph_apply(self):
+    def test_graph_apply(self) -> None:
         url = reverse("admin:auth_user_changelist")
         res = self.app.get(url, user="sax")
         form = res.forms["changelist-form"]
         form["action"] = "graph_queryset"
-        for i in range(0, 11):
+        for i in range(11):
             form.set("_selected_action", True, i)
         res = form.submit()
         res.forms["charts-form"]["graph_type"] = "PieChart"
         res.forms["charts-form"]["axes_x"] = "is_staff"
         res = res.forms["charts-form"].submit("apply")
 
-    def test_graph_post(self):
+    def test_graph_post(self) -> None:
         url = reverse("admin:auth_user_changelist")
         res = self.app.get(url, user="sax")
         form = res.forms["changelist-form"]
         form["action"] = "graph_queryset"
-        for i in range(0, 11):
+        for i in range(11):
             form.set("_selected_action", True, i)
         res = form.submit()
         res.forms["charts-form"]["graph_type"] = "PieChart"

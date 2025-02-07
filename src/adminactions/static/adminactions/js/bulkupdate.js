@@ -15,19 +15,18 @@
                 var data = localStorage.getItem(model);
                 if (data) {
                     $.each(formData, function (i, pair) {
-                        $("input[name='" +  pair.name + "']").val(pair.value);
+                        $("input[name='" + pair.name + "']").val(pair.value);
                         // $("td.col_field.field-" + pair.name + "-value input").val(pair.value);
                     });
                 }
                 $("#sel-cmd").val("");
             } else if (this.value === "default") {
-                $('td.col_field').each(function () {
-                    $(this).find('input').val($(this).data('col'))
+                $("td.col_field").each(function () {
+                    $(this).find("input").val($(this).data("col"));
                 });
                 $("#sel-cmd").val("");
-
             }
-        })
+        });
 
         // console.log(formData);
     });
