@@ -11,6 +11,6 @@ src/adminactions/version.py
 /docs/build
 /MANIFEST
 coverage.xml
-sonar-project.properties
 .venv/
 uv.lock
+!.pre-commit-config.yaml
