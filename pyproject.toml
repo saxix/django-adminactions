@@ -148,9 +148,7 @@ max_supported_python = "3.13"
 [tool.pytest.ini_options]
 django_find_project = false
 norecursedirs = [ "demo", ".tox" ]
-addopts = "--doctest-modules --tb=short --reuse-db --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc --capture=no --doctest-glob=adminactions/*.py"
-echo-version = [ "django" ]
-
+addopts = "--doctest-modules --echo-attr=django.conf.settings.DATABASES.default.ENGINE --tb=short --reuse-db --cov=adminactions --cov-report=html --cov-config=tests/.coveragerc --capture=no --doctest-glob=adminactions/*.py"
 python_files = "tests/test_*.py tests/**/test_*.py"
 markers = [
   "functional: mark a test as functional",
