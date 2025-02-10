@@ -52,7 +52,7 @@ def import_fixture(modeladmin: "ModelAdmin", request: "HttpRequest") -> "HttpRes
                     obj.save()
                     imported += 1
 
-                modeladmin.message_user(request, imported, messages.SUCCESS)
+                modeladmin.message_user(request, f"{imported} objects imported", messages.SUCCESS)
             except Exception as e:
                 modeladmin.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 

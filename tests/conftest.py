@@ -6,9 +6,16 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING, Protocol
 
-import django_webtest
 import pytest
+from django_webtest import DjangoTestApp
+
+if TYPE_CHECKING:
+
+    class AppFactory(Protocol):
+        def __call__(self, csrf_checks: bool, extra_environ: dict | None = None) -> DjangoTestApp: ...
+
 
 logger = logging.getLogger("test")
 
@@ -116,12 +123,8 @@ def create_aa_permissions(db) -> None:
 
 
 @pytest.fixture
-def app(request):
-    wtm = django_webtest.WebTestMixin()
-    wtm.csrf_checks = False
-    wtm._patch_settings()
-    request.addfinalizer(wtm._unpatch_settings)
-    return django_webtest.DjangoTestApp()
+def app(request, django_app_factory: "AppFactory") -> DjangoTestApp:
+    return django_app_factory(csrf_checks=False)
 
 
 @pytest.fixture

@@ -45,7 +45,7 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
             value, label = el, el
 
         if label == "":  # ignore empty
-            continue
+            continue  # pragma: no cover
         ret.append(
             '<a name="{name}"><a href="#{name}" '
             'data-value="{value}" '
