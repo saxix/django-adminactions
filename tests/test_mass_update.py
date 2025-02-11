@@ -1,4 +1,3 @@
-# from adminactions.signals import adminaction_requested, adminaction_start, adminaction_end
 from __future__ import annotations
 
 from pathlib import Path
@@ -74,7 +73,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         selected_rows = kwargs.pop("selected_rows", self._selected_rows)
         with user_grant_permission(
             self.user,
-            ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel"],
+            ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel", "demo.view_demomodel",],
         ):
             res = self.app.get("/", user="user")
             res = res.click("Demo models")
@@ -108,7 +107,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         DemoModelAdmin.mass_update_form = DemoModelMassUpdateForm
         with user_grant_permission(
             self.user,
-            ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel"],
+            ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel", "demo.view_demomodel",],
         ):
             res = self.app.get("/", user="user")
             res = res.click("Demo models")
@@ -174,7 +173,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         # Create handler
 
         res = self._run_action(_async=1, _validate=0, chk_id_char=False)
-        assert res.status_code == 302
+        assert res.status_code == 302, res.showbrowser()
         assert DemoModel.objects.filter(choices=1).exists()
 
     @patch("adminactions.mass_update.adminaction_end.send")
@@ -183,7 +182,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
     @skipIf(not celery_present, "Celery not installed")
     def test_async_single(self, req, start, end) -> None:
         res = self._run_action(_async=1, _validate=1)
-        assert res.status_code == 302
+        assert res.status_code == 302, res.showbrowser()
         assert req.called
         assert start.called
         assert end.called
@@ -198,8 +197,18 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         obj2 = DemoModel.objects.get(pk=2)
         assert obj1.image.read() == obj2.image.read()
 
+
     def test_file_field_prevent_async(self) -> None:
         res = self._run_action(
             _async=1, select_across=1, chk_id_image=True, image=Upload(str(Path(__file__).parent / "test.jpeg"))
         )
         assert res.status_code == 200
+
+
+    def test_m2m_sync(self) -> None:
+        self._run_action(_async=0, select_across=1, chk_id_m2m=True, m2m=[1])
+        assert DemoModel.objects.filter(m2m__id=1).exists()
+
+    def test_m2m_async(self) -> None:
+        self._run_action(_async=1, select_across=1, chk_id_m2m=True, m2m=[1])
+        assert DemoModel.objects.filter(m2m__id=1).exists()

@@ -14,6 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db.models import FileField, ForeignKey
 from django.db.models import fields as df
+from django.db.models.query import QuerySet
 from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (
@@ -38,7 +39,6 @@ from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import curry, get_field_by_name
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
     from django.http.request import HttpRequest
 
 
@@ -208,10 +208,17 @@ class MassUpdateForm(GenericActionForm):
 
     def full_clean(self) -> None:
         super().full_clean()
+
+        def _is_field_name(n: str) -> bool:
+            return not (n.startswith(("chk_id_", "func_id_")))
+
+        def _is_enabled(n: str) -> bool:
+            return self.cleaned_data[f"chk_id_{n}"]
+
         if not self.is_bound:  # Stop further processing.
             return
         for field_name, value in list(self.cleaned_data.items()):
-            if isinstance(self.fields.get(field_name, ""), forms.FileField):
+            if _is_field_name(field_name) and isinstance(self.fields.get(field_name, ""), forms.FileField):
                 if self.cleaned_data["_async"] and self.cleaned_data.get(field_name, None):
                     self.add_error(field_name, _("Cannot use Async with FileField"))
 
@@ -220,7 +227,11 @@ class MassUpdateForm(GenericActionForm):
                 self.add_error(None, "Cannot use operators without 'validate'")
             else:
                 for field_name, value in list(self.cleaned_data.items()):
-                    if isinstance(self.fields.get(field_name, ""), ModelMultipleChoiceField):
+                    if (
+                        _is_field_name(field_name)
+                        and _is_enabled(field_name)
+                        and isinstance(self.fields.get(field_name, ""), ModelMultipleChoiceField)
+                    ):
                         self.add_error(
                             field_name,
                             _("Unable no mass update ManyToManyField without 'validate'"),
@@ -233,13 +244,13 @@ class MassUpdateForm(GenericActionForm):
             try:
                 value = raw_value
                 initial = self.initial.get(name, field.initial)
+                enabler = "chk_id_%s" % name
+                apply = self.data.get(enabler, "") == "on"
+                self.cleaned_data[enabler] = apply
                 if isinstance(field, ff.FileField):
                     value = field.clean(raw_value, initial)
                 else:
-                    enabler = "chk_id_%s" % name
                     function = self.data.get("func_id_%s" % name, "")
-                    apply = self.data.get(enabler, "") == "on"
-                    self.cleaned_data[enabler] = apply
                     self.cleaned_data["func_id_%s" % name] = function
                     # self.cleaned_data[name] = field.clean(raw_value)
                     if apply:
@@ -254,7 +265,7 @@ class MassUpdateForm(GenericActionForm):
                                 value = curry(func, value)
                             else:
                                 value = func
-                        self.cleaned_data[name] = value
+                        # self.cleaned_data[name] = value
                 if hasattr(self, "clean_%s" % name):
                     value = getattr(self, "clean_%s" % name)()
                 self.cleaned_data[name] = value
@@ -454,7 +465,10 @@ def mass_update(modeladmin, request, queryset):  # noqa
                         op = form.data.get("func_id_%s" % field_name)
                         if callable(value):
                             value = None
-                        rules[field_name] = (op, value)
+                        if isinstance(value, QuerySet):
+                            rules[field_name] = (op, list(value.values_list("pk", flat=True)))
+                        else:
+                            rules[field_name] = (op, value)
                 if use_celery:
                     from .tasks import mass_update_task
 

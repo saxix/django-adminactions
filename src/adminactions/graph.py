@@ -129,7 +129,7 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
                         json.dumps(data_labels),
                         json.dumps(data_labels),
                     )
-                elif graph_type == "PieChart":
+                else:  # graph_type == "PieChart":
                     table = [list(zip(list(map(str, data_labels)), list(map(str, data))))]
                     extra = """{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,
                                                 rendererOptions: {fill: true,
@@ -149,13 +149,7 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
                     modeladmin=modeladmin,
                     form=form,
                 )
-    elif request.method == "POST":
-        initial = {
-            helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
-            "select_across": request.POST.get("select_across", 0),
-        }
-        form = MForm(initial=initial)
-    else:
+    else:  # if request.method == "POST":
         initial = {
             helpers.ACTION_CHECKBOX_NAME: request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
             "select_across": request.POST.get("select_across", 0),

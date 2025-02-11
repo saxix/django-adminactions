@@ -77,6 +77,20 @@ dev = [
 build.hooks.vcs.version-file = "src/adminactions/version.py"
 version.source = "vcs"
 
+[tool.hatch.build.targets.sdist]
+ignore-vcs = true
+include = [
+  "src/adminactions/**/*.*",
+]
+exclude = [
+  ".gitignore",
+]
+packages = [ "src/adminactions" ]
+
+[tool.hatch.build.targets.wheel]
+packages = [ "src/adminactions" ]
+only-packages = true
+
 [tool.ruff]
 target-version = "py311"
 line-length = 120

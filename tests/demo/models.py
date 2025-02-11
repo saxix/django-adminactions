@@ -44,6 +44,8 @@ class DemoModel(models.Model):
     image = models.ImageField(blank=True, null=True)
     subclassed_image = SubclassedImageField(blank=True, null=True)
 
+    m2m = models.ManyToManyField("self", blank=True)
+
     class Meta:
         app_label = "demo"
         ordering = ("-id",)
