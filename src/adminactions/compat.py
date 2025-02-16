@@ -20,7 +20,7 @@ def nocommit(using: str | None = None, savepoint: bool = True, durable: bool = F
 
 
 try:
-    from celery import current_app  # noqa
+    from celery import current_app  # noqa: F401
 
     celery_present = True
 except ImportError:

@@ -28,11 +28,10 @@ from adminactions.perms import get_permission_codename
 from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 
 if TYPE_CHECKING:
-    from django.contrib.admin import ModelAdmin
+    from django.contrib.admin.options import ModelAdmin
     from django.db.models import QuerySet
     from django.db.models.fields import Field
     from django.http.request import HttpRequest
-    from django.http.response import HttpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +72,7 @@ class BulkUpdateForm(forms.Form):
             css={"all": ["adminactions/css/bulkupdate.css"]},
         )
         for field in self.fields.values():
-            media = media + field.widget.media
+            media += field.widget.media
         return media
 
 
@@ -83,15 +82,11 @@ class BulkUpdateMappingForm(forms.Form):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.model = kwargs.pop("model")
         super().__init__(*args, **kwargs)
-        # self._errors = None
-        # self.update_using_queryset_allowed = True
         for f in sorted(
             [(f.name, getattr(f, "verbose_name", f.name)) for f in self.model._meta.get_fields()],
             key=lambda item: item[1].casefold(),
         ):
             self.fields[f[0]] = forms.CharField(label=f[1].title(), required=False)
-            # self.initial[f[0]] = f[0]
-            # self.fields[f[0]].widget.initial = f[0]
 
     def _clean_fields(self) -> None:
         for name, field in self.fields.items():
@@ -112,7 +107,7 @@ class BulkUpdateMappingForm(forms.Form):
         return {k: v for k, v in mapping.items() if v.strip()}
 
 
-def bulk_update(modeladmin, request, queryset):  # noqa
+def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:  # noqa: PLR1702, PLR0914, PLR0915
     try:
         opts = modeladmin.model._meta
         perm = "{0}.{1}".format(opts.app_label, get_permission_codename(bulk_update.base_permission, opts))
@@ -241,7 +236,7 @@ bulk_update.short_description = _("Bulk update")
 bulk_update.base_permission = "adminactions_bulkupdate"
 
 
-def _bulk_update(
+def _bulk_update(  # noqa: PLR1702, PLR0912, PLR0913, PLR0915, PLR1702
     queryset: "QuerySet",
     file_name_or_object: str | Field,
     *,
@@ -261,7 +256,7 @@ def _bulk_update(
         "changes": {},
     }
     adminaction_start.send(sender=queryset.model, action="bulk_update", request=request, queryset=queryset)
-    try:
+    try:  # noqa: PLR1702
         if isinstance(file_name_or_object, FileProxyMixin):
             f = file_name_or_object
         else:
@@ -269,7 +264,7 @@ def _bulk_update(
 
         if header:
             reader = csv.DictReader(codecs.iterdecode(f, "utf-8"), **(csv_options or {}))
-            for _k, v in mapping.items():
+            for v in mapping.values():
                 if v not in reader.fieldnames:
                     raise ValidationError(_("%s column is not present in the file") % v)
         else:
@@ -295,10 +290,10 @@ def _bulk_update(
                                     if isinstance(related_field, models.UUIDField):
                                         try:
                                             value = related_model.objects.get(**{related_field_name: value})
-                                        except related_model.DoesNotExist:
+                                        except related_model.DoesNotExist as e:
                                             raise ValidationError(
                                                 f"No instance of {related_model._meta.verbose_name} found with {related_field_name} = {value}"
-                                            )
+                                            ) from e
                                 setattr(obj, field, value)
                     else:
                         for i, value in enumerate(row):

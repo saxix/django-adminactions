@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import operator
 import re
 from collections import OrderedDict as SortedDict
 from collections import defaultdict
@@ -39,6 +40,7 @@ from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import curry, get_field_by_name
 
 if TYPE_CHECKING:
+    from django.contrib.admin.options import ModelAdmin
     from django.http.request import HttpRequest
 
 
@@ -50,7 +52,7 @@ add = lambda arg, value: value + arg
 sub = lambda arg, value: value - arg
 add_percent = lambda arg, value: value + (value * arg / 100)
 sub_percent = lambda arg, value: value - (value * arg / 100)
-negate = lambda value: not value
+negate = operator.not_
 trim = lambda arg, value: value.strip(arg)
 
 change_domain = lambda arg, value: re.sub("@.*", arg, value)
@@ -107,7 +109,7 @@ class OperationManager:
             data |= self._dict.get(typ, ())
         return data
 
-    def operation_enabled(self, field: df.Field, operation: tuple[Any, Any, Any]) -> bool:
+    def operation_enabled(self, field: df.Field, operation: tuple[Any, Any, Any]) -> bool:  # noqa: PLR6301
         if operation:
             enabler = operation[2]
             return enabler is True or (callable(enabler) and enabler(field))
@@ -185,7 +187,7 @@ class MassUpdateForm(GenericActionForm):
 
     def _get_validation_exclusions(self) -> list[str]:
         exclude = list(super()._get_validation_exclusions())
-        for name, field in list(self.fields.items()):
+        for name, __ in list(self.fields.items()):
             function = self.data.get("func_id_%s" % name, False)
             if function:
                 exclude.append(name)
@@ -217,7 +219,7 @@ class MassUpdateForm(GenericActionForm):
 
         if not self.is_bound:  # Stop further processing.
             return
-        for field_name, value in list(self.cleaned_data.items()):
+        for field_name, __ in list(self.cleaned_data.items()):
             if _is_field_name(field_name) and isinstance(self.fields.get(field_name, ""), forms.FileField):
                 if self.cleaned_data["_async"] and self.cleaned_data.get(field_name, None):
                     self.add_error(field_name, _("Cannot use Async with FileField"))
@@ -226,7 +228,7 @@ class MassUpdateForm(GenericActionForm):
             if not self.update_using_queryset_allowed:
                 self.add_error(None, "Cannot use operators without 'validate'")
             else:
-                for field_name, value in list(self.cleaned_data.items()):
+                for field_name, __ in list(self.cleaned_data.items()):
                     if (
                         _is_field_name(field_name)
                         and _is_enabled(field_name)
@@ -252,9 +254,8 @@ class MassUpdateForm(GenericActionForm):
                 else:
                     function = self.data.get("func_id_%s" % name, "")
                     self.cleaned_data["func_id_%s" % name] = function
-                    # self.cleaned_data[name] = field.clean(raw_value)
                     if apply:
-                        field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
+                        field_object, __, __, __ = get_field_by_name(self._meta.model, name)
                         value = field.clean(raw_value)
                         if function:
                             func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
@@ -265,7 +266,6 @@ class MassUpdateForm(GenericActionForm):
                                 value = curry(func, value)
                             else:
                                 value = func
-                        # self.cleaned_data[name] = value
                 if hasattr(self, "clean_%s" % name):
                     value = getattr(self, "clean_%s" % name)()
                 self.cleaned_data[name] = value
@@ -349,7 +349,7 @@ def mass_update_execute(
                 queryset=queryset,
             )
             if config.AA_ENABLE_LOG:
-                from django.contrib.admin.models import CHANGE, LogEntry
+                from django.contrib.admin.models import CHANGE, LogEntry  # noqa: PLC0415
 
                 ids = list(queryset.only("pk").values_list("pk", flat=True))
                 LogEntry.objects.log_action(
@@ -366,7 +366,7 @@ def mass_update_execute(
     return updated, errors
 
 
-def mass_update(modeladmin, request, queryset):  # noqa
+def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> tuple[int, list[str]]:  # noqa: PLR0915, PLR0912, PLR1702, PLR0914
     """
     mass update queryset
     """
@@ -390,9 +390,9 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 # many thousands of items and kill the database.
                 grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
             elif hasattr(f, "flatchoices") and f.flatchoices:
-                grouped[f.name] = dict(getattr(f, "flatchoices")).keys()
+                grouped[f.name] = dict(f.flatchoices).keys()
             elif hasattr(f, "choices") and f.choices:
-                grouped[f.name] = dict(getattr(f, "choices")).keys()
+                grouped[f.name] = dict(f.choices).keys()
             elif isinstance(f, df.BooleanField):
                 grouped[f.name] = [("True", True), ("False", False)]
         already_grouped = set(grouped)
@@ -455,7 +455,6 @@ def mass_update(modeladmin, request, queryset):  # noqa
         try:
             form = MForm(request.POST, request.FILES, initial=initial)
             if form.is_valid():
-                # # need_transaction = form.cleaned_data.get('_unique_transaction', False)
                 validate = form.cleaned_data.get("_validate", False)
                 clean = form.cleaned_data.get("_clean", False)
                 use_celery = form.cleaned_data.get("_async", False)
@@ -470,7 +469,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                         else:
                             rules[field_name] = (op, value)
                 if use_celery:
-                    from .tasks import mass_update_task
+                    from .tasks import mass_update_task  # noqa: PLC0415
 
                     mass_update_task.delay(
                         f"{opts.app_label}.{opts.model_name}",
@@ -482,7 +481,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                     )
                 else:
                     try:
-                        updated, errors = mass_update_execute(
+                        updated, __ = mass_update_execute(
                             queryset,
                             rules,
                             validate,
@@ -520,7 +519,6 @@ def mass_update(modeladmin, request, queryset):  # noqa
         sample_values = None
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
-    # dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else str(obj)
     tpl = "adminactions/mass_update.html"
     ctx = {
         "adminform": adminForm,

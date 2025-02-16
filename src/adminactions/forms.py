@@ -37,7 +37,6 @@ class GenericActionForm(ModelForm):
         return [f.name for f in self._meta.model._meta.get_fields() if f.name not in ignored_fields]
 
     def model_fields(self) -> list[forms.Field]:
-        # field_names = [f.name for f in self._meta.model._meta.get_fields() if f.name not in self.model_field_names]
         return [field for field in self if field.name in self.model_field_names]
 
 
@@ -63,18 +62,7 @@ class CSVConfigForm(forms.Form):
         return self.cleaned_data["escapechar"] or None
 
     def csv_fields(self) -> list[forms.Field]:
-        return [
-            field
-            for field in self
-            if field.name
-            in [
-                "header",
-                "delimiter",
-                "quotechar",
-                "quoting",
-                "escapechar",
-            ]
-        ]
+        return [field for field in self if field.name in {"header", "delimiter", "quotechar", "quoting", "escapechar"}]
 
 
 class CSVOptions(CSVConfigForm):

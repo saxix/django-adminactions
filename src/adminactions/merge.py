@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Generator
+from typing import TYPE_CHECKING, Any, Generator
 
 from django import forms
 from django.contrib import messages
@@ -12,6 +12,7 @@ from django.forms.formsets import formset_factory
 from django.forms.models import model_to_dict, modelform_factory
 from django.http import HttpResponseRedirect
 from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
@@ -23,6 +24,10 @@ from .forms import GenericActionForm
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import clone_instance, get_ignored_fields
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models import QuerySet
 
 
 class MergeFormBase(forms.Form):
@@ -70,7 +75,7 @@ class MergeForm(GenericActionForm, MergeFormBase):
     pass
 
 
-def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet"):  # noqa
+def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> HttpResponse:  # noqa: PLR0914, PLR0915
     """
     Merge two model instances. Move all foreign keys.
 

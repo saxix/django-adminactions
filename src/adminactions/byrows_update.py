@@ -4,9 +4,12 @@ from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.admin.options import ModelAdmin
+from django.db.models import QuerySet
 from django.db.models import fields as django_fields
 from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
@@ -16,7 +19,7 @@ from .perms import get_permission_codename
 from .utils import get_ignored_fields
 
 
-def byrows_update(modeladmin, request, queryset):  # noqa
+def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
     """
     by rows update queryset
 

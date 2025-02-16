@@ -43,8 +43,8 @@ dependencies = [
 ]
 optional-dependencies.dev = [
 ]
-urls.Downloads = "https://github.com/saxix/django-adminactions"
-urls.Homepage = "https://github.com/saxix/django-adminactions"
+urls.downloads = "https://github.com/saxix/django-adminactions"
+urls.homepage = "https://github.com/saxix/django-adminactions"
 
 [dependency-groups]
 dev = [
@@ -95,7 +95,7 @@ exclude = [
   "tests",
 ]
 format.preview = true
-format.docstring-code-line-length = 100
+format.docstring-code-line-length = 120
 format.docstring-code-format = true
 lint.select = [
   "ALL",
@@ -103,7 +103,7 @@ lint.select = [
 lint.ignore = [
   #  "A",
   #  "ANN",
-  "ANN401",
+  "ANN401", #  Dynamically typed expressions
   "ARG",
   "B",
   "BLE",
@@ -115,15 +115,14 @@ lint.ignore = [
   "DTZ",
   "E",
   "EM",
-  "ERA",
-  "F",
+  #  "F",
   "FBT",
-  "FURB",
+  #  "FURB",
   "N",
-  "PERF",
-  "PGH",
-  "PLC",
-  "PLR",
+  #  "PERF",
+  #  "PGH",
+  #  "PLC",
+  #  "PLR",
   "PLW",
   "RET",
   "RUF",
@@ -149,7 +148,9 @@ lint.per-file-ignores."tests/**/*.py" = [
   "S603",    # `subprocess` call: check for execution of untrusted input
 ]
 lint.isort = { known-first-party = [ "pytest_echo" ] }
-
+lint.pylint.max-args = 7
+lint.pylint.max-branches = 14
+lint.pylint.max-nested-blocks = 8
 lint.preview = true
 
 [tool.pyproject-fmt]

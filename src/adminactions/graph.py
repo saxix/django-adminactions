@@ -19,9 +19,11 @@ from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import get_field_by_name
 
 if TYPE_CHECKING:
+    from http.client import HTTPResponse
+
     from django.contrib.admin import ModelAdmin
+    from django.db.models import QuerySet
     from django.http.request import HttpRequest
-    from django.http.response import HttpResponse
 
 
 def graph_form_factory(model: Model) -> Form:
@@ -45,7 +47,7 @@ def graph_form_factory(model: Model) -> Form:
     return DeclarativeFieldsMetaclass(str(class_name), (Form,), attrs)
 
 
-def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> "HTTPResponse":  # noqa
+def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> "HTTPResponse":  # noqa: PLR0912, PLR0914, PLR0915
     opts = modeladmin.model._meta
     perm = "{0}.{1}".format(
         opts.app_label.lower(),
@@ -88,26 +90,20 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
                 return
             try:
                 x = form.cleaned_data["axes_x"]
-                # y = form.cleaned_data['axes_y']
                 graph_type = form.cleaned_data["graph_type"]
 
-                field, model, direct, m2m = get_field_by_name(modeladmin.model, x)
+                field, __, __, __ = get_field_by_name(modeladmin.model, x)
                 cc = queryset.values_list(x).annotate(Count(x)).order_by()
                 if isinstance(field, ForeignKey):
                     data_labels = []
-                    for value, cnt in cc:
+                    for value, __ in cc:
                         data_labels.append(str(field.rel.to.objects.get(pk=value)))
                 elif isinstance(field, BooleanField):
                     data_labels = [str(label) for label, v in cc]
                 elif hasattr(modeladmin.model, "get_%s_display" % field.name):
                     data_labels = []
-                    for value, cnt in cc:
-                        data_labels.append(
-                            smart_str(
-                                dict(field.flatchoices).get(value, value),
-                                strings_only=True,
-                            )
-                        )
+                    for value, __ in cc:
+                        data_labels.append(smart_str(dict(field.flatchoices).get(value, value), strings_only=True))
                 else:
                     data_labels = [str(label) for label, v in cc]
                 data = [str(v) for label, v in cc]

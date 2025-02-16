@@ -39,12 +39,12 @@ def get_action(request: HttpRequest) -> list[str]:
     return request.POST.getlist("action")[action_index]
 
 
-def base_export(
+def base_export(  # noqa: PLR0913, PLR0917
     modeladmin: "ModelAdmin",
     request: "HttpRequest",
     queryset: QuerySet,
     title: str,
-    impl: callable,  # noqa
+    impl: callable,
     name: str,
     action_short_description: str,
     template: str,
@@ -132,7 +132,6 @@ def base_export(
 
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
-    # tpl = 'adminactions/export_csv.html'
     ctx = {
         "adminform": adminForm,
         "change": True,
@@ -371,7 +370,7 @@ export_as_fixture.short_description = _("Export as fixture")
 export_as_fixture.base_permission = "adminactions_export"
 
 
-def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse":  # noqa
+def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse":
     """
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted
@@ -431,7 +430,7 @@ def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset:
                 c = Collector(using)
                 c.collect(queryset, collect_related=collect_related)
                 data = []
-                for model, instances in list(c.data.items()):
+                for __, instances in list(c.data.items()):
                     data.extend(instances)
                 adminaction_end.send(
                     sender=modeladmin.model,

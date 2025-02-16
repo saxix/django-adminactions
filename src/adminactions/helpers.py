@@ -70,7 +70,7 @@ class AdminActionPermMixin:
         opts = self.model._meta
         filtered_actions = []
         actions = super()._filter_actions_by_permissions(request, actions)
-        from .actions import actions as aa
+        from .actions import actions as aa  # noqa: PLC0415
 
         for action in actions:
             if action[0] in aa:

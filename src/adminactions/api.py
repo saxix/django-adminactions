@@ -48,7 +48,7 @@ escapechars = " \\"
 ALL_FIELDS = -999
 
 
-def merge(
+def merge(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
     master: Model,
     other: Model,
     fields: Iterable[str] | None = None,
@@ -123,7 +123,7 @@ def merge(
                             all_related[name].append((rel_fieldname, r))
 
         if commit:
-            for name, elements in list(all_related.items()):
+            for __, elements in list(all_related.items()):
                 for rel_fieldname, element in elements:
                     setattr(element, rel_fieldname, master)
                     element.save()
@@ -144,12 +144,12 @@ class Echo:
     interface.
     """
 
-    def write(self, value: Any) -> Any:
+    def write(self, value: Any) -> Any:  # noqa: PLR6301
         """Write the value by returning it, instead of storing in a buffer."""
         return value
 
 
-def export_as_csv(
+def export_as_csv(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
     queryset: QuerySet,
     fields: list[str] | None = None,
     header: bool = False,
@@ -270,14 +270,14 @@ xls_options_default = {
 }
 
 
-def export_as_xls2(
+def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
     queryset: "QuerySet",
     fields: list[str] = None,
     header: bool = False,
     filename: str | None = None,
     options: "XLSOptions" | None = None,
     out: File | None = None,
-    modeladmin: ModelAdmin | None = None,  # noqa
+    modeladmin: ModelAdmin | None = None,
 ) -> HttpResponse:
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
@@ -401,21 +401,19 @@ xlsxwriter_options = {
     "DecimalField": "#,##0.00",
     "BooleanField": "boolean",
     "NullBooleanField": "boolean",
-    # 'EmailField': lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
-    # 'URLField': lambda value: 'HYPERLINK("%s","%s")' % (value, value),
     "CurrencyColumn": '"$"#,##0.00);[Red]("$"#,##0.00)',
 }
 
 
-def export_as_xls3(
+def export_as_xls3(  # noqa: PLR0912, PLR0915
     queryset: "QuerySet",
     fields: list[str] | None = None,
     header: bool = False,
     filename: str | None = None,
     options: "XLSOptions | None" = None,
     out: File | None = None,
-    modeladmin: ModelAdmin | None = None,  # noqa
-) -> HttpResponse:  # pragma: no cover
+    modeladmin: ModelAdmin | None = None,
+) -> HttpResponse:
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
     """
@@ -429,12 +427,12 @@ def export_as_xls3(
     :param formatting: if is None will use formatting_default
     :return: HttpResponse instance if out not supplied, otherwise out
     """
-    import xlsxwriter
+    import xlsxwriter  # noqa: PLC0415
 
     def _get_qs_formats(queryset: "QuerySet") -> HttpResponse:
         formats = {"_general_": book.add_format()}
         if hasattr(queryset, "model"):
-            for i, fieldname in enumerate(fields):
+            for fieldname in fields:
                 try:
                     (
                         f,

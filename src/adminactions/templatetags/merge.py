@@ -1,7 +1,6 @@
 from typing import Any
 
 from django.forms.forms import Form
-from django.forms.utils import ErrorList
 from django.forms.widgets import Widget
 from django.template import Library
 

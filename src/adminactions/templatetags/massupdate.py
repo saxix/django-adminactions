@@ -44,7 +44,7 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
         except (TypeError, ValueError):
             value, label = el, el
 
-        if label == "":  # ignore empty
+        if not label:  # ignore empty
             continue  # pragma: no cover
         ret.append(
             '<a name="{name}"><a href="#{name}" '
@@ -69,9 +69,9 @@ def checkbox_enabler(context: Context, field: Field) -> str:
 
 @register.simple_tag(takes_context=True)
 def field_function(context: Context, model: Model, form_field: Field) -> widgets.Select:
-    from adminactions.mass_update import OPERATIONS
+    from adminactions.mass_update import OPERATIONS  # noqa: PLC0415
 
-    model_field, model, direct, m2m = get_field_by_name(model, form_field.name)
+    model_field, model, __, __ = get_field_by_name(model, form_field.name)
     attrs = {"class": "func_select"}
     options_attrs = {}
     choices = []
@@ -81,7 +81,7 @@ def field_function(context: Context, model: Model, form_field: Field) -> widgets
     if form.is_bound:
         value = form.cleaned_data.get("func_id_%s" % form_field.name, "")
 
-    for label, (__, param, enabler, __) in list(OPERATIONS.get_for_field(model_field).items()):
+    for label, (__, param, __, __) in list(OPERATIONS.get_for_field(model_field).items()):
         options_attrs[label] = {"class": classes[param], "label": label}
         choices.append((label, label))
     return widgets.Select(attrs, choices).render("func_id_%s" % form_field.name, value)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import partial
+from itertools import chain
 from typing import TYPE_CHECKING, Any, Iterable, Union
 
 from django.conf import settings
@@ -35,10 +36,6 @@ def clone_instance(instance: Model, fieldnames: list[str] = None) -> Model:
         fieldnames = [fld.name for fld in instance._meta.fields]
 
     return instance.__class__(**{name: getattr(instance, name) for name in fieldnames})
-
-
-# def get_copy_of_instance(instance):
-# return instance.__class__.objects.get(pk=instance.pk)
 
 
 def get_attr(obj: Any, attr: str, default: Any | None = None) -> Any:
@@ -94,8 +91,8 @@ def getattr_or_item(obj: Any, name: str) -> Any:
     except AttributeError:
         try:
             ret = obj[name]
-        except (KeyError, TypeError):
-            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
+        except (KeyError, TypeError) as e:
+            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name)) from e
     return ret
 
 
@@ -168,7 +165,7 @@ def get_field_by_path(model: Model, field_path: str) -> Field:
     parts = field_path.split(".")
     target = parts[0]
     if target in get_all_field_names(model):
-        field_object, model, direct, m2m = get_field_by_name(model, target)
+        field_object, model, __, __ = get_field_by_name(model, target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
                 return get_field_by_path(field_object.related_model, ".".join(parts[1:]))
@@ -257,7 +254,7 @@ def flatten(iterable: Iterable) -> list[Any]:
     >>> flatten([[[1, 2, 3], (42, None)], [4, 5], [6], 7, (8, 9, 10)])
     [1, 2, 3, 42, None, 4, 5, 6, 7, 8, 9, 10]"""
 
-    result = list()
+    result = []
     for el in iterable:
         if hasattr(el, "__iter__") and not isinstance(el, str):
             result.extend(flatten(el))
@@ -281,8 +278,6 @@ def get_all_related_objects(model: Model) -> list[str]:
 
 
 def get_all_field_names(model: Model) -> list[str]:
-    from itertools import chain
-
     return list(
         set(
             chain.from_iterable(

@@ -16,7 +16,7 @@ def get_permission_codename(action: str, opts: Options) -> str:
 
 
 def get_contenttype_for_model(model: Model) -> "ContentType":
-    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.contenttypes.models import ContentType  # noqa: PLC0415
 
     model = model._meta.concrete_model
     opts = model._meta
@@ -28,10 +28,10 @@ def get_contenttype_for_model(model: Model) -> "ContentType":
 
 
 def create_extra_permissions() -> None:
-    from django.contrib.auth.models import Permission
-    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.auth.models import Permission  # noqa: PLC0415
+    from django.contrib.contenttypes.models import ContentType  # noqa: PLC0415
 
-    from .actions import actions as aa
+    from .actions import actions as aa  # noqa: PLC0415
 
     perm_suffix = "adminactions_"
     existing_perms = set(
