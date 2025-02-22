@@ -325,7 +325,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/ee/25/4afe0b88b91b49611
 
 [[package]]
 name = "django-adminactions"
-version = "2.4.dev12+g308f833.d20250210"
+version = "2.4.dev19+g3c9832e.d20250222"
 source = { editable = "." }
 dependencies = [
     { name = "pytz" },
@@ -371,7 +371,7 @@ requires-dist = [
 dev = [
     { name = "celery" },
     { name = "check-manifest" },
-    { name = "covdefaults", specifier = ">=2.3.0" },
+    { name = "covdefaults", specifier = ">=2.3" },
     { name = "django-admin-extra-urls" },
     { name = "django-dynamic-fixture" },
     { name = "django-environ" },
