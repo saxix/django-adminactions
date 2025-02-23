@@ -15,7 +15,7 @@ from django.test.testcases import TestCase
 from django_dynamic_fixture import G
 from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
 
-from adminactions.exceptions import ActionInterrupted
+from adminactions.exceptions import ActionInterruptedError
 from adminactions.signals import (
     adminaction_end,
     adminaction_requested,
@@ -111,7 +111,8 @@ class SelectRowsMixin:
     _selected_values = []
     csrf_checks = False
 
-    def _select_rows(self, form, selected_rows=None) -> None:
+    def _select_rows(self, form, selected_rows=None) -> list[int]:
+        selected_pks = []
         if selected_rows is None:
             selected_rows = self._selected_rows
 
@@ -120,7 +121,9 @@ class SelectRowsMixin:
             chk = form.get("_selected_action", r, default=None)
             if chk:
                 form.set("_selected_action", True, r)
+                selected_pks.append(int(chk.value))
                 self._selected_values.append(int(chk.value))
+        return selected_pks
 
 
 class CheckSignalsMixin:
@@ -170,7 +173,7 @@ class CheckSignalsMixin:
                 queryset.order_by("id").values_list("id", flat=True),
                 sorted(self._selected_values),
             )
-            raise ActionInterrupted(self.MESSAGE)
+            raise ActionInterruptedError(self.MESSAGE)
 
         myhandler.invoked = False
 
@@ -192,7 +195,7 @@ class CheckSignalsMixin:
                 queryset.order_by("id").values_list("id", flat=True),
                 sorted(self._selected_values),
             )
-            raise ActionInterrupted(self.MESSAGE)
+            raise ActionInterruptedError(self.MESSAGE)
 
         try:
             adminaction_start.connect(myhandler, sender=self.sender_model)

@@ -10,7 +10,10 @@ if TYPE_CHECKING:
 
 class NoCommit(t.Atomic):
     def __exit__(
-        self, exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: TracebackType | None
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         super().__exit__(Exception, Exception(), traceback)
 

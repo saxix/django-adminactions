@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Iterable, Union
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.db import models
@@ -10,6 +10,8 @@ from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from django.contrib.admin.options import ModelAdmin
     from django.db.models.base import Model
     from django.db.models.fields import Field
@@ -22,7 +24,7 @@ def get_ignored_fields(model: Model, setting_var_name: str) -> Iterable[str]:
     return getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
 
 
-def clone_instance(instance: Model, fieldnames: list[str] = None) -> Model:
+def clone_instance(instance: Model, fieldnames: list[str] | None = None) -> Model:
     """
         returns a copy of the passed instance.
 
@@ -57,8 +59,8 @@ def get_attr(obj: Any, attr: str, default: Any | None = None) -> Any:
     if "." not in attr:
         ret = getattr(obj, attr, default)
     else:
-        L = attr.split(".")
-        ret = get_attr(getattr(obj, L[0], default), ".".join(L[1:]), default)
+        parts = attr.split(".")
+        ret = get_attr(getattr(obj, parts[0], default), ".".join(parts[1:]), default)
 
     if isinstance(ret, BaseException):
         raise ret
@@ -92,12 +94,16 @@ def getattr_or_item(obj: Any, name: str) -> Any:
         try:
             ret = obj[name]
         except (KeyError, TypeError) as e:
-            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name)) from e
+            raise AttributeError(f"{obj.__class__.__name__} object has no attribute/item '{name}'") from e
     return ret
 
 
 def get_field_value(
-    obj: Model, field: Field, usedisplay: bool = True, raw_callable: bool = False, modeladmin: ModelAdmin = None
+    obj: Model,
+    field: Field,
+    usedisplay: bool = True,
+    raw_callable: bool = False,
+    modeladmin: ModelAdmin = None,
 ) -> Any:
     """
     returns the field value or field representation if get_FIELD_display exists
@@ -114,19 +120,19 @@ def get_field_value(
     >>> get_field_value(p, None)
     Traceback (most recent call last):
         ...
-    ValueError: Invalid value for parameter `field`: Should be a field name or a Field instance
+    TypeError: Invalid value for parameter `field`: Should be a field name or a Field instance
     """
     if isinstance(field, str):
         fieldname = field
     elif isinstance(field, models.Field):
         fieldname = field.name
     else:
-        raise ValueError("Invalid value for parameter `field`: Should be a field name or a Field instance")
+        raise TypeError("Invalid value for parameter `field`: Should be a field name or a Field instance")
 
     if modeladmin and hasattr(modeladmin, fieldname):
         value = getattr(modeladmin, fieldname)(obj)
-    elif usedisplay and hasattr(obj, "get_%s_display" % fieldname):
-        value = getattr(obj, "get_%s_display" % fieldname)()
+    elif usedisplay and hasattr(obj, f"get_{fieldname}_display"):
+        value = getattr(obj, f"get_{fieldname}_display")()
     else:
         value = getattr_or_item(obj, fieldname)
 
@@ -144,7 +150,7 @@ def get_field_value(
     return value
 
 
-def get_field_by_path(model: Model, field_path: str) -> Field:
+def get_field_by_path(model: Model, field_path: str) -> Field | None:
     """
     get a Model class or instance and a path to a attribute, returns the field object
 
@@ -169,14 +175,12 @@ def get_field_by_path(model: Model, field_path: str) -> Field:
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
                 return get_field_by_path(field_object.related_model, ".".join(parts[1:]))
-            else:
-                return field_object
-        else:
             return field_object
+        return field_object
     return None
 
 
-def get_verbose_name(model_or_queryset: Union[Model, QuerySet], field: Field) -> str:
+def get_verbose_name(model_or_queryset: Model | QuerySet, field: Field) -> str:
     """
     returns the value of the ``verbose_name`` of a field
 
@@ -210,26 +214,21 @@ def get_verbose_name(model_or_queryset: Union[Model, QuerySet], field: Field) ->
     True
     """
 
-    if isinstance(model_or_queryset, models.Manager):
+    if isinstance(model_or_queryset, models.Manager | QuerySet):
         model = model_or_queryset.model
-    elif isinstance(model_or_queryset, QuerySet):
-        model = model_or_queryset.model
-    elif isinstance(model_or_queryset, models.Model):
-        model = model_or_queryset
-    elif type(model_or_queryset) is models.base.ModelBase:
+    elif isinstance(model_or_queryset, models.Model | models.base.ModelBase):
         model = model_or_queryset
     else:
-        raise ValueError(
-            "`get_verbose_name` expects Manager, Queryset or Model as first parameter (got %s)"
-            % type(model_or_queryset)
+        raise TypeError(
+            f"`get_verbose_name` expects Manager, Queryset or Model as first parameter (got {type(model_or_queryset)})",
         )
 
     if isinstance(field, str):
         field = get_field_by_path(model, field)
     elif isinstance(field, models.Field):
-        field = field
+        pass
     else:
-        raise ValueError("`get_verbose_name` field_path must be string or Field class")
+        raise TypeError("`get_verbose_name` field_path must be string or Field class")
 
     return field.verbose_name
 
@@ -284,8 +283,8 @@ def get_all_field_names(model: Model) -> list[str]:
                 (field.name, field.attname) if hasattr(field, "attname") else (field.name,)
                 for field in model._meta.get_fields()
                 if not (field.many_to_one and field.related_model is None)
-            )
-        )
+            ),
+        ),
     )
 
 

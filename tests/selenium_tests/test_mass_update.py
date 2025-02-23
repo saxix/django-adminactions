@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from django.contrib.auth.models import User
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
-from django.contrib.auth.models import User
 
 if TYPE_CHECKING:
     from selenium.webdriver.remote.webdriver import WebDriver

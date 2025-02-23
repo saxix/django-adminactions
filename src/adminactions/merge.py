@@ -1,5 +1,6 @@
+from collections.abc import Generator
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Generator
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from django import forms
 from django.contrib import messages
@@ -59,33 +60,32 @@ class MergeFormBase(forms.Form):
     def clean_field_names(self) -> Any:
         if self.cleaned_data["field_names"]:
             return self.cleaned_data["field_names"].split(",")
-        else:
-            return None
+        return None
 
     class Media:
-        js = [
+        js: ClassVar[list[str]] = [
             "admin/js/vendor/jquery/jquery.js",
             "admin/js/jquery.init.js",
             "adminactions/js/merge.min.js",
         ]
-        css = {"all": ["adminactions/css/adminactions.css"]}
+        css: ClassVar[dict[str, list[str]]] = {"all": ["adminactions/css/adminactions.css"]}
 
 
 class MergeForm(GenericActionForm, MergeFormBase):
     pass
 
 
-def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> HttpResponse:  # noqa: PLR0914, PLR0915
+def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> HttpResponse | None:  # noqa: C901, PLR0914, PLR0915
     """
     Merge two model instances. Move all foreign keys.
 
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(merge.base_permission, opts))
+    perm = f"{opts.app_label}.{get_permission_codename(merge.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
 
     def raw_widget(field: models.Field, **kwargs: Any) -> Field:
         """force all fields as not required"""
@@ -127,8 +127,7 @@ def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet"
                 v_other.pk = stored_pk
 
                 return validate_form.is_valid(), validate_form, v_merge_kwargs
-            else:
-                return False, merge_form_base, v_merge_kwargs
+            return False, merge_form_base, v_merge_kwargs
 
     name = "merge"  # Action name -- currently hardcoded - sent to signal
     tpl = "adminactions/merge.html"
@@ -195,8 +194,7 @@ def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet"
             )
 
             return HttpResponseRedirect(request.get_full_path())
-        else:
-            messages.error(request, form.errors)
+        messages.error(request, form.errors)
     else:
         try:
             master, other = queryset.all()
@@ -206,7 +204,7 @@ def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet"
                     for target in (master, other):
                         raw_value = getattr(target, master_field.name)
                         if raw_value:
-                            fixed_value = datetime(
+                            fixed_value = datetime(  # noqa: DTZ001
                                 raw_value.year,
                                 raw_value.month,
                                 raw_value.day,
@@ -217,7 +215,7 @@ def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet"
                             setattr(target, master_field.name, fixed_value)
         except ValueError:
             messages.error(request, _("Please select exactly 2 records"))
-            return
+            return None
 
         initial = {
             "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
@@ -238,11 +236,7 @@ def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet"
         "formset": formset,
         "media": mark_safe(media),
         "action_short_description": merge.short_description,
-        "title": "%s (%s)"
-        % (
-            merge.short_description.capitalize(),
-            smart_str(modeladmin.opts.verbose_name_plural),
-        ),
+        "title": f"{merge.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
         "master": master,
         "other": other,
     })

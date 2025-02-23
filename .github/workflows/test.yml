@@ -32,17 +32,18 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: [ "311", "312", "313" ]
-                django-version: [ "32", "42", "51" ]
+                python: [ "313" ]
+                django: [ "51" ]
         env:
-            PY_VER: ${{ matrix.python-version}}
-            DJ_VER: ${{ matrix.django-version}}
+            #            PY_VER: ${{ matrix.python-version}}
+            #            DJ_VER: ${{ matrix.django-version}}
             CELERY_BROKER_URL: redis://redis:6379/0
             CELERY_ALWAYS_EAGER: true
         steps:
             -   uses: actions/checkout@v4
                 with:
                     fetch-depth: 0
+
             -   name: Install the latest version of uv
                 uses: astral-sh/setup-uv@v5
                 with:
@@ -51,26 +52,17 @@ jobs:
                     github-token: ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Install tox
-                run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv
+                run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv --with tox-gh-actions
 
             -   name: Install Python
-                if: matrix.python-version != '3.13'
-                run: uv python install --python-preference only-managed ${{ matrix.python-version}}
+                if: matrix.python != '3.13'
+                run: uv python install --python-preference only-managed ${{ matrix.python }}
 
-            -   name: Setup test suite ${{ env.DJ_VER }}-${{ env.PY_VER }}
-                run: tox run -vv --notest --skip-missing-interpreters false -e d${{ env.DJ_VER }}-py${{ env.PY_VER }}
-
+            -   name: Setup test suite
+                run: tox run -vv --notest --skip-missing-interpreters false
             -   name: Run test suite
-#                    COV_CMD=$(if [ ${{ env.DJ_VER }}-${{ env.PY_VER }} == 51-312 ]; then echo "--cov=pytest_echo --cov-report=xml"; else echo ; fi)
-                run: |
-                    tox run --skip-pkg-install -e d${{ env.DJ_VER }}-py${{ env.PY_VER }}
+                run: tox run --skip-pkg-install
                 env:
                     PYTEST_ADDOPTS: "-vv --durations=20"
                     DIFF_AGAINST: HEAD
-            -   name: Upload coverage to Codecov
-                uses: codecov/codecov-action@v5
-                if: ${{ success() && matrix.python-version == 3.13 }}
-                with:
-                    env_vars: OS
-                    name: codecov-pytest-order
-                    token: ${{ secrets.CODECOV_TOKEN }}
+                    DJANGO: ${{ matrix.django }}

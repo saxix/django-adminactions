@@ -20,7 +20,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .api import export_as_csv as _export_as_csv
 from .api import export_as_xls as _export_as_xls
-from .exceptions import ActionInterrupted
+from .exceptions import ActionInterruptedError
 from .forms import CSVOptions, FixtureOptions, XLSOptions
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
@@ -39,7 +39,7 @@ def get_action(request: HttpRequest) -> list[str]:
     return request.POST.getlist("action")[action_index]
 
 
-def base_export(  # noqa: PLR0913, PLR0917
+def base_export(  # noqa: C901, PLR0913, PLR0917
     modeladmin: "ModelAdmin",
     request: "HttpRequest",
     queryset: QuerySet,
@@ -49,15 +49,15 @@ def base_export(  # noqa: PLR0913, PLR0917
     action_short_description: str,
     template: str,
     form_class: type[Form],
-) -> "HttpResponse":
+) -> HttpResponse | None:
     """
     export a queryset to csv file
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(base_export.base_permission, opts))
+    perm = f"{opts.app_label}.{get_permission_codename(base_export.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
 
     try:
         adminaction_requested.send(
@@ -67,9 +67,9 @@ def base_export(  # noqa: PLR0913, PLR0917
             queryset=queryset,
             modeladmin=modeladmin,
         )
-    except ActionInterrupted as e:
+    except ActionInterruptedError as e:
         messages.error(request, str(e))
-        return
+        return None
     if hasattr(modeladmin, "get_exportable_columns"):
         cols = modeladmin.get_exportable_columns(request, form_class)
     else:
@@ -96,11 +96,11 @@ def base_export(  # noqa: PLR0913, PLR0917
                     modeladmin=modeladmin,
                     form=form,
                 )
-            except ActionInterrupted as e:
+            except ActionInterruptedError as e:
                 messages.error(request, str(e))
-                return
+                return None
 
-            if hasattr(modeladmin, "get_%s_filename" % name):
+            if hasattr(modeladmin, f"get_{name}_filename"):
                 filename = modeladmin.get_export_as_csv_filename(request, queryset)
             else:
                 filename = None
@@ -115,7 +115,7 @@ def base_export(  # noqa: PLR0913, PLR0917
                 )
             except Exception as e:
                 logger.exception(e)
-                messages.error(request, "Error: (%s)" % str(e))
+                messages.error(request, f"Error: ({e!s})")
             else:
                 adminaction_end.send(
                     sender=modeladmin.model,
@@ -166,11 +166,7 @@ def export_as_csv(modeladmin: "ModelAdmin", request: HttpRequest, queryset: Quer
         impl=_export_as_csv,
         name="export_as_csv",
         action_short_description=export_as_csv.short_description,
-        title="%s (%s)"
-        % (
-            export_as_csv.short_description.capitalize(),
-            modeladmin.opts.verbose_name_plural,
-        ),
+        title=f"{export_as_csv.short_description.capitalize()} ({modeladmin.opts.verbose_name_plural})",
         template="adminactions/export_csv.html",
         form_class=form_class,
     )
@@ -192,11 +188,7 @@ def export_as_xls(modeladmin: "ModelAdmin", request: HttpRequest, queryset: Quer
         impl=_export_as_xls,
         name="export_as_xls",
         action_short_description=export_as_xls.short_description,
-        title="%s (%s)"
-        % (
-            export_as_xls.short_description.capitalize(),
-            modeladmin.opts.verbose_name_plural,
-        ),
+        title=f"{export_as_xls.short_description.capitalize()} ({modeladmin.opts.verbose_name_plural})",
         template="adminactions/export_xls.html",
         form_class=form_class,
     )
@@ -207,23 +199,24 @@ export_as_xls.base_permission = "adminactions_export"
 
 
 class FlatCollector:
-    def __init__(self, using: str) -> None:
+    def __init__(self, using: str) -> None:  # noqa: ARG002
         self._visited = []
         super().__init__()
 
     def collect(self, objs: list[Model]) -> None:
         self.data = objs
-        self.models = set([o.__class__ for o in self.data])
+        self.models = {o.__class__ for o in self.data}
 
 
 class ForeignKeysCollector:
-    def __init__(self, using: str) -> None:
+    def __init__(self, using: str) -> None:  # noqa: ARG002
         self._visited = []
         super().__init__()
 
     def _collect(self, objs: list[Model]) -> None:
         objects = []
-        for obj in objs:
+        for o in objs:
+            obj = o
             if obj and obj not in self._visited:
                 concrete_model = obj._meta.concrete_model
                 obj = concrete_model.objects.get(pk=obj.pk)
@@ -243,7 +236,7 @@ class ForeignKeysCollector:
     def collect(self, objs: list[Model]) -> None:
         self._visited = []
         self.data = self._collect(objs)
-        self.models = set([o.__class__ for o in self.data])
+        self.models = {o.__class__ for o in self.data}
 
     def __str__(self) -> str:
         return mark_safe(self.data)
@@ -262,11 +255,11 @@ def _dump_qs(form: Form, queryset: QuerySet, data: dict[str, Any], filename: str
 
     response = HttpResponse(content_type="application/json")
     if not form.cleaned_data.get("on_screen", False):
-        filename = filename or "%s.%s" % (
+        filename = filename or "{}.{}".format(
             queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"),
             fmt,
         )
-        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode("us-ascii", "replace")
+        response["Content-Disposition"] = (f'attachment;filename="{filename}"').encode("us-ascii", "replace")
     response.content = ret
     return response
 
@@ -280,10 +273,10 @@ def export_as_fixture(modeladmin: "ModelAdmin", request: HttpRequest, queryset: 
         "indent": 4,
     }
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(export_as_fixture.base_permission, opts))
+    perm = f"{opts.app_label}.{get_permission_codename(export_as_fixture.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
 
     try:
         adminaction_requested.send(
@@ -293,9 +286,9 @@ def export_as_fixture(modeladmin: "ModelAdmin", request: HttpRequest, queryset: 
             queryset=queryset,
             modeladmin=modeladmin,
         )
-    except ActionInterrupted as e:
+    except ActionInterruptedError as e:
         messages.error(request, str(e))
-        return
+        return None
     if hasattr(modeladmin, "get_aa_export_form"):
         form_class = modeladmin.get_aa_export_form(request, "fixture") or FixtureOptions
     else:
@@ -313,12 +306,12 @@ def export_as_fixture(modeladmin: "ModelAdmin", request: HttpRequest, queryset: 
                     modeladmin=modeladmin,
                     form=form,
                 )
-            except ActionInterrupted as e:
+            except ActionInterruptedError as e:
                 messages.error(request, str(e))
-                return
+                return None
             try:
-                _collector = ForeignKeysCollector if form.cleaned_data.get("add_foreign_keys") else FlatCollector
-                c = _collector(None)
+                collector = ForeignKeysCollector if form.cleaned_data.get("add_foreign_keys") else FlatCollector
+                c = collector(None)
                 c.collect(queryset)
                 adminaction_end.send(
                     sender=modeladmin.model,
@@ -347,11 +340,7 @@ def export_as_fixture(modeladmin: "ModelAdmin", request: HttpRequest, queryset: 
         "adminform": adminForm,
         "change": True,
         "action_short_description": export_as_fixture.short_description,
-        "title": "%s (%s)"
-        % (
-            export_as_fixture.short_description.capitalize(),
-            modeladmin.opts.verbose_name_plural,
-        ),
+        "title": f"{export_as_fixture.short_description.capitalize()} ({modeladmin.opts.verbose_name_plural})",
         "is_popup": False,
         "save_as": False,
         "has_delete_permission": False,
@@ -370,19 +359,16 @@ export_as_fixture.short_description = _("Export as fixture")
 export_as_fixture.base_permission = "adminactions_export"
 
 
-def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse":
+def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse | None":
     """
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted
     """
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label,
-        get_permission_codename(export_delete_tree.base_permission, opts),
-    )
+    perm = f"{opts.app_label}.{get_permission_codename(export_delete_tree.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
     try:
         adminaction_requested.send(
             sender=modeladmin.model,
@@ -391,9 +377,9 @@ def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset:
             queryset=queryset,
             modeladmin=modeladmin,
         )
-    except ActionInterrupted as e:
+    except ActionInterruptedError as e:
         messages.error(request, str(e))
-        return
+        return None
 
     initial = {
         "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
@@ -420,9 +406,9 @@ def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset:
                     modeladmin=modeladmin,
                     form=form,
                 )
-            except ActionInterrupted as e:
+            except ActionInterruptedError as e:
                 messages.error(request, str(e))
-                return
+                return None
             try:
                 collect_related = form.cleaned_data.get("add_foreign_keys")
                 using = router.db_for_write(modeladmin.model)
@@ -458,11 +444,7 @@ def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset:
         "adminform": adminForm,
         "change": True,
         "action_short_description": export_delete_tree.short_description,
-        "title": "%s (%s)"
-        % (
-            export_delete_tree.short_description.capitalize(),
-            modeladmin.opts.verbose_name_plural,
-        ),
+        "title": f"{export_delete_tree.short_description.capitalize()} ({modeladmin.opts.verbose_name_plural})",
         "is_popup": False,
         "save_as": False,
         "has_delete_permission": False,

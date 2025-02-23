@@ -18,6 +18,6 @@ def test_post_migrate(value):
 def test_app_config():
     with mock.patch("adminactions.config.AA_PERMISSION_HANDLER", consts.AA_PERMISSION_CREATE_USE_APPCONFIG):
         with mock.patch("adminactions.perms.create_extra_permissions") as m:
-            apps.get_app_config('adminactions').ready()
+            apps.get_app_config("adminactions").ready()
 
         assert m.call_count == 1

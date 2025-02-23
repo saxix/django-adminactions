@@ -10,7 +10,12 @@ logger = logging.getLogger(__name__)
 
 @shared_task()
 def mass_update_task(
-    model: Model, ids: list[Any], rules: dict[str, tuple[callable, Any]], validate: bool, clean: bool, user_pk: Any
+    model: Model,
+    ids: list[Any],
+    rules: dict[str, tuple[callable, Any]],
+    validate: bool,
+    clean: bool,
+    user_pk: Any,
 ) -> None:
     from adminactions.mass_update import mass_update_execute  # noqa: PLC0415
 

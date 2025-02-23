@@ -120,7 +120,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.admin",
-    "admin_extra_urls",
+    "admin_extra_buttons",
     "adminactions.apps.Config",
     "demo",
 ]

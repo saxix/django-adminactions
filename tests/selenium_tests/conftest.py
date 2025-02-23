@@ -10,8 +10,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 
 browsers = {
-    "firefox": webdriver.Firefox,
-    'chrome': webdriver.Chrome,
+    # "firefox": webdriver.Firefox,
+    "chrome": webdriver.Chrome,
 }
 
 

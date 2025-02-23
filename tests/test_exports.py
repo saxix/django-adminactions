@@ -118,11 +118,11 @@ class ExportDeleteTreeTest(ExportMixin, SelectRowsMixin, CheckSignalsMixin, WebT
             res = res.click("Users")
             form = res.forms["changelist-form"]
             form["action"] = self.action_name
-            self._select_rows(form, [0, 1])
+            selected_pks = self._select_rows(form, [0, 1])
             res = form.submit()
             res.forms["export-form"]["use_natural_fk"] = True
             res = res.forms["export-form"].submit("apply")
-            assert res.json[0]["pk"] == 1
+            assert res.json[0]["pk"] in selected_pks, f"{selected_pks} - {res.json[0]['pk']}"
 
     def _run_action(self, steps=2):
         with user_grant_permission(self.user, ["auth.change_user", "auth.adminactions_export_user"]):

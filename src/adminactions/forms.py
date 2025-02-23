@@ -42,8 +42,12 @@ class GenericActionForm(ModelForm):
 
 class CSVConfigForm(forms.Form):
     header = forms.BooleanField(label=_("Header"), required=False)
-    delimiter = forms.ChoiceField(label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=",")
-    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes)), initial="'")
+    delimiter = forms.ChoiceField(
+        label=_("Delimiter"),
+        choices=list(zip(delimiters, delimiters, strict=True)),
+        initial=",",
+    )
+    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes, strict=True)), initial="'")
     quoting = forms.TypedChoiceField(
         coerce=int,
         label=_("Quoting"),
@@ -112,4 +116,5 @@ class FixtureOptions(forms.Form):
     add_foreign_keys = forms.BooleanField(required=False)
 
     indent = forms.IntegerField(required=True, max_value=10, min_value=0)
-    serializer = forms.ChoiceField(choices=list(zip(get_serializer_formats(), get_serializer_formats())))
+    known_formats = get_serializer_formats()
+    serializer = forms.ChoiceField(choices=list(zip(known_formats, known_formats, strict=True)))

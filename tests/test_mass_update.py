@@ -73,7 +73,11 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         selected_rows = kwargs.pop("selected_rows", self._selected_rows)
         with user_grant_permission(
             self.user,
-            ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel", "demo.view_demomodel",],
+            [
+                "demo.change_demomodel",
+                "demo.adminactions_massupdate_demomodel",
+                "demo.view_demomodel",
+            ],
         ):
             res = self.app.get("/", user="user")
             res = res.click("Demo models")
@@ -107,7 +111,11 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         DemoModelAdmin.mass_update_form = DemoModelMassUpdateForm
         with user_grant_permission(
             self.user,
-            ["demo.change_demomodel", "demo.adminactions_massupdate_demomodel", "demo.view_demomodel",],
+            [
+                "demo.change_demomodel",
+                "demo.adminactions_massupdate_demomodel",
+                "demo.view_demomodel",
+            ],
         ):
             res = self.app.get("/", user="user")
             res = res.click("Demo models")
@@ -197,13 +205,11 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
         obj2 = DemoModel.objects.get(pk=2)
         assert obj1.image.read() == obj2.image.read()
 
-
     def test_file_field_prevent_async(self) -> None:
         res = self._run_action(
             _async=1, select_across=1, chk_id_image=True, image=Upload(str(Path(__file__).parent / "test.jpeg"))
         )
         assert res.status_code == 200
-
 
     def test_m2m_sync(self) -> None:
         self._run_action(_async=0, select_across=1, chk_id_m2m=True, m2m=[1])

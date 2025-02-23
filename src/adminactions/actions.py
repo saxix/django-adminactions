@@ -1,6 +1,6 @@
-from typing import Optional
+from __future__ import annotations
 
-from django.contrib.admin import AdminSite
+from typing import TYPE_CHECKING
 
 from .bulk_update import bulk_update
 from .byrows_update import byrows_update
@@ -9,6 +9,10 @@ from .export import export_as_csv, export_as_fixture, export_as_xls, export_dele
 from .graph import graph_queryset
 from .mass_update import mass_update
 from .merge import merge
+
+if TYPE_CHECKING:
+    from django.contrib.admin import AdminSite
+
 
 actions = [
     export_as_fixture,
@@ -24,7 +28,7 @@ actions = [
 ]
 
 
-def add_to_site(site: AdminSite, exclude: Optional[list[str]] = None, include: Optional[list[str]] = None) -> None:
+def add_to_site(site: AdminSite, exclude: list[str] | None = None, include: list[str] | None = None) -> None:
     """
     Register all the adminactions into passed site
 

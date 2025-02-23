@@ -1,8 +1,6 @@
 graft docs
-include CHANGELOG
 include LICENSE
 include src/*.py
-include README.md
 
 include README.md
 include MANIFEST.in

@@ -20,17 +20,15 @@
           $(sender).next(".sample").html(data);
         });
       };
-      $("#id_datetime_format, #id_date_format, #id_time_format")
-        .after('&nbsp;&nbsp;<span class="sample"></span>')
-        .keyup(function () {
+      $("#id_datetime_format, #id_date_format, #id_time_format").each(function (i, el){
+        var target = $(el).attr("id");
+        $(el).after('&nbsp;&nbsp;<span class="sample ' + target + '"></span>').keyup(function () {
           clearTimeout($(this).data("timer"));
           var target = $(this);
-          var wait = setTimeout(function () {
-            get_format(target);
-          }, 500);
-          $(this).data("timer", wait);
-        })
-        .trigger("keyup");
+          var wait = setTimeout(function () {get_format(target); }, 500);
+           $(this).data("timer", wait);
+            }).trigger("keyup");
+      })
     });
   })(django.jQuery);
 </script>

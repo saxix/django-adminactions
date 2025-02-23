@@ -22,10 +22,10 @@ def test_get_verbose_name() -> None:
 
     assert get_verbose_name(p, "content_type.model") == "python model class name"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         get_verbose_name(object, "aaa")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         get_verbose_name(p, None)
 
 

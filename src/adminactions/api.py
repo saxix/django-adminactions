@@ -4,7 +4,7 @@ import collections
 import csv
 import datetime
 import itertools
-from typing import TYPE_CHECKING, Any, Generator
+from typing import TYPE_CHECKING, Any
 
 import xlwt
 from django.conf import settings
@@ -22,7 +22,7 @@ from adminactions import utils
 from .utils import clone_instance, get_field_by_path, get_field_value, get_ignored_fields
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Generator, Iterable
 
     from django.contrib.admin.options import ModelAdmin
     from django.core.files.base import File
@@ -47,7 +47,7 @@ escapechars = " \\"
 ALL_FIELDS = -999
 
 
-def merge(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
+def merge(  # noqa: C901, PLR0912
     master: Model,
     other: Model,
     fields: Iterable[str] | None = None,
@@ -80,10 +80,10 @@ def merge(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
 
     if m2m == ALL_FIELDS:
         m2m = set()
-        for field in master._meta.get_fields():  # noqa: SLF001
+        for field in master._meta.get_fields():
             if getattr(field, "many_to_many", None):
                 if isinstance(field, ManyToManyField):
-                    if not field.remote_field.through._meta.auto_created:  # noqa: SLF001
+                    if not field.remote_field.through._meta.auto_created:
                         continue
                     m2m.add(field.name)
                 else:
@@ -95,7 +95,7 @@ def merge(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
         result = clone_instance(master)
         for fieldname in fields:
             f = get_field_by_path(master, fieldname)
-            if isinstance(f, FileField) or f and not f.primary_key:
+            if isinstance(f, FileField) or (f and not f.primary_key):
                 setattr(result, fieldname, getattr(other, fieldname))
 
         if m2m:
@@ -117,7 +117,7 @@ def merge(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
                 else:
                     accessor = getattr(other, name, None)
                     if accessor:
-                        rel_fieldname = list(accessor.core_filters.keys())[0].split("__")[0]
+                        rel_fieldname = next(iter(accessor.core_filters.keys()))
                         for r in accessor.all():
                             all_related[name].append((rel_fieldname, r))
 
@@ -127,9 +127,9 @@ def merge(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
                     setattr(element, rel_fieldname, master)
                     element.save()
             other.delete()
-            ignored_fields = get_ignored_fields(result._meta.model, "MERGE_ACTION_IGNORED_FIELDS")  # noqa: SLF001
+            ignored_fields = get_ignored_fields(result._meta.model, "MERGE_ACTION_IGNORED_FIELDS")
             for ig_field in ignored_fields:
-                setattr(result, ig_field, result._meta.get_field(ig_field).get_default())  # noqa: SLF001
+                setattr(result, ig_field, result._meta.get_field(ig_field).get_default())
             result.save()
             for fieldname, elements in list(all_m2m.items()):
                 dest_m2m = getattr(result, fieldname)
@@ -148,7 +148,7 @@ class Echo:
         return value
 
 
-def export_as_csv(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
+def export_as_csv(  # noqa: C901,
     queryset: QuerySet,
     fields: list[str] | None = None,
     header: bool = False,
@@ -171,16 +171,13 @@ def export_as_csv(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
     """
     streaming_enabled = getattr(settings, "ADMINACTIONS_STREAM_CSV", False)
     if out is None:
-        if streaming_enabled:
-            response_class = StreamingHttpResponse
-        else:
-            response_class = HttpResponse
+        response_class = StreamingHttpResponse if streaming_enabled else HttpResponse
 
         if filename is None:
-            filename = "%s.csv" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+            filename = "{}.csv".format(queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"))
 
         response = response_class(content_type="text/csv")
-        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode("us-ascii", "replace")
+        response["Content-Disposition"] = (f'attachment;filename="{filename}"').encode("us-ascii", "replace")
     else:
         response = out
 
@@ -191,10 +188,7 @@ def export_as_csv(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
         config.update(options)
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
-    if streaming_enabled:
-        buffer_object = Echo()
-    else:
-        buffer_object = response
+    buffer_object = Echo() if streaming_enabled else response
 
     dialect = config.get("dialect", None)
     if dialect is not None:
@@ -212,10 +206,10 @@ def export_as_csv(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
 
     def yield_header() -> Generator[str, None, None]:
         if bool(header):
-            if isinstance(header, (list, tuple)):
+            if isinstance(header, (list | tuple)):
                 yield writer.writerow(header)
             else:
-                yield writer.writerow([f for f in fields])
+                yield writer.writerow(list(fields))
         yield ""
 
     def yield_rows() -> Generator[str, None, None]:
@@ -263,18 +257,18 @@ xls_options_default = {
     "DecimalField": "#,##0.00",
     "BooleanField": "boolean",
     "NullBooleanField": "boolean",
-    "EmailField": lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
-    "URLField": lambda value: 'HYPERLINK("%s","%s")' % (value, value),
+    "EmailField": lambda value: f'HYPERLINK("mailto:{value}","{value}")',
+    "URLField": lambda value: f'HYPERLINK("{value}","{value}")',
     "CurrencyColumn": '"$"#,##0.00);[Red]("$"#,##0.00)',
 }
 
 
-def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
-    queryset: "QuerySet",
-    fields: list[str] = None,
+def export_as_xls2(  # noqa: C901, PLR0912, PLR0915
+    queryset: QuerySet,
+    fields: list[str] | None = None,
     header: bool = False,
     filename: str | None = None,
-    options: "XLSOptions" | None = None,
+    options: XLSOptions | None = None,
     out: File | None = None,
     modeladmin: ModelAdmin | None = None,
 ) -> HttpResponse:
@@ -292,7 +286,7 @@ def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
     :return: HttpResponse instance if out not supplied, otherwise out
     """
 
-    def _get_qs_formats(queryset: "QuerySet") -> HttpResponse:
+    def _get_qs_formats(queryset: QuerySet) -> HttpResponse:
         formats = {}
         if hasattr(queryset, "model"):
             for i, fieldname in enumerate(fields):
@@ -312,10 +306,10 @@ def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
 
     if out is None:
         if filename is None:
-            filename = "%s.xls" % queryset.model._meta.verbose_name_plural.lower().replace(" ", "_")
+            filename = "{}.xls".format(queryset.model._meta.verbose_name_plural.lower().replace(" ", "_"))
 
         response = HttpResponse(content_type="application/vnd.ms-excel")
-        response["Content-Disposition"] = ('attachment;filename="%s"' % filename).encode("us-ascii", "replace")
+        response["Content-Disposition"] = (f'attachment;filename="{filename}"').encode("us-ascii", "replace")
     else:
         response = out
 
@@ -324,7 +318,7 @@ def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
         config.update(options)
 
     if fields is None:
-        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]  # noqa: SLF001
+        fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=2)
     sheet_name = config.pop("sheet_name")
@@ -336,10 +330,10 @@ def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
     heading_xf = xlwt.easyxf("font:height 200; font: bold on; align: wrap on, vert centre, horiz center")
     sheet.write(row, 0, "#", style)
     if header:
-        if not isinstance(header, (list, tuple)):
+        if not isinstance(header, (list | tuple)):
             header = [
                 force_str(f.verbose_name)
-                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many  # noqa: SLF001
+                for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
                 if f.name in fields
             ]
 
@@ -358,7 +352,11 @@ def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
             fmt = formats.get(col_idx, "general")
             try:
                 value = get_field_value(
-                    row, fieldname, usedisplay=use_display, raw_callable=False, modeladmin=modeladmin
+                    row,
+                    fieldname,
+                    usedisplay=use_display,
+                    raw_callable=False,
+                    modeladmin=modeladmin,
                 )
                 if callable(fmt):
                     value = xlwt.Formula(fmt(value))
@@ -374,11 +372,11 @@ def export_as_xls2(  # noqa: PLR1702, PLR0914, PLR0912, PLR0915,
                     else:
                         styles_[hash(fmt)] = xlwt.easyxf(num_format_str=fmt)
 
-                if isinstance(value, (list, tuple)):
+                if isinstance(value, (list | tuple)):
                     value = "".join(value)
 
                 sheet.write(rownum + 1, col_idx + 1, value, styles_[hash(fmt)])
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 sheet.write(rownum + 1, col_idx + 1, smart_str(e), styles_[hash(fmt)])
 
     book.save(response)

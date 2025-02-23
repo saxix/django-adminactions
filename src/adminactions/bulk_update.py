@@ -4,7 +4,7 @@ import codecs
 import csv
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence
+from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib import messages
@@ -22,12 +22,14 @@ from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-from adminactions.exceptions import ActionInterrupted
+from adminactions.exceptions import ActionInterruptedError
 from adminactions.forms import CSVConfigForm
 from adminactions.perms import get_permission_codename
 from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from django.contrib.admin.options import ModelAdmin
     from django.db.models import QuerySet
     from django.db.models.fields import Field
@@ -107,10 +109,10 @@ class BulkUpdateMappingForm(forms.Form):
         return {k: v for k, v in mapping.items() if v.strip()}
 
 
-def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:  # noqa: PLR1702, PLR0914, PLR0915
+def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect | None:  # noqa: C901, PLR0915, PLR0914
     try:
         opts = modeladmin.model._meta
-        perm = "{0}.{1}".format(opts.app_label, get_permission_codename(bulk_update.base_permission, opts))
+        perm = f"{opts.app_label}.{get_permission_codename(bulk_update.base_permission, opts)}"
         bulk_update_form = getattr(modeladmin, "bulk_update_form", BulkUpdateForm)
         bulk_update_fields = getattr(modeladmin, "bulk_update_fields", None)
         bulk_update_exclude = getattr(modeladmin, "bulk_update_exclude", None)
@@ -118,10 +120,10 @@ def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
             bulk_update_exclude = []
 
         if bulk_update_fields and bulk_update_exclude:
-            raise Exception("Cannot set both 'bulk_update_exclude' and 'bulk_update_fields'")
+            raise ValueError("Cannot set both 'bulk_update_exclude' and 'bulk_update_fields'")
         if not request.user.has_perm(perm):
             messages.error(request, _("Sorry you do not have rights to execute this action"))
-            return
+            return None
         if "apply" not in request.POST:
             try:
                 adminaction_requested.send(
@@ -131,9 +133,9 @@ def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
                     queryset=queryset,
                     modeladmin=modeladmin,
                 )
-            except ActionInterrupted as e:
+            except ActionInterruptedError as e:
                 messages.error(request, str(e))
-                return
+                return None
         form_initial = {
             "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
             "_date_format": "%Y-%m-%d",
@@ -177,10 +179,10 @@ def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
                 except ValidationError as e:
                     messages.error(request, str(e))
                     form.add_error(None, e)
-                except ActionInterrupted as e:
+                except ActionInterruptedError as e:
                     messages.error(request, f"{e.__class__.__name__}: {e}")
                     return HttpResponseRedirect(request.get_full_path())
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     messages.error(request, f"{e.__class__.__name__}: {e}")
                     return HttpResponseRedirect(request.get_full_path())
                 else:
@@ -209,11 +211,7 @@ def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
             "csv_form": csv_form,
             "map_form": map_form,
             "action_short_description": bulk_update.short_description,
-            "title": "%s (%s)"
-            % (
-                bulk_update.short_description.capitalize(),
-                smart_str(modeladmin.opts.verbose_name_plural),
-            ),
+            "title": f"{bulk_update.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
             "change": True,
             "is_popup": False,
             "save_as": False,
@@ -236,15 +234,15 @@ bulk_update.short_description = _("Bulk update")
 bulk_update.base_permission = "adminactions_bulkupdate"
 
 
-def _bulk_update(  # noqa: PLR1702, PLR0912, PLR0913, PLR0915, PLR1702
-    queryset: "QuerySet",
+def _bulk_update(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    queryset: QuerySet,
     file_name_or_object: str | Field,
     *,
     mapping: dict,
     indexes: Sequence[str],
     clean: bool = False,
     header: bool = True,
-    csv_options: Optional[Dict] = None,
+    csv_options: dict | None = None,
     request: HttpRequest | None = None,
     dry_run: bool = False,
 ) -> dict[str, list[str]]:
@@ -260,7 +258,7 @@ def _bulk_update(  # noqa: PLR1702, PLR0912, PLR0913, PLR0915, PLR1702
         if isinstance(file_name_or_object, FileProxyMixin):
             f = file_name_or_object
         else:
-            f = Path(file_name_or_object).open("rb")
+            f = Path(file_name_or_object).open("rb")  # noqa: SIM115
 
         if header:
             reader = csv.DictReader(codecs.iterdecode(f, "utf-8"), **(csv_options or {}))
@@ -272,13 +270,14 @@ def _bulk_update(  # noqa: PLR1702, PLR0912, PLR0913, PLR0915, PLR1702
             mapping = {k: int(v) - 1 for k, v in mapping.items()}
         reverse = {v: k for k, v in mapping.items()}
         with atomic():
-            for i, row in enumerate(reader, 1):
+            for row in reader:
                 key = {k: row[mapping[k]] for k in indexes}
                 try:
                     obj = queryset.get(**key)
                     changes = {}
                     if header:
-                        for colname, value in row.items():
+                        for colname, v in row.items():
+                            value = v
                             field = reverse[colname]
                             if field not in indexes:
                                 model_field = queryset.model._meta.get_field(field)
@@ -292,13 +291,14 @@ def _bulk_update(  # noqa: PLR1702, PLR0912, PLR0913, PLR0915, PLR1702
                                             value = related_model.objects.get(**{related_field_name: value})
                                         except related_model.DoesNotExist as e:
                                             raise ValidationError(
-                                                f"No instance of {related_model._meta.verbose_name} found with {related_field_name} = {value}"
+                                                f"No instance of {related_model._meta.verbose_name} "
+                                                f"found with {related_field_name}={value}",
                                             ) from e
                                 setattr(obj, field, value)
                     else:
-                        for i, value in enumerate(row):
-                            if i in reverse.keys():
-                                field = reverse[i]
+                        for ii, value in enumerate(row):
+                            if ii in reverse:
+                                field = reverse[ii]
                                 if field not in indexes:
                                     changes[field] = [getattr(obj, field), value]
                                     setattr(obj, field, value)
@@ -318,7 +318,7 @@ def _bulk_update(  # noqa: PLR1702, PLR0912, PLR0913, PLR0915, PLR1702
             request=request,
             queryset=queryset,
         )
-    except ActionInterrupted:
+    except ActionInterruptedError:
         pass
     except Exception as e:
         logger.exception(e)

@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 import pytest
-from django_webtest import DjangoTestApp
 
 if TYPE_CHECKING:
+    from django_webtest import DjangoTestApp
 
     class AppFactory(Protocol):
         def __call__(self, csrf_checks: bool, extra_environ: dict | None = None) -> DjangoTestApp: ...
@@ -88,7 +88,7 @@ def pytest_configure(config) -> None:
     os.environ["CELERY_ALWAYS_EAGER"] = "1"
     os.environ["MEDIA_ROOT"] = "/tmp/media/"
     settings.MEDIA_ROOT = tempfile.TemporaryDirectory().name
-    original_media = os.path.join(settings.DEMO_DIR, "media")
+    original_media = str(Path(settings.DEMO_DIR) / "media")
     shutil.copytree(original_media, settings.MEDIA_ROOT)
 
     if config.option.log_level:
@@ -96,8 +96,8 @@ def pytest_configure(config) -> None:
 
         level = config.option.log_level.upper()
         assert level in levelNames
-        format = "%(levelname)-7s %(name)-30s %(funcName)-20s:%(lineno)3s %(message)s"
-        formatter = logging.Formatter(format)
+        fmt = "%(levelname)-7s %(name)-30s %(funcName)-20s:%(lineno)3s %(message)s"
+        formatter = logging.Formatter(fmt)
 
         handler = logging.StreamHandler()
         handler.setLevel(levelNames[level])

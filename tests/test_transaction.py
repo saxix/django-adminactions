@@ -14,7 +14,7 @@ from django_dynamic_fixture import G
 from adminactions import compat
 from adminactions.api import merge
 from adminactions.compat import nocommit
-from adminactions.exceptions import ActionInterrupted
+from adminactions.exceptions import ActionInterruptedError
 from adminactions.signals import adminaction_end
 
 pytestmarker = pytest.mark.skip
@@ -46,7 +46,7 @@ def test_transaction_mass_update(app, users, administrator) -> None:
     assert User.objects.filter(is_staff=True).count() == 1  # sanity check
 
     def _handler(*args, **kwargs) -> NoReturn:
-        raise ActionInterrupted
+        raise ActionInterruptedError
 
     with atomic():
         res = app.get(reverse("admin:index"), user=administrator.username)

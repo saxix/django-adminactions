@@ -12,14 +12,13 @@ from django.db.models.base import Model
 
 
 def get_permission_codename(action: str, opts: Options) -> str:
-    return "%s_%s" % (action, opts.object_name.lower())
+    return f"{action}_{opts.object_name.lower()}"
 
 
 def get_contenttype_for_model(model: Model) -> "ContentType":
     from django.contrib.contenttypes.models import ContentType  # noqa: PLC0415
 
-    model = model._meta.concrete_model
-    opts = model._meta
+    opts = model._meta.concrete_model._meta
     ct, __ = ContentType.objects.get_or_create(
         app_label=opts.app_label,
         model=opts.model_name,
@@ -35,7 +34,7 @@ def create_extra_permissions() -> None:
 
     perm_suffix = "adminactions_"
     existing_perms = set(
-        Permission.objects.filter(codename__startswith=perm_suffix).values_list("codename", "content_type_id")
+        Permission.objects.filter(codename__startswith=perm_suffix).values_list("codename", "content_type_id"),
     )
     models = list(apps.get_models())
     content_types = ContentType.objects.get_for_models(*models)
@@ -51,7 +50,8 @@ def create_extra_permissions() -> None:
             if (codename, ct.id) in existing_perms:
                 continue
             label = "Can {} {} (adminactions)".format(
-                action.base_permission.replace(perm_suffix, ""), opts.verbose_name_raw
+                action.base_permission.replace(perm_suffix, ""),
+                opts.verbose_name_raw,
             )
             permission = Permission(codename=codename, content_type=ct, name=label[:255])
             new_permissions.append(permission)

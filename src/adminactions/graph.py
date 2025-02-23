@@ -13,7 +13,7 @@ from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 
-from .exceptions import ActionInterrupted
+from .exceptions import ActionInterruptedError
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import get_field_by_name
@@ -33,7 +33,7 @@ def graph_form_factory(model: Model) -> Form:
     model_fields = [(str(f.name), str(f.verbose_name)) for f in model._meta.fields if not f.primary_key]
     graphs = [("PieChart", "PieChart"), ("BarChart", "BarChart")]
     model_fields.insert(0, ("", "N/A"))
-    class_name = "%s%sGraphForm" % (app_name, model_name)
+    class_name = f"{app_name}{model_name}GraphForm"
     attrs = {
         "initial": {"app": app_name, "model": model_name},
         "_selected_action": CharField(widget=MultipleHiddenInput),
@@ -47,15 +47,12 @@ def graph_form_factory(model: Model) -> Form:
     return DeclarativeFieldsMetaclass(str(class_name), (Form,), attrs)
 
 
-def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> "HTTPResponse":  # noqa: PLR0912, PLR0914, PLR0915
+def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> "HTTPResponse":  # noqa: C901, PLR0912, PLR0914, PLR0915
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label.lower(),
-        get_permission_codename(graph_queryset.base_permission, opts),
-    )
+    perm = f"{opts.app_label.lower()}.{get_permission_codename(graph_queryset.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
 
     MForm = graph_form_factory(modeladmin.model)
 
@@ -69,9 +66,9 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
             queryset=queryset,
             modeladmin=modeladmin,
         )
-    except ActionInterrupted as e:
+    except ActionInterruptedError as e:
         messages.error(request, str(e))
-        return
+        return None
 
     if "apply" in request.POST:
         form = MForm(request.POST)
@@ -85,9 +82,9 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
                     modeladmin=modeladmin,
                     form=form,
                 )
-            except ActionInterrupted as e:
+            except ActionInterruptedError as e:
                 messages.error(request, str(e))
-                return
+                return None
             try:
                 x = form.cleaned_data["axes_x"]
                 graph_type = form.cleaned_data["graph_type"]
@@ -100,7 +97,7 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
                         data_labels.append(str(field.rel.to.objects.get(pk=value)))
                 elif isinstance(field, BooleanField):
                     data_labels = [str(label) for label, v in cc]
-                elif hasattr(modeladmin.model, "get_%s_display" % field.name):
+                elif hasattr(modeladmin.model, f"get_{field.name}_display"):
                     data_labels = []
                     for value, __ in cc:
                         data_labels.append(smart_str(dict(field.flatchoices).get(value, value), strings_only=True))
@@ -110,23 +107,20 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
 
                 if graph_type == "BarChart":
                     table = [data]
-                    extra = """{seriesDefaults:{renderer:$.jqplot.BarRenderer,
-                                                rendererOptions: {fillToZero: true,
-                                                                  barDirection: 'horizontal'},
+                    extra = f"""{{seriesDefaults:{{renderer:$.jqplot.BarRenderer,
+                                                rendererOptions: {{fillToZero: true,
+                                                                  barDirection: 'horizontal'}},
                                                 shadowAngle: -135,
-                                               },
-                                series:[%s],
-                                axes: {yaxis: {renderer: $.jqplot.CategoryAxisRenderer,
-                                                ticks: %s},
-                                       xaxis: {pad: 1.05,
-                                               tickOptions: {formatString: '%%d'}}
-                                      }
-                                }""" % (
-                        json.dumps(data_labels),
-                        json.dumps(data_labels),
-                    )
+                                               }},
+                                series:[{json.dumps(data_labels)}],
+                                axes: {{yaxis: {{renderer: $.jqplot.CategoryAxisRenderer,
+                                                ticks: {json.dumps(data_labels)}}},
+                                       xaxis: {{pad: 1.05,
+                                               tickOptions: {{formatString: '%d'}}}}
+                                      }}
+                                }}"""
                 else:  # graph_type == "PieChart":
-                    table = [list(zip(list(map(str, data_labels)), list(map(str, data))))]
+                    table = [list(zip(list(map(str, data_labels)), list(map(str, data)), strict=True))]
                     extra = """{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,
                                                 rendererOptions: {fill: true,
                                                                     showDataLabels: true,
@@ -134,8 +128,8 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
                                                                     lineWidth: 5}},
                              legend: {show: true, location: 'e'}}"""
 
-            except Exception as e:
-                messages.error(request, "Unable to produce valid data: %s" % str(e))
+            except Exception as e:  # noqa: BLE001
+                messages.error(request, f"Unable to produce valid data: {e!s}")
             else:
                 adminaction_end.send(
                     sender=modeladmin.model,
@@ -160,11 +154,7 @@ def graph_queryset(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "
         "action": "graph_queryset",
         "opts": modeladmin.model._meta,
         "action_short_description": graph_queryset.short_description,
-        "title": "%s (%s)"
-        % (
-            graph_queryset.short_description.capitalize(),
-            smart_str(modeladmin.opts.verbose_name_plural),
-        ),
+        "title": f"{graph_queryset.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
         "app_label": queryset.model._meta.app_label,
         "media": media,
         "extra": extra,

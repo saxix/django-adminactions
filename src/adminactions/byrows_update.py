@@ -29,19 +29,16 @@ def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QueryS
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label.lower(),
-        get_permission_codename(byrows_update.base_permission, opts),
-    )
+    perm = f"{opts.app_label.lower()}.{get_permission_codename(byrows_update.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
 
-    class modelform(modeladmin.form):
+    class ByRowModelForm(modeladmin.form):
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             super().__init__(*args, **kwargs)
             if self.instance:
-                readonly_fields = (modeladmin.model._meta.pk.name,) + tuple(modeladmin.get_readonly_fields(request))
+                readonly_fields = (modeladmin.model._meta.pk.name, *tuple(modeladmin.get_readonly_fields(request)))
                 for fname in readonly_fields:
                     if fname in self.fields:
                         self.fields[fname].widget.attrs["readonly"] = "readonly"
@@ -61,7 +58,7 @@ def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QueryS
 
     MFormSet = modelformset_factory(
         modeladmin.model,
-        form=modelform,
+        form=ByRowModelForm,
         fields=fields,
         extra=0,
         formfield_callback=formfield_callback,
@@ -90,11 +87,7 @@ def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QueryS
         "adminform": adminform,
         "actionform": actionform,
         "action_short_description": byrows_update.short_description,
-        "title": "%s (%s)"
-        % (
-            byrows_update.short_description.capitalize(),
-            smart_str(modeladmin.opts.verbose_name_plural),
-        ),
+        "title": f"{byrows_update.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
         "formset": formset,
         "opts": modeladmin.model._meta,
         "app_label": modeladmin.model._meta.app_label,

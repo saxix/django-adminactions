@@ -47,11 +47,15 @@ urls.downloads = "https://github.com/saxix/django-adminactions"
 urls.homepage = "https://github.com/saxix/django-adminactions"
 
 [dependency-groups]
+#[tool.setuptools_scm]
+#relative_to =  "__file__"
+#root =  ".."
+
 dev = [
   "celery",
   "check-manifest",
   "covdefaults>=2.3",
-  "django-admin-extra-urls",
+  "django-admin-extra-buttons",
   "django-dynamic-fixture",
   "django-environ",
   "django-webtest",
@@ -59,7 +63,6 @@ dev = [
   "modernize",
   "mypy",
   "pillow",
-  "psycopg2",
   "pytest",
   "pytest-cache",
   "pytest-cov",
@@ -71,11 +74,13 @@ dev = [
   "selenium>=2.42",
   "setuptools>=15",
   "tox>=4.2",
+  "tox-gh>=1.5",
 ]
 
 [tool.hatch]
 build.hooks.vcs.version-file = "src/adminactions/version.py"
 version.source = "vcs"
+raw-options = { root = "../.." }
 
 [tool.hatch.build.targets.sdist]
 ignore-vcs = true
@@ -101,36 +106,22 @@ lint.select = [
   "ALL",
 ]
 lint.ignore = [
-  #  "A",
-  #  "ANN",
   "ANN401", #  Dynamically typed expressions
-  "ARG",
-  "B",
-  "BLE",
-  "C",
-  "COM",
-  "CPY",
-  "D",
-  "DOC",
-  "DTZ",
-  "E",
-  "EM",
-  #  "F",
-  "FBT",
-  #  "FURB",
-  "N",
-  #  "PERF",
-  #  "PGH",
-  #  "PLC",
-  #  "PLR",
-  "PLW",
-  "RET",
-  "RUF",
-  "S",
-  "SIM",
-  "SLF",
-  "TRY",
-  "UP",
+  "COM812",
+  "CPY",    # Missing copyright notice
+  "D",      # docstring
+  "DOC",    # docstring
+  "E731",   #  Do not assign a `lambda` expression,
+  "EM101",  #  Exception must not use a string literal, assign to variable first
+  "EM102",  #  Exception must not use a f-string literal, assign to variable first
+  "FBT001", #  Boolean-typed positional argument in function definition
+  "FBT002", #  Boolean default positional argument in function definition
+  "N806",   # Variable `...` in function should be lowercase
+  "S308",   # Use of `mark_safe` may expose cross-site scripting vulnerabilities
+  "SLF001", #  Private member accessed: `...`
+  "TRY003", # Avoid specifying long messages outside the exception class
+  "TRY301", # Abstract `raise` to an inner function
+  "TRY401", #  Redundant exception object included in `logging.exception` call
 ]
 lint.per-file-ignores."docs/conf.py" = [
   "A001",   #
@@ -139,13 +130,30 @@ lint.per-file-ignores."docs/conf.py" = [
   "INP001", #
 ]
 lint.per-file-ignores."tests/**/*.py" = [
-  "D",       # don"t care about documentation in tests
-  "FBT",     # don"t care about booleans as positional arguments in tests
-  "INP001",  # no implicit namespace
-  "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
+  "A",
+  "ANN",
+  "ARG",
+  "B",
+  "D",
+  "DJ",
+  "DTZ",
+  "ERA",
+  "F",
+  "FBT",
+  "INP",
+  "N",
+  "PGH",
+  "PLC",
+  "PLR",
+  "PLW",
   "PT",
-  "S101",    # asserts allowed in tests...
-  "S603",    # `subprocess` call: check for execution of untrusted input
+  "PTH",
+  "PYI",
+  "RUF",
+  "S",
+  "SIM",
+  "TC",
+  "UP",
 ]
 lint.isort = { known-first-party = [ "pytest_echo" ] }
 lint.pylint.max-args = 7

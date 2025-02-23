@@ -53,7 +53,7 @@ def import_fixture(modeladmin: "ModelAdmin", request: "HttpRequest") -> "HttpRes
                     imported += 1
 
                 modeladmin.message_user(request, f"{imported} objects imported", messages.SUCCESS)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 modeladmin.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     else:
@@ -65,7 +65,9 @@ def import_fixture(modeladmin: "ModelAdmin", request: "HttpRequest") -> "HttpRes
 
 class AdminActionPermMixin:
     def _filter_actions_by_permissions(
-        self, request: "HttpRequest", actions: list[tuple[callable, Any]]
+        self,
+        request: "HttpRequest",
+        actions: list[tuple[callable, Any]],
     ) -> list[tuple[callable, Any]]:
         opts = self.model._meta
         filtered_actions = []
@@ -74,10 +76,7 @@ class AdminActionPermMixin:
 
         for action in actions:
             if action[0] in aa:
-                perm = "{0}.{1}".format(
-                    opts.app_label,
-                    get_permission_codename(action[0].base_permission, opts),
-                )
+                perm = f"{opts.app_label}.{get_permission_codename(action[0].base_permission, opts)}"
                 if not request.user.has_perm(perm):
                     continue
             filtered_actions.append(action)
