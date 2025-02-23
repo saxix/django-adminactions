@@ -58,6 +58,7 @@ dev = [
   "django-admin-extra-buttons",
   "django-dynamic-fixture",
   "django-environ",
+  "django-stubs>=5.1.3",
   "django-webtest",
   "mock",
   "modernize",
@@ -122,6 +123,7 @@ lint.ignore = [
   "TRY003", # Avoid specifying long messages outside the exception class
   "TRY301", # Abstract `raise` to an inner function
   "TRY401", #  Redundant exception object included in `logging.exception` call
+  "UP037",  #
 ]
 lint.per-file-ignores."docs/conf.py" = [
   "A001",   #

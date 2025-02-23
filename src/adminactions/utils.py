@@ -10,11 +10,13 @@ from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
 
     from django.contrib.admin.options import ModelAdmin
+    from django.contrib.contenttypes.fields import GenericForeignKey
     from django.db.models.base import Model
-    from django.db.models.fields import Field
+    from django.db.models.fields import Field as DBField
+    from django.db.models.fields.reverse_related import ForeignObjectRel
 
 
 def get_ignored_fields(model: Model, setting_var_name: str) -> Iterable[str]:
@@ -100,10 +102,10 @@ def getattr_or_item(obj: Any, name: str) -> Any:
 
 def get_field_value(
     obj: Model,
-    field: Field,
+    field: "DBField[Any, Any]",
     usedisplay: bool = True,
     raw_callable: bool = False,
-    modeladmin: ModelAdmin = None,
+    modeladmin: ModelAdmin[Model] | None = None,
 ) -> Any:
     """
     returns the field value or field representation if get_FIELD_display exists
@@ -150,7 +152,7 @@ def get_field_value(
     return value
 
 
-def get_field_by_path(model: Model, field_path: str) -> Field | None:
+def get_field_by_path(model: type[Model] | Model, field_path: str) -> DBField | None:
     """
     get a Model class or instance and a path to a attribute, returns the field object
 
@@ -180,7 +182,7 @@ def get_field_by_path(model: Model, field_path: str) -> Field | None:
     return None
 
 
-def get_verbose_name(model_or_queryset: Model | QuerySet, field: Field) -> str:
+def get_verbose_name(model_or_queryset: Model | QuerySet, field: "DBField[Any, Any]") -> str:
     """
     returns the value of the ``verbose_name`` of a field
 
@@ -213,7 +215,7 @@ def get_verbose_name(model_or_queryset: Model | QuerySet, field: Field) -> str:
     >>> get_verbose_name(p, "content_type.model") == "python model class name"
     True
     """
-
+    model: type[Model] | QuerySet
     if isinstance(model_or_queryset, models.Manager | QuerySet):
         model = model_or_queryset.model
     elif isinstance(model_or_queryset, models.Model | models.base.ModelBase):
@@ -230,10 +232,10 @@ def get_verbose_name(model_or_queryset: Model | QuerySet, field: Field) -> str:
     else:
         raise TypeError("`get_verbose_name` field_path must be string or Field class")
 
-    return field.verbose_name
+    return str(field.verbose_name)
 
 
-def flatten(iterable: Iterable) -> list[Any]:
+def flatten(iterable: Iterable[Any]) -> list[Any]:
     """
     flatten(sequence) -> list
 
@@ -262,7 +264,9 @@ def flatten(iterable: Iterable) -> list[Any]:
     return list(result)
 
 
-def get_field_by_name(model: Model, name: str) -> (Field, Model, bool, bool):
+def get_field_by_name(
+    model: Model, name: str
+) -> "tuple[DBField[Any, Any] | ForeignObjectRel | GenericForeignKey, type[Model] | Any, bool, bool | None]":
     field = model._meta.get_field(name)
     direct = not field.auto_created or field.concrete
     return field, field.model, direct, field.many_to_many
@@ -272,11 +276,11 @@ def model_has_field(model: Model, field_name: str) -> bool:
     return field_name in [f.name for f in model._meta.get_fields()]
 
 
-def get_all_related_objects(model: Model) -> list[str]:
+def get_all_related_objects(model: Model) -> "list[DBField[Any, Any] | ForeignObjectRel | GenericForeignKey]":
     return [f for f in model._meta.get_fields() if (f.one_to_many or f.one_to_one) and f.auto_created]
 
 
-def get_all_field_names(model: Model) -> list[str]:
+def get_all_field_names(model: type[Model] | Model) -> list[str]:
     return list(
         set(
             chain.from_iterable(
@@ -288,11 +292,11 @@ def get_all_field_names(model: Model) -> list[str]:
     )
 
 
-def curry(func: callable, *a: Any, **kw: Any) -> callable:
+def curry(func: Callable[[Any], Any], *a: Any, **kw: Any) -> Callable[[Any], Any]:
     return partial(func, *a, **kw)
 
 
-def get_common_context(modeladmin: ModelAdmin, **kwargs: Any) -> dict[str, Any]:
+def get_common_context(modeladmin: ModelAdmin[Model], **kwargs: Any) -> dict[str, Any]:
     ctx = {
         "change": True,
         "is_popup": False,

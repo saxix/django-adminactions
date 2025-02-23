@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Any
+
 from django.db.models.base import Model
 from django.forms import widgets
 from django.forms.fields import Field
@@ -6,6 +8,10 @@ from django.template.context import Context
 from django.utils.safestring import mark_safe
 
 from adminactions.utils import get_field_by_name
+
+if TYPE_CHECKING:
+    from django.db.models import Field as DBField
+
 
 register = Library()
 
@@ -55,7 +61,7 @@ data-value="1" class="fastfieldvalue name1 value">value1.1</a>, \
 
 
 @register.simple_tag(takes_context=True)
-def checkbox_enabler(context: Context, field: Field) -> str:
+def checkbox_enabler(context: Context, field: "DBField[Any, Any]") -> str:
     form = context["adminform"].form
     name = f"chk_id_{field.name}"
     checked = ""
