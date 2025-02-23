@@ -32,11 +32,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python: [ "313" ]
-                django: [ "51" ]
+                python: [ "3.13", "3.12" ]
+                django: [ "5.1", "4.2" ]
         env:
-            #            PY_VER: ${{ matrix.python-version}}
-            #            DJ_VER: ${{ matrix.django-version}}
             CELERY_BROKER_URL: redis://redis:6379/0
             CELERY_ALWAYS_EAGER: true
         steps:
@@ -60,7 +58,8 @@ jobs:
 
             -   name: Setup test suite
                 run: tox run -vv --notest --skip-missing-interpreters false
-            -   name: Run test suite
+
+            -   name: Run test suite ${{ matrix.django }}-${{ matrix.python }}
                 run: tox run --skip-pkg-install
                 env:
                     PYTEST_ADDOPTS: "-vv --durations=20"
