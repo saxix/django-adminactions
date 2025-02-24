@@ -4,8 +4,8 @@
 
 Export all the records that belong selected queryset using any registered Serializer.
 
-This action is the counterpart of `export_as_fixture`_, where it dumps the queryset and it's ForeignKeys,
-`export_delete_tree`_ all the records that belong to the entries of the  selected queryset.
+This action is the counterpart of [[export_as_fixture]], where it dumps the queryset and it's ForeignKeys,
+[[export_delete_tree]] all the records that belong to the entries of the  selected queryset.
 see `export_as_fixture`_ for details
 
 
@@ -20,6 +20,4 @@ see `export_as_fixture`_ for details
 
 **Screenshot**
 
-.. figure:: _static/export_as_fixture.png
-
-![export_as_fixture](_static/export_as_fixture.png)
+![img_export_delete_tree](_static/export_delete_tree.png)

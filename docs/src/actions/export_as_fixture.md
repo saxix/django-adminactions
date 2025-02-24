@@ -18,4 +18,4 @@ Export selected queryset as fixtures using any registered Serializer.
 
 **Screenshot**
 
-![export_as_fixture](_static/export_as_fixture.png)
+![img_export_as_fixture](_static/export_as_fixture.png)
