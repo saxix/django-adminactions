@@ -1,0 +1,360 @@
+# Actions
+
+
+## Mass Update
+
+
+Update one or more fields of the selected queryset to a common value and/or apply a
+`transform_operations`_ to selected field.
+
+|| |
+|----------------------|------------------------------------------------------------------------------------------|
+|**validate**          |  use obj.save() instead of obj._default_manager.update. Slower but required in some cases (To run some business logic in save() and clean(). Manadatory if use :ref:`transform_operations` |
+|**unique_transaction**|  .. versionadded:: 0.0.4 |
+
+**validate**
+    use obj.save() instead of obj._default_manager.update. Slower but required in some cases (To run some business logic in save() and clean(). Manadatory if use :ref:`transform_operations`
+
+
+**Screenshot**
+
+![Mass Update](_static/mass_update.png){ align=left }
+
+
+### Ignore Fields
+<!-- sax:version 1.9 -->
+
+It is possible to prevent some fields to be displayed to avoid changes.
+To filter out some fields you need to set `UPDATE_ACTION_IGNORED_FIELDS` settings parameter as follow::
+
+    UPDATE_ACTION_IGNORED_FIELDS = {
+        'app_name': {
+                'user': ['is_staff', 'is_superuser'],
+        },
+    }
+
+### Transform Operation
+
+<!-- sax:version 0.0.4 -->
+
+
+Is possible to update fields applying function. |app| comes with a predefined set of functions.
+You can anyway `register your own functions <register_transform_function>`
+
+
+**common to all models**
+
+|<!-- --> | <!-- -->                                                         |
+|------------|------------------------------------------------------------------|
+|set         | set the value                                                    |
+|set null    | set the value to null (only available if the field has null=True
+
+
+#### CharField
+
+    ---------=  ------------------------------------==
+    upper       convert to uppercase
+    lower       convert to lowercase
+    capitalize  capitalize first character
+    capwords    capitalize each word
+    swapcase    swap the case
+    trim        remove leading and trailing whitespace
+    ---------=  ------------------------------------==
+
+
+#### IntegerField
+
+
+    ---------==  ------------------------------------------------------------------=
+    add          add the value passed as arg to the current value of the field
+    sub          subtract the value passed as arg to the current value of the field
+    add_percent  add the `X` percent to the current value
+    sub_percent  subtract the `X` percent from the current value
+    ---------==  ------------------------------------------------------------------=
+
+#### BooleanField
+
+
+    ---------=  ---------------------------------
+    swap        invert (negate) the current value
+    ---------=  ---------------------------------
+
+#### NullBooleanField
+
+
+    ---------=  ---------------------------------
+    swap        invert (negate) the current value
+    ---------=  ---------------------------------
+
+#### EmailField`
+
+
+    ------------=  ------------------------------------==
+    change domain  set the domain (@?????) to common value
+    ------------=  ------------------------------------==
+
+#### URLField`
+
+    ------------=  ------------------------------------------
+    change domain  set the protocol (????://) to common value
+    ------------=  ------------------------------------------
+
+
+## Export as CSV
+
+
+csv.Dialect.delimiter
+
+See [installer.records][] to learn about records.
+See [django.db.models][] to learn about records.
+See [python.csv.Dialect.delimiter][] to learn about records.
+See [python.csv.Dialect.delimiter][] to learn about records.
+See [std.csv.Dialect.delimiter][] to learn about records.
+See [py.csv.Dialect.delimiter][] to learn about records.
+See [python.csv][] to learn about records.
+See [std.csv][] to learn about records.
+See [csv.Dialect.delimiter][] to learn about records.
+
+
+Please refer to the [AAAA]({{ interwiki.github }}228)
+
+
+Export selected queryset as csv file. (see :ref:`csv <python:csv>`)
+
+
+Available options: (see :ref:`python:csv-fmt-params`).
+
+!!!note
+    Are you looking for the [export_as_csv](api.md#export_as_csv) [api_export_as_csv][] internal api? .
+
+|                     |                                                                                                                                                                                                           |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **header**          | add the header line to the file                                                                                                                                                                           |
+| **delimiter**       | A one-character string used to separate fields. It defaults to `,`. (see [csv.Dialect.delimiter][])                                                                                                       |
+| **quotechar**       | A one-character string used to quote fields containing special characters, such as the delimiter or quotechar, or which contain new-line characters. It defaults to `"`.  (see [csv.Dialect.quotechar][]) |
+| **quoting**         | Controls when quotes should be generated by the writer and recognised by the reader. (see [csv.Dialect.quoting][])                                                                                        |
+| **escapechar**      | A one-character string used by the writer to escape the *delimiter*. (see [csv.Dialect.escapechar][])                                                                                                     |
+| **datetime_format** | How to format datetime field. (see [strftime][datetime.date.strftime] and [strptime][datetime.datetime.strptime])                                                                                         |
+| **date_format**     | How to format date field. (see [strftime][datetime.date.strftime] and [strptime][datetime.datetime.strptime])                                                                                                       |
+| **time_format**     | How to format time field. (see [strftime][datetime.date.strftime] and [strptime][datetime.datetime.strptime])                                                                                                       |
+| **columns**         | Which columns will be included in the dump                                                                                                                                                                |
+
+**Screenshot**
+
+![export_as_csv](_static/export_as_csv.png){ align=left }
+
+
+### Customize Options Form
+
+To customize OptionForm add `get_export_form(request, export_type)` to your ModelAdmin.
+By default OptionForm is based on `export_type` argument:
+
+- 'xls': `adminactions.forms.XLSOptions`
+- 'csv': `adminactions.forms.CSVOptions`
+- 'fixture': `adminactions.forms.FixtureOptions`
+- 'delete': `adminactions.forms.FixtureOptions`
+
+
+### Limit columns
+
+
+To limit the columns that can be exported, you can add `get_exportable_columns(request, options)` to the ModelAdmin to returns
+the list of the allowed columns, it should returns a list of `[(field_name, field_label),...]`
+
+By default
+
+    cols = [(f.name, f.verbose_name) for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
+
+`options` is and instance of: `CSVOptions`, `XLSOptions` `FixtureOptions`
+
+
+### Streaming CSV Response
+
+
+When a very large/complex dataset is exported, it may take be useful to stream the response row by row instead of the whole file.
+
+To enable this functionality by default, set the django ``settings.ADMINACTIONS_STREAM_CSV`` to ``True`` (default: ``False``).
+
+Behind the scenes, this attaches an iterator as the response content (using a [StreamingHttpResponse][django.http.StreamingHttpResponse] *if django >= 1.6* and  [HttpResponse][django.http.HttpResponse] otherwise);
+the iterator simply yields a new csv row for each queryset iteration.
+
+The benefit of this approach is a shorter initial response which unblocks the customer from request/response and he is free to do other things while waiting for the download to finish.
+
+
+## Export as Fixture
+
+Export selected queryset as fixtures using any registered Serializer.
+
+!!! note annotate
+
+    this is not the same as django's command ``dumpdata`` because it can dump also the Foreign Keys.
+
+
+|||
+|--------------------|---------------------------------------------------------------------------------------|
+**use natural key**  | If true use natural keys.
+**dump on screen**   | Dump on screen instead to show ``Save as`` popup
+**indent**           | Indentation value
+**serializer**       | Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
+**add_foreign_keys** | If checked export foreign keys too, otherwise act as standard dumpdata
+
+
+**Screenshot**
+
+![export_as_fixture](_static/export_as_fixture.png)
+
+
+## Export Delete Tree
+<!-- sax:version 0.0.4 -->
+
+
+Export all the records that belong selected queryset using any registered Serializer.
+
+This action is the counterpart of `export_as_fixture`_, where it dumps the queryset and it's ForeignKeys,
+`export_delete_tree`_ all the records that belong to the entries of the  selected queryset.
+see `export_as_fixture`_ for details
+
+
+|                     ||
+|---------------------|---------------------------------------------------------------------------------------|
+ **use natural key**  | If true use natural keys.
+ **dump on screen**   | Dump on screen instead to show ``Save as`` popup
+ **indent**           | Indentation value
+ **serializer**       | Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
+ **add_foreign_keys** | If checked export dependent objects too.
+
+
+**Screenshot**
+
+.. figure:: _static/export_as_fixture.png
+
+![export_as_fixture](_static/export_as_fixture.png)
+
+
+.. _export_as_xls:
+
+## Export as Excel
+
+<!-- sax:version 0.3 -->
+
+
+Export selected queryset as Excel (xls) file.
+
+Available options:
+
+|||
+|-----------------|------------------------------------------------------------------------------------------|
+**header**        |    add the header line to the file
+**columns**       |    Which columns will be included in the dump
+
+
+
+### Customize Options Form:
+
+
+see [export_as_csv_options]
+
+
+### Limit columns
+
+
+see :ref:`export_as_csv_columns`
+
+
+## Graph Queryset
+
+Graph selected queryset.
+
+
+|||
+||------------------------------------------------------------|
+| **Graph type**             | Graph type to use
+| **Group by and count by:** | Grouping field
+
+**Screenshot**
+
+![graph_pie](_static/graph_pie.png)
+
+![graph_bar](_static/graph_bar.png)
+
+
+## Merge Records
+
+<!-- sax:version 0.1 -->
+
+Sometimes you need to *"merge"* two records maybe because they represent the same business object
+but were create double by mistake.
+This action allow you to selectively merge two records and move dependencies
+from one record to the other one.
+
+
+**Screenshots**
+
+### Step 1
+
+![graph_bar](_static/merge_1.png)
+
+### Step 2
+
+
+![graph_bar](_static/merge_2.png)
+
+
+
+**Limitations/TODO**
+
+- merge doesn't work for models related with ``on_delete=Protect`` (see :ghissue:`85`)
+
+
+### Ignore Fields
+
+<!-- sax:version 1.9 -->
+
+It is possible to prevent some fields to be displayed to avoid merge.
+To filter out some fields you need to set `MERGE_ACTION_IGNORED_FIELDS` settings parameter as follow::
+
+    MERGE_ACTION_IGNORED_FIELDS = {
+        'app_name': {
+                'user': ['is_staff', 'is_superuser'],
+        },
+    }
+
+## By Rows Update
+
+<!-- sax:version 2.0 -->
+
+Dynamycally enable changelist editing
+
+**Screenshots**
+
+![byrows_update](_static/byrows_update.png)
+
+
+## Find Duplicates
+<!-- sax:version 2.0 -->
+
+Find duplicated records.
+
+Note: This can be used to count records based on simple grouping
+
+
+|||
+|--------------------|------------------------------------------------------------------------------------------|
+**min**             | only reports duplicates more than <value>
+**max**             | only reports duplicates less than <value>
+**fields**          | selection of fields to be used to detect duplicates
+
+**Screenshots**
+
+![find_duplicates](_static/find_duplicates.png)
+
+
+
+## Bulk Update
+<!-- sax:version 1.1 -->
+
+Updates queryset using csv file
+
+**Screenshots**
+
+![bulk_update](_static/bulk_update.png)

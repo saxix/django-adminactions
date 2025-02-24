@@ -1,5 +1,5 @@
-Release 2.4
-===========
+## 2.4
+
 * fixes #227
 * fixes #231
 * add ability to asynchronously mass_update M2M
@@ -8,13 +8,13 @@ Release 2.4
 * move to uv/ruff
 
 
-Release 2.3
-===========
+## 2.3
+
 * Add support to foreignkeys to bulk updates ( @see https://github.com/saxix/django-adminactions/pull/224/files)
 
 
-Release 2.2
-===========
+## 2.2
+
 * new `MassUpdateForm.sort_fields`. Make optional MassUpdateForm fields sorting
 * make possible globally customize MassUpdateForm
 * removes async feature from Bulk update
@@ -24,8 +24,8 @@ Release 2.2
 * renamed `get_export_form` as `get_aa_export_form` ( @see https://github.com/saxix/django-adminactions/issues/217)
 * add support for ModelAdmin callable (@see https://github.com/saxix/django-adminactions/issues/181)
 
-Release 2.1
-===========
+## 2.1
+
 * new action "Bulk Update"
 * add support for ImageField / FileField
 * add Django 4.1 support
@@ -38,8 +38,8 @@ Release 2.1
 * Merged #200 - Very lame fix for #199 - https://github.com/saxix/django-adminactions/pull/200
 
 
-Release 2.0
-===========
+## 2.0
+
 * new action "Find Duplicates"
 * allows customization of exportable columns (`get_exportable_columns(request)`)
 * allows customization od ExportForm (`get_export_form(request, export_type)`)
@@ -52,13 +52,13 @@ Release 2.0
 * BACKWARD INCOMPATIBLE: Removes internal api SelectOptionsAttribute
 
 
-Release 1.15
-=============
+## 1.15
+
 * perms refactoring. Add module `consts` to handle import errors in some circumstances
 
 
-Release 1.14
-=============
+## 1.14
+
 * drop support Django 2.x
 * added support to django 4 and python 3.10
 * added portugues translations
@@ -67,27 +67,27 @@ Release 1.14
 * minor perms refactoring
 
 
-Release 1.13
-=============
+## 1.13
+
 * permission refactoring
 * new AdminActionPermMixin to easily filter out not allowed actions from the list
 
-Release 1.12
-=============
+## 1.12
+
 * Add GitHub Actions / lint
 
-Release 1.11
-=============
+## 1.11
+
 * add new configuration settings.AA_PERMISSION_HANDLER to customise how to create extra permissions
 
-Release 1.10
-=============
+## 1.10
+
 * Drop support Django < 2.2
 * change create_extra_permission to be executed after all other migrations
 * add `create_extra_permission` to handle situaations where permissions are not created for all models
 
-Release 1.9
-=============
+## 1.9
+
 * Drop support Django < 2.2
 * Official Django 3.2 support
 * Official Django 3.1 support
@@ -98,23 +98,23 @@ Release 1.9
 * add `create_extra_permission` to handle situaations where permissions are not created for all models
 
 
-Release 1.8.1
-=============
+## 1.8.1
+
 * Official Django 3.0 support
 
 
-Release 1.8
-=============
+## 1.8
+
 * MassUpdate: add new configuration `mass_update_fields`, `mass_update_exclude`, `mass_update_hints`
 
 
-Release 1.7.1
-=============
+## 1.7.1
+
 * Fixes #160 - Mass update error. Too many values to unpack
 
 
-Release 1.7
-===========
+## 1.7
+
 * Add Django 2.2 support
 * Improves performace
 * Fixes #152 - Allow protected merges
@@ -124,8 +124,8 @@ Release 1.7
 * Fixes #158 - Huge mass update performance fixes for large tables
 
 
-Release 1.6
-=================
+## 1.6
+
 * fixes :ghissue:`142` Updates README.rst with svg badges
 * fixes :ghissue:`136` RemovedInDjango19Warning
 * add official support to Django 2.0 and Python 3.6
@@ -133,8 +133,8 @@ Release 1.6
 * cleaner merge interface
 
 
-Release 1.5
-===========
+## 1.5
+
 * add official support to Django 1.11 and Python 3.6
 * fixes :ghissue:`116` Fixing ManyToMany merging with intermediary models. (thanks int-ua)
 * fixes :ghissue:`95` Cannot merge models with subclassed ImageField or FileField: "file not sent". (thanks int-ua)
@@ -142,28 +142,28 @@ Release 1.5
 * fixes :ghissue:`93` Do not export dates as strings in Excel
 
 
-Release 1.4
-===========
+## 1.4
+
 * document :ghissue:`112` Undocumented feature: merge_form
 * document :ghissue:`108` merge doesn't account for many-to-many relationships
 * document :ghissue:`95` Cannot merge models with subclassed ImageField: "file not sent" error
 * document :ghissue:`85` merge doesn't work for models related with on_delete=Protect
 
 
-Release 1.3
-===========
+## 1.3
+
 * fixes :ghissue:`92` translations are not compiled in package
 * fixes :ghissue:`105` Support exporting many to many fields
 * fixes :ghissue:`109` AttributeError: module 'adminactions.compat' has no attribute 'nocommit'
 
 
-Release 1.2
-===========
+## 1.2
+
 * merge :ghissue:`98` - Django 1.10 support (thanks PetrDlouhy, florianm)
 
 
-Release 1.1
-===========
+## 1.1
+
 * merge :ghissue:`91` - add french translation
 * merge :ghissue:`88` - Display required columns in byrows_update formset
 * merge :ghissue:`87` - Add AdminSite.each_context() to templates context.
@@ -172,8 +172,8 @@ Release 1.1
 * merge :ghissue:`79` - Permissions don't work
 
 
-Release 1.0
-===========
+## 1.0
+
 * minor refactoring
 * official support for django 1.4 to 1.9
 * official support for python 2.7, 3.3, 3.5
@@ -186,49 +186,49 @@ Release 1.0
 * new `upper` and `lower` modifiers available for EmailField in mass update.
 
 
-Release 0.8.5
-=============
+## 0.8.5
+
 * repackage due broken version in 0.8.4
 
 
-Release 0.8.4
-=============
+## 0.8.4
+
 * fixes :ghissue:`70` get_models return incorrect models in django 1.7+
 * closes :ghissue:`71`
 
 
-Release 0.8.3
-=============
+## 0.8.3
+
 * bugfix: support both post_syncdb and post_migrate
 
 
-Release 0.8.2
-=============
+## 0.8.2
+
 * fixes #64: Export not working when actions enabled on top & bottom
 * document #62: default of csv is not csv (thanks @oppianmatt)
 
 
-Release 0.8.1
-=============
+## 0.8.1
+
 * Use collections.OrderedDict instead for Django1.7 or higher. (thanks @rvoicilas)
 
 
-Release 0.8
-===========
+## 0.8
+
 * python 3.3, 3.4 compatibility
 * add spanish translation (thanks @xangmuve)
 
 
-Release 0.7
-===========
+## 0.7
+
 * fixes issue in mass_update due wrong indentaion
 * fixed :ghissue:`49`
 * removed options to enable/disable transactions during mass_update.
 * fixed :ghissue:`60`
 
 
-Release 0.6
-===========
+## 0.6
+
 * fixed :ghissue:`55`
 * fixed :ghissue:`51`
 * added selenium tests
@@ -236,20 +236,20 @@ Release 0.6
 * removed demoproject (use `make demo` instead)
 
 
-Release 0.5
-===========
+## 0.5
+
 * fix mass_update bug that caused all records in a table to be updated (thanks @jht001)
 * Added timezone support to csv and xls export
 
 
-Release 0.4
-===========
+## 0.4
+
 * fixed :ghissue:`33`
 * fixed :ghissue:`20`
 
 
-Release 0.3
-===========
+## 0.3
+
 * fixed :ghissue:`26`
 * add feature to :ref:`use callable as columns <export_with_callable>`
 * add feature to :ref:`export dictionaries <export_with_dictionaries>`
@@ -259,15 +259,15 @@ Release 0.3
 * new permission :ref:`adminactions_merge`
 
 
-Release 0.2
-===========
+## 0.2
+
 * improved :ref:`export_as_csv`
 * Django 1.6 compatibility
 * Added `modeladmin` in providing_args of signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
 
 
-Release 0.1
-===========
+## 0.1
+
 * new api module
 * pull out core export_csv functionalites as `_export_as_csv() <api.html#adminactions.export._export_as_csv>`_ to be used by custom code
 * New exported filename callback for easy customize the filename ( see :ref:`filename_callbacks`)
@@ -278,8 +278,8 @@ Release 0.1
 * New signals: :ref:`adminaction_requested`, :ref:`adminaction_start`,  :ref:`adminaction_end`
 
 
-Release 0.0.4
-=============
+## 0.0.4
+
 * NEW added ``add_foreign_keys`` parameter to :ref:`export_as_fixture` and :ref:`export_delete_tree`
 * NEW :ref:`export_delete_tree`
 * renamed export_as_json as export_as_fixtures
@@ -289,16 +289,16 @@ Release 0.0.4
 * NEW: url to preview date format in `export_as_csv`
 
 
-Release 0.0.3
-=============
+## 0.0.3
+
 * added demo project
 
 
-Release 0.0.2
-=============
+## 0.0.2
+
 * name changed from django-actions to django-adminactions
 
 
-Release 0.0.1
-=============
+## 0.0.1
+
 * first relase

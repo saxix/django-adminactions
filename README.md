@@ -1,4 +1,5 @@
 # django-adminactions
+<!-- start -->
 
 [![Pypi](https://badge.fury.io/py/django-adminactions.svg)](https://badge.fury.io/py/django-adminactions)
 [![coverage](https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=develop)](https://codecov.io/github/saxix/django-adminactions?branch=develop)
@@ -8,10 +9,8 @@
 [![Supported Python
 versions](https://img.shields.io/pypi/pyversions/django-adminactions.svg)](https://pypi.org/project/django-adminactions/)
 
-Collection of useful actions to use with
-django.contrib.admin.ModelAdmin and/or django.contrib.admin.AdminSite
+Collection of useful actions to use with `django.contrib.admin.ModelAdmin` and/or `django.contrib.admin.AdminSite`
 
-Please see the changelog at http://django-adminactions.readthedocs.org/en/latest/changes.html
 
 #### Actions
 
