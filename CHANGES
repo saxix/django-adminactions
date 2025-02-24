@@ -2,6 +2,9 @@ Release 2.4
 ===========
 * fixes #227
 * add ability to asynchronously mass_update M2M
+* add typing
+* pep621
+* move to uv/ruff
 
 
 Release 2.3
