@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from environ import Env
@@ -15,78 +17,81 @@ FILE_UPLOAD_HANDLERS = [
     "django.core.files.uploadhandler.MemoryFileUploadHandler",
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 ]
+env = Env()
+DATABASES = {"default": env.db("DATABASE_URL")}
 
-db = os.environ.get("DBENGINE", None)
-if db == "pg":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": "adminactions",
-            "HOST": os.environ.get("PG_HOST", "127.0.0.1"),
-            "PORT": os.environ.get("PG_PORT", ""),
-            "USER": os.environ.get("PG_USER", "postgres"),
-            "PASSWORD": os.environ.get("PG_PASSWORD", ""),
-        }
-    }
-elif db == "mysql":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": "adminactions",
-            "HOST": os.environ.get("MYSQL_HOST", "127.0.0.1"),
-            "PORT": os.environ.get("MYSQL_PORT", ""),
-            "USER": os.environ.get("MYSQL_USER", "root"),
-            "PASSWORD": os.environ.get("MYSQL_PASSWORD", ""),
-            "CHARSET": "utf8",
-            "COLLATION": "utf8_general_ci",
-            "TEST": {
-                "CHARSET": "utf8",
-                "COLLATION": "utf8_general_ci",
-            },
-            "TEST_CHARSET": "utf8",
-            "TEST_COLLATION": "utf8_general_ci",
-        }
-    }
-elif db == "myisam":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": "adminactions",
-            "HOST": os.environ.get("MYSQL_HOST", "127.0.0.1"),
-            "PORT": os.environ.get("MYSQL_PORT", ""),
-            "USER": os.environ.get("MYSQL_USER", "root"),
-            "PASSWORD": os.environ.get("MYSQL_PASSWORD", ""),
-            "CHARSET": "utf8",
-            "OPTIONS": {"init_command": "SET storage_engine=MyISAM"},
-            "COLLATION": "utf8_general_ci",
-            "TEST": {
-                "CHARSET": "utf8",
-                "COLLATION": "utf8_general_ci",
-            },
-            "TEST_CHARSET": "utf8",
-            "TEST_COLLATION": "utf8_general_ci",
-        }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": "adminactions.sqlite",
-            "TEST": {
-                "NAME": ":memory:",
-            },
-            "TEST_NAME": ":memory:",
-            "HOST": "",
-            "PORT": "",
-            "ATOMIC_REQUESTS": True,
-        }
-    }
+#
+# db = os.environ.get("DBENGINE", None)
+# if db == "pg":
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.postgresql_psycopg2",
+#             "NAME": "adminactions",
+#             "HOST": os.environ.get("PG_HOST", "127.0.0.1"),
+#             "PORT": os.environ.get("PG_PORT", ""),
+#             "USER": os.environ.get("PG_USER", "postgres"),
+#             "PASSWORD": os.environ.get("PG_PASSWORD", ""),
+#         }
+#     }
+# elif db == "mysql":
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.mysql",
+#             "NAME": "adminactions",
+#             "HOST": os.environ.get("MYSQL_HOST", "127.0.0.1"),
+#             "PORT": os.environ.get("MYSQL_PORT", ""),
+#             "USER": os.environ.get("MYSQL_USER", "root"),
+#             "PASSWORD": os.environ.get("MYSQL_PASSWORD", ""),
+#             "CHARSET": "utf8",
+#             "COLLATION": "utf8_general_ci",
+#             "TEST": {
+#                 "CHARSET": "utf8",
+#                 "COLLATION": "utf8_general_ci",
+#             },
+#             "TEST_CHARSET": "utf8",
+#             "TEST_COLLATION": "utf8_general_ci",
+#         }
+#     }
+# elif db == "myisam":
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.mysql",
+#             "NAME": "adminactions",
+#             "HOST": os.environ.get("MYSQL_HOST", "127.0.0.1"),
+#             "PORT": os.environ.get("MYSQL_PORT", ""),
+#             "USER": os.environ.get("MYSQL_USER", "root"),
+#             "PASSWORD": os.environ.get("MYSQL_PASSWORD", ""),
+#             "CHARSET": "utf8",
+#             "OPTIONS": {"init_command": "SET storage_engine=MyISAM"},
+#             "COLLATION": "utf8_general_ci",
+#             "TEST": {
+#                 "CHARSET": "utf8",
+#                 "COLLATION": "utf8_general_ci",
+#             },
+#             "TEST_CHARSET": "utf8",
+#             "TEST_COLLATION": "utf8_general_ci",
+#         }
+#     }
+# else:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": "adminactions.sqlite",
+#             "TEST": {
+#                 "NAME": ":memory:",
+#             },
+#             "TEST_NAME": ":memory:",
+#             "HOST": "",
+#             "PORT": "",
+#             "ATOMIC_REQUESTS": True,
+#         }
+#     }
 
 TIME_ZONE = "Asia/Bangkok"
 LANGUAGE_CODE = "en-us"
 SITE_ID = 1
 USE_I18N = True
-USE_L10N = True
+# USE_L10N = True
 USE_TZ = True
 MEDIA_ROOT = os.environ.get("MEDIA_ROOT", os.path.join(DEMO_DIR, "media"))
 MEDIA_URL = ""
@@ -115,7 +120,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.admin",
-    "admin_extra_urls",
+    "admin_extra_buttons",
     "adminactions.apps.Config",
     "demo",
 ]
@@ -193,3 +198,4 @@ CELERY_ALWAYS_EAGER = True
 # CELERY_RESULT_SERIALIZER = "json"
 # CELERY_TIMEZONE = TIME_ZONE
 # CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

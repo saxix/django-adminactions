@@ -1,9 +1,15 @@
 #!/usr/bin/env python
+from __future__ import annotations
+
 import os
 import sys
 
 here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-rel = lambda *args: os.path.join(here, *args)
+
+
+def rel(*args):
+    return os.path.join(here, *args)
+
 
 sys.path.insert(0, rel(os.pardir))
 sys.path.insert(0, rel("src"))

@@ -1,24 +1,34 @@
+from collections.abc import Generator
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.db import models
+from django.db.models.base import Model
 from django.forms import HiddenInput, TextInput
+from django.forms.fields import Field
 from django.forms.formsets import formset_factory
 from django.forms.models import model_to_dict, modelform_factory
 from django.http import HttpResponseRedirect
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
 from . import api
-from . import compat as transaction
+from .compat import nocommit
 from .forms import GenericActionForm
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import clone_instance, get_ignored_fields
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models import QuerySet
 
 
 class MergeFormBase(forms.Form):
@@ -39,56 +49,45 @@ class MergeFormBase(forms.Form):
     other_pk = forms.CharField(widget=HiddenInput)
     field_names = forms.CharField(required=False, widget=HiddenInput)
 
-    def action_fields(self):
+    def action_fields(self) -> Generator[HiddenInput, None, None]:
         for field_name in ["dependencies", "master_pk", "other_pk", "field_names"]:
             bf = self[field_name]
             yield HiddenInput().render(field_name, bf.value())
 
-    def clean_dependencies(self):
+    def clean_dependencies(self) -> int:
         return int(self.cleaned_data["dependencies"])
 
-    def clean_field_names(self):
+    def clean_field_names(self) -> Any:
         if self.cleaned_data["field_names"]:
             return self.cleaned_data["field_names"].split(",")
-        else:
-            return None
-
-    def full_clean(self):
-        super().full_clean()
-
-    def clean(self):
-        return super().clean()
-
-    def is_valid(self):
-        return super().is_valid()
+        return None
 
     class Media:
-        js = [
+        js: ClassVar[list[str]] = [
             "admin/js/vendor/jquery/jquery.js",
             "admin/js/jquery.init.js",
             "adminactions/js/merge.min.js",
         ]
-        css = {"all": ["adminactions/css/adminactions.css"]}
+        css: ClassVar[dict[str, list[str]]] = {"all": ["adminactions/css/adminactions.css"]}
 
 
 class MergeForm(GenericActionForm, MergeFormBase):
     pass
 
 
-# noinspection PyProtectedMember
-def merge(modeladmin, request, queryset):  # noqa
+def merge(modeladmin: "ModelAdmin", request: "HttpRequest", queryset: "QuerySet") -> HttpResponse | None:  # noqa: C901, PLR0914, PLR0915
     """
     Merge two model instances. Move all foreign keys.
 
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(merge.base_permission, opts))
+    perm = f"{opts.app_label}.{get_permission_codename(merge.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
 
-    def raw_widget(field, **kwargs):
+    def raw_widget(field: models.Field, **kwargs: Any) -> Field:
         """force all fields as not required"""
         kwargs["widget"] = TextInput({"class": "raw-value"})
         if isinstance(field, models.FileField):
@@ -105,11 +104,11 @@ def merge(modeladmin, request, queryset):  # noqa
     )
     OForm = modelform_factory(modeladmin.model, exclude=("pk",), formfield_callback=raw_widget)
 
-    def validate(v_request, v_master, v_other):
+    def validate(v_request: HttpRequest, v_master: Model, v_other: Model) -> None:
         """Validate the model is still valid after the merge"""
         v_merge_kwargs = {}
 
-        with transaction.nocommit():
+        with nocommit():
             merge_form_base = MergeFormBase(v_request.POST)
 
             if merge_form_base.is_valid():
@@ -128,8 +127,7 @@ def merge(modeladmin, request, queryset):  # noqa
                 v_other.pk = stored_pk
 
                 return validate_form.is_valid(), validate_form, v_merge_kwargs
-            else:
-                return False, merge_form_base, v_merge_kwargs
+            return False, merge_form_base, v_merge_kwargs
 
     name = "merge"  # Action name -- currently hardcoded - sent to signal
     tpl = "adminactions/merge.html"
@@ -141,9 +139,7 @@ def merge(modeladmin, request, queryset):  # noqa
         "select_across": request.POST.get("select_across") == "1",
         "action": request.POST.get("action"),
         "fields": [
-            f
-            for f in queryset.model._meta.fields
-            if not f.primary_key and f.editable and f.name not in ignored_fields
+            f for f in queryset.model._meta.fields if not f.primary_key and f.editable and f.name not in ignored_fields
         ],
         "app_label": queryset.model._meta.app_label,
         "result": "",
@@ -198,8 +194,7 @@ def merge(modeladmin, request, queryset):  # noqa
             )
 
             return HttpResponseRedirect(request.get_full_path())
-        else:
-            messages.error(request, form.errors)
+        messages.error(request, form.errors)
     else:
         try:
             master, other = queryset.all()
@@ -209,7 +204,7 @@ def merge(modeladmin, request, queryset):  # noqa
                     for target in (master, other):
                         raw_value = getattr(target, master_field.name)
                         if raw_value:
-                            fixed_value = datetime(
+                            fixed_value = datetime(  # noqa: DTZ001
                                 raw_value.year,
                                 raw_value.month,
                                 raw_value.day,
@@ -220,7 +215,7 @@ def merge(modeladmin, request, queryset):  # noqa
                             setattr(target, master_field.name, fixed_value)
         except ValueError:
             messages.error(request, _("Please select exactly 2 records"))
-            return
+            return None
 
         initial = {
             "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
@@ -236,21 +231,15 @@ def merge(modeladmin, request, queryset):  # noqa
 
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
-    ctx.update(
-        {
-            "adminform": adminForm,
-            "formset": formset,
-            "media": mark_safe(media),
-            "action_short_description": merge.short_description,
-            "title": "%s (%s)"
-            % (
-                merge.short_description.capitalize(),
-                smart_str(modeladmin.opts.verbose_name_plural),
-            ),
-            "master": master,
-            "other": other,
-        }
-    )
+    ctx.update({
+        "adminform": adminForm,
+        "formset": formset,
+        "media": mark_safe(media),
+        "action_short_description": merge.short_description,
+        "title": f"{merge.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
+        "master": master,
+        "other": other,
+    })
     ctx.update(modeladmin.admin_site.each_context(request))
     return render(request, tpl, context=ctx)
 

@@ -34,4 +34,3 @@ adminactions_merge
 ==================
 
 Required to execute :ref:`merge`
-

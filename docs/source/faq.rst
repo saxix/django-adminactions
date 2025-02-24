@@ -95,6 +95,3 @@ here the partial code::
     :func:`export_delete_tree` will dump only ``Rome``
 
     :func:`export_as_fixture` will dump the whole tree
-
-
-

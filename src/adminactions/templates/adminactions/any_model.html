@@ -1,5 +1,5 @@
 {% extends "admin/change_form.html" %}
-{% load i18n admin_modify static %}
+{% load admin_modify i18n static %}
 {% block extrahead %}{{ block.super }}
     <style type="text/css">
         #col1 {
@@ -19,16 +19,16 @@
     <script language="javascript" type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
     <script language="javascript" type="text/javascript" src="{% static 'adminactions/js/massupdate.js' %}"></script>
     <!--<script language="javascript" type="text/javascript" src="/media/js/admin/DateTimeShortcuts.js"></script>-->
-{% endblock %}
+{% endblock extrahead %}
 
 {% block breadcrumbs %}{% if not is_popup %}
     <div class="breadcrumbs">
-        <a href="../../../">{% trans "Home" %}</a> &rsaquo;
+        <a href="../../../">{% translate "Home" %}</a> &rsaquo;
         <a href="../../">{{ app_label|capfirst|escape }}</a> &rsaquo;
         <a href="../">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
         Mass Update
     </div>
-{% endif %}{% endblock %}
+{% endif %}{% endblock breadcrumbs %}
 
 {% block content %}
     {% if form.subject.errors %}
@@ -71,7 +71,7 @@
                 {{ hidden }}
             {% endfor %}
             <input type="hidden" name="action" value="{{ action }}"/>
-            <input type="submit" name="apply" value="{% trans 'Update records' %}"/>
+            <input type="submit" name="apply" value="{% translate 'Update records' %}"/>
         </form>
     </div>
     <div id='col2'>
@@ -84,4 +84,4 @@
 
 
     </div>
-{% endblock %}
+{% endblock content %}

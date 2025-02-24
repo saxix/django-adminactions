@@ -1,12 +1,21 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
 import sys
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING, Protocol
 
-import django_webtest
 import pytest
+
+if TYPE_CHECKING:
+    from django_webtest import DjangoTestApp
+
+    class AppFactory(Protocol):
+        def __call__(self, csrf_checks: bool, extra_environ: dict | None = None) -> DjangoTestApp: ...
+
 
 logger = logging.getLogger("test")
 
@@ -27,7 +36,7 @@ levelNames = {
 }
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser) -> None:
     group = parser.getgroup("selenium", "Selenium Web Browser Automation")
     group.addoption(
         "--selenium-enable",
@@ -62,7 +71,7 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_configure(config):
+def pytest_configure(config) -> None:
     here = Path(__file__).parent
     sys.path.insert(0, here)
     sys.path.insert(0, here.parent / "src")
@@ -74,22 +83,21 @@ def pytest_configure(config):
         config.option.markexpr.find("selenium") < 0
         and not config.option.keyword
         and config.option.keyword.find("selenium") < 0
-    ):
-        if not config.option.selenium_enable:
-            setattr(config.option, "markexpr", "not selenium")
+    ) and not config.option.selenium_enable:
+        config.option.markexpr = "not selenium"
     os.environ["CELERY_ALWAYS_EAGER"] = "1"
     os.environ["MEDIA_ROOT"] = "/tmp/media/"
     settings.MEDIA_ROOT = tempfile.TemporaryDirectory().name
-    original_media = os.path.join(settings.DEMO_DIR, "media")
+    original_media = str(Path(settings.DEMO_DIR) / "media")
     shutil.copytree(original_media, settings.MEDIA_ROOT)
 
     if config.option.log_level:
         import logging
 
         level = config.option.log_level.upper()
-        assert level in levelNames.keys()
-        format = "%(levelname)-7s %(name)-30s %(funcName)-20s:%(lineno)3s %(message)s"
-        formatter = logging.Formatter(format)
+        assert level in levelNames
+        fmt = "%(levelname)-7s %(name)-30s %(funcName)-20s:%(lineno)3s %(message)s"
+        formatter = logging.Formatter(fmt)
 
         handler = logging.StreamHandler()
         handler.setLevel(levelNames[level])
@@ -108,22 +116,18 @@ def pytest_configure(config):
 
 
 @pytest.fixture(autouse=True)
-def create_aa_permissions(db):
+def create_aa_permissions(db) -> None:
     from adminactions.perms import create_extra_permissions
 
     create_extra_permissions()
 
 
-@pytest.fixture(scope="function")
-def app(request):
-    wtm = django_webtest.WebTestMixin()
-    wtm.csrf_checks = False
-    wtm._patch_settings()
-    request.addfinalizer(wtm._unpatch_settings)
-    return django_webtest.DjangoTestApp()
+@pytest.fixture
+def app(request, django_app_factory: "AppFactory") -> DjangoTestApp:
+    return django_app_factory(csrf_checks=False)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def users():
     from django.contrib.auth.models import User
     from django_dynamic_fixture import G
@@ -131,7 +135,7 @@ def users():
     return G(User, n=2, is_staff=False, is_active=False)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def demomodels():
     from demo.models import DemoModel
     from django_dynamic_fixture import G
@@ -139,7 +143,7 @@ def demomodels():
     return G(DemoModel, n=20)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def admin():
     from django.contrib.auth.models import User
     from django_dynamic_fixture import G
@@ -147,10 +151,9 @@ def admin():
     return G(User, is_staff=True, is_active=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def administrator():
     from django.contrib.auth.models import User
     from utils import ADMIN, PWD
 
-    superuser = User._default_manager.create_superuser(username=ADMIN, password=PWD, email="sax@noreply.org")
-    return superuser
+    return User._default_manager.create_superuser(username=ADMIN, password=PWD, email="sax@noreply.org")

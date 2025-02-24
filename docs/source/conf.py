@@ -8,12 +8,18 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+from __future__ import annotations
 
 import os
 import sys
 
 here = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-up = lambda base, level: os.path.abspath(os.path.join(base, *([os.pardir] * level)))
+
+
+def up(base, level):
+    return os.path.abspath(os.path.join(base, *([os.pardir] * level)))
+
+
 sys.path.insert(0, up(here, 2))
 
 from django.conf import settings

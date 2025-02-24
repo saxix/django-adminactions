@@ -1,3 +1,5 @@
-VERSION = __version__ = "2.3.0"
-NAME = "django-adminactions"
-default_app_config = "adminactions.apps.Config"
+from .version import __version__
+
+VERSION = __version__
+
+__all__ = ["VERSION", "__version__"]

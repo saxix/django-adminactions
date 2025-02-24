@@ -1,22 +1,20 @@
-{% extends "admin_extra_urls/action_page.html" %}{% load i18n static admin_list admin_urls %}
-{% block breadcrumbs-items %}
-  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
-  &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
-  {% if original %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_list admin_urls i18n static %} {% block breadcrumbs-items %}
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+{% if original %}
   &rsaquo; <a href="{% url opts|admin_urlname:'change' original.pk %}">{{ original }}</a>
-  {% endif %}
-  {% block breadcrumbs-active %}&rsaquo; {{ action|default_if_none:title }}{% endblock breadcrumbs-active %}
+{% endif %}
+{% block breadcrumbs-active %}&rsaquo; {{ action|default_if_none:title }} {% endblock %}
 {% endblock breadcrumbs-items %}
 
 {% block action-content %}
-  <form method="post">
-    {% csrf_token %}
-    <table>
+<form method="post" id="import-form">
+  {% csrf_token %}
+  <table>
     {{ form }}
-    </table>
-  <input type="submit" value="{% trans 'Import' %}">
-  </form>
+  </table>
+  <input type="submit" value="{% translate 'Import' %}" />
+</form>
 
-
-{% endblock %}
+{% endblock action-content %}

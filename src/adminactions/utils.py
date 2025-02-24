@@ -1,21 +1,32 @@
+from __future__ import annotations
+
 from functools import partial
+from itertools import chain
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
 
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
-def get_ignored_fields(model, setting_var_name):
+    from django.contrib.admin.options import ModelAdmin
+    from django.contrib.contenttypes.fields import GenericForeignKey
+    from django.db.models.base import Model
+    from django.db.models.fields import Field as DBField
+    from django.db.models.fields.reverse_related import ForeignObjectRel
+
+
+def get_ignored_fields(model: Model, setting_var_name: str) -> Iterable[str]:
     """
     returns list of ignored fields which must not be modified
     """
-    return (
-        getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
-    )
+    return getattr(settings, setting_var_name, {}).get(model._meta.app_label, {}).get(model._meta.model_name, ())
 
 
-def clone_instance(instance, fieldnames=None):
+def clone_instance(instance: Model, fieldnames: list[str] | None = None) -> Model:
     """
         returns a copy of the passed instance.
 
@@ -31,37 +42,34 @@ def clone_instance(instance, fieldnames=None):
     return instance.__class__(**{name: getattr(instance, name) for name in fieldnames})
 
 
-# def get_copy_of_instance(instance):
-# return instance.__class__.objects.get(pk=instance.pk)
-
-
-def get_attr(obj, attr, default=None):
+def get_attr(obj: Any, attr: str, default: Any | None = None) -> Any:
     """Recursive get object's attribute. May use dot notation.
 
-    >>> class C: pass
+    >>> class C:
+    ...     pass
     >>> a = C()
     >>> a.b = C()
     >>> a.b.c = 4
-    >>> get_attr(a, 'b.c')
+    >>> get_attr(a, "b.c")
     4
 
-    >>> get_attr(a, 'b.c.y', None)
+    >>> get_attr(a, "b.c.y", None)
 
-    >>> get_attr(a, 'b.c.y', 1)
+    >>> get_attr(a, "b.c.y", 1)
     1
     """
     if "." not in attr:
         ret = getattr(obj, attr, default)
     else:
-        L = attr.split(".")
-        ret = get_attr(getattr(obj, L[0], default), ".".join(L[1:]), default)
+        parts = attr.split(".")
+        ret = get_attr(getattr(obj, parts[0], default), ".".join(parts[1:]), default)
 
     if isinstance(ret, BaseException):
         raise ret
     return ret
 
 
-def getattr_or_item(obj, name):
+def getattr_or_item(obj: Any, name: str) -> Any:
     """
     works indifferently on dict or objects, retrieving the
     'name' attribute or item
@@ -70,11 +78,11 @@ def getattr_or_item(obj, name):
     :param name: attribute or item name
     :return:
     >>> from django.contrib.auth.models import Permission
-    >>> p = Permission(name='perm')
-    >>> d ={'one': 1, 'two': 2}
-    >>> getattr_or_item(d, 'one')
+    >>> p = Permission(name="perm")
+    >>> d = {"one": 1, "two": 2}
+    >>> getattr_or_item(d, "one")
     1
-    >>> print(getattr_or_item(p, 'name'))
+    >>> print(getattr_or_item(p, "name"))
     perm
     """
     # this change type from type to dict in python3.9
@@ -87,12 +95,18 @@ def getattr_or_item(obj, name):
     except AttributeError:
         try:
             ret = obj[name]
-        except (KeyError, TypeError):
-            raise AttributeError("%s object has no attribute/item '%s'" % (obj.__class__.__name__, name))
+        except (KeyError, TypeError) as e:
+            raise AttributeError(f"{obj.__class__.__name__} object has no attribute/item '{name}'") from e
     return ret
 
 
-def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=None):
+def get_field_value(
+    obj: Model,
+    field: "DBField[Any, Any]",
+    usedisplay: bool = True,
+    raw_callable: bool = False,
+    modeladmin: ModelAdmin[Model] | None = None,
+) -> Any:
     """
     returns the field value or field representation if get_FIELD_display exists
 
@@ -102,25 +116,25 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=
     :return: field value
 
     >>> from django.contrib.auth.models import Permission
-    >>> p = Permission(name='perm')
-    >>> get_field_value(p, 'name') == 'perm'
+    >>> p = Permission(name="perm")
+    >>> get_field_value(p, "name") == "perm"
     True
     >>> get_field_value(p, None)
     Traceback (most recent call last):
         ...
-    ValueError: Invalid value for parameter `field`: Should be a field name or a Field instance
+    TypeError: Invalid value for parameter `field`: Should be a field name or a Field instance
     """
     if isinstance(field, str):
         fieldname = field
     elif isinstance(field, models.Field):
         fieldname = field.name
     else:
-        raise ValueError("Invalid value for parameter `field`: Should be a field name or a Field instance")
+        raise TypeError("Invalid value for parameter `field`: Should be a field name or a Field instance")
 
     if modeladmin and hasattr(modeladmin, fieldname):
         value = getattr(modeladmin, fieldname)(obj)
-    elif usedisplay and hasattr(obj, "get_%s_display" % fieldname):
-        value = getattr(obj, "get_%s_display" % fieldname)()
+    elif usedisplay and hasattr(obj, f"get_{fieldname}_display"):
+        value = getattr(obj, f"get_{fieldname}_display")()
     else:
         value = getattr_or_item(obj, fieldname)
 
@@ -138,7 +152,7 @@ def get_field_value(obj, field, usedisplay=True, raw_callable=False, modeladmin=
     return value
 
 
-def get_field_by_path(model, field_path):
+def get_field_by_path(model: type[Model] | Model, field_path: str) -> DBField | None:
     """
     get a Model class or instance and a path to a attribute, returns the field object
 
@@ -149,28 +163,26 @@ def get_field_by_path(model, field_path):
 
     >>> from django.contrib.auth.models import Permission
 
-    >>> p = Permission(name='perm')
-    >>> get_field_by_path(Permission, 'content_type').name
+    >>> p = Permission(name="perm")
+    >>> get_field_by_path(Permission, "content_type").name
     'content_type'
-    >>> p = Permission(name='perm')
-    >>> get_field_by_path(p, 'content_type.app_label').name
+    >>> p = Permission(name="perm")
+    >>> get_field_by_path(p, "content_type.app_label").name
     'app_label'
     """
     parts = field_path.split(".")
     target = parts[0]
     if target in get_all_field_names(model):
-        field_object, model, direct, m2m = get_field_by_name(model, target)
+        field_object, model, __, __ = get_field_by_name(model, target)
         if isinstance(field_object, models.fields.related.ForeignKey):
             if parts[1:]:
                 return get_field_by_path(field_object.related_model, ".".join(parts[1:]))
-            else:
-                return field_object
-        else:
             return field_object
+        return field_object
     return None
 
 
-def get_verbose_name(model_or_queryset, field):
+def get_verbose_name(model_or_queryset: Model | QuerySet, field: "DBField[Any, Any]") -> str:
     """
     returns the value of the ``verbose_name`` of a field
 
@@ -190,45 +202,40 @@ def get_verbose_name(model_or_queryset, field):
     >>> from django.contrib.auth.models import User, Permission
     >>> user = User()
     >>> p = Permission()
-    >>> get_verbose_name(user, 'username') == 'username'
+    >>> get_verbose_name(user, "username") == "username"
     True
-    >>> get_verbose_name(User, 'username') == 'username'
+    >>> get_verbose_name(User, "username") == "username"
     True
-    >>> get_verbose_name(User.objects.all(), 'username') == 'username'
+    >>> get_verbose_name(User.objects.all(), "username") == "username"
     True
-    >>> get_verbose_name(User.objects, 'username') == 'username'
+    >>> get_verbose_name(User.objects, "username") == "username"
     True
-    >>> get_verbose_name(User.objects, user._meta.fields[0]) == 'ID'
+    >>> get_verbose_name(User.objects, user._meta.fields[0]) == "ID"
     True
-    >>> get_verbose_name(p, 'content_type.model') == 'python model class name'
+    >>> get_verbose_name(p, "content_type.model") == "python model class name"
     True
     """
-
-    if isinstance(model_or_queryset, models.Manager):
+    model: type[Model] | QuerySet
+    if isinstance(model_or_queryset, models.Manager | QuerySet):
         model = model_or_queryset.model
-    elif isinstance(model_or_queryset, QuerySet):
-        model = model_or_queryset.model
-    elif isinstance(model_or_queryset, models.Model):
-        model = model_or_queryset
-    elif type(model_or_queryset) is models.base.ModelBase:
+    elif isinstance(model_or_queryset, models.Model | models.base.ModelBase):
         model = model_or_queryset
     else:
-        raise ValueError(
-            "`get_verbose_name` expects Manager, Queryset or Model as first parameter (got %s)"
-            % type(model_or_queryset)
+        raise TypeError(
+            f"`get_verbose_name` expects Manager, Queryset or Model as first parameter (got {type(model_or_queryset)})",
         )
 
     if isinstance(field, str):
         field = get_field_by_path(model, field)
     elif isinstance(field, models.Field):
-        field = field
+        pass
     else:
-        raise ValueError("`get_verbose_name` field_path must be string or Field class")
+        raise TypeError("`get_verbose_name` field_path must be string or Field class")
 
-    return field.verbose_name
+    return str(field.verbose_name)
 
 
-def flatten(iterable):
+def flatten(iterable: Iterable[Any]) -> list[Any]:
     """
     flatten(sequence) -> list
 
@@ -242,13 +249,13 @@ def flatten(iterable):
     Examples:
 
     >>> from adminactions.utils import flatten
-    >>> [1, 2, [3,4], (5,6)]
+    >>> [1, 2, [3, 4], (5, 6)]
     [1, 2, [3, 4], (5, 6)]
 
-    >>> flatten([[[1,2,3], (42,None)], [4,5], [6], 7, (8,9,10)])
+    >>> flatten([[[1, 2, 3], (42, None)], [4, 5], [6], 7, (8, 9, 10)])
     [1, 2, 3, 42, None, 4, 5, 6, 7, 8, 9, 10]"""
 
-    result = list()
+    result = []
     for el in iterable:
         if hasattr(el, "__iter__") and not isinstance(el, str):
             result.extend(flatten(el))
@@ -257,39 +264,39 @@ def flatten(iterable):
     return list(result)
 
 
-def get_field_by_name(model, name):
+def get_field_by_name(
+    model: Model, name: str
+) -> "tuple[DBField[Any, Any] | ForeignObjectRel | GenericForeignKey, type[Model] | Any, bool, bool | None]":
     field = model._meta.get_field(name)
     direct = not field.auto_created or field.concrete
     return field, field.model, direct, field.many_to_many
 
 
-def model_has_field(model, field_name):
+def model_has_field(model: Model, field_name: str) -> bool:
     return field_name in [f.name for f in model._meta.get_fields()]
 
 
-def get_all_related_objects(model):
+def get_all_related_objects(model: Model) -> "list[DBField[Any, Any] | ForeignObjectRel | GenericForeignKey]":
     return [f for f in model._meta.get_fields() if (f.one_to_many or f.one_to_one) and f.auto_created]
 
 
-def get_all_field_names(model):
-    from itertools import chain
-
+def get_all_field_names(model: type[Model] | Model) -> list[str]:
     return list(
         set(
             chain.from_iterable(
                 (field.name, field.attname) if hasattr(field, "attname") else (field.name,)
                 for field in model._meta.get_fields()
                 if not (field.many_to_one and field.related_model is None)
-            )
-        )
+            ),
+        ),
     )
 
 
-def curry(func, *a, **kw):
+def curry(func: Callable[[Any], Any], *a: Any, **kw: Any) -> Callable[[Any], Any]:
     return partial(func, *a, **kw)
 
 
-def get_common_context(modeladmin, **kwargs):
+def get_common_context(modeladmin: ModelAdmin[Model], **kwargs: Any) -> dict[str, Any]:
     ctx = {
         "change": True,
         "is_popup": False,

@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import logging
+import operator
 import re
 from collections import OrderedDict as SortedDict
 from collections import defaultdict
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from django import forms
 from django.conf import settings
@@ -11,6 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.db.models import FileField, ForeignKey
 from django.db.models import fields as df
+from django.db.models.query import QuerySet
 from django.db.transaction import atomic
 from django.forms import fields as ff
 from django.forms.models import (
@@ -28,11 +33,16 @@ from django.utils.translation import gettext as _
 
 from . import config
 from .compat import celery_present
-from .exceptions import ActionInterrupted
+from .exceptions import ActionInterruptedError
 from .forms import GenericActionForm
 from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import curry, get_field_by_name
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import ModelAdmin
+    from django.http.request import HttpRequest
+
 
 logger = logging.getLogger(__name__)
 
@@ -42,11 +52,11 @@ add = lambda arg, value: value + arg
 sub = lambda arg, value: value - arg
 add_percent = lambda arg, value: value + (value * arg / 100)
 sub_percent = lambda arg, value: value - (value * arg / 100)
-negate = lambda value: not value
+negate = operator.not_
 trim = lambda arg, value: value.strip(arg)
 
-change_domain = lambda arg, value: re.sub("@.*", arg, value)
-change_protocol = lambda arg, value: re.sub("^[a-z]*://", "%s://" % arg, value)
+change_domain = lambda arg, value: re.sub(r"@.*", arg, value)
+change_protocol = lambda arg, value: re.sub(r"^[a-z]*://", f"{arg}://", value)
 
 disable_if_not_nullable = lambda field: field.null
 disable_if_unique = lambda field: not field.unique
@@ -69,87 +79,87 @@ class OperationManager:
     description: string description of the operator
     """
 
-    COMMON = [
+    COMMON: ClassVar[list[tuple[str, Any]]] = [
         ("set", (None, True, disable_if_unique, "")),
-        ("set null", (lambda old_value: None, False, disable_if_not_nullable, "")),
+        ("set null", (lambda old_value: None, False, disable_if_not_nullable, "")),  # noqa: ARG005
     ]
 
-    def __init__(self, _dict):
+    def __init__(self, _dict: dict[type[df.Field], tuple[str, Any]]) -> None:
         self._dict = defaultdict(SortedDict)
-        self.operations = dict()
+        self.operations = {}
         self.register_operations(df.Field, self.COMMON)
         for field_class, args in _dict.items():
             self.register_operations(field_class, args)
 
-    def register_operations(self, field_class, operations):
+    def register_operations(
+        self,
+        field_class: type[df.Field],
+        operations: list[tuple[str, tuple[Any, bool, callable, str]]],
+    ) -> None:
         for label, operation in operations:
             self._dict[field_class][label] = operation
             if operation:
                 self.operations[label] = operation[0]
 
-    def get_function(self, name):
+    def get_function(self, name: str) -> callable:
         return self.operations.get(name, None)
 
-    def get(self, field_class: type):
+    def get(self, field_class: type[df.Field]) -> dict[type[df.Field]]:
         data = SortedDict()
         # reversed to make the most specific overrule the more general ones
         for typ in reversed(field_class.__mro__):
             data |= self._dict.get(typ, ())
         return data
 
-    def operation_enabled(self, field, operation):
+    def operation_enabled(self, field: df.Field, operation: tuple[Any, Any, Any]) -> bool:  # noqa: PLR6301
         if operation:
             enabler = operation[2]
             return enabler is True or (callable(enabler) and enabler(field))
         return False
 
-    def get_for_field(self, field):
+    def get_for_field(self, field: df.Field) -> dict[str, callable]:
         """returns valid functions for passed field
         :param field Field django Model Field
         :return list of (label, (__, param, enabler, help))
         """
-        return SortedDict(
-            [
-                (label, operation)
-                for label, operation in self.get(field.__class__).items()
-                if self.operation_enabled(field, operation)
-            ]
-        )
+        return SortedDict([
+            (label, operation)
+            for label, operation in self.get(field.__class__).items()
+            if self.operation_enabled(field, operation)
+        ])
 
-    def __getitem__(self, field_class):
+    def __getitem__(self, field_class: type[df.Field]) -> dict[type[df.Field]]:
         return self.get(field_class)
 
 
-OPERATIONS = OperationManager(
-    {
-        df.CharField: [
-            ("upper", (str.upper, False, True, _("convert to uppercase"))),
-            ("lower", (str.lower, False, True, _("convert to lowercase"))),
-            (
-                "capitalize",
-                (str.capitalize, False, True, _("capitalize first character")),
-            ),
-            ("trim", (str.strip, False, True, _("leading and trailing whitespace"))),
-        ],
-        df.IntegerField: [
-            (
-                "add percent",
-                (add_percent, True, True, _("add <arg> percent to existing value")),
-            ),
-            ("sub percent", (sub_percent, True, True, "")),
-            ("sub", (sub_percent, True, True, "")),
-            ("add", (add, True, True, "")),
-        ],
-        df.BooleanField: [("toggle", (negate, False, True, ""))],
-        # df.NullBooleanField: [("toggle", (negate, False, True, ""))],
-        df.EmailField: [
-            ("change domain", (change_domain, True, True, "")),
-            ("upper", (str.upper, False, True, _("convert to uppercase"))),
-            ("lower", (str.lower, False, True, _("convert to lowercase"))),
-        ],
-        df.URLField: [("change protocol", (change_protocol, True, True, ""))],
-    }
-)
+OPERATIONS = OperationManager({
+    df.CharField: [
+        ("upper", (str.upper, False, True, _("convert to uppercase"))),
+        ("lower", (str.lower, False, True, _("convert to lowercase"))),
+        (
+            "capitalize",
+            (str.capitalize, False, True, _("capitalize first character")),
+        ),
+        ("trim", (str.strip, False, True, _("leading and trailing whitespace"))),
+    ],
+    df.IntegerField: [
+        (
+            "add percent",
+            (add_percent, True, True, _("add <arg> percent to existing value")),
+        ),
+        ("sub percent", (sub_percent, True, True, "")),
+        ("sub", (sub_percent, True, True, "")),
+        ("add", (add, True, True, "")),
+    ],
+    df.BooleanField: [("toggle", (negate, False, True, ""))],
+    # df.NullBooleanField: [("toggle", (negate, False, True, ""))],
+    df.EmailField: [
+        ("change domain", (change_domain, True, True, "")),
+        ("upper", (str.upper, False, True, _("convert to uppercase"))),
+        ("lower", (str.lower, False, True, _("convert to lowercase"))),
+    ],
+    df.URLField: [("change protocol", (change_protocol, True, True, ""))],
+})
 
 
 class MassUpdateForm(GenericActionForm):
@@ -167,7 +177,7 @@ class MassUpdateForm(GenericActionForm):
     )
     sort_fields = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._errors = None
         self.update_using_queryset_allowed = True
@@ -175,17 +185,17 @@ class MassUpdateForm(GenericActionForm):
             self.fields["_async"].widget = forms.HiddenInput()
 
         if self.sort_fields:
-            self.fields = {k: v for k, v in sorted(self.fields.items(), key=lambda item: item[1].label or "")}
+            self.fields = dict(sorted(self.fields.items(), key=lambda item: item[1].label or ""))
 
-    def _get_validation_exclusions(self):
+    def _get_validation_exclusions(self) -> list[str]:
         exclude = list(super()._get_validation_exclusions())
-        for name, field in list(self.fields.items()):
-            function = self.data.get("func_id_%s" % name, False)
+        for name, __ in list(self.fields.items()):
+            function = self.data.get(f"func_id_{name}", False)
             if function:
                 exclude.append(name)
         return exclude
 
-    def _post_clean(self):
+    def _post_clean(self) -> None:
         # must be overriden to bypass instance.clean()
         if self.cleaned_data.get("_clean", False):
             opts = self._meta
@@ -200,44 +210,58 @@ class MassUpdateForm(GenericActionForm):
             except ValidationError as e:
                 self._update_errors(e.message_dict)
 
-    def full_clean(self):
+    def full_clean(self) -> None:
         super().full_clean()
+
+        def _is_field_name(n: str) -> bool:
+            return not (n.startswith(("chk_id_", "func_id_")))
+
+        def _is_enabled(n: str) -> bool:
+            return self.cleaned_data[f"chk_id_{n}"]
+
         if not self.is_bound:  # Stop further processing.
             return
-        for field_name, value in list(self.cleaned_data.items()):
-            if isinstance(self.fields.get(field_name, ""), forms.FileField):
-                if self.cleaned_data["_async"] and self.cleaned_data.get(field_name, None):
-                    self.add_error(field_name, _("Cannot use Async with FileField"))
+        for field_name, __ in list(self.cleaned_data.items()):
+            if (
+                _is_field_name(field_name)
+                and isinstance(self.fields.get(field_name, ""), forms.FileField)
+                and self.cleaned_data["_async"]
+                and self.cleaned_data.get(field_name, None)
+            ):
+                self.add_error(field_name, _("Cannot use Async with FileField"))
 
         if not self.cleaned_data.get("_validate"):
             if not self.update_using_queryset_allowed:
                 self.add_error(None, "Cannot use operators without 'validate'")
             else:
-                for field_name, value in list(self.cleaned_data.items()):
-                    if isinstance(self.fields.get(field_name, ""), ModelMultipleChoiceField):
+                for field_name, __ in list(self.cleaned_data.items()):
+                    if (
+                        _is_field_name(field_name)
+                        and _is_enabled(field_name)
+                        and isinstance(self.fields.get(field_name, ""), ModelMultipleChoiceField)
+                    ):
                         self.add_error(
                             field_name,
-                            _("Unable no mass update ManyToManyField" " without 'validate'"),
+                            _("Unable no mass update ManyToManyField without 'validate'"),
                         )
 
-    def _clean_fields(self):
+    def _clean_fields(self) -> None:
         self.update_using_queryset_allowed = True
         for name, field in list(self.fields.items()):
             raw_value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             try:
                 value = raw_value
                 initial = self.initial.get(name, field.initial)
+                enabler = f"chk_id_{name}"
+                apply = self.data.get(enabler, "") == "on"
+                self.cleaned_data[enabler] = apply
                 if isinstance(field, ff.FileField):
                     value = field.clean(raw_value, initial)
                 else:
-                    enabler = "chk_id_%s" % name
-                    function = self.data.get("func_id_%s" % name, "")
-                    apply = self.data.get(enabler, "") == "on"
-                    self.cleaned_data[enabler] = apply
-                    self.cleaned_data["func_id_%s" % name] = function
-                    # self.cleaned_data[name] = field.clean(raw_value)
+                    function = self.data.get(f"func_id_{name}", "")
+                    self.cleaned_data[f"func_id_{name}"] = function
                     if apply:
-                        field_object, model, direct, m2m = get_field_by_name(self._meta.model, name)
+                        field_object, __, __, __ = get_field_by_name(self._meta.model, name)
                         value = field.clean(raw_value)
                         if function:
                             func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
@@ -248,44 +272,50 @@ class MassUpdateForm(GenericActionForm):
                                 value = curry(func, value)
                             else:
                                 value = func
-                        self.cleaned_data[name] = value
-                if hasattr(self, "clean_%s" % name):
-                    value = getattr(self, "clean_%s" % name)()
+                if hasattr(self, f"clean_{name}"):
+                    value = getattr(self, f"clean_{name}")()
                 self.cleaned_data[name] = value
             except ValidationError as e:
                 self._errors[name] = self.error_class(e.messages)
                 if name in self.cleaned_data:
                     del self.cleaned_data[name]
 
-    def clean__validate(self):
+    def clean__validate(self) -> bool:
         return bool(self.data.get("_validate", 0))
 
-    def clean__async(self):
+    def clean__async(self) -> bool:
         return bool(self.data.get("_async", 0))
 
-    def clean__clean(self):
+    def clean__clean(self) -> bool:
         return bool(self.data.get("_clean", 0))
 
     @property
-    def media(self):
+    def media(self) -> forms.Media:
         extra = "" if settings.DEBUG else ".min"
         return super().media + forms.Media(
             js=(
-                "admin/js/vendor/jquery/jquery%s.js" % extra,
-                "adminactions/js/massupdate%s.js" % extra,
+                f"admin/js/vendor/jquery/jquery{extra}.js",
+                f"adminactions/js/massupdate{extra}.js",
             ),
             css={
                 "screen": ("adminactions/css/massupdate.css",),
             },
         )
 
-    def fix_json(self):
+    def fix_json(self) -> None:
         for label, field in self.fields.items():
             if isinstance(field, forms.JSONField):
                 field.disabled = label not in self.data
 
 
-def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None):
+def mass_update_execute(
+    queryset: QuerySet,
+    rules: dict[str, tuple[callable, Any]],
+    validate: bool,
+    clean: bool,
+    user_pk: Any,
+    request: HttpRequest | None = None,
+) -> tuple[int, list[str]]:
     errors = {}
     updated = 0
     opts = queryset.model._meta
@@ -325,7 +355,7 @@ def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None)
                 queryset=queryset,
             )
             if config.AA_ENABLE_LOG:
-                from django.contrib.admin.models import CHANGE, LogEntry
+                from django.contrib.admin.models import CHANGE, LogEntry  # noqa: PLC0415
 
                 ids = list(queryset.only("pk").values_list("pk", flat=True))
                 LogEntry.objects.log_action(
@@ -336,39 +366,39 @@ def mass_update_execute(queryset, rules, validate, clean, user_pk, request=None)
                     action_flag=CHANGE,
                     change_message={"rules": str(rules), "records": ids},
                 )
-    except ActionInterrupted:
+    except ActionInterruptedError:
         updated, errors = 0, {}
 
     return updated, errors
 
 
-def mass_update(modeladmin, request, queryset):  # noqa
+def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> tuple[int, list[str]]:  # noqa: C901, PLR0915, PLR0912, PLR0914
     """
     mass update queryset
     """
 
-    def not_required(field, **kwargs):
+    def not_required(field: df.Field, **kwargs: Any) -> forms.Field:
         """force all fields as not required"""
         kwargs["required"] = False
         kwargs["request"] = request
         return modeladmin.formfield_for_dbfield(field, **kwargs)
 
-    def _get_sample():
-        grouped = defaultdict(lambda: [])
+    def _get_sample() -> dict[str, list[tuple[Any, str] | dict[str, Any]]]:
+        grouped = defaultdict(list)
         for f in mass_update_hints:
             if isinstance(f, ForeignKey):
                 # Filter by queryset so we only get results without our
                 # current resultset
-                filters = {"%s__in" % f.remote_field.name: queryset}
+                filters = {f"{f.remote_field.name}__in": queryset}
                 # Order by random to get a nice sample
                 query = f.related_model.objects.filter(**filters).distinct().order_by("?")
                 # Limit the amount of results so we don't accidently query
                 # many thousands of items and kill the database.
                 grouped[f.name] = [(a.pk, str(a)) for a in query[:10]]
             elif hasattr(f, "flatchoices") and f.flatchoices:
-                grouped[f.name] = dict(getattr(f, "flatchoices")).keys()
+                grouped[f.name] = dict(f.flatchoices).keys()
             elif hasattr(f, "choices") and f.choices:
-                grouped[f.name] = dict(getattr(f, "choices")).keys()
+                grouped[f.name] = dict(f.choices).keys()
             elif isinstance(f, df.BooleanField):
                 grouped[f.name] = [("True", True), ("False", False)]
         already_grouped = set(grouped)
@@ -384,10 +414,10 @@ def mass_update(modeladmin, request, queryset):  # noqa
         return grouped
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(opts.app_label, get_permission_codename(mass_update.base_permission, opts))
+    perm = ".".join([opts.app_label, get_permission_codename(mass_update.base_permission, opts)])
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
     if "apply" not in request.POST:
         try:
             adminaction_requested.send(
@@ -397,16 +427,16 @@ def mass_update(modeladmin, request, queryset):  # noqa
                 queryset=queryset,
                 modeladmin=modeladmin,
             )
-        except ActionInterrupted as e:
+        except ActionInterruptedError as e:
             messages.error(request, str(e))
-            return
+            return None
 
     defaultFormClass = import_string(config.AA_MASSUPDATE_FORM)
     mass_update_form = getattr(modeladmin, "mass_update_form", defaultFormClass)
     mass_update_fields = getattr(modeladmin, "mass_update_fields", None)
     mass_update_exclude = getattr(modeladmin, "mass_update_exclude", None)
     if mass_update_fields and mass_update_exclude:
-        raise Exception("Cannot set both 'mass_update_exclude' and 'mass_update_fields'")
+        raise ValueError("Cannot set both 'mass_update_exclude' and 'mass_update_fields'")
 
     if mass_update_exclude is None:
         mass_update_exclude = ["pk"]
@@ -431,19 +461,22 @@ def mass_update(modeladmin, request, queryset):  # noqa
         try:
             form = MForm(request.POST, request.FILES, initial=initial)
             if form.is_valid():
-                # # need_transaction = form.cleaned_data.get('_unique_transaction', False)
                 validate = form.cleaned_data.get("_validate", False)
                 clean = form.cleaned_data.get("_clean", False)
                 use_celery = form.cleaned_data.get("_async", False)
-                for field_name, value in list(form.cleaned_data.items()):
-                    enabler = "chk_id_%s" % field_name
+                for field_name, v in list(form.cleaned_data.items()):
+                    value = v
+                    enabler = f"chk_id_{field_name}"
                     if form.data.get(enabler, False) == "on":
-                        op = form.data.get("func_id_%s" % field_name)
+                        op = form.data.get(f"func_id_{field_name}")
                         if callable(value):
                             value = None
-                        rules[field_name] = (op, value)
+                        if isinstance(value, QuerySet):
+                            rules[field_name] = (op, list(value.values_list("pk", flat=True)))
+                        else:
+                            rules[field_name] = (op, value)
                 if use_celery:
-                    from .tasks import mass_update_task
+                    from .tasks import mass_update_task  # noqa: PLC0415
 
                     mass_update_task.delay(
                         f"{opts.app_label}.{opts.model_name}",
@@ -455,7 +488,7 @@ def mass_update(modeladmin, request, queryset):  # noqa
                     )
                 else:
                     try:
-                        updated, errors = mass_update_execute(
+                        updated, __ = mass_update_execute(
                             queryset,
                             rules,
                             validate,
@@ -464,12 +497,12 @@ def mass_update(modeladmin, request, queryset):  # noqa
                             request=request,
                         )
                         messages.info(request, _("Updated %s records") % updated)
-                    except ActionInterrupted as e:
+                    except ActionInterruptedError as e:
                         messages.error(request, str(e))
                         return HttpResponseRedirect(request.get_full_path())
                 return HttpResponseRedirect(request.get_full_path())
-            else:
-                form.fix_json()
+
+            form.fix_json()
         except Exception as e:
             messages.error(request, str(e))
             logger.exception(e)
@@ -478,32 +511,23 @@ def mass_update(modeladmin, request, queryset):  # noqa
     else:
         initial.update({"action": "mass_update", "_validate": 1})
         prefill_with = request.POST.get("prefill-with", None)
-        prefill_instance = None
         try:
             # Gets the instance directly from the queryset for data security
             prefill_instance = queryset.get(pk=prefill_with)
         except ObjectDoesNotExist:
-            pass
+            prefill_instance = None
 
         form = MForm(initial=initial, instance=prefill_instance)
 
-    if mass_update_hints:
-        sample_values = _get_sample()
-    else:
-        sample_values = None
+    sample_values = _get_sample() if mass_update_hints else None
     adminForm = helpers.AdminForm(form, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
     media = modeladmin.media + adminForm.media
-    # dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.date) else str(obj)
     tpl = "adminactions/mass_update.html"
     ctx = {
         "adminform": adminForm,
         "form": form,
         "action_short_description": mass_update.short_description,
-        "title": "%s (%s)"
-        % (
-            mass_update.short_description.capitalize(),
-            smart_str(modeladmin.opts.verbose_name_plural),
-        ),
+        "title": f"{mass_update.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
         "grouped": sample_values,
         "change": True,
         "rules": rules,

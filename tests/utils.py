@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import os
 import string
 from random import choice, randrange, shuffle
+from typing import NoReturn
 
 from django.conf import global_settings
 from django.contrib import admin
@@ -12,12 +15,16 @@ from django.test.testcases import TestCase
 from django_dynamic_fixture import G
 from django_dynamic_fixture.fixture_algorithms.random_fixture import RandomDataFixture
 
-from adminactions.exceptions import ActionInterrupted
-from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
+from adminactions.exceptions import ActionInterruptedError
+from adminactions.signals import (
+    adminaction_end,
+    adminaction_requested,
+    adminaction_start,
+)
 
 
 class admin_register:
-    def __init__(self, model, model_admin=None, unregister=False):
+    def __init__(self, model, model_admin=None, unregister=False) -> None:
         self.model = model
         self.model_admin = model_admin
         self.unregister = unregister
@@ -36,8 +43,7 @@ class admin_register:
 
     def start(self):
         """Activate a patch, returning any created mock."""
-        result = self.__enter__()
-        return result
+        return self.__enter__()
 
     def stop(self):
         """Stop an active patch."""
@@ -63,7 +69,8 @@ def get_group(name=None, permissions=None):
         try:
             app_label, codename = permission_name.split(".")
         except ValueError:
-            raise ValueError("Invalid permission name `{0}`".format(permission_name))
+            msg = f"Invalid permission name `{permission_name}`"
+            raise ValueError(msg)
         __, model_name = codename.rsplit("_", 1)
         ct = ContentType.objects.get(app_label__iexact=app_label, model__iexact=model_name)
         permission = Permission.objects.get(content_type=ct, codename=codename)
@@ -72,7 +79,7 @@ def get_group(name=None, permissions=None):
 
 
 class user_grant_permission:
-    def __init__(self, user, permissions=None):
+    def __init__(self, user, permissions=None) -> None:
         self.user = user
         self.permissions = permissions
         self.group = None
@@ -92,8 +99,7 @@ class user_grant_permission:
 
     def start(self):
         """Activate a patch, returning any created mock."""
-        result = self.__enter__()
-        return result
+        return self.__enter__()
 
     def stop(self):
         """Stop an active patch."""
@@ -105,7 +111,8 @@ class SelectRowsMixin:
     _selected_values = []
     csrf_checks = False
 
-    def _select_rows(self, form, selected_rows=None):
+    def _select_rows(self, form, selected_rows=None) -> list[int]:
+        selected_pks = []
         if selected_rows is None:
             selected_rows = self._selected_rows
 
@@ -114,17 +121,19 @@ class SelectRowsMixin:
             chk = form.get("_selected_action", r, default=None)
             if chk:
                 form.set("_selected_action", True, r)
+                selected_pks.append(int(chk.value))
                 self._selected_values.append(int(chk.value))
+        return selected_pks
 
 
 class CheckSignalsMixin:
     MESSAGE = "Action Interrupted Test"
 
-    def test_signal_sent(self):
+    def test_signal_sent(self) -> None:
         def handler_factory(name):
-            def myhandler(sender, action, request, queryset, **kwargs):
+            def myhandler(sender, action, request, queryset, **kwargs) -> None:
                 handler_factory.invoked[name] = True
-                self.assertEqual(action, self.action_name)
+                assert action == self.action_name
                 self.assertSequenceEqual(
                     queryset.order_by("id").values_list("id", flat=True),
                     sorted(self._selected_values),
@@ -145,63 +154,63 @@ class CheckSignalsMixin:
             adminaction_end.connect(m3, sender=self.sender_model)
 
             self._run_action()
-            self.assertIn("adminaction_requested", handler_factory.invoked)
-            self.assertIn("adminaction_start", handler_factory.invoked)
-            self.assertIn("adminaction_end", handler_factory.invoked)
+            assert "adminaction_requested" in handler_factory.invoked
+            assert "adminaction_start" in handler_factory.invoked
+            assert "adminaction_end" in handler_factory.invoked
 
         finally:
             adminaction_requested.disconnect(m1, sender=self.sender_model)
             adminaction_start.disconnect(m2, sender=self.sender_model)
             adminaction_end.disconnect(m3, sender=self.sender_model)
 
-    def test_signal_requested(self):
+    def test_signal_requested(self) -> None:
         # test if adminaction_requested Signal can stop the action
 
-        def myhandler(sender, action, request, queryset, **kwargs):
+        def myhandler(sender, action, request, queryset, **kwargs) -> NoReturn:
             myhandler.invoked = True
-            self.assertEqual(action, self.action_name)
+            assert action == self.action_name
             self.assertSequenceEqual(
                 queryset.order_by("id").values_list("id", flat=True),
                 sorted(self._selected_values),
             )
-            raise ActionInterrupted(self.MESSAGE)
+            raise ActionInterruptedError(self.MESSAGE)
 
         myhandler.invoked = False
 
         try:
             adminaction_requested.connect(myhandler, sender=self.sender_model)
             self._run_action(1)
-            self.assertTrue(myhandler.invoked)
-            self.assertIn(self.MESSAGE, self.app.cookies["messages"])
+            assert myhandler.invoked
+            assert self.MESSAGE in self.app.cookies["messages"]
         finally:
             adminaction_requested.disconnect(myhandler, sender=self.sender_model)
 
-    def test_signal_start(self):
+    def test_signal_start(self) -> None:
         # test if adminaction_start Signal can stop the action
 
-        def myhandler(sender, action, request, queryset, **kwargs):
+        def myhandler(sender, action, request, queryset, **kwargs) -> NoReturn:
             myhandler.invoked = True
-            self.assertEqual(action, self.action_name)
+            assert action == self.action_name
             self.assertSequenceEqual(
                 queryset.order_by("id").values_list("id", flat=True),
                 sorted(self._selected_values),
             )
-            raise ActionInterrupted(self.MESSAGE)
+            raise ActionInterruptedError(self.MESSAGE)
 
         try:
             adminaction_start.connect(myhandler, sender=self.sender_model)
             self._run_action(2)
-            self.assertTrue(myhandler.invoked)
-            self.assertIn(self.MESSAGE, self.app.cookies["messages"])
+            assert myhandler.invoked
+            assert self.MESSAGE in self.app.cookies["messages"]
         finally:
             adminaction_start.disconnect(myhandler, sender=self.sender_model)
 
-    def test_signal_end(self):
+    def test_signal_end(self) -> None:
         # test if adminaction_start Signal can stop the action
 
-        def myhandler(sender, action, request, queryset, **kwargs):
+        def myhandler(sender, action, request, queryset, **kwargs) -> None:
             myhandler.invoked = True
-            self.assertEqual(action, self.action_name)
+            assert action == self.action_name
             self.assertSequenceEqual(
                 queryset.order_by("id").values_list("id", flat=True),
                 sorted(self._selected_values),
@@ -211,7 +220,7 @@ class CheckSignalsMixin:
         try:
             adminaction_end.connect(myhandler, sender=self.sender_model)
             self._run_action(2)
-            self.assertTrue(myhandler.invoked)
+            assert myhandler.invoked
         finally:
             adminaction_end.disconnect(myhandler, sender=self.sender_model)
 
@@ -228,14 +237,12 @@ def ipaddress(not_valid=None):
     shuffle(class_a)
     first = class_a.pop()
 
-    return ".".join(
-        [
-            str(first),
-            str(randrange(1, 256)),
-            str(randrange(1, 256)),
-            str(randrange(1, 256)),
-        ]
-    )
+    return ".".join([
+        str(first),
+        str(randrange(1, 256)),
+        str(randrange(1, 256)),
+        str(randrange(1, 256)),
+    ])
 
 
 class DataFixtureClass(RandomDataFixture):  # it can inherit of SequentialDataFixture, RandomDataFixture etc.
@@ -278,16 +285,16 @@ class BaseTestCaseMixin:
         "adminactions.json",
     ]
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         self.sett = self.settings(**SETTINGS)
         self.sett.enable()
         self.login()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.sett.disable()
 
-    def login(self, username="user_00", password="123"):
+    def login(self, username="user_00", password="123") -> None:
         user = User.objects.get(username=username)
         try:
             self.client.force_login(user)
@@ -296,7 +303,7 @@ class BaseTestCaseMixin:
             assert logged, "Unable login with credentials"
         self._user = authenticate(username=username, password=password)
 
-    def add_permission(self, *perms, **kwargs):
+    def add_permission(self, *perms, **kwargs) -> None:
         """add the right permission to the user"""
         target = kwargs.pop("user", self._user)
         if hasattr(target, "_perm_cache"):

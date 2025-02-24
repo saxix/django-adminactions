@@ -33,8 +33,7 @@ demo:
 	PYTHONPATH=${PWD}:${PWD}/tests:${PWD}/src  django-admin.py runserver --settings=demo.settings
 
 lint:
-	@flake8 src/ tests/
-	@isort -c src/
+	pre-commit run --all
 
 
 clean:

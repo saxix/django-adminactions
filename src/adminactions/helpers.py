@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Any
+
 from django import forms
 from django.contrib import messages
 from django.core import serializers
@@ -5,6 +7,11 @@ from django.core.exceptions import ValidationError
 from django.template.response import TemplateResponse
 
 from .perms import get_permission_codename
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import ModelAdmin
+    from django.http.request import HttpRequest
+    from django.http.response import HttpResponse
 
 
 class ImportFixtureForm(forms.Form):
@@ -14,12 +21,12 @@ class ImportFixtureForm(forms.Form):
     use_natural_foreign_keys = forms.BooleanField(required=False)
     use_natural_primary_keys = forms.BooleanField(required=False)
 
-    def clean(self):
+    def clean(self) -> None:
         if not (self.cleaned_data["fixture_file"] or self.cleaned_data["fixture_content"]):
             raise ValidationError("You must provide file or content")
 
 
-def import_fixture(modeladmin, request):
+def import_fixture(modeladmin: "ModelAdmin", request: "HttpRequest") -> "HttpResponse":
     context = modeladmin.get_common_context(request)
     if request.method == "POST":
         form = ImportFixtureForm(data=request.POST)
@@ -45,8 +52,8 @@ def import_fixture(modeladmin, request):
                     obj.save()
                     imported += 1
 
-                modeladmin.message_user(request, imported, messages.SUCCESS)
-            except Exception as e:
+                modeladmin.message_user(request, f"{imported} objects imported", messages.SUCCESS)
+            except Exception as e:  # noqa: BLE001
                 modeladmin.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     else:
@@ -57,18 +64,19 @@ def import_fixture(modeladmin, request):
 
 
 class AdminActionPermMixin:
-    def _filter_actions_by_permissions(self, request, actions):
+    def _filter_actions_by_permissions(
+        self,
+        request: "HttpRequest",
+        actions: list[tuple[callable, Any]],
+    ) -> list[tuple[callable, Any]]:
         opts = self.model._meta
         filtered_actions = []
         actions = super()._filter_actions_by_permissions(request, actions)
-        from .actions import actions as aa
+        from .actions import actions as aa  # noqa: PLC0415
 
         for action in actions:
             if action[0] in aa:
-                perm = "{0}.{1}".format(
-                    opts.app_label,
-                    get_permission_codename(action[0].base_permission, opts),
-                )
+                perm = f"{opts.app_label}.{get_permission_codename(action[0].base_permission, opts)}"
                 if not request.user.has_perm(perm):
                     continue
             filtered_actions.append(action)

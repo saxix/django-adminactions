@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import uuid
 
-from admin_extra_urls.api import button
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.api import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.auth.models import User
 from django.db import models
@@ -42,6 +44,8 @@ class DemoModel(models.Model):
     image = models.ImageField(blank=True, null=True)
     subclassed_image = SubclassedImageField(blank=True, null=True)
 
+    m2m = models.ManyToManyField("self", blank=True)
+
     class Meta:
         app_label = "demo"
         ordering = ("-id",)
@@ -69,7 +73,7 @@ class DemoRelated(models.Model):
         app_label = "demo"
 
 
-class UserDetailModelAdmin(ExtraUrlMixin, ModelAdmin):
+class UserDetailModelAdmin(ExtraButtonsMixin, ModelAdmin):
     list_display = [f.name for f in UserDetail._meta.fields]
 
 
@@ -79,7 +83,7 @@ def export_one(_modeladmin, _request, queryset):
     return export_as_csv(queryset, fields=["get_custom_field"], modeladmin=_modeladmin)
 
 
-class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
+class DemoModelAdmin(ExtraButtonsMixin, ModelAdmin):
     # list_display = ('char', 'integer', 'logic', 'null_logic',)
     list_display = [f.name for f in DemoModel._meta.fields]
     actions = (export_one,)
@@ -90,15 +94,15 @@ class DemoModelAdmin(ExtraUrlMixin, ModelAdmin):
 
         return _import_fixture(self, request)
 
-    def get_custom_field(self, instance):
+    def get_custom_field(self, instance) -> str:
         return f"model-attribute-{instance.pk}"
 
 
-class DemoOneToOneAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):
+class DemoOneToOneAdmin(ExtraButtonsMixin, AdminActionPermMixin, ModelAdmin):
     pass
 
 
-class DemoRelatedAdmin(ExtraUrlMixin, AdminActionPermMixin, ModelAdmin):
+class DemoRelatedAdmin(ExtraButtonsMixin, AdminActionPermMixin, ModelAdmin):
     pass
 
 

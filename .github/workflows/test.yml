@@ -1,11 +1,13 @@
 name: Test
 
 on:
+    workflow_dispatch:
     push:
-        branches:
-            - master
-            - develop
+        branches: [ "develop" ]
+        tags-ignore: [ "**" ]
     pull_request:
+    schedule:
+        -   cron: "0 8 * * *"
 
 jobs:
     lint:
@@ -30,31 +32,36 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: [ "3.9", "3.10", "3.11" ]
-                django-version: [ "3.2", "4.2" ]
+                django: [ "5.1", "4.2", "3.2" ]
+                python: [ "3.13", "3.12", "3.11", "3.10" ]
         env:
-            PY_VER: ${{ matrix.python-version}}
-            DJ_VER: ${{ matrix.django-version}}
             CELERY_BROKER_URL: redis://redis:6379/0
             CELERY_ALWAYS_EAGER: true
         steps:
-            -   uses: actions/checkout@v2
-
-            -   name: Set up Python ${{ matrix.python-version }}
-                uses: actions/setup-python@v2
+            -   uses: actions/checkout@v4
                 with:
-                    python-version: ${{ matrix.python-version }}
+                    fetch-depth: 0
 
-            -   name: Install dependencies
-                run: python -m pip install --upgrade pip .[test] "django==${DJ_VER}.*"
-
-            -   name: Test with
-                run: py.test tests/ -v
-
-            -   uses: codecov/codecov-action@v1
+            -   name: Install the latest version of uv
+                uses: astral-sh/setup-uv@v5
                 with:
-#                    files: ./coverage1.xml,./coverage2.xml # optional
-#                    flags: unittests # optional
-#                    name: codecov-umbrella # optional
-#                    fail_ci_if_error: true # optional (default = false)
-                    verbose: true # optional (default = false)
+                    enable-cache: true
+                    cache-dependency-glob: "pyproject.toml"
+                    github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Install tox
+                run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv --with tox-gh-actions
+
+            -   name: Install Python
+                if: matrix.python != '3.13'
+                run: uv python install --python-preference only-managed ${{ matrix.python }}
+
+            -   name: Setup test suite
+                run: tox run -vv --notest --skip-missing-interpreters false
+
+            -   name: Run test suite ${{ matrix.django }}-${{ matrix.python }}
+                run: tox run --skip-pkg-install
+                env:
+                    PYTEST_ADDOPTS: "-vv --durations=20"
+                    DIFF_AGAINST: HEAD
+                    DJANGO: ${{ matrix.django }}

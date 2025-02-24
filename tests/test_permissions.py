@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 import pytest
@@ -20,8 +22,8 @@ logger = logging.getLogger(__name__)
         "mass_update",
     ],
 )
-@pytest.mark.django_db()
-def test_permission_needed(app, admin, demomodels, action):
+@pytest.mark.django_db
+def test_permission_needed(app, admin, demomodels, action) -> None:
     permission_mapping = {
         "export_as_csv": "adminactions_export",
         "export_as_fixture": "adminactions_export",
@@ -31,7 +33,7 @@ def test_permission_needed(app, admin, demomodels, action):
         "merge": "adminactions_merge",
         "graph_queryset": "adminactions_chart",
     }
-    perm = "demo.{}_demomodel".format(permission_mapping[action])
+    perm = f"demo.{permission_mapping[action]}_demomodel"
     url = reverse("admin:demo_demomodel_changelist")
     pks = [demomodels[0].pk, demomodels[1].pk]
     with user_grant_permission(admin, ["demo.change_demomodel"]):
@@ -44,9 +46,7 @@ def test_permission_needed(app, admin, demomodels, action):
         )
         assert res.status_code == 302
         res = res.follow()
-        assert "Sorry you do not have rights to execute this action" in [
-            str(m) for m in res.context["messages"]
-        ]
+        assert "Sorry you do not have rights to execute this action" in [str(m) for m in res.context["messages"]]
 
         with user_grant_permission(admin, [perm]):
             res = app.post(
@@ -59,9 +59,9 @@ def test_permission_needed(app, admin, demomodels, action):
             assert res.status_code == 200
 
 
-@pytest.mark.django_db()
-def test_permissions(admin):
+@pytest.mark.django_db
+def test_permissions(admin) -> None:
     assert Permission.objects.filter(codename__startswith="adminactions").count() == 70
 
     with user_grant_permission(admin, ["demo.adminactions_export_demomodel"]):
-        assert admin.get_all_permissions() == set(["demo.adminactions_export_demomodel"])
+        assert admin.get_all_permissions() == {"demo.adminactions_export_demomodel"}

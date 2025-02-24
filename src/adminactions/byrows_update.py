@@ -1,7 +1,15 @@
+from typing import Any
+
+from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
+from django.contrib.admin.options import ModelAdmin
+from django.db.models import QuerySet
+from django.db.models import fields as django_fields
 from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
@@ -11,7 +19,7 @@ from .perms import get_permission_codename
 from .utils import get_ignored_fields
 
 
-def byrows_update(modeladmin, request, queryset):  # noqa
+def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
     """
     by rows update queryset
 
@@ -21,21 +29,16 @@ def byrows_update(modeladmin, request, queryset):  # noqa
     """
 
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label.lower(),
-        get_permission_codename(byrows_update.base_permission, opts),
-    )
+    perm = f"{opts.app_label.lower()}.{get_permission_codename(byrows_update.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
 
-    class modelform(modeladmin.form):
-        def __init__(self, *args, **kwargs):
+    class ByRowModelForm(modeladmin.form):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             super().__init__(*args, **kwargs)
             if self.instance:
-                readonly_fields = (modeladmin.model._meta.pk.name,) + tuple(
-                    modeladmin.get_readonly_fields(request)
-                )
+                readonly_fields = (modeladmin.model._meta.pk.name, *tuple(modeladmin.get_readonly_fields(request)))
                 for fname in readonly_fields:
                     if fname in self.fields:
                         self.fields[fname].widget.attrs["readonly"] = "readonly"
@@ -43,7 +46,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     fields = byrows_update_get_fields(modeladmin)
 
-    def formfield_callback(field, **kwargs):
+    def formfield_callback(field: django_fields.Field, **kwargs: Any) -> forms.Field:
         return modeladmin.formfield_for_dbfield(field, request=request, **kwargs)
 
     ActionForm = modelform_factory(
@@ -55,7 +58,7 @@ def byrows_update(modeladmin, request, queryset):  # noqa
 
     MFormSet = modelformset_factory(
         modeladmin.model,
-        form=modelform,
+        form=ByRowModelForm,
         fields=fields,
         extra=0,
         formfield_callback=formfield_callback,
@@ -77,20 +80,14 @@ def byrows_update(modeladmin, request, queryset):  # noqa
         actionform = ActionForm(initial=action_form_initial, instance=None)
         formset = MFormSet(queryset=queryset)
 
-    adminform = helpers.AdminForm(
-        actionform, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin
-    )
+    adminform = helpers.AdminForm(actionform, modeladmin.get_fieldsets(request), {}, [], model_admin=modeladmin)
 
     tpl = "adminactions/byrows_update.html"
     ctx = {
         "adminform": adminform,
         "actionform": actionform,
         "action_short_description": byrows_update.short_description,
-        "title": "%s (%s)"
-        % (
-            byrows_update.short_description.capitalize(),
-            smart_str(modeladmin.opts.verbose_name_plural),
-        ),
+        "title": f"{byrows_update.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
         "formset": formset,
         "opts": modeladmin.model._meta,
         "app_label": modeladmin.model._meta.app_label,
@@ -103,7 +100,7 @@ byrows_update.short_description = _("By rows update")
 byrows_update.base_permission = "adminactions_byrowsupdate"
 
 
-def byrows_update_get_fields(modeladmin):
+def byrows_update_get_fields(modeladmin: ModelAdmin) -> list[str]:
     """
     Get fields names to be shown of the model rows formset considering the
     admin option:

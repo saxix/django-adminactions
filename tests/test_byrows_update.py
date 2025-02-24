@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from demo.models import DemoModel
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
@@ -23,7 +25,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
     _selected_rows = [0, 1]
     csrf_checks = False
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         self._url = reverse("admin:demo_demomodel_changelist")
         self.user = G(User, username="user", is_staff=True, is_active=True)
@@ -32,16 +34,14 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
 
     def _get_changelist_form_response(self):
         res = self.app.get("/", user="user")
-        res = res.click("Demo models")
-        return res
+        return res.click("Demo models")
 
     def _get_action_form_response(self, change_list_response=None):
         form = change_list_response.forms["changelist-form"]
         form["action"] = "byrows_update"
-        res = form.submit()
-        return res
+        return form.submit()
 
-    def test_no_permission(self):
+    def test_no_permission(self) -> None:
         with user_grant_permission(self.user, ["demo.change_demomodel"]):
             res = self._get_changelist_form_response()
 
@@ -51,7 +51,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
             res = form.submit().follow()
             assert "Sorry you do not have rights to execute this action" in str(res.body)
 
-    def test_form_rows_count(self):
+    def test_form_rows_count(self) -> None:
         """
         Count the selected items appear in the action form
         """
@@ -65,12 +65,9 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
             form = res.forms["changelist-form"]
             self._select_rows(form, selected_rows=self._selected_rows)
             res = self._get_action_form_response(change_list_response=res)
-            self.assertEqual(
-                len(res.html.find(id="formset").find_all(class_="row")),
-                len(self._selected_rows),
-            )
+            assert len(res.html.find(id="formset").find_all(class_="row")) == len(self._selected_rows)
 
-    def test_form_rows_fields_exists(self):
+    def test_form_rows_fields_exists(self) -> None:
         """
         Check model fields appear in action form for each selected models
         """
@@ -84,7 +81,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
             self._select_rows(form, selected_rows=self._selected_rows)
             res = self._get_action_form_response(change_list_response=res)
             byrows_update_get_fields(ModelAdmin(DemoModel, self.site))
-            for r, value in enumerate(self._selected_values):
+            for r, _value in enumerate(self._selected_values):
                 for fname in byrows_update_get_fields(ModelAdmin(DemoModel, self.site)):
                     fname = "form-%d-%s" % (r, fname)
 
@@ -96,7 +93,7 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
                         # field name upon errors
                         assert res.forms["update-form"][fname]
 
-    def test_form_rows_edit(self):
+    def test_form_rows_edit(self) -> None:
         """
         Modify a value in action form and see if its stored upon form submit
         """
@@ -117,4 +114,4 @@ class TestByRowsUpdateAction(WebTestMixin, SelectRowsMixin, TestCase):
             res.forms["update-form"].submit("apply")
             obj = DemoModel.objects.get(id=self._selected_values[row_to_modify])
             for k, v in new_values.items():
-                self.assertEqual(v, getattr(obj, k))
+                assert v == getattr(obj, k)

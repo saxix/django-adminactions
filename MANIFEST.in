@@ -1,29 +1,25 @@
-include README.rst
+graft docs
+include LICENSE
+include src/*.py
+
+include README.md
 include MANIFEST.in
 include AUTHORS.rst
 include CHANGES
 include LICENSE
-include setup.py
-include setup.cfg
-include tox.ini
 include *.py
-include Makefile
 
-exclude .bumpversion.cfg
 exclude .editorconfig
 exclude manage.py
 exclude .*
+exclude .act
+exclude *
 
-recursive-include docs *
-recursive-include src *.css
-recursive-include src *.js
-recursive-include src *.pip
-recursive-include src *.po
-recursive-include src *.txt
-recursive-include src/adminactions *.py
-recursive-include src/adminactions *.html
-recursive-include tests *
+recursive-include src/adminactions *.*
+recursive-exclude .act *
 
 global-exclude *.pyc
 global-exclude __pycache__
+global-exclude ~*
 global-exclude *~
+global-exclude .*

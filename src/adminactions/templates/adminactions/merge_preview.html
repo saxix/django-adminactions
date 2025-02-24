@@ -1,41 +1,40 @@
-{% extends "admin/change_form.html" %}
-{% load i18n actions static merge %}
-{% block breadcrumbs %}{% if not is_popup %}
-    <div class="breadcrumbs">
-        <a href="../../">{% trans "Home" %}</a> &rsaquo;
-        <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
-        <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
-        <a href="javascript:history.back();">{% trans "Merge records" %}</a> &rsaquo;
-        {% trans "Preview" %}
-    </div>
-{% endif %}{% endblock %}
-{% block content %}
-    <form method="post" id="merge-form">{% csrf_token %}
-        {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
-        {% for f in adminform.form.action_fields %}{{ f }}{% endfor %}
-    <table class="mergetable">
-        <tr class="row1">
-            <th>{% trans "Key" %}</th>
-            <td colspan="2">{{ master.pk }}</td>
-        </tr>
-        <tr class="row1">
-            <th></th>
-            <th>{% trans "Original" %}</th>
-            <th>{% trans "After Merging" %}</th>
-        </tr>
-        {% for field in fields %}
-        <tr class="{% cycle 'row2' 'row1' %} preview-row">
-            <th class="column label">{{ master|verbose_name:field.name }}</th>
-            <td class="column original">
-                <span class="display">{{ original|field_display:field.name }}</span>
-            </td>
-            <td class="column result">
-                {{ adminform.form|widget:field.name }}
-                <span class="display">{{ master|field_display:field.name }}</span>
+{% extends "admin/change_form.html" %} {% load actions i18n merge static %} {% block breadcrumbs %}{% if not is_popup %}
+<div class="breadcrumbs">
+  <a href="../../">{% translate "Home" %}</a> &rsaquo;
+  <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+  <a href=".">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+  <a href="javascript:history.back();">{% translate "Merge records" %}</a>
+  &rsaquo; {% translate "Preview" %}
+</div>
+{% endif %}{% endblock breadcrumbs %}
 
-            </td>
-        {% endfor %}
-    </table>
-    <input type="submit" value="{% trans 'Merge' %}" name="apply">
-    </form>
-{% endblock %}
+{% block content %}
+<form method="post" id="merge-form">
+  {% csrf_token %} {% for f in adminform.form.hidden_fields %}{{ f }}{% endfor %}
+  {% for f in adminform.form.action_fields %}{{ f }}{% endfor %}
+  <table class="mergetable">
+    <tr class="row1">
+      <th>{% translate "Key" %}</th>
+      <td colspan="2">{{ master.pk }}</td>
+    </tr>
+    <tr class="row1">
+      <th></th>
+      <th>{% translate "Original" %}</th>
+      <th>{% translate "After Merging" %}</th>
+    </tr>
+    {% for field in fields %}
+    <tr class="{% cycle 'row2' 'row1' %} preview-row">
+      <th class="column label">{{ master|verbose_name:field.name }}</th>
+      <td class="column original">
+        <span class="display">{{ original|field_display:field.name }}</span>
+      </td>
+      <td class="column result">
+        {{ adminform.form|widget:field.name }}
+        <span class="display">{{ master|field_display:field.name }}</span>
+      </td>
+      {% endfor %}
+    </tr>
+  </table>
+  <input type="submit" value="{% translate 'Merge' %}" name="apply" />
+</form>
+{% endblock content %}

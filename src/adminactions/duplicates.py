@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import helpers
@@ -6,10 +10,17 @@ from django.db.models import Count
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 
-from adminactions.exceptions import ActionInterrupted
+from adminactions.exceptions import ActionInterruptedError
 from adminactions.perms import get_permission_codename
 from adminactions.signals import adminaction_end, adminaction_requested, adminaction_start
 from adminactions.utils import get_common_context
+
+if TYPE_CHECKING:
+    from django.contrib.admin import ModelAdmin
+    from django.db.models import QuerySet
+    from django.db.models.fields import Field
+    from django.http.request import HttpRequest
+    from django.http.response import HttpResponse
 
 
 class DuplicatesForm(forms.Form):
@@ -24,7 +35,7 @@ class DuplicatesForm(forms.Form):
     min = forms.IntegerField(required=True, initial=2)
     max = forms.IntegerField(required=False)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.model = kwargs.pop("model")
         self.field_names = []
         super().__init__(*args, **kwargs)
@@ -35,14 +46,14 @@ class DuplicatesForm(forms.Form):
             self.field_names.append(field.name)
             self.fields[field.name] = forms.BooleanField(label=label, required=False)
 
-    def clean(self):
+    def clean(self) -> dict[str, Any]:
         checked = [fname for fname in self.field_names if self.cleaned_data[fname]]
         if not checked:
             raise ValidationError("Select at least one field")
         return self.cleaned_data
 
     @property
-    def media(self):
+    def media(self) -> forms.Media:
         return super().media + forms.Media(
             css={
                 "screen": ("adminactions/css/adminactions.css",),
@@ -50,7 +61,7 @@ class DuplicatesForm(forms.Form):
         )
 
 
-def find_duplicates(qs, fields, min_dupe=1, max_dupe=None):
+def find_duplicates(qs: QuerySet, fields: list[Field], min_dupe: int = 1, max_dupe: int | None = None) -> QuerySet:
     qs = qs.order_by()
     qs = qs.values(*fields)
     qs = qs.annotate(count_id=Count("id"))
@@ -60,15 +71,12 @@ def find_duplicates(qs, fields, min_dupe=1, max_dupe=None):
     return qs
 
 
-def find_duplicates_action(modeladmin, request, queryset):
+def find_duplicates_action(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
     opts = modeladmin.model._meta
-    perm = "{0}.{1}".format(
-        opts.app_label,
-        get_permission_codename(find_duplicates_action.base_permission, opts),
-    )
+    perm = f"{opts.app_label}.{get_permission_codename(find_duplicates_action.base_permission, opts)}"
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
-        return
+        return None
     ctx = get_common_context(
         modeladmin,
         action_short_description=find_duplicates_action.short_description,
@@ -88,9 +96,9 @@ def find_duplicates_action(modeladmin, request, queryset):
             queryset=queryset,
             modeladmin=modeladmin,
         )
-    except ActionInterrupted as e:
+    except ActionInterruptedError as e:
         messages.error(request, str(e))
-        return
+        return None
     if "apply" in request.POST:
         form = DuplicatesForm(request.POST, request.FILES, model=modeladmin.model)
         if form.is_valid():
@@ -102,9 +110,9 @@ def find_duplicates_action(modeladmin, request, queryset):
                     queryset=queryset,
                     modeladmin=modeladmin,
                 )
-            except ActionInterrupted as e:
+            except ActionInterruptedError as e:
                 messages.error(request, str(e))
-                return
+                return None
 
             min_dupe = form.cleaned_data["min"]
             max_dupe = form.cleaned_data.get("max", None)
@@ -126,8 +134,6 @@ def find_duplicates_action(modeladmin, request, queryset):
                 request=request,
                 queryset=queryset,
             )
-        else:
-            pass
     else:
         form = DuplicatesForm(model=modeladmin.model, initial=initial)
     ctx["form"] = form

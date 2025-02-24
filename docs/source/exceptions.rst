@@ -10,4 +10,3 @@ Exceptions
 ---------------------
 
 Exception raised to interrupt an action.
-

@@ -1,24 +1,32 @@
+from __future__ import annotations
+
 import os
 import types
 
 import pytest
 from django_dynamic_fixture import G
 from selenium import webdriver
-
-# from demo.common import *  # noqa
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 
 browsers = {
-    "firefox": webdriver.Firefox,
-    # 'chrome': webdriver.Chrome,
+    # "firefox": webdriver.Firefox,
+    "chrome": webdriver.Chrome,
 }
 
 
 @pytest.fixture(scope="session", params=list(browsers.keys()))
-def driver(request):
+def driver(request) -> "WebDriver":
     if "DISPLAY" not in os.environ:
         pytest.skip("Test requires display server (export DISPLAY)")
+    if request.param == "firefox":
+        options = webdriver.FirefoxOptions()
+        options.add_argument("-headless")
+    else:
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless=new")  # for Chrome >= 109
 
-    b = browsers[request.param]()
+    b = browsers[request.param](options=options)
 
     request.addfinalizer(lambda *args: b.quit())
 
@@ -33,9 +41,9 @@ def browser(live_server, driver):
         self._last_url = url
         return self.get(self.live_server.url + url)
 
-    def dump(self, filename=None):
+    def dump(self, filename=None) -> None:
         dest = filename or self._last_url.replace("/", "_").replace("#", "~")
-        self.get_screenshot_as_file("./{}.jpg".format(dest))
+        self.get_screenshot_as_file(f"./{dest}.jpg")
 
     b = driver
     b.live_server = live_server
@@ -51,20 +59,19 @@ def browser(live_server, driver):
 def login(browser):
     from utils import ADMIN, PWD
 
-    browser.go("/admin/")
+    browser.go("/")
 
-    username = browser.find_element_by_id("id_username")
-    password = browser.find_element_by_id("id_password")
+    username = browser.find_element(By.ID, "id_username")
+    password = browser.find_element(By.ID, "id_password")
 
     username.send_keys(ADMIN)
     password.send_keys(PWD)
-
-    browser.find_element_by_css_selector('input[type="submit"]').click()
+    browser.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
 
     return browser
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def admin_site(browser, administrator):
     from demo.models import DemoModel, UserDetail
 
