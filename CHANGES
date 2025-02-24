@@ -1,6 +1,7 @@
 Release 2.4
 ===========
 * fixes #227
+* fixes #231
 * add ability to asynchronously mass_update M2M
 * add typing
 * pep621

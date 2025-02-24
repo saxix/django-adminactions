@@ -132,7 +132,10 @@ def get_field_value(
         raise TypeError("Invalid value for parameter `field`: Should be a field name or a Field instance")
 
     if modeladmin and hasattr(modeladmin, fieldname):
-        value = getattr(modeladmin, fieldname)(obj)
+        if callable(getattr(modeladmin, fieldname)):
+            value = getattr(modeladmin, fieldname)(obj)
+        else:
+            value = getattr(obj, fieldname)
     elif usedisplay and hasattr(obj, f"get_{fieldname}_display"):
         value = getattr(obj, f"get_{fieldname}_display")()
     else:
