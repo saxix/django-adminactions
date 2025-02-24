@@ -65,3 +65,11 @@ jobs:
                     PYTEST_ADDOPTS: "-vv --durations=20"
                     DIFF_AGAINST: HEAD
                     DJANGO: ${{ matrix.django }}
+
+            -   name: Upload coverage to Codecov
+                uses: codecov/codecov-action@v5
+                if: ${{ success() && matrix.python-version == 3.13 && matrix.django == 5.1 }}
+                with:
+                    env_vars: OS
+                    name: codecov-pytest-order
+                    token: ${{ secrets.CODECOV_TOKEN }}
