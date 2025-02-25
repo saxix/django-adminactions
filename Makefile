@@ -37,7 +37,7 @@ lint:
 
 
 clean:
-	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST
+	rm -fr ${BUILDDIR} dist *.egg-info .coverage coverage.xml pytest.xml .cache MANIFEST build
 	find . -name __pycache__ | xargs rm -rf
 	find . -name "*.py?" -o -name "*.orig" -prune | xargs rm -rf
 	find adminactions/locale -name django.mo | xargs rm -f

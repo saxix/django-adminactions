@@ -3,7 +3,7 @@
 Export selected queryset as csv file. (see [csv][])
 
 
-Available options: (see [csv][csv#dialects-and-formatting-parameters]).
+Available options: (see [csv][csv]).
 
 !!!note
     Are you looking for the [export_as_csv](api.md#export_as_csv)

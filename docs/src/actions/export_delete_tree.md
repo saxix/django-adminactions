@@ -16,8 +16,3 @@ see `export_as_fixture`_ for details
  **indent**           | Indentation value
  **serializer**       | Serializer to use. (see :ref:`Serialization formats <django:serialization-formats>`)
  **add_foreign_keys** | If checked export dependent objects too.
-
-
-**Screenshot**
-
-![img_export_delete_tree](_static/export_delete_tree.png)

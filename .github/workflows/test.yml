@@ -78,5 +78,6 @@ jobs:
                     directory: .tox/
                     env_vars: OS
                     name: codecov-pytest-order
+                    flags: unittests
                     token: ${{ secrets.CODECOV_TOKEN }}
                     verbose: true
