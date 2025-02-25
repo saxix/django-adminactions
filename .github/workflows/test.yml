@@ -45,9 +45,14 @@ jobs:
             -   name: Install the latest version of uv
                 uses: astral-sh/setup-uv@v5
                 with:
+                    version: "latest"
                     enable-cache: true
-                    cache-dependency-glob: "pyproject.toml"
+                    cache-dependency-glob: |
+                        pyproject.toml
+                        uv.lock
+                    cache-suffix: ${{ matrix.python }}-${{ matrix.django }}
                     github-token: ${{ secrets.GITHUB_TOKEN }}
+                    python-version: ${{ matrix.python }}
 
             -   name: Install tox
                 run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv --with tox-gh-actions
