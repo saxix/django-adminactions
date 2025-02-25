@@ -1,0 +1,5 @@
+# Changelog
+
+{%
+    include-markdown '../../CHANGES'
+%}

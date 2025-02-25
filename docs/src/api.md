@@ -1,25 +1,9 @@
-.. include:: globals.rst
-.. module:: adminactions
+# API
 
-:tocdepth: 2
-
-.. _api:
-
-===
-API
-===
-
-.. currentmodule:: adminactions
-
----------
-Functions
----------
-
-.. _api_export_as_csv:
+## Functions
 
 
-export_as_csv
--------------
+### export_as_csv
 
 .. seealso:: Are you looking for the :ref:`export_as_csv` action? .
 
