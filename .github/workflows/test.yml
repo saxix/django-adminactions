@@ -75,7 +75,6 @@ jobs:
                 uses: codecov/codecov-action@v5
                 if: ${{ success() && matrix.python == '3.13' && matrix.django == '5.1' }}
                 with:
-                    directory: .tox
                     env_vars: OS
                     flags: unittests
                     token: ${{ secrets.CODECOV_TOKEN }}
