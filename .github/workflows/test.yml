@@ -73,8 +73,9 @@ jobs:
 
             -   name: Upload coverage to Codecov
                 uses: codecov/test-results-action@v1
-#                if: ${{ success() && matrix.python == '3.13' && matrix.django == '5.1' }}
+                if: ${{ success() && matrix.python == '3.13' && matrix.django == '5.1' }}
                 with:
+                    directory: .tox
                     env_vars: OS
                     flags: unittests
                     report_type: test_results
