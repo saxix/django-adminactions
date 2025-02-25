@@ -72,10 +72,11 @@ jobs:
                     DJANGO: ${{ matrix.django }}
 
             -   name: Upload coverage to Codecov
-                uses: codecov/codecov-action@v5
-                if: ${{ success() && matrix.python == '3.13' && matrix.django == '5.1' }}
+                uses: codecov/test-results-action@v1
+#                if: ${{ success() && matrix.python == '3.13' && matrix.django == '5.1' }}
                 with:
                     env_vars: OS
                     flags: unittests
+                    report_type: test_results
                     token: ${{ secrets.CODECOV_TOKEN }}
                     verbose: true
