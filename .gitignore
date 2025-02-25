@@ -17,3 +17,4 @@ uv.lock
 !.github
 !.gitignore
 !.coveragerc
+!docs/**/.pages
