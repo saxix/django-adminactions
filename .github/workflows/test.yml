@@ -57,10 +57,10 @@ jobs:
                 run: uv python install --python-preference only-managed ${{ matrix.python }}
 
             -   name: Setup test suite
-                run: tox run -vv --notest --skip-missing-interpreters false
+                run: tox run -vv --notest --skip-missing-interpreters false --workdir .tox
 
             -   name: Run test suite ${{ matrix.django }}-${{ matrix.python }}
-                run: tox run --skip-pkg-install
+                run: tox run --skip-pkg-install --workdir .tox
                 env:
                     PYTEST_ADDOPTS: "-vv --durations=20"
                     DIFF_AGAINST: HEAD
@@ -70,6 +70,8 @@ jobs:
                 uses: codecov/codecov-action@v5
                 if: ${{ success() && matrix.python == '3.13' && matrix.django == '5.1' }}
                 with:
+                    directory: .tox/
                     env_vars: OS
                     name: codecov-pytest-order
                     token: ${{ secrets.CODECOV_TOKEN }}
+                    verbose: true
