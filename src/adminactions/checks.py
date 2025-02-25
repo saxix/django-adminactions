@@ -5,7 +5,7 @@ from django.core.checks import Error, register
 
 
 @register()
-def check_adminactions_settings(app_configs: AppConfig, **kwargs: Any) -> None:  # noqa: ARG001
+def check_adminactions_settings(app_configs: AppConfig, **kwargs: Any) -> list[Error]:  # noqa: ARG001
     errors = []
     from .config import AA_PERMISSION_HANDLER  # noqa: PLC0415
     from .consts import (  # noqa: PLC0415

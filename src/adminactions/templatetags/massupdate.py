@@ -1,8 +1,7 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from django.db.models.base import Model
 from django.forms import widgets
-from django.forms.fields import Field
 from django.template import Library
 from django.template.context import Context
 from django.utils.safestring import mark_safe
@@ -10,8 +9,11 @@ from django.utils.safestring import mark_safe
 from adminactions.utils import get_field_by_name
 
 if TYPE_CHECKING:
+    from django.contrib.contenttypes.fields import GenericForeignKey
     from django.db.models import Field as DBField
+    from django.db.models.fields.reverse_related import ForeignObjectRel
 
+    AnyField: TypeAlias = DBField[Any, Any] | ForeignObjectRel | GenericForeignKey
 
 register = Library()
 
@@ -72,10 +74,10 @@ def checkbox_enabler(context: Context, field: "DBField[Any, Any]") -> str:
 
 
 @register.simple_tag(takes_context=True)
-def field_function(context: Context, model: Model, form_field: Field) -> widgets.Select:
+def field_function(context: Context, model: type[Model], field: "AnyField") -> str:
     from adminactions.mass_update import OPERATIONS  # noqa: PLC0415
 
-    model_field, model, __, __ = get_field_by_name(model, form_field.name)
+    model_field, model, __, __ = get_field_by_name(model, field.name)
     attrs = {"class": "func_select"}
     options_attrs = {}
     choices = []
@@ -83,9 +85,9 @@ def field_function(context: Context, model: Model, form_field: Field) -> widgets
     form = context["adminform"].form
     value = ""
     if form.is_bound:
-        value = form.cleaned_data.get(f"func_id_{form_field.name}", "")
+        value = form.cleaned_data.get(f"func_id_{field.name}", "")
 
     for label, (__, param, __, __) in list(OPERATIONS.get_for_field(model_field).items()):
         options_attrs[label] = {"class": classes[param], "label": label}
         choices.append((label, label))
-    return widgets.Select(attrs, choices).render(f"func_id_{form_field.name}", value)
+    return widgets.Select(attrs, choices).render(f"func_id_{field.name}", value)

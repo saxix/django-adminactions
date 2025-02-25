@@ -4,7 +4,7 @@ import codecs
 import csv
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
 
 from django import forms
 from django.contrib import messages
@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.utils import FileProxyMixin
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.base import Model
 from django.db.transaction import atomic
 from django.forms import Media
 from django.http import HttpResponseRedirect
@@ -31,9 +32,23 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from django.contrib.admin.options import ModelAdmin
+    from django.contrib.contenttypes.fields import GenericForeignKey
     from django.db.models import QuerySet
+    from django.db.models.base import Model
     from django.db.models.fields import Field
+    from django.db.models.fields.reverse_related import ForeignObjectRel
     from django.http.request import HttpRequest
+    from django.http.response import HttpResponse
+
+    AnyField: TypeAlias = Field[Any, Any] | ForeignObjectRel | GenericForeignKey
+
+    class TBulkUpdateResult(TypedDict):
+        updated: list[Any]
+        errors: list[Any]
+        missing: list[Any]
+        duplicates: list[Any]
+        changes: dict[str, dict[str, Any]]
+
 
 logger = logging.getLogger(__name__)
 
@@ -109,10 +124,10 @@ class BulkUpdateMappingForm(forms.Form):
         return {k: v for k, v in mapping.items() if v.strip()}
 
 
-def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect | None:  # noqa: C901, PLR0915, PLR0914
+def bulk_update(modeladmin: ModelAdmin[Model], request: HttpRequest, queryset: QuerySet[Model]) -> HttpResponse | None:  # noqa: C901, PLR0911, PLR0915, PLR0914
     try:
         opts = modeladmin.model._meta
-        perm = f"{opts.app_label}.{get_permission_codename(bulk_update.base_permission, opts)}"
+        perm = f"{opts.app_label}.{get_permission_codename(bulk_update.base_permission, opts)}"  # type: ignore[attr-defined]
         bulk_update_form = getattr(modeladmin, "bulk_update_form", BulkUpdateForm)
         bulk_update_fields = getattr(modeladmin, "bulk_update_fields", None)
         bulk_update_exclude = getattr(modeladmin, "bulk_update_exclude", None)
@@ -149,11 +164,10 @@ def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
             "escapechar": "",
             "quotechar": '"',
         }
-        map_initial = {}
         if "apply" in request.POST:
             form = bulk_update_form(request.POST, request.FILES, initial=form_initial)
             csv_form = CSVConfigForm(request.POST, initial=csv_initial, prefix="csv")
-            map_form = BulkUpdateMappingForm(request.POST, initial=map_initial, model=modeladmin.model, prefix="fld")
+            map_form = BulkUpdateMappingForm(request.POST, initial={}, model=modeladmin.model, prefix="fld")
 
             if form.is_valid() and csv_form.is_valid() and map_form.is_valid():
                 header = csv_form.cleaned_data.pop("header")
@@ -228,6 +242,7 @@ def bulk_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
         return render(request, tpl, context=ctx)
     except Exception as e:
         logger.exception(e)
+        return None
 
 
 bulk_update.short_description = _("Bulk update")
@@ -235,18 +250,18 @@ bulk_update.base_permission = "adminactions_bulkupdate"
 
 
 def _bulk_update(  # noqa: C901, PLR0912, PLR0913, PLR0915
-    queryset: QuerySet,
-    file_name_or_object: str | Field,
+    queryset: QuerySet[Model],
+    file_name_or_object: "str | AnyField",
     *,
     mapping: dict,
     indexes: Sequence[str],
     clean: bool = False,
     header: bool = True,
-    csv_options: dict | None = None,
+    csv_options: dict[str, str | int] | None = None,
     request: HttpRequest | None = None,
     dry_run: bool = False,
-) -> dict[str, list[str]]:
-    results = {
+) -> TBulkUpdateResult:
+    results: TBulkUpdateResult = {
         "updated": [],
         "errors": [],
         "missing": [],

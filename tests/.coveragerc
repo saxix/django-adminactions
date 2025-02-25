@@ -1,0 +1,15 @@
+[run]
+branch = True
+source = adminactions
+
+omit =
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    pragma: no cover
+
+ignore_errors = False
+
+[html]
+directory = ~build/coverage

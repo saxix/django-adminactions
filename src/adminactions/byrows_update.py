@@ -6,6 +6,7 @@ from django.contrib.admin import helpers
 from django.contrib.admin.options import ModelAdmin
 from django.db.models import QuerySet
 from django.db.models import fields as django_fields
+from django.db.models.base import Model
 from django.forms.models import modelform_factory, modelformset_factory
 from django.http import HttpResponseRedirect
 from django.http.request import HttpRequest
@@ -19,7 +20,9 @@ from .perms import get_permission_codename
 from .utils import get_ignored_fields
 
 
-def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
+def byrows_update(
+    modeladmin: ModelAdmin[Model], request: HttpRequest, queryset: QuerySet[Model]
+) -> HttpResponse | None:
     """
     by rows update queryset
 
@@ -46,7 +49,7 @@ def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QueryS
 
     fields = byrows_update_get_fields(modeladmin)
 
-    def formfield_callback(field: django_fields.Field, **kwargs: Any) -> forms.Field:
+    def formfield_callback(field: django_fields.Field, **kwargs: Any) -> forms.Field | None:
         return modeladmin.formfield_for_dbfield(field, request=request, **kwargs)
 
     ActionForm = modelform_factory(
@@ -96,11 +99,11 @@ def byrows_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QueryS
     return render(request, tpl, ctx)
 
 
-byrows_update.short_description = _("By rows update")
-byrows_update.base_permission = "adminactions_byrowsupdate"
+byrows_update.short_description = _("By rows update")  # type: ignore[attr-defined]
+byrows_update.base_permission = "adminactions_byrowsupdate"  # type: ignore[attr-defined]
 
 
-def byrows_update_get_fields(modeladmin: ModelAdmin) -> list[str]:
+def byrows_update_get_fields(modeladmin: ModelAdmin[Model]) -> list[str]:
     """
     Get fields names to be shown of the model rows formset considering the
     admin option:

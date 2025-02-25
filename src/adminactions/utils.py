@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import chain
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from django.conf import settings
 from django.db import models
@@ -18,8 +18,10 @@ if TYPE_CHECKING:
     from django.db.models.fields import Field as DBField
     from django.db.models.fields.reverse_related import ForeignObjectRel
 
+    AnyField: TypeAlias = DBField[Any, Any] | ForeignObjectRel | GenericForeignKey
 
-def get_ignored_fields(model: Model, setting_var_name: str) -> Iterable[str]:
+
+def get_ignored_fields(model: type[Model], setting_var_name: str) -> Iterable[str]:
     """
     returns list of ignored fields which must not be modified
     """
@@ -102,7 +104,7 @@ def getattr_or_item(obj: Any, name: str) -> Any:
 
 def get_field_value(
     obj: Model,
-    field: "DBField[Any, Any]",
+    field: "AnyField | str | type[AnyField]",
     usedisplay: bool = True,
     raw_callable: bool = False,
     modeladmin: ModelAdmin[Model] | None = None,
@@ -110,6 +112,8 @@ def get_field_value(
     """
     returns the field value or field representation if get_FIELD_display exists
 
+    :param modeladmin: ModelAdmin instance
+    :type raw_callable: bool
     :param obj: :class:`django.db.models.Model` instance
     :param field: :class:`django.db.models.Field` instance or ``basestring`` fieldname
     :param usedisplay: boolean if True return the get_FIELD_display() result
@@ -267,9 +271,7 @@ def flatten(iterable: Iterable[Any]) -> list[Any]:
     return list(result)
 
 
-def get_field_by_name(
-    model: Model, name: str
-) -> "tuple[DBField[Any, Any] | ForeignObjectRel | GenericForeignKey, type[Model] | Any, bool, bool | None]":
+def get_field_by_name(model: type[Model], name: str) -> "tuple[AnyField, type[Model] | Any, bool|None, bool | None]":
     field = model._meta.get_field(name)
     direct = not field.auto_created or field.concrete
     return field, field.model, direct, field.many_to_many
@@ -279,7 +281,7 @@ def model_has_field(model: Model, field_name: str) -> bool:
     return field_name in [f.name for f in model._meta.get_fields()]
 
 
-def get_all_related_objects(model: Model) -> "list[DBField[Any, Any] | ForeignObjectRel | GenericForeignKey]":
+def get_all_related_objects(model: Model) -> "list[ForeignObjectRel]":
     return [f for f in model._meta.get_fields() if (f.one_to_many or f.one_to_one) and f.auto_created]
 
 

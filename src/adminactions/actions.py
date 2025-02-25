@@ -11,8 +11,17 @@ from .mass_update import mass_update
 from .merge import merge
 
 if TYPE_CHECKING:
-    from django.contrib.admin import AdminSite
+    from collections.abc import Callable
+    from typing import Any
 
+    from django.contrib.admin import AdminSite
+    from django.contrib.admin.options import ModelAdmin
+    from django.db.models import QuerySet
+    from django.db.models.base import Model
+    from django.http.request import HttpRequest
+    from django.http.response import HttpResponse
+
+    TActionFunction = Callable[[ModelAdmin[Any], HttpRequest, QuerySet[Model]], HttpResponse]
 
 actions = [
     export_as_fixture,
@@ -28,16 +37,11 @@ actions = [
 ]
 
 
-def add_to_site(site: AdminSite, exclude: list[str] | None = None, include: list[str] | None = None) -> None:
+def add_to_site(
+    site: AdminSite, exclude: list[str] | None = None, include: list[TActionFunction] | None = None
+) -> None:
     """
     Register all the adminactions into passed site
-
-    :param site: AdminSite instance
-    :type site: django.contrib.admin.AdminSite
-
-    :param exclude: name of the actions to exclude
-    :type exclude: List
-    :return: None
 
     Examples:
 
@@ -45,11 +49,11 @@ def add_to_site(site: AdminSite, exclude: list[str] | None = None, include: list
     >>> add_to_site(site)
 
     >>> from django.contrib.admin import site
-    >>> add_to_site(site, exclude=["merge"])
+    >>> add_to_site(site, exclude=[merge])
 
     """
     exclude = exclude or []
     selection = include or actions
     for action in selection:
         if action.__name__ not in exclude:
-            site.add_action(action)
+            site.add_action(action)  # type: ignore[arg-type]

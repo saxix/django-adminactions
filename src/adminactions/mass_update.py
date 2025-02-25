@@ -5,7 +5,7 @@ import operator
 import re
 from collections import OrderedDict as SortedDict
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeAlias
 
 from django import forms
 from django.conf import settings
@@ -40,8 +40,20 @@ from .signals import adminaction_end, adminaction_requested, adminaction_start
 from .utils import curry, get_field_by_name
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from django.contrib.admin.options import ModelAdmin
+    from django.contrib.contenttypes.fields import GenericForeignKey
+    from django.db.models.base import Model
+    from django.db.models.fields.reverse_related import ForeignObjectRel
     from django.http.request import HttpRequest
+    from django.http.response import HttpResponse
+
+    AnyField: TypeAlias = df.Field[Any, Any] | ForeignObjectRel | GenericForeignKey
+    TTransformer = Callable[[Any], Any] | Callable[[Any, Any], Any]
+    TOperation = tuple[TTransformer | None, bool, bool | Callable[[Any], bool], str]
+    TOperations = list[tuple[str, TOperation]]
+    TOperationConfig: TypeAlias = dict[type[AnyField], TOperations]
 
 
 logger = logging.getLogger(__name__)
@@ -84,40 +96,40 @@ class OperationManager:
         ("set null", (lambda old_value: None, False, disable_if_not_nullable, "")),  # noqa: ARG005
     ]
 
-    def __init__(self, _dict: dict[type[df.Field], tuple[str, Any]]) -> None:
-        self._dict = defaultdict(SortedDict)
-        self.operations = {}
+    def __init__(self, _dict: TOperationConfig) -> None:
+        self._dict: dict[type[AnyField], dict[str, TOperation]] = defaultdict(dict)
+        self.operations: dict[str, TTransformer | None] = {}
         self.register_operations(df.Field, self.COMMON)
         for field_class, args in _dict.items():
             self.register_operations(field_class, args)
 
     def register_operations(
         self,
-        field_class: type[df.Field],
-        operations: list[tuple[str, tuple[Any, bool, callable, str]]],
+        field_class: type[AnyField],
+        operations: TOperations,
     ) -> None:
         for label, operation in operations:
             self._dict[field_class][label] = operation
             if operation:
                 self.operations[label] = operation[0]
 
-    def get_function(self, name: str) -> callable:
+    def get_function(self, name: str) -> TTransformer | None:
         return self.operations.get(name, None)
 
-    def get(self, field_class: type[df.Field]) -> dict[type[df.Field]]:
-        data = SortedDict()
+    def get(self, field_class: type[AnyField]) -> dict[str, TOperation]:
+        data: dict[str, TOperation] = SortedDict()
         # reversed to make the most specific overrule the more general ones
         for typ in reversed(field_class.__mro__):
             data |= self._dict.get(typ, ())
         return data
 
-    def operation_enabled(self, field: df.Field, operation: tuple[Any, Any, Any]) -> bool:  # noqa: PLR6301
+    def operation_enabled(self, field: "AnyField", operation: TOperation) -> bool:  # noqa: PLR6301
         if operation:
             enabler = operation[2]
             return enabler is True or (callable(enabler) and enabler(field))
         return False
 
-    def get_for_field(self, field: df.Field) -> dict[str, callable]:
+    def get_for_field(self, field: "AnyField") -> dict[str, TOperation]:
         """returns valid functions for passed field
         :param field Field django Model Field
         :return list of (label, (__, param, enabler, help))
@@ -128,7 +140,7 @@ class OperationManager:
             if self.operation_enabled(field, operation)
         ])
 
-    def __getitem__(self, field_class: type[df.Field]) -> dict[type[df.Field]]:
+    def __getitem__(self, field_class: type[AnyField]) -> dict[str, TOperation]:
         return self.get(field_class)
 
 
@@ -160,6 +172,10 @@ OPERATIONS = OperationManager({
     ],
     df.URLField: [("change protocol", (change_protocol, True, True, ""))],
 })
+
+
+class MassUpdateFormProtocol(Protocol):
+    def fix_json(self) -> None: ...
 
 
 class MassUpdateForm(GenericActionForm):
@@ -217,7 +233,7 @@ class MassUpdateForm(GenericActionForm):
             return not (n.startswith(("chk_id_", "func_id_")))
 
         def _is_enabled(n: str) -> bool:
-            return self.cleaned_data[f"chk_id_{n}"]
+            return bool(self.cleaned_data[f"chk_id_{n}"])
 
         if not self.is_bound:  # Stop further processing.
             return
@@ -247,6 +263,7 @@ class MassUpdateForm(GenericActionForm):
 
     def _clean_fields(self) -> None:
         self.update_using_queryset_allowed = True
+        self._errors = {}
         for name, field in list(self.fields.items()):
             raw_value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
             try:
@@ -309,15 +326,15 @@ class MassUpdateForm(GenericActionForm):
 
 
 def mass_update_execute(
-    queryset: QuerySet,
+    queryset: QuerySet[Model],
     rules: dict[str, tuple[callable, Any]],
     validate: bool,
     clean: bool,
     user_pk: Any,
     request: HttpRequest | None = None,
 ) -> tuple[int, list[str]]:
-    errors = {}
-    updated = 0
+    errors: dict[str, Any] = {}
+    updated: int = 0
     opts = queryset.model._meta
     adminaction_start.send(sender=queryset.model, action="mass_update", request=request, queryset=queryset)
     try:
@@ -372,7 +389,7 @@ def mass_update_execute(
     return updated, errors
 
 
-def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> tuple[int, list[str]]:  # noqa: C901, PLR0915, PLR0912, PLR0914
+def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> str | HttpResponse | None:  # noqa: C901, PLR0915, PLR0912, PLR0914
     """
     mass update queryset
     """
@@ -432,7 +449,7 @@ def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
             return None
 
     defaultFormClass = import_string(config.AA_MASSUPDATE_FORM)
-    mass_update_form = getattr(modeladmin, "mass_update_form", defaultFormClass)
+    mass_update_form: type[MassUpdateForm] = getattr(modeladmin, "mass_update_form", defaultFormClass)
     mass_update_fields = getattr(modeladmin, "mass_update_fields", None)
     mass_update_exclude = getattr(modeladmin, "mass_update_exclude", None)
     if mass_update_fields and mass_update_exclude:
@@ -459,7 +476,7 @@ def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
     rules = {}
     if "apply" in request.POST:
         try:
-            form = MForm(request.POST, request.FILES, initial=initial)
+            form: MassUpdateForm = MForm(request.POST, request.FILES, initial=initial)
             if form.is_valid():
                 validate = form.cleaned_data.get("_validate", False)
                 clean = form.cleaned_data.get("_clean", False)
@@ -526,8 +543,8 @@ def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
     ctx = {
         "adminform": adminForm,
         "form": form,
-        "action_short_description": mass_update.short_description,
-        "title": f"{mass_update.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",
+        "action_short_description": mass_update.short_description,  # type: ignore[attr-defined]
+        "title": f"{mass_update.short_description.capitalize()} ({smart_str(modeladmin.opts.verbose_name_plural)})",  # type: ignore[attr-defined]
         "grouped": sample_values,
         "change": True,
         "rules": rules,
@@ -546,5 +563,5 @@ def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
     return render(request, tpl, context=ctx)
 
 
-mass_update.short_description = _("Mass update")
-mass_update.base_permission = "adminactions_massupdate"
+mass_update.short_description = _("Mass update")  # type: ignore[attr-defined]
+mass_update.base_permission = "adminactions_massupdate"  # type: ignore[attr-defined]

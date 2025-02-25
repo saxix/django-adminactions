@@ -13,13 +13,14 @@ Transform function are function that accept one or two parameter.
 
 To customize the Form used by the massupdate action simply create your own Form class and set it as value
 of the ``mass_update_form`` attribute to your ``ModelAdmin``. ie::
+
 ```python
 from adminactions.mass_update import MassUpdateForm
 
 
 class MyMassUpdateForm(MassUpdateForm):
     class Meta:
-         fields = 'field1', 'field2',
+        fields = 'field1', 'field2',
 
 
 class MyModelAdmin(admin.ModelAdmin):

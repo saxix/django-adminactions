@@ -18,6 +18,7 @@ from adminactions.utils import get_common_context
 if TYPE_CHECKING:
     from django.contrib.admin import ModelAdmin
     from django.db.models import QuerySet
+    from django.db.models.base import Model
     from django.db.models.fields import Field
     from django.http.request import HttpRequest
     from django.http.response import HttpResponse
@@ -61,7 +62,9 @@ class DuplicatesForm(forms.Form):
         )
 
 
-def find_duplicates(qs: QuerySet, fields: list[Field], min_dupe: int = 1, max_dupe: int | None = None) -> QuerySet:
+def find_duplicates(
+    qs: QuerySet[Model], fields: list[Field], min_dupe: int = 1, max_dupe: int | None = None
+) -> QuerySet[Model]:
     qs = qs.order_by()
     qs = qs.values(*fields)
     qs = qs.annotate(count_id=Count("id"))
@@ -71,7 +74,9 @@ def find_duplicates(qs: QuerySet, fields: list[Field], min_dupe: int = 1, max_du
     return qs
 
 
-def find_duplicates_action(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
+def find_duplicates_action(
+    modeladmin: ModelAdmin[Model], request: HttpRequest, queryset: QuerySet[Model]
+) -> HttpResponse | None:
     opts = modeladmin.model._meta
     perm = f"{opts.app_label}.{get_permission_codename(find_duplicates_action.base_permission, opts)}"
     if not request.user.has_perm(perm):
@@ -140,5 +145,5 @@ def find_duplicates_action(modeladmin: ModelAdmin, request: HttpRequest, queryse
     return render(request, tpl, context=ctx)
 
 
-find_duplicates_action.short_description = _("Find Duplicates")
-find_duplicates_action.base_permission = "adminactions_find_duplicates"
+find_duplicates_action.short_description = _("Find Duplicates")  # type: ignore[attr-defined]
+find_duplicates_action.base_permission = "adminactions_find_duplicates"  # type: ignore[attr-defined]

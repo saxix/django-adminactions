@@ -4,11 +4,14 @@ from django import forms
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import ValidationError
+from django.db.models.base import Model
 from django.template.response import TemplateResponse
 
 from .perms import get_permission_codename
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from django.contrib.admin.options import ModelAdmin
     from django.http.request import HttpRequest
     from django.http.response import HttpResponse
@@ -64,14 +67,16 @@ def import_fixture(modeladmin: "ModelAdmin", request: "HttpRequest") -> "HttpRes
 
 
 class AdminActionPermMixin:
+    model: Model
+
     def _filter_actions_by_permissions(
         self,
         request: "HttpRequest",
-        actions: list[tuple[callable, Any]],
-    ) -> list[tuple[callable, Any]]:
+        actions: "list[tuple[Callable[[Any], Any], Any]]",
+    ) -> "list[tuple[Callable[[Any], Any], Any]]":
         opts = self.model._meta
         filtered_actions = []
-        actions = super()._filter_actions_by_permissions(request, actions)
+        actions = super()._filter_actions_by_permissions(request, actions)  # type: ignore[attr-defined, misc]
         from .actions import actions as aa  # noqa: PLC0415
 
         for action in actions:

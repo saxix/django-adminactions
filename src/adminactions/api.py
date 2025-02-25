@@ -4,9 +4,10 @@ import collections
 import csv
 import datetime
 import itertools
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
-import xlwt
+import xlwt  # type: ignore[import-untyped]
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db.models import FileField, Model
@@ -22,15 +23,15 @@ from adminactions import utils
 from .utils import clone_instance, get_field_by_path, get_field_value, get_ignored_fields
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable
+    from collections.abc import Generator
 
     from django.contrib.admin.options import ModelAdmin
     from django.core.files.base import File
     from django.db.models.query import QuerySet
 
-    from .forms import CSVOptions, XLSOptions
+    from .forms import CSVOptions
 
-csv_options_default = {
+csv_options_default: dict[str, str | int] = {
     "date_format": "d/m/Y",
     "datetime_format": "N j, Y, P",
     "time_format": "P",
@@ -47,13 +48,13 @@ escapechars = " \\"
 ALL_FIELDS = -999
 
 
-def merge(  # noqa: C901, PLR0912
+def merge(  # noqa: C901, PLR0912, PLR0915
     master: Model,
     other: Model,
     fields: Iterable[str] | None = None,
     commit: bool = False,
-    m2m: Iterable[str] | None = None,
-    related: Iterable[str] | None = None,
+    m2m: Iterable[str] | int | None = None,
+    related: Iterable[str] | int | None = None,
 ) -> Model:
     """
         Merge 'other' into master.
@@ -71,12 +72,17 @@ def merge(  # noqa: C901, PLR0912
     """
 
     fields = fields or []
+    related_names: Iterable[str]
 
-    all_m2m = {}
-    all_related = {}
+    all_m2m: dict[str, list[Any]] = {}
+    all_related: dict[str, list[Any]] = {}
 
     if related == ALL_FIELDS:
-        related = [rel.get_accessor_name() for rel in utils.get_all_related_objects(master)]
+        related_names = [rel.get_accessor_name() for rel in utils.get_all_related_objects(master)]
+    elif isinstance(related, Iterable):
+        related_names = related
+    else:
+        related_names = []
 
     if m2m == ALL_FIELDS:
         m2m = set()
@@ -104,8 +110,8 @@ def merge(  # noqa: C901, PLR0912
                 source_m2m = getattr(other, accessor)
                 for r in source_m2m.all():
                     all_m2m[accessor].append(r)
-        if related:
-            for name in set(related):
+        if related_names:
+            for name in set(related_names):
                 related_object = get_field_by_path(master, name)
                 all_related[name] = []
                 if related_object and isinstance(related_object.field, OneToOneField):
@@ -186,6 +192,7 @@ def export_as_csv(  # noqa: C901,
     else:
         config = csv_options_default.copy()
         config.update(options)
+
     if fields is None:
         fields = [f.name for f in queryset.model._meta.fields + queryset.model._meta.many_to_many]
     buffer_object = Echo() if streaming_enabled else response
@@ -263,14 +270,14 @@ xls_options_default = {
 }
 
 
-def export_as_xls2(  # noqa: C901, PLR0912, PLR0915
-    queryset: QuerySet,
+def export_as_xls2(  # noqa: C901, PLR0912, PLR0914, PLR0915
+    queryset: QuerySet[Model],
     fields: list[str] | None = None,
     header: bool = False,
     filename: str | None = None,
-    options: XLSOptions | None = None,
+    options: dict[str, int | str] | None = None,
     out: File | None = None,
-    modeladmin: ModelAdmin | None = None,
+    modeladmin: ModelAdmin[Model] | None = None,
 ) -> HttpResponse:
     # sheet_name=None,  header_alt=None,
     # formatting=None, out=None):
@@ -286,19 +293,19 @@ def export_as_xls2(  # noqa: C901, PLR0912, PLR0915
     :return: HttpResponse instance if out not supplied, otherwise out
     """
 
-    def _get_qs_formats(queryset: QuerySet) -> HttpResponse:
-        formats = {}
+    def _get_qs_formats(selected_fields: list[str], queryset: QuerySet[Model]) -> dict[int, str]:
+        formats: dict[int, str] = {}
         if hasattr(queryset, "model"):
-            for i, fieldname in enumerate(fields):
+            for i, _fieldname in enumerate(selected_fields):
                 try:
                     (
                         f,
                         __,
                         __,
                         __,
-                    ) = utils.get_field_by_name(queryset.model, fieldname)
-                    fmt = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, "general"))
-                    formats[i] = fmt
+                    ) = utils.get_field_by_name(queryset.model, _fieldname)
+                    fmt_ = xls_options_default.get(f.name, xls_options_default.get(f.__class__.__name__, "general"))
+                    formats[i] = fmt_
                 except FieldDoesNotExist:
                     pass
 
@@ -322,7 +329,7 @@ def export_as_xls2(  # noqa: C901, PLR0912, PLR0915
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=2)
     sheet_name = config.pop("sheet_name")
-    use_display = config.get("use_display", False)
+    use_display = bool(config.get("use_display", False))
 
     sheet = book.add_sheet(sheet_name)
     style = xlwt.XFStyle()
@@ -330,29 +337,30 @@ def export_as_xls2(  # noqa: C901, PLR0912, PLR0915
     heading_xf = xlwt.easyxf("font:height 200; font: bold on; align: wrap on, vert centre, horiz center")
     sheet.write(row, 0, "#", style)
     if header:
-        if not isinstance(header, (list | tuple)):
-            header = [
+        if isinstance(header, (list | tuple)):
+            header_line = header
+        else:
+            header_line = [
                 force_str(f.verbose_name)
                 for f in queryset.model._meta.fields + queryset.model._meta.many_to_many
                 if f.name in fields
             ]
 
-        for col, fieldname in enumerate(header, start=1):
+        for col, fieldname in enumerate(header_line, start=1):
             sheet.write(row, col, fieldname, heading_xf)
             sheet.col(col).width = 5000
 
     sheet.row(row).height = 500
-    formats = _get_qs_formats(queryset)
+    formats = _get_qs_formats(fields, queryset)
 
     styles_ = {}
-
-    for rownum, row in enumerate(queryset):
+    for rownum, instance in enumerate(queryset):
         sheet.write(rownum + 1, 0, rownum + 1)
         for col_idx, fieldname in enumerate(fields):
             fmt = formats.get(col_idx, "general")
             try:
                 value = get_field_value(
-                    row,
+                    instance,
                     fieldname,
                     usedisplay=use_display,
                     raw_callable=False,

@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
@@ -26,12 +27,14 @@ from .perms import get_permission_codename
 from .signals import adminaction_end, adminaction_requested, adminaction_start
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from django.contrib.admin import ModelAdmin
 
 logger = logging.getLogger(__name__)
 
 
-def get_action(request: HttpRequest) -> list[str]:
+def get_action(request: HttpRequest) -> str:
     try:
         action_index = int(request.POST.get("index", 0))
     except ValueError:
@@ -39,12 +42,12 @@ def get_action(request: HttpRequest) -> list[str]:
     return request.POST.getlist("action")[action_index]
 
 
-def base_export(  # noqa: C901, PLR0913, PLR0917
-    modeladmin: "ModelAdmin",
+def base_export(  # noqa: PLR0913, PLR0917
+    modeladmin: "ModelAdmin[Model]",
     request: "HttpRequest",
-    queryset: QuerySet,
+    queryset: QuerySet[Model],
     title: str,
-    impl: callable,
+    impl: Callable[[QuerySet[Model], Any], HttpResponse],
     name: str,
     action_short_description: str,
     template: str,
@@ -100,10 +103,7 @@ def base_export(  # noqa: C901, PLR0913, PLR0917
                 messages.error(request, str(e))
                 return None
 
-            if hasattr(modeladmin, f"get_{name}_filename"):
-                filename = modeladmin.get_export_as_csv_filename(request, queryset)
-            else:
-                filename = None
+            filename = ff(request, queryset) if (ff := getattr(modeladmin, f"get_{name}_filename", None)) else None
             try:
                 response = impl(
                     queryset,
@@ -242,7 +242,7 @@ class ForeignKeysCollector:
         return mark_safe(self.data)
 
 
-def _dump_qs(form: Form, queryset: QuerySet, data: dict[str, Any], filename: str) -> None:
+def _dump_qs(form: Form, queryset: QuerySet, data: "Iterable[Model]", filename: str) -> HttpResponse:
     fmt = form.cleaned_data.get("serializer")
 
     json = ser.get_serializer(fmt)()
@@ -264,7 +264,9 @@ def _dump_qs(form: Form, queryset: QuerySet, data: dict[str, Any], filename: str
     return response
 
 
-def export_as_fixture(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse":
+def export_as_fixture(
+    modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet[Model]
+) -> "HttpResponse | None":
     initial = {
         "_selected_action": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
         "select_across": request.POST.get("select_across") == "1",
@@ -355,17 +357,19 @@ def export_as_fixture(modeladmin: "ModelAdmin", request: HttpRequest, queryset: 
     return render(request, tpl, ctx)
 
 
-export_as_fixture.short_description = _("Export as fixture")
-export_as_fixture.base_permission = "adminactions_export"
+export_as_fixture.short_description = _("Export as fixture")  # type: ignore[attr-defined]
+export_as_fixture.base_permission = "adminactions_export"  # type: ignore[attr-defined]
 
 
-def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset: QuerySet) -> "HttpResponse | None":
+def export_delete_tree(
+    modeladmin: "ModelAdmin[Model]", request: HttpRequest, queryset: QuerySet[Model]
+) -> "HttpResponse | None":
     """
     Export as fixture selected queryset and all the records that belong to.
     That mean that dump what will be deleted if the queryset was deleted
     """
     opts = modeladmin.model._meta
-    perm = f"{opts.app_label}.{get_permission_codename(export_delete_tree.base_permission, opts)}"
+    perm = f"{opts.app_label}.{get_permission_codename(export_delete_tree.base_permission, opts)}"  # type: ignore[attr-defined]
     if not request.user.has_perm(perm):
         messages.error(request, _("Sorry you do not have rights to execute this action"))
         return None
@@ -415,7 +419,7 @@ def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset:
 
                 c = Collector(using)
                 c.collect(queryset, collect_related=collect_related)
-                data = []
+                data: list[Model] = []
                 for __, instances in list(c.data.items()):
                     data.extend(instances)
                 adminaction_end.send(
@@ -443,8 +447,8 @@ def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset:
     ctx = {
         "adminform": adminForm,
         "change": True,
-        "action_short_description": export_delete_tree.short_description,
-        "title": f"{export_delete_tree.short_description.capitalize()} ({modeladmin.opts.verbose_name_plural})",
+        "action_short_description": export_delete_tree.short_description,  # type: ignore[attr-defined]
+        "title": f"{export_delete_tree.short_description.capitalize()} ({modeladmin.opts.verbose_name_plural})",  # type: ignore[attr-defined]
         "is_popup": False,
         "save_as": False,
         "has_delete_permission": False,
@@ -459,5 +463,5 @@ def export_delete_tree(modeladmin: "ModelAdmin", request: HttpRequest, queryset:
     return render(request, tpl, ctx)
 
 
-export_delete_tree.short_description = _("Export delete tree")
-export_delete_tree.base_permission = "adminactions_export"
+export_delete_tree.short_description = _("Export delete tree")  # type: ignore[attr-defined]
+export_delete_tree.base_permission = "adminactions_export"  # type: ignore[attr-defined]
