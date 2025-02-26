@@ -12,7 +12,7 @@ src/adminactions/version.py
 /MANIFEST
 coverage.xml
 .venv/
-uv.lock
+docs/output/**
 !.pre-commit-config.yaml
 !.github
 !.gitignore
