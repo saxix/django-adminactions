@@ -4,7 +4,7 @@
 [![Pypi](https://badge.fury.io/py/django-adminactions.svg)](https://badge.fury.io/py/django-adminactions)
 [![coverage](https://codecov.io/github/saxix/django-adminactions/coverage.svg?branch=develop)](https://codecov.io/github/saxix/django-adminactions?branch=develop)
 [![Test](https://github.com/saxix/django-adminactions/actions/workflows/test.yml/badge.svg)](https://github.com/saxix/django-adminactions/actions/workflows/test.yml)
-[![Documentation](https://github.com/saxix/django-adminactions/actions/workflows/docs.yml/badge.svg)](https://github.com/saxix/django-adminactions/actions/workflows/docs.yml)
+[![Documentation](https://github.com/saxix/django-adminactions/actions/workflows/docs.yml/badge.svg)](https://saxix.github.io/django-adminactions/)
 [![Django](https://img.shields.io/pypi/frameworkversions/django/django-adminactions)](https://pypi.org/project/django-adminactions/)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/django-adminactions.svg)](https://pypi.org/project/django-adminactions/)
 
