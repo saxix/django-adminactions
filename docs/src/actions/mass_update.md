@@ -9,9 +9,6 @@ Update one or more fields of the selected queryset to a common value and/or appl
 |**validate**          |  use obj.save() instead of obj._default_manager.update. Slower but required in some cases (To run some business logic in save() and clean(). Manadatory if use :ref:`transform_operations` |
 |**unique_transaction**|  .. versionadded:: 0.0.4 |
 
-**validate**
-    use obj.save() instead of obj._default_manager.update. Slower but required in some cases (To run some business logic in save() and clean(). Manadatory if use :ref:`transform_operations`
-
 
 **Screenshot**
 
@@ -31,6 +28,7 @@ To filter out some fields you need to set `UPDATE_ACTION_IGNORED_FIELDS` setting
     }
 
 ## Prevent Record to be updated
+<!-- sax:version 2.4 -->
 
 To prevent record to be updated based on custom logic, it is possible to connect to `mass_update_process` and raise `MassUpdateSkipRecordError`
 
