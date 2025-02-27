@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest import skipIf
-from unittest.mock import patch
+from unittest import skipIf, mock
+from unittest.mock import patch, MagicMock
 
-from demo.models import (
+import pytest
+from django.forms.forms import Form
+
+from adminactions.exceptions import ActionInterruptedError, MassUpdateSkipRecordError
+from demo.admin import (
     DemoModel,
     DemoModelAdmin,
     DemoModelMassUpdateForm,
     TestMassUpdateForm,
 )
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import fields
@@ -28,6 +33,17 @@ from adminactions.mass_update import OPERATIONS
 __all__ = [
     "MassUpdateTest",
 ]
+
+
+def test_operations() -> None:
+    from adminactions.mass_update import add, sub, add_percent, sub_percent, trim, change_domain, change_protocol
+    assert add(1, 1) == 2
+    assert sub(1, 1) == 0
+    assert add_percent(50, 100) == 150
+    assert sub_percent(50, 90) == 45
+    assert trim(" ", "  aa  ") == "aa"
+    assert change_domain("@example.com", "user@example.org") == "user@example.com"
+    assert change_protocol("https", "http://example.com/path/to/page") == "https://example.com/path/to/page"
 
 
 def test_operationmanager_get() -> None:
@@ -127,7 +143,7 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
             assert isinstance(res.context["adminform"].form, DemoModelMassUpdateForm)
 
     def test_custom_form(self) -> None:
-        with override_settings(AA_MASSUPDATE_FORM="demo.models.TestMassUpdateForm"):
+        with override_settings(AA_MASSUPDATE_FORM="demo.admin.TestMassUpdateForm"):
             config.AA_MASSUPDATE_FORM = settings.AA_MASSUPDATE_FORM
             with user_grant_permission(
                 self.user,
@@ -218,3 +234,42 @@ class MassUpdateTest(SelectRowsMixin, CheckSignalsMixin, WebTestMixin, TestCase)
     def test_m2m_async(self) -> None:
         self._run_action(_async=1, select_across=1, chk_id_m2m=True, m2m=[1])
         assert DemoModel.objects.filter(m2m__id=1).exists()
+
+    def test_consistency(self) -> None:
+        with mock.patch("demo.admin.DemoModelAdmin.mass_update_fields", [""], create=True) :
+            with mock.patch("demo.admin.DemoModelAdmin.mass_update_exclude", [""], create=True) :
+                with pytest.raises(ValueError):
+                    self._run_action(_async=1, select_across=1, chk_id_m2m=True, m2m=[1])
+
+    def test_mass_update_exclude(self) -> None:
+        with mock.patch("demo.admin.DemoModelAdmin.mass_update_exclude", ["pk"], create=True) :
+            self._run_action(_async=1, select_across=1, chk_id_m2m=True, m2m=[1])
+            assert DemoModel.objects.filter(m2m__id=1).exists()
+
+        with mock.patch("demo.admin.DemoModelAdmin.mass_update_exclude", ["logic"], create=True) :
+            self._run_action(_async=1, select_across=1, chk_id_m2m=True, m2m=[1])
+            assert DemoModel.objects.filter(m2m__id=1).exists()
+
+
+    def test_action_skip_record(self) -> None:
+        from adminactions.signals import mass_update_process
+        handler = MagicMock(side_effect=MassUpdateSkipRecordError)
+        mass_update_process.connect(handler)
+        self._run_action(_async=0, select_across=1, chk_id_m2m=True, m2m=[1])
+
+        mass_update_process.disconnect(handler)
+        assert not DemoModel.objects.filter(m2m__id=1).exists()
+
+    def test_action_interrupted(self) -> None:
+        from adminactions.signals import mass_update_process
+        handler = MagicMock(side_effect=ActionInterruptedError)
+        mass_update_process.connect(handler)
+        self._run_action(_async=0, select_across=1, chk_id_m2m=True, m2m=[1])
+
+        mass_update_process.disconnect(handler)
+        assert not DemoModel.objects.filter(m2m__id=1).exists()
+
+    def test_validation_error(self) -> None:
+        with mock.patch("adminactions.mass_update.mass_update_execute", MagicMock(side_effect=Exception)) :
+            res = self._run_action(_async=0, select_across=1, chk_id_m2m=True, m2m=[1])
+        assert not DemoModel.objects.filter(m2m__id=1).exists()

@@ -30,6 +30,28 @@ To filter out some fields you need to set `UPDATE_ACTION_IGNORED_FIELDS` setting
         },
     }
 
+## Prevent Record to be updated
+
+To prevent record to be updated based on custom logic, it is possible to connect to `mass_update_process` and raise `MassUpdateSkipRecordError`
+
+Es:
+```python
+from django.contrib.auth.models import User
+from django.dispatch import receiver
+from adminactions.signals import mass_update_process
+from adminactions.exceptions import MassUpdateSkipRecordError
+
+
+@receiver(mass_update_process, sender=User)
+def my_handler(sender, record: User, **kwargs):
+    if record.is_superuser:
+        raise MassUpdateSkipRecordError
+
+```
+
+
+
+
 ## Transform Operation
 
 <!-- sax:version 0.0.4 -->

@@ -33,10 +33,10 @@ from django.utils.translation import gettext as _
 
 from . import config
 from .compat import celery_present
-from .exceptions import ActionInterruptedError
+from .exceptions import ActionInterruptedError, MassUpdateSkipRecordError
 from .forms import GenericActionForm
 from .perms import get_permission_codename
-from .signals import adminaction_end, adminaction_requested, adminaction_start
+from .signals import adminaction_end, adminaction_requested, adminaction_start, mass_update_process
 from .utils import curry, get_field_by_name
 
 if TYPE_CHECKING:
@@ -325,46 +325,50 @@ class MassUpdateForm(GenericActionForm):
                 field.disabled = label not in self.data
 
 
-def mass_update_execute(
+def mass_update_execute(  # noqa: C901
     queryset: QuerySet[Model],
     rules: dict[str, tuple[callable, Any]],
     validate: bool,
     clean: bool,
     user_pk: Any,
     request: HttpRequest | None = None,
-) -> tuple[int, list[str]]:
+) -> tuple[int, dict[str, Any]]:
     errors: dict[str, Any] = {}
     updated: int = 0
     opts = queryset.model._meta
     adminaction_start.send(sender=queryset.model, action="mass_update", request=request, queryset=queryset)
-    try:
+    try:  # noqa: PLR1702
         with atomic():
             if not validate:
                 values = {field_name: value for field_name, (func_name, value) in rules.items()}
                 queryset.update(**values)
             else:
                 for record in queryset:
-                    for field_name, (func_name, value) in rules.items():
-                        field = queryset.model._meta.get_field(field_name)
-                        if isinstance(field, FileField):
-                            file_field = getattr(record, field_name)
-                            file_field.save(value.name, File(value.file))
-                        else:
-                            func = OPERATIONS.get_function(func_name)
-                            if callable(func):
-                                old_value = getattr(record, field_name)
-                                setattr(record, field_name, func(old_value))
+                    try:
+                        mass_update_process.send(sender=queryset.model, record=record, request=request)
+                        for field_name, (func_name, value) in rules.items():
+                            field = queryset.model._meta.get_field(field_name)
+                            if isinstance(field, FileField):
+                                file_field = getattr(record, field_name)
+                                file_field.save(value.name, File(value.file))
                             else:
-                                changed_attr = getattr(record, field_name, None)
-                                if changed_attr.__class__.__name__ == "ManyRelatedManager":
-                                    changed_attr.set(value)
+                                func = OPERATIONS.get_function(func_name)
+                                if callable(func):
+                                    old_value = getattr(record, field_name)
+                                    setattr(record, field_name, func(old_value))
                                 else:
-                                    setattr(record, field_name, value)
+                                    changed_attr = getattr(record, field_name, None)
+                                    if changed_attr.__class__.__name__ == "ManyRelatedManager":
+                                        changed_attr.set(value)
+                                    else:
+                                        setattr(record, field_name, value)
 
-                    if clean:
-                        record.clean()
-                    record.save()
-                    updated += 1
+                        if clean:
+                            record.clean()
+                        record.save()
+                        updated += 1
+                    except MassUpdateSkipRecordError:
+                        pass
             adminaction_end.send(
                 sender=queryset.model,
                 action="mass_update",
@@ -402,7 +406,8 @@ def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
 
     def _get_sample() -> dict[str, list[tuple[Any, str] | dict[str, Any]]]:
         grouped = defaultdict(list)
-        for f in mass_update_hints:
+        for fname in mass_update_hints:
+            f = modeladmin.model._meta.get_field(fname)
             if isinstance(f, ForeignKey):
                 # Filter by queryset so we only get results without our
                 # current resultset

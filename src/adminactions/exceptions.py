@@ -7,3 +7,7 @@ class ActionInterruptedError(Exception):
 
 class FakeTransactionError(Exception):
     pass
+
+
+class MassUpdateSkipRecordError(Exception):
+    pass

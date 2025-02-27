@@ -6,7 +6,7 @@
 * add typing
 * pep621
 * move to uv/ruff
-
+* add `mass_update_process` and `MassUpdateSkipRecordError`
 
 ## 2.3
 

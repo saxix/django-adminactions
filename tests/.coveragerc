@@ -8,6 +8,7 @@ omit =
 # Regexes for lines to exclude from consideration
 exclude_lines =
     pragma: no cover
+    if TYPE_CHECKING:
 
 ignore_errors = False
 

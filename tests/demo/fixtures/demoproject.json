@@ -21,6 +21,7 @@
       "unique": "unique 1",
       "email": "s.apostolico@gmail.com",
       "choices": 2,
+      "nested_choices": 2,
       "image": "second.png",
       "subclassed_image": false
     }
@@ -47,6 +48,7 @@
       "unique": "unique 2",
       "email": "s.apostolico@gmail.com",
       "choices": 2,
+      "nested_choices": 2,
       "image": "first.png",
       "subclassed_image": "subclassed_first.png"
     }
@@ -73,6 +75,7 @@
       "unique": "unique 3",
       "email": "s.apostolico@gmail.com",
       "choices": 2,
+      "nested_choices": 2,
       "image": null,
       "subclassed_image": "subclassed_second.png"
     }
