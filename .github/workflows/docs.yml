@@ -1,71 +1,90 @@
 name: "Documentation"
 
 on:
-  push:
-    branches:
-      - develop
-      - master
-  schedule:
-    - cron: "37 23 * * 2"
+    push:
+        branches:
+            - develop
+            - master
+    schedule:
+        -   cron: "37 23 * * 2"
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+    contents: read
+    pages: write
+    id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    group: "pages"
+    cancel-in-progress: false
 
 jobs:
-  generate:
-    name: Generate
-    #    if: needs.changes.outputs.docs == 'true'
-    #    needs: changes
-    runs-on: ubuntu-latest
-    env:
-      PYTHONPATH: src/
-    steps:
-      - uses: actions/checkout@v4
+    changes:
+        runs-on: ubuntu-latest
+        timeout-minutes: 1
+        defaults:
+            run:
+                shell: bash
+        outputs:
+            run_tests: ${{ steps.changes.outputs.docs }}
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4.1.7
+            -   id: changes
+                name: Check for file changes
+                uses: dorny/paths-filter@0bc4621a3135347011ad047f9ecf449bf72ce2bd # v3.0.0
+                with:
+                    base: ${{ github.ref }}
+                    token: ${{ github.token }}
+                    filters: .github/file-filters.yml
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
+    generate:
+        name: Generate
+        if: needs.changes.outputs.docs == 'true'
+        needs: changes
+        runs-on: ubuntu-latest
+        env:
+            PYTHONPATH: src/
+        steps:
+            -   uses: actions/checkout@v4
 
-      - uses: yezz123/setup-uv@v4
+            -   name: Set up Python
+                uses: actions/setup-python@v4
+                with:
+                    python-version: "3.12"
 
-      - uses: actions/cache/restore@v4
-        id: restore-cache
-        with:
-          path: .venv
-          key: ${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+            -   uses: yezz123/setup-uv@v4
 
-      - name: Install dependencies
-        run: uv sync --only-group docs
+            -   uses: actions/cache/restore@v4
+                id: restore-cache
+                with:
+                    path: .venv
+                    key: ${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
 
-      - name: Build Doc
-        run: .venv/bin/mkdocs build -d ./docs/output
+            -   name: Install dependencies
+                run: uv sync --only-group docs
 
-      - uses: actions/cache/save@v4
-        id: cache
-        if: always() && steps.restore-cache.outputs.cache-hit != 'true'
-        with:
-          path: .venv
-          key: ${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./docs/output
+            -   name: Build Doc
+                run: .venv/bin/mkdocs build -d ./docs/output
 
-  # Deployment job
-  deploy:
-    needs: generate
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+            -   uses: actions/cache/save@v4
+                id: cache
+                if: always() && steps.restore-cache.outputs.cache-hit != 'true'
+                with:
+                    path: .venv
+                    key: ${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+            -   name: Upload artifact
+                uses: actions/upload-pages-artifact@v3
+                with:
+                    path: ./docs/output
+
+    # Deployment job
+    deploy:
+        needs: generate
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Deploy to GitHub Pages
+                id: deployment
+                uses: actions/deploy-pages@v4

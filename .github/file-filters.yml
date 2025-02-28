@@ -1,0 +1,30 @@
+dependencies: &dependencies
+  - 'pdm.lock'
+  - 'pyproject.toml'
+
+actions: &actions
+  - added|modified: './.github/**/*'
+
+python: &python
+  - added|modified: 'src/**'
+  - added|modified: 'tests/**'
+  - added|modified: '.pre-commit-config.yaml'
+
+changelog:
+  - 'CHANGELOG.md'
+
+run_tests: &tests
+  - *actions
+  - *python
+  - *dependencies
+  - 'tox.ini'
+
+package:
+  - *tests
+  - *dependencies
+
+docs:
+  - added|modified: './docs/**/*'
+  - modified: './src/birder/config/__init__.py'
+  - modified: './github/workflows/docs.yml'
+  - modified: './github/file-filters.yml'
