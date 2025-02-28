@@ -5,4 +5,4 @@ Updates queryset using csv file
 
 **Screenshots**
 
-![bulk_update](_static/bulk_update.png)
+![bulk_update](../_static/bulk_update.png)

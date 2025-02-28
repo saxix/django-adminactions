@@ -10,6 +10,6 @@ Graph selected queryset.
 
 **Screenshot**
 
-![graph_pie](_static/graph_pie.png)
+![graph_pie](../_static/graph_pie.png)
 
-![graph_bar](_static/graph_bar.png)
+![graph_bar](../_static/graph_bar.png)

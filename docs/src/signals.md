@@ -1,6 +1,6 @@
 # Signals
 
-|app| provides the following signals:
+{{app}} provides the following signals:
 
 * [[#adminaction_requested]]
 * [[#adminaction_start]]
@@ -13,15 +13,18 @@ Sent when the action is requested (ie click 'Go' in the admin changelist view).
 The handler can raise a :ref:`actioninterrupted` to interrupt
 the action's execution. The handler can rely on the following parameter:
 
+
 * sender: [django.db.models.Model][]
 * action: string. name of the action
-* request: [HttpRequest](https://django.readthedocs.io/en/5.1.x/ref/request-response.html#httprequest-objects)
-* queryset: [Queryset](https://django.readthedocs.io/en/5.1.x/ref/models/querysets.html)
+* request: [django.http.HttpRequest][]
+* queryset: [django.db.models.query.QuerySet][]
 * modeladmin: [django.contrib.admin.ModelAdmin][]
+
 
 Example::
 ```python
 
+from adminactions.exceptions import ActionInterrupted
 from adminactions.signals import adminaction_requested
 
 def myhandler(sender, action, request, queryset, modeladmin, **kwargs):
@@ -38,11 +41,11 @@ Sent after the form has been validated (ie click 'Apply' in the action Form),
 The handler can raise a :ref:`actioninterrupted` to avoid the stop execution.
 The handler can rely on the following parameter:
 
-* sender: :class:`django:django.db.models.Model`
+* sender: [django.db.models.Model][]
 * action: string. name of the action
-* request: :class:`django:django.core.httpd.HttpRequest`
-* queryset: :class:`django:django.db.models.query.Queryset`
-* modeladmin: :class:`django:django.contrib.admin.ModelAdmin`
+* request: [django.http.HttpRequest][]
+* queryset: [django.db.models.query.QuerySet][]
+* modeladmin: [django.contrib.admin.ModelAdmin][]
 * form: :class:`django:django.forms.Form`
 
 Example
@@ -66,11 +69,39 @@ adminaction_start.connect(myhandler, sender=MyModel, action='export`)
 Sent **after** the successfully execution of the action.
 The handler can rely on the following parameter:
 
-* sender: :class:`django:django.db.models.Model`
+* sender: [django.db.models.Model][]
 * action: string. name of the action
-* request: :class:`django:django.core.httpd.HttpRequest`
-* queryset: :class:`django:django.db.models.query.Queryset`
-* modeladmin: :class:`django:django.contrib.admin.ModelAdmin`
-* form: :class:`django:django.forms.Form`
+* request: [django.http.HttpRequest][]
+* queryset: [django.db.models.query.QuerySet][]
+* modeladmin: [django.contrib.admin.ModelAdmin][]
+* form: [django.forms.Form][]
 * errors: dict
 * updated: int
+
+
+
+
+## mass_update_process
+
+
+Sent **before** the record is updated:
+The handler can rely on the following parameter:
+
+* sender: [django.db.models.Model][]
+* request: [django.http.HttpRequest][]
+* queryset: [django.db.models.query.QuerySet][]
+
+Es:
+```python
+from django.contrib.auth.models import User
+from django.dispatch import receiver
+from adminactions.signals import mass_update_process
+from adminactions.exceptions import MassUpdateSkipRecordError
+
+
+@receiver(mass_update_process, sender=User)
+def my_handler(sender, record: User, **kwargs):
+    if record.is_superuser:
+        raise MassUpdateSkipRecordError
+
+```

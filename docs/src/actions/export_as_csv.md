@@ -22,7 +22,7 @@ Available options: (see [csv][csv]).
 
 **Screenshot**
 
-![export_as_csv](_static/export_as_csv.png){ align=left }
+![export_as_csv](../_static/export_as_csv.png){ align=left }
 
 
 ## Customize Options Form

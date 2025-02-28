@@ -12,12 +12,12 @@ from one record to the other one.
 
 ### Step 1
 
-![graph_bar](_static/merge_1.png)
+![graph_bar](../_static/merge_1.png)
 
 ### Step 2
 
 
-![graph_bar](_static/merge_2.png)
+![graph_bar](../_static/merge_2.png)
 
 
 

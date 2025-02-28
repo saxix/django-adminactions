@@ -25,6 +25,6 @@ package:
 
 docs:
   - added|modified: './docs/**/*'
-  - modified: './src/birder/config/__init__.py'
+  - modified: './README.md'
   - modified: './github/workflows/docs.yml'
   - modified: './github/file-filters.yml'

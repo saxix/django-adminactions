@@ -12,7 +12,7 @@ Update one or more fields of the selected queryset to a common value and/or appl
 
 **Screenshot**
 
-![Mass Update](_static/mass_update.png){ align=left }
+![Mass Update](../_static/mass_update.png){ align=left }
 
 
 ## Ignore Fields

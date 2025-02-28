@@ -5,6 +5,7 @@
 *.pyc
 *.egg-info
 *.sqlite
+*.inv
 src/adminactions/version.py
 /dist
 /build

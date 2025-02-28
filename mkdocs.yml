@@ -15,27 +15,27 @@ exclude_docs: |
     ~*
 
 markdown_extensions:
-    - abbr
+#    - abbr
     - admonition
     - attr_list
     - md_in_html
-    - pymdownx.blocks.caption
-    - pymdownx.details
-    - pymdownx.snippets
+#    - pymdownx.blocks.caption
+#    - pymdownx.details
+#    - pymdownx.snippets
     - pymdownx.superfences
-    - tables
-    -   pymdownx.tasklist:
-            custom_checkbox: true
-            clickable_checkbox: true
+#    - tables
+#    -   pymdownx.tasklist:
+#            custom_checkbox: true
+#            clickable_checkbox: true
     -   pymdownx.emoji:
             emoji_index: !!python/name:material.extensions.emoji.twemoji
             emoji_generator: !!python/name:material.extensions.emoji.to_svg
-    -   pymdownx.highlight:
-            anchor_linenums: true
-            line_spans: __span
-            pygments_lang_class: true
-    - pymdownx.inlinehilite
-#  - pymdownx.magiclink
+#    -   pymdownx.highlight:
+#            anchor_linenums: true
+#            line_spans: __span
+#            pygments_lang_class: true
+#    - pymdownx.inlinehilite
+#    - pymdownx.magiclink
 #  - pymdownx.superfences:
 #      custom_fences:
 #        - name: mermaid
@@ -44,49 +44,43 @@ markdown_extensions:
 #
 theme:
     name: "material"
-#    color_mode: auto
-
-    #  custom_dir: docs/_theme/overrides
-    #  favicon: img/favicon.ico
-    #  logo: img/logo.png
     highlightjs: true
     hljs_languages:
         - yaml
         - django
-#    user_color_mode_toggle: true
     palette:
-    - scheme: default
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-        accent: indigo
+        -   scheme: default
+            toggle:
+                icon: material/brightness-7
+                name: Switch to dark mode
+                accent: indigo
 
-    - scheme: slate
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
+        -   scheme: slate
+            toggle:
+                icon: material/brightness-4
+                name: Switch to light mode
     features:
         #    - content.action.edit
         - content.code.annotate
         - content.code.copy
         - content.tooltips
         - header.autohidex
-        #    - navigation.footer
         - navigation.indexes
         - navigation.instant
         - navigation.instant.prefetch
         - navigation.instant.progress
-#  extra:
-#    version:
-#      provider: mike
-#      alias: true
+validation:
+    links:
+        absolute_links: relative_to_docs
 
 plugins:
     - awesome-pages
+    - autorefs
     - include-markdown
+    - macros
     - glightbox
-    - tags
-    - markdownextradata
+#    - tags
+#    - markdownextradata
     -   ezlinks:
             wikilinks: true
     -   mkdocstrings:
@@ -96,10 +90,10 @@ plugins:
                     inventories:
                         - https://installer.readthedocs.io/en/stable/objects.inv
                         - https://django.readthedocs.org/en/5.1.x/objects.inv
-                        #            - url: https://docs.python.org/3.13/objects.inv
-                        #              domains: [std, py, csv]
+#                        #            - url: https://docs.python.org/3.13/objects.inv
+#                        #              domains: [std, py, csv]
                         - https://docs.python.org/3.13/objects.inv
-
+#
     - search
 #  - gen-files:
 #      scripts:
@@ -116,3 +110,4 @@ extra:
         github: https://github.com/saxix/django-adminactions/issues/
         stackoverflow: stackoverflow.com/questions/
         google: https://www.google.com/search?q=
+    app: django-adminactions

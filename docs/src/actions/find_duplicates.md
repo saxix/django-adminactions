@@ -14,4 +14,4 @@ Note: This can be used to count records based on simple grouping
 
 **Screenshots**
 
-![find_duplicates](_static/find_duplicates.png)
+![find_duplicates](../_static/find_duplicates.png)

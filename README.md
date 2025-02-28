@@ -25,7 +25,7 @@ Collection of useful actions to use with `django.contrib.admin.ModelAdmin` and/o
 
 #### Project Links
 
--   Code: https://github.com/saxix/django-adminactions
--   Documentation: https://saxix.github.io/django-adminactions/
--   Issue Tracker: https://github.com/saxix/django-adminactions/issues?sort
--   Download Package: https://pypi.org/project/django-adminactions/
+-   Code: [https://github.com/saxix/django-adminactions](https://github.com/saxix/django-adminactions)
+-   Documentation:[https://saxix.github.io/django-adminactions/](https://saxix.github.io/django-adminactions/)
+-   Issue Tracker: [https://github.com/saxix/django-adminactions/issues](https://github.com/saxix/django-adminactions/issues?sort)
+-   Download Package: [https://pypi.org/project/django-adminactions/](https://pypi.org/project/django-adminactions/)
