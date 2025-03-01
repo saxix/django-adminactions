@@ -20,7 +20,7 @@ jobs:
             run_tests: ${{ steps.changes.outputs.run_tests }}
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v4.1.7
+                uses: actions/checkout@v4
             -   id: changes
                 name: Check for file changes
                 uses: dorny/paths-filter@0bc4621a3135347011ad047f9ecf449bf72ce2bd # v3.0.0
@@ -35,7 +35,7 @@ jobs:
 
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             -   uses: actions/setup-python@v2
 
             -   name: Install dependencies
@@ -47,7 +47,7 @@ jobs:
     pkg_meta:
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v2
+            -   uses: actions/checkout@v4
             -   uses: actions/setup-python@v2
 
             -   name: Install dependencies
