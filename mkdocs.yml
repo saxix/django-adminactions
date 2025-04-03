@@ -15,33 +15,13 @@ exclude_docs: |
     ~*
 
 markdown_extensions:
-#    - abbr
     - admonition
     - attr_list
     - md_in_html
-#    - pymdownx.blocks.caption
-#    - pymdownx.details
-#    - pymdownx.snippets
     - pymdownx.superfences
-#    - tables
-#    -   pymdownx.tasklist:
-#            custom_checkbox: true
-#            clickable_checkbox: true
     -   pymdownx.emoji:
             emoji_index: !!python/name:material.extensions.emoji.twemoji
             emoji_generator: !!python/name:material.extensions.emoji.to_svg
-#    -   pymdownx.highlight:
-#            anchor_linenums: true
-#            line_spans: __span
-#            pygments_lang_class: true
-#    - pymdownx.inlinehilite
-#    - pymdownx.magiclink
-#  - pymdownx.superfences:
-#      custom_fences:
-#        - name: mermaid
-#          class: mermaid
-#          format: !!python/name:pymdownx.superfences.fence_code_format
-#
 theme:
     name: "material"
     highlightjs: true
@@ -79,8 +59,6 @@ plugins:
     - include-markdown
     - macros
     - glightbox
-#    - tags
-#    - markdownextradata
     -   ezlinks:
             wikilinks: true
     -   mkdocstrings:
@@ -90,14 +68,9 @@ plugins:
                     inventories:
                         - https://installer.readthedocs.io/en/stable/objects.inv
                         - https://django.readthedocs.org/en/5.1.x/objects.inv
-#                        #            - url: https://docs.python.org/3.13/objects.inv
-#                        #              domains: [std, py, csv]
                         - https://docs.python.org/3.13/objects.inv
-#
     - search
-#  - gen-files:
-#      scripts:
-#        - docs/_scripts/get_settings.py
+
 watch:
     - src/
 hooks:
