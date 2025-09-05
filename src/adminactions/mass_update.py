@@ -286,7 +286,8 @@ class MassUpdateForm(GenericActionForm):
                             if func is None:
                                 pass
                             elif hasparm:
-                                value = curry(func, value)
+                                # value = curry(func, value)
+                                pass
                             else:
                                 value = func
                 if hasattr(self, f"clean_{name}"):
@@ -355,7 +356,7 @@ def mass_update_execute(  # noqa: C901
                                 func = OPERATIONS.get_function(func_name)
                                 if callable(func):
                                     old_value = getattr(record, field_name)
-                                    setattr(record, field_name, func(old_value))
+                                    setattr(record, field_name, func(value, old_value))
                                 else:
                                     changed_attr = getattr(record, field_name, None)
                                     if changed_attr.__class__.__name__ == "ManyRelatedManager":
@@ -491,8 +492,7 @@ def mass_update(modeladmin: ModelAdmin, request: HttpRequest, queryset: QuerySet
                     enabler = f"chk_id_{field_name}"
                     if form.data.get(enabler, False) == "on":
                         op = form.data.get(f"func_id_{field_name}")
-                        if callable(value):
-                            value = None
+
                         if isinstance(value, QuerySet):
                             rules[field_name] = (op, list(value.values_list("pk", flat=True)))
                         else:
