@@ -287,8 +287,6 @@ class MassUpdateForm(GenericActionForm):
                                 pass
                             else:
                                 value = func
-                            else:
-                                value = func
                 if hasattr(self, f"clean_{name}"):
                     value = getattr(self, f"clean_{name}")()
                 self.cleaned_data[name] = value
