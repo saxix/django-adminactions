@@ -283,11 +283,10 @@ class MassUpdateForm(GenericActionForm):
                         if function:
                             func, hasparm, __, __ = OPERATIONS.get_for_field(field_object)[function]
                             self.update_using_queryset_allowed &= func is None
-                            if func is None:
+                            if func is None or hasparm:
                                 pass
-                            elif hasparm:
-                                # value = curry(func, value)
-                                pass
+                            else:
+                                value = func
                             else:
                                 value = func
                 if hasattr(self, f"clean_{name}"):
