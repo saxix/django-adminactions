@@ -160,7 +160,7 @@ OPERATIONS = OperationManager({
             (add_percent, True, True, _("add <arg> percent to existing value")),
         ),
         ("sub percent", (sub_percent, True, True, "")),
-        ("sub", (sub_percent, True, True, "")),
+        ("sub", (sub, True, True, "")),
         ("add", (add, True, True, "")),
     ],
     df.BooleanField: [("toggle", (negate, False, True, ""))],
