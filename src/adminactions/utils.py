@@ -39,9 +39,22 @@ def clone_instance(instance: Model, fieldnames: list[str] | None = None) -> Mode
     """
 
     if fieldnames is None:
-        fieldnames = [fld.name for fld in instance._meta.fields]
+        values = {fld.attname: getattr(instance, fld.attname) for fld in instance._meta.fields}
+    else:
+        lookup = {}
+        for fld in instance._meta.fields:
+            lookup[fld.attname] = fld
+            lookup[fld.name] = fld
 
-    return instance.__class__(**{name: getattr(instance, name) for name in fieldnames})
+        values = {}
+        for name in fieldnames:
+            field = lookup.get(name)
+            if field:
+                values[field.attname] = getattr(instance, field.attname)
+            else:
+                values[name] = getattr(instance, name)
+
+    return instance.__class__(**values)
 
 
 def get_attr(obj: Any, attr: str, default: Any | None = None) -> Any:
