@@ -38,10 +38,21 @@ def clone_instance(instance: Model, fieldnames: list[str] | None = None) -> Mode
     :return: :py:class:`django.db.models.Model` instance
     """
 
-    if fieldnames is None:
-        fieldnames = [fld.name for fld in instance._meta.fields]
+    fields_by_name = {fld.name: fld for fld in instance._meta.fields}
+    fields_by_attname = {fld.attname: fld for fld in instance._meta.fields}
 
-    return instance.__class__(**{name: getattr(instance, name) for name in fieldnames})
+    if fieldnames is None:
+        fieldnames = list(fields_by_name)
+
+    values = {}
+    for name in fieldnames:
+        field = fields_by_name.get(name) or fields_by_attname.get(name)
+        if field:
+            values[field.attname] = getattr(instance, field.attname)
+        else:
+            values[name] = getattr(instance, name)
+
+    return instance.__class__(**values)
 
 
 def get_attr(obj: Any, attr: str, default: Any | None = None) -> Any:
