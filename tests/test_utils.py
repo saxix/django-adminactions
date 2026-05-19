@@ -58,10 +58,19 @@ def test_clone_instance_uses_field_attnames() -> None:
 def test_clone_instance_accepts_attname_fieldnames() -> None:
     instance = CloneChild(id=1, name="parent", value="child")
 
-    clone = clone_instance(instance, ["cloneparent_ptr_id", "value"])
+    clone = clone_instance(instance, ["cloneparent_ptr", "cloneparent_ptr_id", "value"])
 
     assert clone.pk == instance.pk
     assert clone.cloneparent_ptr_id == instance.cloneparent_ptr_id
+    assert clone.value == instance.value
+
+
+def test_clone_instance_accepts_non_field_constructor_fieldnames() -> None:
+    instance = CloneChild(id=1, name="parent", value="child")
+
+    clone = clone_instance(instance, ["pk", "value"])
+
+    assert clone.pk == instance.pk
     assert clone.value == instance.value
 
 
